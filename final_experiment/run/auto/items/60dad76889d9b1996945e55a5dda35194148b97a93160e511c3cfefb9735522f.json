@@ -1,0 +1,43 @@
+{
+  "anon_id": "f57bcd648f2219554deb",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[C=1,F=3,H=4,I=5,J=8,K=6,Q=2,Z=7]]",
+      "certificate": "逐列约束为J+I=F+10、H+C+1=K、K+C=Z+10c3、Q+K+c3=J。由提示得I=H+C且K=I+1；结合C为奇数、H<J、进位条件及数字互异性，穷举可行数字后唯一解为C=1,H=4,I=5,K=6,J=8,Q=2,Z=7，且F=3。验证：2648+6115=8763，即QKHJ+KCCI=JZKF；各列进位为1、0、0。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的映射满足所有约束：2648+6115=8763，对应 QKHJ+KCCI=JZKF。各字母数字互异且均在0到9之间，首字母Q、K、J非零；个位进位为1，十位进位为0，百位进位为0，最高位无新进位。提示条件也满足：C=1为奇数，H=4<J=8，且H+C=4+1=5=I。映射按字母表顺序且格式正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要结合逐列加法、进位条件和提示关系，先由H+C=I及十位进位为0推出K=I+1，再通过互异性、奇偶性、H<J及其余列的进位关系确定各数字，最后验证整体等式。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "inequality",
+        "boolean"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确列出了四列加法关系，并明确验证了数值等式、进位序列和提示条件；但“穷举后唯一解”的完整排除过程未展开，因此唯一性证明存在小幅说明缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

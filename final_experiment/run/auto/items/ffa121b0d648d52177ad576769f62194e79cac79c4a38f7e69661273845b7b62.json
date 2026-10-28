@@ -1,0 +1,41 @@
+{
+  "anon_id": "7fa0a71043fd0be1c4d3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "3====[1,2,7]====( '绿色':0,'黑色':1,'橙色':5 )",
+      "certificate": "设置1仅将第5件（尺寸“大”）产地改为巴西；设置2将第5、8件材质改为玻璃。交换命中索引5、8，分别与6、7交换，交换双方均为橙色，颜色不变。无材质为金属，偶数次重着色，因此第1、2件绿色改为紫色。满足条件的索引为1、2、7，共3件；最终颜色中绿色0件、黑色1件、橙色5件。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answer is consistent with all four rules. Only item 5 has size 大 and remains/gets origin 巴西; items 5 and 8 therefore have material 玻璃. The exchange at indices 5 and 8 swaps equal 橙色 colors, so colors remain unchanged. There are zero 金属 items, so green items 1 and 2 are recolored purple. The queried union is indices 1, 2, and 7, giving count 3; final color counts are green 0, black 1, orange 5.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Requires sequentially applying the two settings, determining the exchange trigger set and its color effects, computing metal parity for recoloring, then evaluating the final attribute union and color counts.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "ordering"
+      ],
+      "scenario": "objects",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate correctly identifies the affected setting items, exchange indices and unchanged colors, even metal parity and recoloring of items 1 and 2, the qualifying indices 1,2,7, and the final color counts.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

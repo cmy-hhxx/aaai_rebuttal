@@ -1,0 +1,41 @@
+{
+  "anon_id": "886470c0272f65bff3e6",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[x^2y+\\sin x+\\frac{y}{1+x}+\\frac{y}{(1-xy)^2}+\\cos y]]",
+      "certificate": "由微积分基本定理，\\(\\frac{\\partial}{\\partial x}\\int_0^x(t^2y+\\sin t)\\,dt=x^2y+\\sin x\\)，且\\(\\frac{\\partial}{\\partial x}[y\\ln(1+x)]=\\frac{y}{1+x}\\)。另外，\\(\\frac{\\partial g}{\\partial x}=\\frac{y}{(1-xy)^2}+\\cos y\\)。两者相加即得答案（定义域需满足\\(x>-1\\)且\\(xy\\ne1\\)）。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按定义分别求偏导：\\(\\partial f/\\partial x=x^2y+\\sin x+y/(1+x)\\)，\\(\\partial g/\\partial x=y/(1-xy)^2+\\cos y\\)。相加后与标准答案完全一致；给出的定义域条件也正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次使用变上限积分求导、对数函数求导、有理函数链式求导及乘积中对\\(x\\)的求导，最后合并两组结果。",
+      "reasoning_type_tags": [
+        "deduction",
+        "algebra",
+        "other"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "other"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确核验了积分项、\\(y\\ln(1+x)\\)项和\\(g\\)的两项偏导，并说明将其相加；每一步均可直接检查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

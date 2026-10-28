@@ -1,0 +1,44 @@
+{
+  "anon_id": "3ff6fb4725fb3666254b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "7103.84",
+      "certificate": "严格删除各列底部 j 个元素后均剩 12 项；按行重组并去重后保留 11 行。按时间排序后，weekday 属于 {Tue, Sun, Sat} 的仅有最后两行。两指标滚动中位数（窗口 3，边界使用可用样本）分别为：co2_ppm = 540.44、499.58；light_lux = 18259.70、18086.25。全体平滑值的 IQR 区间均包含这两行，因此两行均通过 gating。总体方差：Var(co2)=40.86²/4=417.3849，Var(light)=173.45²/4=7521.225625，绝对差=7103.840725，按 ROUND_HALF_UP 保留两位为 7103.84。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "严格按列索引删除后各列均保留前12项；去重并按时间排序后，weekday 属于 {Tue, Sun, Sat} 的行是原始第2行（Tue，08:16）和第5行（Tue，08:49），而不是最后两行。两行的 co2_ppm 居中滚动中位数均为524.62，light_lux 分别为18666.45和17925.13；两者均通过全体数据上的IQR筛选。因此子集方差差为 0 与 (741.32²/4)=137388.8356 的绝对差，最终应为137388.84，而非 canonical_answer 7104.17。 supplied attempt 同样错误地识别了子集。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目结果与规范答案不一致，无法对有效解的必要推理深度评分。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "temporal"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "temporal",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：唯一 supplied attempt 将筛选子集错误描述为最后两行，未通过时间排序和 weekday 字段的直接核验。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

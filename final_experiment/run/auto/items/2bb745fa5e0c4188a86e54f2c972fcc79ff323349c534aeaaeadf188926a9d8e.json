@@ -1,0 +1,39 @@
+{
+  "anon_id": "f654ce5058c5f5130ca7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[5 9 1 6 7 2 8 4 3,7 8 4 9 3 1 5 2 6,2 3 6 5 4 8 7 1 9,8 5 2 7 9 6 4 3 1,1 6 3 2 8 4 9 5 7,4 7 9 3 1 5 2 6 8,3 4 5 8 6 9 1 7 2,6 1 8 4 2 7 3 9 5,9 2 7 1 5 3 6 8 4]]",
+      "certificate": "填入后每行、每列及每个3×3宫均恰好包含1至9。例如第1行缺失数由宫约束确定为 5 9 1 6 7 2 8 4 3；逐步完成后所有27个单位均无重复，因此满足数独全部约束。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的答案与题面格式一致，并满足数独约束：9行、9列及9个3×3宫均各包含1至9且无重复。答案内容与canonical_answer完全相同。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要在行、列和宫的全异约束之间进行多步相互依赖的候选排除与填入，不能仅由单个直接查表步骤完成。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确指出并声称核验了全部27个单位；最终网格可直接逐行、逐列、逐宫检查。关于第1行及“逐步完成”的具体中间推导没有完整展开，因此存在小幅证据缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

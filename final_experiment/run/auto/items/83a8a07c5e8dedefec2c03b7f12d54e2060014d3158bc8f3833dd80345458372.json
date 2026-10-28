@@ -1,0 +1,43 @@
+{
+  "anon_id": "ebababd93eb19fb049d4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解。第3行中，第1格只能为1或2，结合第2格=3及第4格>第3格，可得第4格=4。于是第1行第4格>2且同列不能为4，只能为3；第4行第4格只能为2，第2行第4格为1。第4行第1格已为1，因此第3行第1格不能为1，只能为2，故第3行第3格为1。第1列剩余数字为3、4，而第1行第1格只能在{1,4}中取，故第1行第1格=4、第2行第1格=3；从而第1行第2格=1。第2行剩余第2、3格为2、4，且第2格>第3格，所以分别为4、2。于是第2列已有1、4、3，第4行第2格必须为2，但第4行第1格=1、第4行第4格=2，出现重复，矛盾。因此不存在满足所有条件的4x4数独。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目本身无解，且 canonical_answer 不满足约束：其第1列为3、4、2、1，但要求 (1,1)>(2,1)，即3>4，错误。并且按题面推导可得第3行第4格=4、第1行第4格=3、第4行第4格=2、第2行第4格=1；随后第3行第1格=2、第3行第3格=1、第1行第1格=4、第2行第1格=3、第1行第2格=1、第2行第2格=4、第2行第3格=2，导致第3列出现两个2（且第4行第2格也被迫为2，与第4行第4格重复），因此确实矛盾。",
+      "error_types": [
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目无解且 canonical_answer 错误。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "ordering",
+        "equality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体题目无效；所给尝试的无解结论与上述矛盾一致，但按要求无效题目的 solver_correct 必须全部记为 null。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,54 @@
+{
+  "anon_id": "8d2068d2e544577be24d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "nums": [
+          5,
+          1,
+          4,
+          8
+        ],
+        "ops": [
+          "-",
+          "*",
+          "+"
+        ]
+      },
+      "certificate": "按 nums 字典序穷举排列，并对每个排列穷举 4^3 个运算符组合；所有以 1 或 4 开头的排列均无解。对 [5,1,4,8]，先算 5-1=4，再算 4*4=16，最后算 16+8=24，因此该组合可行。对该 nums 的其他首运算符（*、+、/）穷举后均无解，所以字典序最小可行答案为所给结果。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给定答案满足固定左结合计算：((5-1)*4)+8=24，且每个数字恰好使用一次。按数字列表字典序，所有以1或4开头的排列均无可行解；因此以5开头的最小候选是[5,1,4,8]，其运算符[-,* ,+]（按字符串顺序表示为[\"-\",\"*\",\"+\"]）可行。证书所述穷举范围覆盖全部24个数字排列和每排列的4^3种运算符组合。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要对数字排列进行字典序分支搜索，并对每个排列穷举三个运算符；先排除所有以1、4开头的排列，再验证[5,1,4,8]及其运算符组合，从而确定字典序最小解。",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "combinatorial_search",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "ordering"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书明确说明了排列与运算符的完整穷举范围，并给出了候选解的逐步算术验证；但未逐项列出所有被排除组合，因此存在轻微的可检查性缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

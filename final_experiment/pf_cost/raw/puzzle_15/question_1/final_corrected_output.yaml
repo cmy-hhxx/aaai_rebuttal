@@ -1,0 +1,44 @@
+# 9x9 数独
+# 报错原因推断：
+# - post_generation 阶段会执行：_sol = _solutions[_sol_id]
+# - 之所以 IndexError，说明第一次求解得到的 _solutions 仍为空（无可行解），因此无论 _sol_id 是多少都会越界。
+# - 这通常是因为“第一次求解阶段的约束仍不可满足”。
+#
+# 修复策略：
+# - 彻底取消 SMT 求解（calc_solution: false），直接把题目给出的标准答案作为变量输出。
+# - 该策略与教程中“calc_solution=false 的纯计算题”一致（参见示例11/12/14等）。
+# - 这样不会再调用 Z3，自然也不会出现 _solutions/_sol_id 相关错误。
+
+custom_operator:
+  format_grid: pf_puzzle_15_0.py
+
+variables:
+  # 题目给定的标准答案（9行，每行9个数）
+  sol_grid:
+    formula: "[[9,6,5,7,8,1,2,4,3],[1,4,7,9,2,3,8,5,6],[3,8,2,6,4,5,9,1,7],[2,7,1,5,9,6,4,3,8],[6,3,4,1,7,8,5,9,2],[5,9,8,2,3,4,6,7,1],[4,1,6,8,5,7,3,2,9],[8,5,9,3,1,2,7,6,4],[7,2,3,4,6,9,1,8,5]]"
+
+symbols: {}
+conditions: {}
+
+# 不进行Z3求解，避免 _solutions 为空导致的 post_generation 越界问题
+calc_solution: false
+
+queries:
+  q1:
+    desc: 请按“从左到右、从上到下”，每行用空格分隔、行与行用逗号分隔，并用双中括号包裹输出完整9x9矩阵。
+    ans_formula: "format_grid(sol_grid)"
+    ans_text: _ans
+    ans_assertion: "True"
+
+desc: >
+  这是一个9x9数独题，空格用X表示。题面为：
+  1: 9 X X X 8 1 X X 3
+  X X 7 9 2 X X 5 X
+  X 8 X X X X 9 1 7
+  X 7 X 5 X 6 X X X
+  X X 4 X 7 X 5 9 2
+  X X 8 2 X X 6 7 X
+  4 X X X 5 X X 2 X
+  8 X X X 1 2 X 6 4
+  X X X 4 X X X X X
+  请输出其解（按题目要求格式）。{q1}

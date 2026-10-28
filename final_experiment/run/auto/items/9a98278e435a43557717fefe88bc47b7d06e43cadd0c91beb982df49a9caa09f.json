@@ -1,0 +1,39 @@
+{
+  "anon_id": "ab59cdcd16bb95eb9892",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "([<{[()]}>([[]]{})])",
+      "certificate": "按后进先出检查：序列中已有括号均正确匹配，末尾处理完后仍有最外层的“(”和“[”未闭合，因此只能依次追加“]”和“)”。追加后完整序列合法闭合。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐字符按栈检查后，给定序列的未闭合栈（从外到内）为“([”，因此只能按后进先出追加“])”。追加后得到的序列与 canonical_answer 完全一致，且所有括号正确闭合。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要先确定扫描结束时仍有外层“(”和“[”未闭合，再依据后进先出顺序先追加“]”、后追加“)”。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "提供的证明明确说明了栈检查、两个未闭合括号及其追加顺序；该顺序与逐字符验证和最终答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

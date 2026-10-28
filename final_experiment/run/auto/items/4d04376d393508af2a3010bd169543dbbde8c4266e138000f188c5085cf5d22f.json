@@ -1,0 +1,40 @@
+{
+  "anon_id": "1a560874bfaa603c767c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "{<([{}]<>)[(())]{[[]]<()>}<<>>[]>}",
+      "certificate": "扫描序列并按栈匹配括号后，末尾仍未闭合的左括号依次为 {、<、[，因此必须按相反顺序追加 ]、>、}。追加后所有括号均正确嵌套闭合。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "栈中未闭合的左括号依次为 {、<、[，必须按相反顺序追加 ]、>、}，正确后缀是 []>}。canonical_answer 的后缀为 []}>，先闭合了花括号再闭合尖括号，括号嵌套错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为 canonical_answer 不正确。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度与解释评分不适用，因为题目的 canonical_answer 与其自身证书给出的追加顺序矛盾；证书描述的答案实际上对应 supplied attempt。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

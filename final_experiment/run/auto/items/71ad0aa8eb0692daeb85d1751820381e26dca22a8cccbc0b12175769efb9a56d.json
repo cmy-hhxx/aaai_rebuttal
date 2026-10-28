@@ -1,0 +1,50 @@
+{
+  "anon_id": "3b56fbef4afc54da6bf3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[!d|(!c|a)]]",
+        "[[A]]",
+        "[[(!d&!c)|!a];[!c&!a]]",
+        "[[A];[B]]",
+        "[[d&!c];[!d&c];[a&!d]]",
+        "[[损坏];[EC:L2];[PC:L3];[EI:L1]]"
+      ],
+      "certificate": "1. d>(c>!a)=!d|(!c|a)。2. d>(c|a)=!d|(c|a)，右式经结合律与分配律等价。3. 德摩根律得!((d|c)&a)=(!d&!c)|!a；(!(d&c))&(!(c|a))化简为!c&!a。4. (d>c)&(d>!c)=!d，故有效；d=c与!d=c不等价。5. 代理式按题设直接为d&!c、!d&c、a&!d。6. 恰有一个真命题时，d真导致EC为L1但无PC，a真导致两位PC，只有c真满足条件：L2两句真为EC，L3一真一假为PC，L1两句假为EI。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规范答案与题目一致。唯一提交答案的第一问错误：d>(c>!a) 应化为 !d|(!c|!a)，而提交为 !d|(!c|a)，将 !a 错写成了 a；其余各问答案均可验证正确。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "第六问需要在恰好一个命题为真的三种状态之间分支检验，并分别计算三个代理的两个分句真值，才能确定只有 c 为真时满足恰好一位完全正确、一位部分正确、一位完全错误；前面还涉及蕴涵消去、德摩根律、NAND/NOR 化简和等价性判断。",
+      "reasoning_type_tags": [
+        "deduction",
+        "algebra",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "implication",
+        "boolean",
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 2,
+      "explanation_evidence": "证书第 1 步明确错误地写成 d>(c>!a)=!d|(!c|a)，与正确结果中的 !a 不符；第 2 至第 6 步的主要推导可检查且基本正确，但该错误导致证书整体不完整正确。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

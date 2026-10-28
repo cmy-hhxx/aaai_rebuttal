@@ -1,0 +1,40 @@
+{
+  "anon_id": "8d7c0892bb9cbeece3f4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "29,36,46,52",
+      "certificate": "逐字符核对栈状态：第29步读入[后应为[<(([，却声明为空；第36步读入>后应为空，却声明为<[；第46步读入{后应为<<<{，却声明为[；第52步读入>后应为<<，却声明为{(。其余步骤的声明均与实际栈状态一致，最终第57步栈为{，确实非空。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "Direct stack simulation shows errors at steps 29, 32, 36, 46, and 52. Step 58 is correct because step 57 leaves the stack as {, which is nonempty. Thus the canonical answer incorrectly includes 58 and omits 32. The supplied attempt also omits 32, although its certificate correctly identifies 29, 36, 46, and 52.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the canonical answer is incorrect.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the puzzle's canonical answer is invalid; the supplied certificate is checkable for steps 29, 36, 46, and 52 but fails to identify the additional error at step 32.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,38 @@
+{
+  "anon_id": "9bfeff7dec5541ad9b74",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "<<{[()[]]({}<>)}[<{}>([])][({})<[]>]>>",
+      "certificate": "逐项按栈匹配后，除开头的两个“<”外，其余括号均已正确闭合；开头两个尖括号仍在栈中，因此末尾追加“>>”即可，且追加后栈为空。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐项进行栈匹配后，给定序列内部的括号均正确闭合，仅开头的两个“<”未闭合；末尾追加“>>”后全部括号闭合，且符合只能在末尾追加括号的要求。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先验证内部各层括号的嵌套匹配，再确定栈中剩余的两个“<”及其对应的追加顺序“>>”。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确说明了栈匹配结果、剩余未闭合括号及追加后的空栈状态，均可由序列直接核验。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

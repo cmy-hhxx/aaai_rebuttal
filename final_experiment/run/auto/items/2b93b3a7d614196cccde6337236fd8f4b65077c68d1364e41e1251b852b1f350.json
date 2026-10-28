@@ -1,0 +1,40 @@
+{
+  "anon_id": "5d5a8a3496d1948964a9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[6]]\n[[UJVRJ,UHVRJ,UHVRF,UHVKF,UBVKF,UBSKF,UBSBF]]\n[[1]]\n[[1]]",
+      "certificate": "合法最短路径为 UJVRJ→UHVRJ→UHVRF→UHVKF→UBVKF→UBSKF→UBSBF，共6步；每个相邻词恰有一个字母不同，且均在词表中。起点至目标的可行连接被该链逐步强制，故不存在更短路径，且该路径也是字典序最小路径。UBSBF 在词表中仅与 UBSKF 相差一个字母，因此其合法一步邻词数量为1；由上述强制链，最短路径条数为1。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied path has six legal one-letter changes: UJVRJ→UHVRJ→UHVRF→UHVKF→UBVKF→UBSKF→UBSBF. Each word is in the vocabulary, neither prohibited intermediate word is used, and the target UBSBF has exactly one one-letter vocabulary neighbor, UBSKF. Checking the listed vocabulary shows the chain is forced, so the minimum distance is 6 and the shortest-path count is 1; the canonical answer matches all four requested outputs.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The result requires chained Hamming-distance adjacency checks across six transitions, a shortest-path exclusion over the vocabulary graph, and counting the target's legal neighbors and shortest paths.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "graph",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly verifies the displayed path, its six-step length, the unique target neighbor, and the claimed path count. The no-shorter-path and lexicographic-minimality claims are asserted as forced rather than explicitly enumerating all competing vocabulary adjacencies, leaving a minor evidentiary gap.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

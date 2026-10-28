@@ -1,0 +1,41 @@
+{
+  "anon_id": "2f0b3ad4b28f5dd3c81b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解。设左上数字4的岛为I，中间数字3的岛为J，右下数字2的岛为K。为避免全为A的2×2方块，右上角区域T={(1,4),(1,5),(2,4),(2,5)}必须含岛屿格。K大小为2且距T太远，不可能覆盖T。I从(1,1)出发，若覆盖T，只能在4格限制下走到(1,4)，于是I必为(1,1),(1,2),(1,3),(1,4)，无法覆盖左下区域。另一方面，左下方块(4–5行,2–3列)也必须含岛屿格；I无法在4格内到达该区域，K无法在2格内到达，因此只能由J覆盖。J必须包含(4,2)或(4,3)。但若J同时覆盖T，从(3,3)到T至少需要经过两个额外格（例如(2,3),(2,4)），这会耗尽J的3格，不能再覆盖左下区域。因此T和左下区域无法同时满足，题目无满足规则的最终网格。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "给出的 canonical_answer 不满足岛屿大小规则：数字 3 所在岛屿包含 (3,3)、(3,4)、(2,4)、(4,3)、(4,2) 共 5 个四连通格子，而数字 3 要求岛屿恰好有 3 个格子。因此标准答案错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为给出的标准答案已被直接反例判定为无效。",
+      "reasoning_type_tags": [
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效；此外，所给尝试声称无解，但未作为有效标准答案得到验证。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

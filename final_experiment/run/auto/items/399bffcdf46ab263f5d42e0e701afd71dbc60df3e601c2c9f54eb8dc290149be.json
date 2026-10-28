@@ -1,0 +1,42 @@
+{
+  "anon_id": "3daad16228d6fadec416",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[2 → → 1 → 1 → 1 →, 3 → → → 1 → 2 → →, 1 → 4 → → → → 1 →, 3 → → → 2 → → 1 →, 2 → → 1 → 1 → 1 →, 2 → → 1 → 1 → 1 →, 1 → 3 → → → 2 → →, 1 → 2 → → 1 → 1 →, 5 → → → → → 2 → →]]",
+      "certificate": "左边界数字格的上、下均被数字格阻挡，且其右侧恰好有对应长度的空格，因此第1至第9行左边界箭头全部向右。由此排除其他方向：r1c4、r5c4、r8c3等箭头也被已覆盖格或数字格限制为向右；r3c3=4只能覆盖c4-c7，r4c5=2只能向右，随后各行右侧未覆盖格依次强制得到向右箭头。具体地，r4c8、r5c8、r6c8、r7c7、r8c8、r9c7分别覆盖其右侧剩余格；r1c8、r2c7、r3c8同理。剩余的r1c6、r2c5、r5c6、r6c4、r6c6、r8c6也均因另一方向会与已覆盖格冲突而只能向右。最终每个X恰被覆盖一次，每个箭头覆盖的空格数等于其数字，且没有水平/垂直相交。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Canonical answer matches the required format and replaces every X with a right-pointing arrow. In each row, every number is followed by exactly the indicated number of consecutive blank cells before the next number or the boundary; the horizontal arrow segments are disjoint across rows, so every blank cell is covered without intersections.",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "Verification requires direct per-number counting of the consecutive blank cells to the right, followed by checking that these row segments partition all X cells. No dependent branching or multi-step case analysis is necessary.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly identifies the rightward direction and states the essential coverage and nonintersection checks. Its deductions are broadly checkable, though the statement that boundary cells are blocked by numeric cells is imprecise for the top and bottom rows, where the boundary is the blocker.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

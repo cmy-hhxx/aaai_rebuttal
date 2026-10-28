@@ -1,0 +1,41 @@
+{
+  "anon_id": "9bbd2464041d8ab2deca",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[2F383D3227362D28]]====[[\\x16\\x33\\x1A\\x35\\x5C\\xBB\\x1D\\x89]]",
+      "certificate": "第一问：逐字节执行 XOR(0x31..0x38)、S_BOX、左旋1位、再 XOR 密钥，得到 2F 38 3D 32 27 36 2D 28。第二问按规定逆运算：D1 C7 C3 C1 84 F3 DF EC → 16 33 1A 35 5C BB 1D 89。该结果含多个非 ASCII 字节，因此给定密文无法按规则还原为有效 ASCII 明文；第二问题面与固定规则不一致。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按规则加密“AAAAAAAA”得到 [[2F383D3227362D28]]，而非规范答案中的 [[D1D1D1D184F3DFEC]]。对密文 D1C7C3C184F3DFEC 逆运算得到字节 16 33 1A 35 5C BB 1D 8C，既不是 ABCDEFGH，也不能作为有效 ASCII 明文；提交答案的最后一个字节也应为 8C 而非 89。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案与固定加解密规则不一致，题目判定本身无效。",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为该题的规范答案错误；提交证书中的第一问计算正确，但第二问的逆运算最后一字节存在明确算术错误，且其结论与题目要求的 ASCII 明文不符。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,41 @@
+{
+  "anon_id": "6334974508487dd1d4c1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "5948374949674- ==== 无法解密",
+      "certificate": "第1问：SPARROW 的摩斯串为 .../.--/.-/.-./.-./---/.--，两两映射得到 5 9 4 8 3 7 4 9 4 9 6 7 4，末尾剩余“-”，故密文为 5948374949674-。第2问：逐数字逆映射 5221496149 得 ../////-.-./--/-.-./，按“/”分隔后包含空字符串（连续斜杠），空字符串不在所给摩斯表中，因此该密文按规则无法解密为合法明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第1问的标准加密结果应为 5948314949674-，而非 canonical_answer 的 8949642855625194364513。按给定摩斯串两两分组得到 .. ./ .- -. /. -/ .- ./ .- ./ -- -/ .-，对应 5 9 4 8 3 1 4 9 4 9 6 7 4，末尾保留“-”。第2问密文逆映射并按“/”分隔后包含空字符串片段，且这些片段不在摩斯表中，因此不能按规则解密为 SIX；canonical_answer 与规则不符。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：规范答案与题目规则不一致，且第2问在严格规则下无合法明文。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：供给尝试的第1问证书在“-/”这一对上的映射计算错误；其第2问关于出现空摩斯片段的结论与规则一致，但整体任务及 canonical_answer 仍不成立。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

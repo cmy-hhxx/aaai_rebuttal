@@ -1,0 +1,41 @@
+{
+  "anon_id": "2a83d862a0d01c74f30e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "olljáubu,ñdúdgíf,ÑÁFÚ,ENÉMÁÍ,GAÑGIBÉ,ÍANDAV,tésíár,úuñsó,yagóápé,hñúé",
+      "certificate": "主键按自定义单位序比较：首单位顺序相关部分为 o < ñ < e < g < i < t < u < y < h；因此第一阶段为 olljáubu, ÑÁFÚ, ñdúdgíf, ENÉMÁÍ, GAÑGIBÉ, ÍANDAV, tésíár, úuñsó, yagóápé, hñúé。ÑÁFÚ 与 ñdúdgíf 首单位同为 ñ，比较后续单位 a<d，故原顺序如上。第二阶段按首单位分块并整体右移一位，只有 ñ 块长度为2，变为 ñdúdgíf, ÑÁFÚ；其余单元素块不变。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "canonical_answer与规则不一致。前置字母顺序为 b<o<n，且 ñ 位于 n 之后；因此在普通剩余字母之前的 ñ 块应排在以 e、g、i 开头的标题之前。第一阶段中 ñ 块应位于 olljáubu 之后、ENÉMÁÍ 之前；第二阶段将该两项块整体右移后得到 ñdúdgíf,ÑÁFÚ。给出的 canonical_answer 却将 ENÉMÁÍ、GAÑGIBÉ、ÍANDAV 放在 ñ 块之前。 supplied attempt 的排序符合这一点。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案与给定排序规则不一致。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为该任务的 canonical_answer 已被规则直接反驳； supplied attempt 的证书与规则可核对，但不能改变 canonical_answer 的错误。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

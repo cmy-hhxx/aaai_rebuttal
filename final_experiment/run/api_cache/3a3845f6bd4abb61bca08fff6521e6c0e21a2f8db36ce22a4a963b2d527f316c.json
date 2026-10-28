@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"请分析这个 4 x 4 的 Kukurasu 谜题网格。你的目标是在网格中放置数字1，使加权和匹配给定的约束：行和 [2, 4, 1, 3] 和列和 [3, 1, 4, 2]。\\n1. 规则：\\n  1. 每个单元格必须填入数字1或X。\\n  2. 行中数字1的权重等于其列号（1到4）。\\n  3. 列中数字1的权重等于其行号（1到4）。\\n  4. 每行的加权和必须匹配其约束。\\n  5. 每列的加权和必须匹配其约束。\\n2. 输入：\\nX  X  X  X  |  2\\nX  X  X  X  |  4\\nX  X  X  X  |  1\\nX  X  X  X  |  3\\n-----------------\\n 3  1  4  2 \\n\\nrow_sums = [2, 4, 1, 3]\\ncol_sums = [3, 1, 4, 2]\\n3. 任务：\\n  - 按照所有规则在网格中放置数字1。\\n  - 在适当的位置用1替换X，在其他位置保留X。\\n  - 以二维列表(列表的列表)输出完成的网格。\\n4. 示例输出格式：\\n[\\n    [\\\"X\\\", \\\"1\\\", \\\"X\\\", \\\"X\\\"],\\n    [\\\"1\\\", \\\"X\\\", \\\"1\\\", \\\"X\\\"],\\n    [\\\"X\\\", \\\"1\\\", \\\"X\\\", \\\"1\\\"],\\n    [\\\"1\\\", \\\"X\\\", \\\"X\\\", \\\"1\\\"]\\n]\", \"seed_answer\": [[\"X\", \"1\", \"X\", \"X\"], [\"X\", \"X\", \"X\", \"1\"], [\"1\", \"X\", \"X\", \"X\"], [\"X\", \"X\", \"1\", \"X\"]]}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/kukurasu/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtWHsZoNMEZSH2VbLZsFBWlwks5L",
+    "created": 1793176917,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, random\nfrom typing import List, Tuple, Dict, Any, Optional\n\n# We generate Kukurasu puzzles (n x n).\n# Rules (standard):\n# - Each cell is either \"1\" (selected) or \"X\" (empty).\n# - Row i constraint: sum of column indices (1..n) where cell (i,j) is 1 equals row_sum[i].\n# - Column j constraint: sum of row indices (1..n) where cell (i,j) is 1 equals col_sum[j].\n#\n# We must output problem text (zh), answer grid (list of lists of \"1\"/\"X\"), and a brief, checkable explanation.\n\n# --------------------- Utility: subset sums for rows/cols ---------------------\n\ndef all_row_patterns(n: int) -> Dict[int, List[int]]:\n    \"\"\"\n    For given n, enumerate all 2^n bitmasks for a row.\n    Weight of selecting column j is (j+1).\n    Return dict: sum -> list of masks achieving it.\n    \"\"\"\n    d: Dict[int, List[int]] = {}\n    for mask in range(1 << n):\n        s = 0\n        for j in range(n):\n            if (mask >> j) & 1:\n                s += (j + 1)\n        d.setdefault(s, []).append(mask)\n    return d\n\ndef all_col_patterns(n: int) -> Dict[int, List[int]]:\n    \"\"\"\n    For columns, weight of selecting row i is (i+1).\n    But a column is also length n; sum is computed by selected row indices.\n    So it's identical mapping as row patterns for n.\n    \"\"\"\n    return all_row_patterns(n)\n\ndef mask_to_row(mask: int, n: int) -> List[str]:\n    return [\"1\" if ((mask >> j) & 1) else \"X\" for j in range(n)]\n\ndef transpose_grid(grid: List[List[str]]) -> List[List[str]]:\n    return [list(row) for row in zip(*grid)]\n\ndef compute_row_sums(grid: List[List[str]]) -> List[int]:\n    n = len(grid)\n    rs = []\n    for i in range(n):\n        s = 0\n        for j in range(n):\n            if grid[i][j] == \"1\":\n                s += (j + 1)\n        rs.append(s)\n    return rs\n\ndef compute_col_sums(grid: List[List[str]]) -> List[int]:\n    n = len(grid)\n    cs = []\n    for j in range(n):\n        s = 0\n        for i in range(n):\n            if grid[i][j] == \"1\":\n                s += (i + 1)\n        cs.append(s)\n    return cs\n\n# --------------------- Exact solver (enumeration with pruning) ---------------------\n\ndef solve_kukurasu(n: int, row_sums: List[int], col_sums: List[int], limit: int = 2) -> List[List[List[str]]]:\n    \"\"\"\n    Enumerate solutions up to 'limit'. Returns list of grids.\n    Use row-mask backtracking with incremental column sum tracking.\n    \"\"\"\n    row_map = all_row_patterns(n)\n    # Candidate masks per row based on row sum\n    candidates: List[List[int]] = []\n    for s in row_sums:\n        if s not in row_map:\n            return []\n        candidates.append(row_map[s][:])\n\n    # Heuristic: order rows by fewest candidates\n    order = sorted(range(n), key=lambda i: len(candidates[i]))\n    inv_order = [0]*n\n    for pos, i in enumerate(order):\n        inv_order[i] = pos\n\n    # We'll assign masks in this order and build actual row positions later.\n    col_acc = [0]*n  # current column sums accumulated (weights are row indices of selected cells)\n    assigned_masks = [None]*n  # in original row index\n    solutions: List[List[List[str]]] = []\n\n    # For pruning, we need to know remaining possible contribution to each column from remaining rows.\n    # Simple bounds: for each remaining row r and column j, contribution is either 0 or (r+1).\n    # So min remaining is 0, max remaining is sum of (r+1) over remaining rows. This is loose but effective.\n    remaining_rows_by_pos = [order[pos:] for pos in range(n+1)]\n    remaining_weight_sums_by_pos = []\n    for pos in range(n+1):\n        rem = remaining_rows_by_pos[pos]\n        total = sum((r+1) for r in rem)\n        remaining_weight_sums_by_pos.append(total)\n\n    def feasible_bounds(pos: int) -> bool:\n        # After assigning first pos rows in 'order', remaining weight sum total applies per column as max.\n        max_add = remaining_weight_sums_by_pos[pos]\n        for j in range(n):\n            if col_acc[j] > col_sums[j]:\n                return False\n            if col_acc[j] + max_add < col_sums[j]:\n                return False\n        return True\n\n    def dfs(pos: int):\n        nonlocal solutions\n        if len(solutions) >= limit:\n            return\n        if not feasible_bounds(pos):\n            return\n        if pos == n:\n            if col_acc == col_sums:\n                # Build grid in original row order\n                grid = []\n                for i in range(n):\n                    grid.append(mask_to_row(assigned_masks[i], n))\n                solutions.append(grid)\n            return\n\n        r = order[pos]  # original row index\n        for mask in candidates[r]:\n            # apply mask: for each column selected add (r+1) to column sum\n            changed = []\n            w = r + 1\n            ok = True\n            for j in range(n):\n                if (mask >> j) & 1:\n                    col_acc[j] += w\n                    changed.append(j)\n                    if col_acc[j] > col_sums[j]:\n                        ok = False\n                        break\n            if ok:\n                assigned_masks[r] = mask\n                dfs(pos + 1)\n                assigned_masks[r] = None\n            # rollback\n            for j in changed:\n                col_acc[j] -= w\n            if len(solutions) >= limit:\n                return\n\n    dfs(0)\n    return solutions\n\n# --------------------- Generator: construct instance with unique solution ---------------------\n\ndef gen_instance(rng: random.Random) -> Tuple[int, List[int], List[int], List[List[str]]]:\n    \"\"\"\n    Create a Kukurasu instance (n,row_sums,col_sums,solution_grid) with unique solution.\n    We sample a random solution grid then compute sums, then verify uniqueness.\n    \"\"\"\n    # choose n and density\n    # keep n moderate to allow uniqueness checking by enumeration\n    n_choices = [4, 5, 6]\n    n = rng.choice(n_choices)\n\n    # sample random grid by picking each cell with some probability\n    # adjust probability to avoid trivial all-X or all-1\n    p = rng.uniform(0.25, 0.6)\n\n    # resample until good uniqueness\n    for _ in range(400):\n        grid = []\n        ones = 0\n        for i in range(n):\n            row = []\n            for j in range(n):\n                v = \"1\" if (rng.random() < p) else \"X\"\n                if v == \"1\":\n                    ones += 1\n                row.append(v)\n            grid.append(row)\n\n        # avoid too sparse/dense\n        if ones < n - 1 or ones > n * n - (n - 1):\n            continue\n\n        row_sums = compute_row_sums(grid)\n        col_sums = compute_col_sums(grid)\n\n        # quick feasibility: each sum must be achievable by subset of 1..n\n        row_map = all_row_patterns(n)\n        if any(s not in row_map for s in row_sums):\n            continue\n        if any(s not in row_map for s in col_sums):\n            continue\n\n        sols = solve_kukurasu(n, row_sums, col_sums, limit=2)\n        if len(sols) == 1:\n            # ensure the unique solution equals our constructed grid (it should, but confirm)\n            if sols[0] == grid:\n                return n, row_sums, col_sums, grid\n            else:\n                # still a valid unique puzzle; return the solver's unique grid and sums\n                return n, row_sums, col_sums, sols[0]\n\n    raise RuntimeError(\"在采样上限内未能生成具有唯一解的 Kukurasu 实例。请更换 seed。\")\n\n# --------------------- Rendering (Chinese) ---------------------\n\ndef render_problem_zh(n: int, row_sums: List[int], col_sums: List[int]) -> str:\n    # Create a blank grid display with row/col constraints\n    header = \"请解一个 {n}×{n} 的 Kukurasu 谜题。你需要把每个格子填成“1”或“X”。\\n\".format(n=n)\n    rules = (\n        \"规则：\\n\"\n        \"1) 每个单元格只能是“1”或“X”。\\n\"\n        \"2) 第 i 行的加权和：该行中所有“1”所在列号之和（列号从 1 到 {n}）。\\n\"\n        \"3) 第 j 列的加权和：该列中所有“1”所在行号之和（行号从 1 到 {n}）。\\n\"\n        \"4) 每行/每列的加权和必须分别等于给定约束。\\n\"\n    ).format(n=n)\n\n    # grid template\n    lines = []\n    for i in range(n):\n        row = \"  \".join([\"X\"] * n)\n        lines.append(f\"{row}  |  {row_sums[i]}\")\n    sep = \"-\" * (3 * n + 6)\n    bottom = \"  \".join(str(x) for x in col_sums)\n\n    statement = (\n        \"初始网格（所有格子未知，用 X 占位）：\\n\"\n        + \"\\n\".join(lines) + \"\\n\"\n        + sep + \"\\n\"\n        + \" \" + bottom + \"\\n\\n\"\n        + f\"row_sums = {row_sums}\\n\"\n        + f\"col_sums = {col_sums}\\n\\n\"\n        \"任务：\\n\"\n        \" - 在网格中把部分 X 改成 1，使所有行/列约束都满足。\\n\"\n        \" - 输出完成后的网格，格式为二维列表（列表的列表），元素为字符串 \\\"1\\\" 或 \\\"X\\\"。\\n\"\n    )\n    return header + rules + statement\n\ndef explanation_zh(n: int, grid: List[List[str]], row_sums: List[int], col_sums: List[int]) -> str:\n    # Provide checkable verification: list selected positions per row and per col and show sums.\n    parts = []\n    parts.append(\"校验方法：对每一行把所有“1”所在列号相加；对每一列把所有“1”所在行号相加。\")\n    parts.append(\"逐行：\")\n    for i in range(n):\n        cols = [j+1 for j in range(n) if grid[i][j] == \"1\"]\n        s = sum(cols)\n        parts.append(f\" - 第{i+1}行 1 的列号 = {cols}，和 = {s}（应为 {row_sums[i]}）\")\n    parts.append(\"逐列：\")\n    for j in range(n):\n        rows = [i+1 for i in range(n) if grid[i][j] == \"1\"]\n        s = sum(rows)\n        parts.append(f\" - 第{j+1}列 1 的行号 = {rows}，和 = {s}（应为 {col_sums[j]}）\")\n    parts.append(\"以上行列加权和均与约束一致。\")\n    return \"\\n\".join(parts)\n\n# --------------------- Main ---------------------\n\ndef main():\n    data = json.load(sys.stdin)\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n\n    rng = random.Random(seed)\n\n    out = []\n    seen = set()\n\n    # bounded attempts to avoid infinite loops\n    attempts = 0\n    max_attempts = 2000\n\n    while len(out) < count and attempts < max_attempts:\n        attempts += 1\n        try:\n            n, row_sums, col_sums, sol = gen_instance(rng)\n        except RuntimeError as e:\n            print(str(e), file=sys.stderr)\n            break\n\n        # de-duplicate by (n, row_sums, col_sums)\n        key = (n, tuple(row_sums), tuple(col_sums))\n        if key in seen:\n            continue\n        seen.add(key)\n\n        # final safety: verify solution satisfies constraints and is unique\n        if compute_row_sums(sol) != row_sums or compute_col_sums(sol) != col_sums:\n            print(\"内部错误：解与约束不一致。\", file=sys.stderr)\n            continue\n        sols = solve_kukurasu(n, row_sums, col_sums, limit=2)\n        if len(sols) != 1 or sols[0] != sol:\n            print(\"内部错误：唯一性校验失败。\", file=sys.stderr)\n            continue\n\n        problem = render_problem_zh(n, row_sums, col_sums)\n        answer = sol\n        explanation = explanation_zh(n, sol, row_sums, col_sums)\n\n        out.append({\n            \"problem\": problem,\n            \"answer\": answer,\n            \"explanation\": explanation\n        })\n\n    if len(out) != count:\n        print(f\"生成数量不足：目标 {count}，实际 {len(out)}。可尝试更换 seed。\", file=sys.stderr)\n\n    json.dump(out, sys.stdout, ensure_ascii=False)\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 3001,
+      "prompt_tokens": 1894,
+      "total_tokens": 4895,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1152
+      },
+      "cost": 0.0435141,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 9,
+        "engine_ttft_ms": 77,
+        "engine_ttlt_ms": 27814,
+        "pre_inference_ms": 285,
+        "service_tbt_ms": 9,
+        "service_ttft_ms": 949,
+        "service_ttlt_ms": 28681,
+        "user_visible_ttft_ms": 664
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261006051512-7603861f-default-r0-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176946.836119
+}

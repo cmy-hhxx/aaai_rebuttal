@@ -1,0 +1,48 @@
+{
+  "anon_id": "ffc4488b41b95adf9cdd",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        3,
+        8,
+        192
+      ],
+      "certificate": "g(2)=3<4，因此 h(2)=2b|6(3)-6|=24b。g(-3)=23≥4，故 h(-3)=6a|6(23)-6|^2=104544a；g(-1)=-3<4，故 h(-1)=48b。兩條線索各有1個A項、1個B項，偏置為4-6=-2，因此右端分別調整為-626880與314400。方程為 48b-209088a=-626880，以及96b+104544a=314400，即 4356a-b=13060。範圍限制下得 a=3、b=8，且第二式驗證成立；h(2)=24×8=192。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The branch evaluations give h(2)=24b, h(-3)=104544a, and h(-1)=48b. Each clue has one A-term and one B-term, so its bias is 4−6=−2; subtracting that from the stated right-hand sides yields the two equations in the certificate. They give a=3, b=8 within the stated ranges, and the second equation verifies the pair. Thus h(2)=192, matching the canonical answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires evaluating g at three inputs and selecting branches, computing the resulting f-values, counting branch terms and adjusting both right-hand sides, solving the resulting simultaneous linear constraints under bounds, then evaluating h(2). These are multiple dependent arithmetic and algebraic steps.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "cardinality",
+        "implication"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly evaluates the three g-values and corresponding branch formulas, counts one term from each branch in each clue, computes the bias and adjusted equations, and derives 4356a−b=13060. The stated bounds leave a=3, b=8, which it checks in the second equation; it then computes h(2)=192.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

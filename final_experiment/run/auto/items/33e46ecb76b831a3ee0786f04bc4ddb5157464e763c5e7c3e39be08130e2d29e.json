@@ -1,0 +1,43 @@
+{
+  "anon_id": "1d6d5871f4daae300432",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "按定义计算：A 真（1780 是闰年且 5×22 为偶数）；B 假（22−5²=−3>−10）；C 真（1977 非闰年、5 为质数、22 为偶数）；D 假（5+22=27 不是偶数）；E 假（5 与 22 互素但 1780 不被 27 整除，且 1780+1977 为奇数）；F 假（1780 与 1977 互素但 27 不是平方数，且两数均不被 3 整除导致异或为假，其否定也为假）。因此 A-D 恰有两条为真，但 E、F 均为假，违反“E 与 F 至少一条为真”，不存在满足全部约束的最终答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "A、C为真，B、D、E为假；F为真，因为m、n均不能被3整除，故“恰有一个能被3整除”为假，其否定为真。A-D中恰有两条为真，E/F至少一条为真，且其他条件均满足。安全码为base(1+3+6)+gcd(1780,1977)(1)+(5×22 mod 97)(13)+0+0=24，因此规范答案正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先分别判断闰年、质数、偶数、整除和互素关系，再组合A-F的布尔条件并核验全局基数/蕴含约束，最后计算gcd、模97和安全码。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "implication",
+        "boolean",
+        "other"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 0,
+      "explanation_evidence": " supplied certificate错误地断言F为假：m=5和n=22均不被3整除，因此两者‘均能被3整除’的异或为假，其否定为真，F应为真；因此并不存在其所称的约束矛盾。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

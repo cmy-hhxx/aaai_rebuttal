@@ -1,0 +1,42 @@
+{
+  "anon_id": "5b18c38cef0c0bdd49d2",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[30, 5]",
+      "certificate": "按整点开始并取三人共同可用时间（欣妍允许清除不超过30分钟的日程），可达到30分钟的整点选项为：周二13:00（明哲与梓涵共同可用至14:06）、周三12:00（共同可用至12:30）、周三14:00（共同可用至14:53）、周五10:00（共同可用至10:37）、周五13:00（共同可用至13:44）。这些时段中欣妍的冲突均可按规则清除30分钟。不存在超过30分钟且同时满足欣妍规则的时段，因此最长时间为30分钟，共5个选项。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目数据与标准答案不一致。按“整点开始”、三人工作时间限制及欣妍可清除不超过30分钟日程的规则，周三12:00至12:30满足：明哲空闲11:44–12:30，梓涵空闲11:53–12:59，欣妍的冲突11:38–12:30可清除。因此至少存在30分钟会议，标准答案[25,1]错误。 supplied attempt也错误地把周二13:00列为选项，但明哲周二仅从13:26开始空闲；其列出的30分钟选项数也遗漏了周五16:00等可行选项。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的标准答案与约束直接矛盾，无法对有效解的必要推理深度进行评分。",
+      "reasoning_type_tags": [
+        "deduction",
+        "temporal"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "people",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目无效且所给证书包含可直接验证的错误：周二13:00不在明哲的任何空闲区间内。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

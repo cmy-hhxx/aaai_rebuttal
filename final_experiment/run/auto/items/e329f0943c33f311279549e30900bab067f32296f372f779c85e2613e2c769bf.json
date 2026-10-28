@@ -1,0 +1,39 @@
+{
+  "anon_id": "705830ffa77e4a6499cb",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "1）[[15313124443332551366661121]]；2）[[QUPCDMKQHPOR]]",
+      "certificate": "加密映射：S=15，Z=31，Z=31，V=24，G=44，A=33，J=32，I=55，X=13，O=66，O=66，R=11，W=21，拼接得15313124443332551366661121。解密分组为42、53、43、22、54、23、45、42、25、43、66、11，依方阵分别得到Q、U、P、C、D、M、K、Q、H、P、O、R，即QUPCDMKQHPOR。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The encryption is correct: S=15, Z=31, Z=31, V=24, G=44, A=33, J=32, I=55, X=13, O=66, O=66, R=11, W=21, yielding 15313124443332551366661121. Decrypting 42,53,43,22,54,23,45,42,25,43,66,11 gives QUYCDMKQHYOR because 43 maps to Y, not P. Thus the canonical answer is correct, while the supplied attempt has P in both positions corresponding to 43.",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "Each output follows by grouping the ciphertext into two-digit codes and directly looking up each code in the supplied Polybius square, with 66 handled as the O special case.",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The attempt's encryption mapping and resulting ciphertext are fully checkable and correct. Its decryption grouping is correct, but it incorrectly maps 43 to P twice; the square specifies 43=Y and P=34.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

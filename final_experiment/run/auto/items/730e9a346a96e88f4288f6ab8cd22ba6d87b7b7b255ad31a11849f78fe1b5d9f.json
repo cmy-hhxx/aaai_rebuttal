@@ -1,0 +1,41 @@
+{
+  "anon_id": "2fd2a8ce7083d85d5150",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[30bd731e893538ed46ad1736]]====[[MOFCJqRE]]",
+      "certificate": "使用密钥字节 73 ef 2a 4e dd 7a 7f bf 07 fd 5f 6f ... 逐字节异或。CRYPTOGRAPHY 异或前12个密钥字节得到 30 bd 73 1e 89 35 38 ed 46 ad 17 36，即密文 30bd731e893538ed46ad1736。密文 3e a0 6c 0d 97 0b 2d fa 异或前8个密钥字节得到 ASCII 字节 4d 4f 46 43 4a 71 52 45，即 MOFCJqRE；其中 q 为小写，这是按给定规则直接解密的结果。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定密钥逐字节异或，第一问确实得到 308d537eba250ecf54ad35f089；第二问得到 4d 4f 46 43 4a 71 52 45，即 MOFCJqRE，而不是 canonical_answer 中的 MORNINGZ。且结果含小写 q，违反明文只能包含大写英文字母的约束。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：canonical answer 与规则计算结果不一致，且第二问违反明文格式约束。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：该题判定为无效；所给 attempt 的逐字节计算实际上支持 MOFCJqRE，并不能支持 canonical answer。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

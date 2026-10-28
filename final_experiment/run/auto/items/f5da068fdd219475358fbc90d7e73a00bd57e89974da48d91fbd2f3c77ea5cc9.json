@@ -1,0 +1,42 @@
+{
+  "anon_id": "fba5967d5436a3d47de3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "110110001101010111010000110111011111100011110101====无合法明文",
+      "certificate": "按P=(2,0,3,1,4,6,5,7)逐字符加密：B→11011000，I→11010101，N→11010000，A→11011101，R→11111000，Y→11110101，拼接得到第一问结果。第二问分块并按P^-1还原后分别为01010111、10111100、10111110、11110100；与K=10101010异或得到11111101、00010110、00010100、01011110，均不构成要求的A-Z大写明文，因此给定密文与规则不一致，第二问无合法答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定规则，第一问的正确密文是 110110001101010111010000110111011111100011110101，而不是 canonical_answer 中的 110000111110110011110100111000111101000111000001。第二问分块并应用 P^-1 后得到 01010111、10111100、10111110、11110100，再与 K 异或得到 11111101、00010110、00010100、01011110，均不是 A-Z 大写 ASCII，因此不可能解出 LIME；给定密文与约束不一致。 supplied attempt 的计算与结论“无合法明文”是可核查的，但整体 canonical answer 错误。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于题目/规范答案不一致，难度评分不适用；只能确认逐块置换、异或和 ASCII 合法性检查。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "由于 verdict 不是 valid，解释质量评分不适用；不过 supplied certificate 中的逐字符加密结果和第二问的逐块解密计算均可直接复核。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,39 @@
+{
+  "anon_id": "7a1627d56c6e7a616ce3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "(()<[{()(<>)}{<>}]>)",
+      "certificate": "从左到右用栈匹配后，未闭合的左括号依次为 (、<、[、{、<；末尾按栈顶到栈底追加 >、}、]、>、)，得到完整序列。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The given prefix leaves the unmatched opening brackets (、<、[、{、< from bottom to top. Appending >、}、]、>、) closes them in reverse order, and the canonical answer exactly performs this completion without altering the prefix.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "First compute the residual stack by matching each closing bracket; then append the uniquely required closing brackets in reverse stack order.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate identifies the residual stack correctly and lists the required suffix >、}、]、>、), which can be directly checked against the canonical answer.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

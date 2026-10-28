@@ -1,0 +1,39 @@
+{
+  "anon_id": "266e53cd47f77c3b28fc",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[3,3],[4,5]]",
+      "certificate": "由 A€B=2A+3B，得 3B=(A€B)-2A。2A=[[2,-2],[4,6]]，因此 3B=[[11,7],[16,21]]-[[2,-2],[4,6]]=[[9,9],[12,15]]，故 B=[[3,3],[4,5]]。代回：2A+3B=[[2,-2],[4,6]]+[[9,9],[12,15]]=[[11,7],[16,21]]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The operation gives 2A+3B=[[11,7],[16,21]]. Computing 2A=[[2,-2],[4,6]], subtracting yields 3B=[[9,9],[12,15]], and dividing by 3 gives B=[[3,3],[4,5]], matching the canonical answer and the verification.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The solution requires sequentially computing 2A, subtracting it from the given result to isolate 3B, and dividing by 3 to obtain B.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly shows the intermediate matrix multiplication, subtraction, division, and direct substitution verification.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

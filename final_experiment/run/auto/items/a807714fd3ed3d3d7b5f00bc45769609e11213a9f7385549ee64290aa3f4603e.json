@@ -1,0 +1,42 @@
+{
+  "anon_id": "64505d2dbfd77a8b16bc",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[OBVIOUSLYTHIS]]",
+      "certificate": "按给定字母表将密文转换为位置值，并逐次执行 Joker 移动、三段切、计数切及 Joker 输出丢弃规则；前两次有效密钥流值为 51、29，分别将 W、N 解为 O、B。继续对全部 13 个字符执行同样过程，得到明文 OBVIOUSLYTHIS。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题面算法计算，第一轮中A Joker从第14位移至第15位，B Joker从第43位移至第45位。三段切后牌堆开头为[31,24,14,8,33,2,49,45,21,53,12,1,16,3,...]；底牌为10，计数切后顶牌仍为12，因此取第13张得到输出值41，而不是证书所称的51。密文字母W的位置为2，首字符应解为LETTERS[(2-41) mod 26]=E，不是规范答案Z或尝试答案O。因此规范答案与题面算法不匹配；此外初始牌堆还含有重复的9且缺少19。",
+      "error_types": [
+        "wrong_answer",
+        "other"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于题目及其规范答案已被首轮可复核计算推翻，难度评分不适用。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "ordering"
+      ],
+      "scenario": "objects",
+      "explanation_score": null,
+      "explanation_evidence": "由于 supplied certificate 的首个密钥流值已被直接反算证明错误，解释质量评分不适用。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

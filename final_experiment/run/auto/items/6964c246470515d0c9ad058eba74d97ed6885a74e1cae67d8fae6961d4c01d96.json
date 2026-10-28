@@ -1,0 +1,67 @@
+{
+  "anon_id": "c43b8c9811c197afc30a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          4,
+          2,
+          3,
+          1
+        ],
+        [
+          1,
+          3,
+          4,
+          2
+        ],
+        [
+          2,
+          4,
+          1,
+          3
+        ],
+        [
+          3,
+          1,
+          2,
+          4
+        ]
+      ],
+      "certificate": "第1行的不等式要求 c1>c2<c3>c4，且因(1,3)<(2,3)只能取第1行=(4,2,3,1)或(4,1,3,2)，并有(2,3)=4。结合第3行第2列=4及列唯一性，(3,3)<(4,3)推出(3,3)=1、(4,3)=2；第3行再由(3,1)<(4,1)、(3,3)<(4,3)得第3行=(2,4,1,3)，第4行=(3,1,2,4)。此时第2列排除(4,1,3,2)，故第1行=(4,2,3,1)；列1、列2及第2行行唯一性确定第2行=(1,3,4,2)。所有行列均为1到4，且全部不等式均满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied grid satisfies the fixed clue r3c2=4, contains 1 through 4 exactly once in every row and column, and satisfies all 11 listed inequalities. The certificate's deductions are consistent with the constraints, though some eliminations are stated compactly.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "The solution requires chained deductions across row permutations, inequality constraints, column uniqueness, and a two-case elimination for the possible first rows before determining the remaining rows.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "inequality",
+        "ordering"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate identifies the key first-row alternatives, derives the third-column values, determines the third and fourth rows, eliminates the alternate first row using column uniqueness, and verifies the final grid. Some intermediate eliminations are compressed rather than fully shown, but the main deductions are checkable.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

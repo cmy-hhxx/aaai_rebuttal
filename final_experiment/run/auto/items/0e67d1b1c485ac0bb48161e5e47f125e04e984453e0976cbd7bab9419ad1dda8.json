@@ -1,0 +1,41 @@
+{
+  "anon_id": "3dd2461341b984dd76e4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[\"+\",\"+\",\"+\"],[\"+\",\"-\",\"-\"],[\"-\",\"+\",\"-\"],[\"-\",\"-\",\"+\"]]====[[\"+\",\"-\"],[\"-\",\"+\"]]",
+      "certificate": "XNOR 在两个输入相同时输出“+”，不同时输出“-”。因此四种输入依次对应输出 +、-、-、+；输出为“-”时仅有 (+,-) 和 (-,+)，且已按 I1、I2 从“+”到“-”排序。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The attempt correctly lists all four input combinations for XNOR in the required order, with output \"+\" exactly when the two inputs are equal. It also correctly lists the two combinations producing output \"-\", ordered by I1 and then I2 from \"+\" to \"-\". The quoted strings are valid JSON representations of the requested values.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The solution requires enumerating the four input combinations, applying the XNOR equality rule to determine each output, then filtering and ordering the rows whose output is \"-\".",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly states the XNOR rule, gives the output sequence +,-,-,+ for the four ordered inputs, identifies the two false-output cases, and confirms the required ordering.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

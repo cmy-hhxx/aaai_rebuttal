@@ -1,0 +1,40 @@
+{
+  "anon_id": "120dcc4aa87af612a6fa",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "(sin(2) - sin(5) + sin(4π/3 - 6) - sin(4π/3 - 9))/6",
+      "certificate": "先对 x 积分：∫[-sin(2x-3y)]dx = (1/2)cos(2x-3y)。代入 x=2π/3 与 x=2 后再对 y∈[2,3] 积分，得 (1/6)[sin(4-3y)-sin(4π/3-3y)]|₂³ = [sin(2)-sin(5)+sin(4π/3-6)-sin(4π/3-9)]/6。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "直接对 x、y 分别积分可得尝试答案：(sin(2)-sin(5)+sin(4π/3-6)-sin(4π/3-9))/6。利用 sin(4π/3-t)=-cos(π/6+t)，该式等于规范答案。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先对 x 求原函数，再代入上下限并对 y 积分，最后使用三角恒等式将 sin(4π/3-t) 改写为 -cos(π/6+t)，这些步骤相互依赖。",
+      "reasoning_type_tags": [
+        "deduction",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确给出 -sin(2x-3y) 关于 x 的原函数 (1/2)cos(2x-3y)，正确代入 x=2π/3、2，并对 y=2 至 3 积分，所得表达式与规范答案通过三角恒等式完全一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

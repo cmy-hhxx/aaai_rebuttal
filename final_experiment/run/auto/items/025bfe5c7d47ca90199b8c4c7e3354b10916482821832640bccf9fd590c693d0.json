@@ -1,0 +1,39 @@
+{
+  "anon_id": "cf76206ee5a3c6da714a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[∀x M(x);∃x S(x);∀x(W(x)→M(x));∃x(W(x)∧S(x))]",
+      "certificate": "D1 的个体域仅含鲸鱼，因此“所有鲸鱼都是哺乳动物”简化为 ∀x M(x)，“有的鲸鱼会唱歌”简化为 ∃x S(x)。D2 包含全体事物，需用 W(x) 限定鲸鱼：分别为 ∀x(W(x)→M(x)) 和 ∃x(W(x)∧S(x))。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied answer is logically equivalent to the canonical answer. In D1, since the domain contains only whales, (1) becomes ∀x M(x) and (2) becomes ∃x S(x). In D2, whale membership must be stated explicitly, yielding ∀x(W(x)→M(x)) and ∃x(W(x)∧S(x)).",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The solution requires two dependent domain-sensitive inferences: first recognizing that D1 makes the whale restriction implicit, and then retaining explicit W(x) restriction in D2, with implication for the universal and conjunction for the existential.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "implication",
+        "boolean"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly justifies all four formulas by distinguishing the restricted D1 domain from the unrestricted D2 domain; each formula matches the requested statement and canonical answer up to notation.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

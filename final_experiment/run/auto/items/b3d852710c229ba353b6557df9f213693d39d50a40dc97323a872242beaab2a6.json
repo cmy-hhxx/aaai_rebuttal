@@ -1,0 +1,42 @@
+{
+  "anon_id": "303fe247dde6a6ff6d0f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[4 2 3 1,2 1 4 3,1 3 2 4,3 4 1 2]]",
+      "certificate": "由第2列下方提示1可知右下角为4。结合第3行左3右1，第3行只能为[1,3,2,4]或[2,3,1,4]；第4行右2且末列第2格为4时，只可能为[1,4,2,3]、[2,4,1,3]或[3,4,1,2]。第1行右提示3并结合第2列不能与第3、4行的3、4重复，只可能为[4,1,3,2]或[4,2,3,1]。再应用第1列下方提示2、第3列上方提示2及各行各列不重复，唯一剩余矩阵为[4,2,3,1]/[2,1,4,3]/[1,3,2,4]/[3,4,1,2]。校验：第1行从右可见3栋，第3行从左可见3栋、从右可见1栋，第4行从右可见2栋；第3列从上可见2栋，第1列从下可见2栋，第2列从下可见1栋。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "给定题面与标准答案不一致。按题面上方列提示为 1、2、3、4，标准答案各列从上方可见楼数分别为 1、3、2、3，因此第2、3、4列均不满足对应提示。证书还声称第2列下方提示为1，但题面第二行列提示中第2列是“?”，存在题面与证书不一致。",
+      "error_types": [
+        "wrong_answer",
+        "rendering"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题面提示与标准答案不一致，无法对该无效题目的最小推理依赖作有效评分。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "other"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：证书引用了题面中不存在的第2列下方提示1，且其标准答案未满足题面上方多个列提示。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

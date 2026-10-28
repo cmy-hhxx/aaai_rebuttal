@@ -1,0 +1,41 @@
+{
+  "anon_id": "49a078fc5978a36faf9c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "1) [[KTGIGTBEWIMIBHMI]]\n2) [[GWZVASPFECUUC]]",
+      "certificate": "加密：N(1,1)→KT，U(2,4)→GI，A(2,1)→GT，E(4,2)→BE，C(3,4)→WI，P(0,4)→MI，H(4,3)→BH，P(0,4)→MI，连接得KTGIGTBEWIMIBHMI。解密按两字母分组：GB→G，WB→W，MT→Z，WH→V，GT→A，ME→S，MI→P，KE→F，BE→E，WI→C，GE→U，GI→U，WI→C，连接得GWZVASPFECUUC。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规则完整且一致。明文加密结果为 KTGIGTBEWIMIBHMI；密文按两字母分组解密为 GWZVASPFECOUC，与 canonical_answer 一致。提供的尝试在解密组 GE 处出错：G 表示第2行、E表示第2列，交叉字母为 O 而不是 U。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 1,
+      "depth_evidence": "每个字符或密文二元组只需进行一次表格行列查找和直接映射；不存在需要多步依赖的推理。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "尝试中的加密过程及除 GE 外的解密分组均可由表格逐项核对；GE 应为 O，导致其最终解密答案错误，但错误位置明确且主要推导完整。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,51 @@
+{
+  "anon_id": "8f677b3f8742a7473595",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        1,
+        3,
+        6,
+        4,
+        0,
+        2
+      ],
+      "certificate": "由 a-c=-5 得 c=a+5；代入 3a+2c=15，得 a=1，c=6。由 c-b=3 得 b=3；代入 4f+3b=17 得 f=2。加权式 4e+3a+c=9 给出 e=0；由 e+d=4 得 d=4。验证：六数互异且和为16；f=2为质数，b=3为奇数，b>a，b与c奇偶相反；A=e+fb=6，除以c=6得商1余0；a、d模3均为1；e<a<f；集合(a,e,b,d)中奇数有1、3共2个。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied assignment [1,3,6,4,0,2] satisfies every stated constraint, including distinct values in [0,7], sum 16, c=a+5, 3a+2c=15, c-b=3, 4f+3b=17, the quotient-remainder condition A=0+2·3=6=1·6+0, modular conditions, e+d=4, d+e-a=3, ordering e<a<f, and exactly two odd values among a,e,b,d. It also matches the canonical answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires chained algebraic deductions: derive c from a-c=-5, jointly determine a and c using 3a+2c=15, then derive b, f, e, and d from successive equations, followed by multi-condition verification.",
+      "reasoning_type_tags": [
+        "deduction",
+        "algebra",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "all_different",
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly derives a=1 and c=6, then b=3, f=2, e=0, and d=4, and checks the remaining arithmetic, parity, primality, quotient-remainder, distinctness, ordering, modular, sum, and cardinality conditions.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,39 @@
+{
+  "anon_id": "92eb04a6fcb171ba2e7f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[IZBFOSSQRGFDXQ]] [[FHEGFDNDVN]]",
+      "certificate": "字母表位置为 X=0,M=1,J=2,Q=3,U=4,D=5,O=6,N=7,P=8,R=9,G=10,T=11,V=12,B=13,W=14,F=15,A=16,K=17,S=18,H=19,Z=20,C=21,Y=22,E=23,I=24,L=25。加密逐字计算 y=(3x+5) mod 26，得到 IZBFOSSQRGFDXQ。解密逐字计算 x=9(y-5) mod 26，得到 FHEGFDNDVN；且 3×9≡1 (mod 26)，验证逆元正确。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied answer matches the canonical answer in both segments. Independent checks confirm encryption of \"FDZVRBBPGHVXNP\" yields \"IZBFOSSQRGFDXQ\" and decryption of \"IGYRIZXZFX\" using 9(y-5) mod 26 yields \"FHEGFDNDVN\". Also, 3×9 ≡ 1 mod 26.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Each character requires mapping through the fixed alphabet, applying the modular affine arithmetic, and mapping the resulting position back to a letter; the two required transformations are independently checked.",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly lists all alphabet positions, states the correct encryption and decryption formulas, gives both resulting strings, and verifies the modular inverse relation 3×9≡1 (mod 26).",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

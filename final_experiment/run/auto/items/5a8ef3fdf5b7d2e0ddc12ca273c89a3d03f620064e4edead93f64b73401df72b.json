@@ -1,0 +1,42 @@
+{
+  "anon_id": "d36db51f336b065f428c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "ZRRF",
+      "certificate": "按密钥1-3-4-2，原始段顺序为[685,654,669,560]。递推盐值取x0=9，xi=(11x(i-1)+2) mod 14，得到[3,7,9,3]，乘权重5后为[15,35,45,15]。逐段计算ASCII=((密文-盐值-位置×5)/7)-5，得到[90,82,82,70]，即Z、R、R、F。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "密钥1-3-4-2将密文位置还原为原始顺序[685,654,669,560]。递推盐值为[3,7,9,3]，加权后为[15,35,45,15]；按位置步长5反解得到ASCII码[90,82,82,70]，对应明文ZRRF，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须依次完成置乱逆变换、递推盐值计算及加权、逐段算术反解并进行ASCII到字母映射，多个步骤相互依赖。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出逆置乱顺序、递推序列、加权盐值、反解公式所得ASCII码及对应字母；各计算均可核验且结论与标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

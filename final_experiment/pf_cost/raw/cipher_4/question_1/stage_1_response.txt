@@ -1,0 +1,110 @@
+### 模型输出 begin
+#### final yaml begin
+custom_operator:
+  # pf_cipher_4_0.py 中实现：polybius_encrypt / polybius_decrypt
+  polybius_encrypt: pf_cipher_4_0.py
+  polybius_decrypt: pf_cipher_4_0.py
+
+variables:
+  # 固定Polybius方阵（行列均从1开始计数）；不含O
+  polybius_rows:
+    formula: "['RTXFS','WCMVH','ZJAPB','LQYGK','NEUDI']"
+
+  # 题目1：明文（全大写无空格标点）
+  plaintext_1:
+    formula: "'AYHYLFHYVYO'"
+
+  # 题目2：密文（数字串，长度为偶数）
+  ciphertext_2:
+    formula: "'3513452143145312244135'"
+
+symbols: {}
+conditions: {}
+calc_solution: false  # 纯计算题，不需要SMT求解
+
+queries:
+  q1:
+    desc: "请给出明文的加密结果，并用[[...]]包裹。"
+    ans_formula: polybius_encrypt(plaintext_1, polybius_rows)
+    ans_text: "'[[' + _ans + ']]'"
+    ans_assertion: 'True'
+
+  q2:
+    desc: "请给出密文的解密结果，并用[[...]]包裹。"
+    ans_formula: polybius_decrypt(ciphertext_2, polybius_rows)
+    ans_text: "'[[' + _ans + ']]'"
+    ans_assertion: 'True'
+
+# 题面组织：两问输出，PuzzleClone会用====分隔多问答案
+desc: "### Cipher Rule: Polybius_square given.\n1: Plaintext: \"{plaintext_1}\"\n2: Ciphertext: \"{ciphertext_2}\"\n{queries}\n"
+#### final yaml end
+#### final code begin
+# pf_cipher_4_0.py
+
+def _build_maps(polybius_rows):
+    """
+    polybius_rows: list[str], length 5; each string length 5.
+      Example row1 'RTXFS' means:
+        (1,1)->R, (1,2)->T, ..., (1,5)->S
+    Returns:
+      enc_map: dict[str, str]  letter -> "rc"
+      dec_map: dict[str, str]  "rc" -> letter
+    Note:
+      'O' is not in the square; encryption maps 'O' -> '66', decryption maps '66' -> 'O'.
+    """
+    if not isinstance(polybius_rows, list) or len(polybius_rows) != 5:
+        raise ValueError("polybius_rows must be a list of 5 strings.")
+    for r in polybius_rows:
+        if not isinstance(r, str) or len(r) != 5:
+            raise ValueError("each row in polybius_rows must be a string of length 5.")
+
+    enc_map = {}
+    dec_map = {}
+    for i in range(5):          # row index 0..4
+        for j in range(5):      # col index 0..4
+            ch = polybius_rows[i][j]
+            rc = f"{i+1}{j+1}"
+            enc_map[ch] = rc
+            dec_map[rc] = ch
+    return enc_map, dec_map
+
+
+def polybius_encrypt(plaintext, polybius_rows):
+    """
+    Encrypt plaintext (uppercase letters) to digit string with the given Polybius square.
+    Special rule: 'O' -> '66'.
+    """
+    enc_map, _ = _build_maps(polybius_rows)
+    res = []
+    for ch in plaintext:
+        if ch == "O":
+            res.append("66")
+        else:
+            if ch not in enc_map:
+                raise ValueError(f"character {ch} not in Polybius square and not 'O'.")
+            res.append(enc_map[ch])
+    return "".join(res)
+
+
+def polybius_decrypt(ciphertext, polybius_rows):
+    """
+    Decrypt digit string to plaintext with the given Polybius square.
+    Ciphertext length must be even; parse as pairs.
+    Special rule: '66' -> 'O'.
+    """
+    _, dec_map = _build_maps(polybius_rows)
+    if len(ciphertext) % 2 != 0:
+        raise ValueError("ciphertext length must be even (pairs of digits).")
+
+    res = []
+    for i in range(0, len(ciphertext), 2):
+        pair = ciphertext[i:i+2]
+        if pair == "66":
+            res.append("O")
+        else:
+            if pair not in dec_map:
+                raise ValueError(f"pair {pair} not decodable by Polybius square.")
+            res.append(dec_map[pair])
+    return "".join(res)
+#### final code end
+### 模型输出 end

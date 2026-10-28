@@ -1,0 +1,39 @@
+{
+  "anon_id": "54825ca7ba685225e7c8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[4]]",
+      "certificate": "下界：HEAD 与 TAIL 的 4 个位置全部不同，每步只能改变一个位置，因此至少需要 4 步。可行路径：HEAD → HEAL → TEAL → TEIL → TAIL；每步只改变一个字母，且 HEAL、TEAL、TEIL 均为有效英文单词。因此最少步数为 4。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The Hamming distance between HEAD and TAIL is 4, so at least four one-letter changes are necessary. The path HEAD → HEAL → TEAL → TEIL → TAIL has exactly four steps, with one position changed per step; HEAL, TEAL, and TEIL are English words. Therefore the canonical answer [[4]] is correct.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "First, count the four differing positions to establish a four-step lower bound. Second, verify a valid four-step word path, showing the bound is attained.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly checks both optimality (the four-position lower bound) and feasibility (each transition and each intermediate word).",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

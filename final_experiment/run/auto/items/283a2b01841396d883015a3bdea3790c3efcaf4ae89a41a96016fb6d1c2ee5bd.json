@@ -1,0 +1,40 @@
+{
+  "anon_id": "5e1ffad1a562d02aa902",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[WONBTVILDROMR]]====[[VTIQCWSYGZ]]",
+      "certificate": "解密前9个字符使用初始内盘：KNYTXRBOD分别对应外盘位置1,8,22,21,4,20,7,25,12，得到WONBTVILD。处理9个字符后内盘右转12位，QYSQ对应ROMR，因此解密结果为WONBTVILDROMR。加密前9个字符使用初始内盘：UBKZYX SNG对应VTIQCWSYG；处理9个字符后内盘右转10位，F在外盘位置13，对应旋转后内盘字符Z，因此加密结果为VTIQCWSYGZ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按0基索引核验：解密前9字符 KNYTXRBOD 经初始内盘映射得到 WONBTVILD；内盘右旋12位后，QYSQ 映射为 ROMR。加密前9字符 UBKZYXSNG 得到 VTIQCWSYG；内盘右旋10位后，F 映射为 Z。因此标准答案与规则及证书一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "每一问都需要先执行初始位置替换，再根据处理满9个字符更新内盘状态，最后用旋转后的内盘处理剩余字符。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出了前9个字符的位置映射、处理满period后的旋转，以及剩余字符的映射；这些步骤可由给定盘面逐项复核，并得到标准答案。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

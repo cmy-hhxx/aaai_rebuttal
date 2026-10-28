@@ -1,0 +1,44 @@
+{
+  "anon_id": "4f76b4745a13f3377497",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[XHVCBVHWSTGR]]",
+        "[[TGRXHVCBVHWS]]",
+        "[[9,10,11,0,1,2,3,4,5,6,7,8]]"
+      ],
+      "certificate": "字母后移2位：REPVFTAZTFUQ→TGRXHVCBVHWS。长度12按6分块右轮转后为CBVH WSTGRXHV，再按3分块右轮转后为XHV CBV HWS TGR，即XHVCBVHWSTGR。最终位置序列对应原索引[3,4,5,6,7,8,9,10,11,0,1,2]，故原索引到最终索引为[9,10,11,0,1,2,3,4,5,6,7,8]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All three supplied answers match the stated rules. Shifting REPVFTAZTFUQ forward by 2 gives TGRXHVCBVHWS; rotating the two 6-character blocks right and then the four 3-character blocks right gives XHVCBVHWSTGR. The composed original-to-final index mapping is [9,10,11,0,1,2,3,4,5,6,7,8].",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Requires alphabet arithmetic, then two successive block rotations, and inversion of the resulting character-order sequence to obtain the original-index-to-final-index mapping.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly verifies the alphabet shift, both block rotations, the resulting ciphertext, and the distinction between final-order original indices and the requested original-to-final mapping.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

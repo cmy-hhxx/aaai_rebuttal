@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"You are an intelligent assistant specializing in evaluating custom operations. Below is a specific rule defined for a custom operation. Your task is to apply this rule accurately to the provided question.\\n\\n### Instructions:\\n\\n1. Carefully read and understand the definitions of the new operations in the rule.\\n2. If the question does not specifically ask for it, your answer should be a number or a group of numbers.\\n3. Double-check your final answer to ensure it follows the rule accurately.\\n\\n### Operation Rule:\\n\\na#b is the average of all even numbers between a and b (including a and b).\\n\\n### Question:\\n1: Compute 3#9.\\nPlease ensure the answer is a single number and wrap it in double square brackets, like this: [[your answer]].\\n2: If 3#X=6, find X.\\nThe answer should only be given as a number.\\nIf there is more than one answer, please separate them with 'or',e.g.[[1or2]].\\nPlease wrap the answer in double square brackets, like this: [[your answer]].\\n\\n### Answer:\\n\", \"seed_answer\": \"[[6]]====[[8or9]]\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/operation_4/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtR5pNzRAvlBIsfcjfnOo96Iuhyv",
+    "created": 1793176595,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, math, itertools, random\nfrom fractions import Fraction\nfrom typing import List, Tuple, Optional, Dict, Any\n\n# =========================\n# Core math for custom op\n# =========================\n\ndef even_numbers_between(a: int, b: int) -> List[int]:\n    lo, hi = (a, b) if a <= b else (b, a)\n    start = lo if lo % 2 == 0 else lo + 1\n    if start > hi:\n        return []\n    return list(range(start, hi + 1, 2))\n\ndef avg_evens(a: int, b: int) -> Optional[Fraction]:\n    evs = even_numbers_between(a, b)\n    if not evs:\n        return None\n    return Fraction(sum(evs), len(evs))\n\ndef avg_evens_via_formula(a: int, b: int) -> Optional[Fraction]:\n    lo, hi = (a, b) if a <= b else (b, a)\n    first = lo if lo % 2 == 0 else lo + 1\n    last = hi if hi % 2 == 0 else hi - 1\n    if first > last:\n        return None\n    n = ((last - first) // 2) + 1\n    # average of arithmetic progression = (first+last)/2\n    return Fraction(first + last, 2)\n\ndef fmt_fraction(fr: Fraction) -> str:\n    if fr.denominator == 1:\n        return str(fr.numerator)\n    return f\"{fr.numerator}/{fr.denominator}\"\n\ndef wrap_answer(value: str) -> str:\n    return f\"[[{value}]]\"\n\ndef parse_op(a: int, b: int) -> Fraction:\n    v = avg_evens(a, b)\n    if v is None:\n        raise ValueError(\"区间内没有偶数，运算未定义\")\n    return v\n\n# =========================\n# Problem families\n# =========================\n\ndef make_problem_family_A(rng: random.Random) -> Dict[str, Any]:\n    \"\"\"\n    Two-part problem:\n    (1) compute a#b\n    (2) solve a#X = t for integer X in a bounded range, possibly multiple solutions.\n    Ensure at least one solution exists; allow multiple solutions by design sometimes.\n    \"\"\"\n    # Choose a fixed a and b for part (1)\n    a = rng.randint(-9, 15)\n    b = rng.randint(a + 2, a + 26) if rng.random() < 0.7 else rng.randint(-15, 25)\n    if rng.random() < 0.25:\n        # occasionally swap to test \"between\" meaning irrespective of order\n        a1, b1 = b, a\n    else:\n        a1, b1 = a, b\n\n    v1 = avg_evens(a1, b1)\n    # ensure defined\n    if v1 is None:\n        # adjust b to include an even\n        b1 = a1 + (1 if a1 % 2 == 0 else 2)\n        v1 = avg_evens(a1, b1)\n    assert v1 is not None\n\n    # Part (2): pick a2 and a solution X0, build t = a2#X0\n    a2 = rng.randint(-8, 12)\n    # choose X0 not too close; allow both sides\n    X0 = rng.randint(a2 - 2, a2 + 24)\n    # ensure there is at least one even in [a2, X0]\n    if not even_numbers_between(a2, X0):\n        X0 += 1\n    t = avg_evens(a2, X0)\n    if t is None:\n        raise RuntimeError(\"构造失败：t 未定义\")\n    # We will ask for all integer X in [L,U] such that a2#X == t\n    L = min(a2, X0) - rng.randint(0, 6)\n    U = max(a2, X0) + rng.randint(3, 10)\n    # Keep range reasonable\n    L = max(L, -20)\n    U = min(U, 40)\n    if L > U:\n        L, U = U, L\n\n    sols = []\n    for X in range(L, U + 1):\n        val = avg_evens(a2, X)\n        if val is not None and val == t:\n            sols.append(X)\n\n    # ensure at least one solution, and not too many\n    if not sols or len(sols) > 12:\n        raise RuntimeError(\"构造失败：解的数量不合适\")\n\n    # prepare outputs\n    ans1 = fmt_fraction(v1)\n    ans2 = \"or\".join(str(s) for s in sols)\n\n    # Cross-check with formula path\n    v1_f = avg_evens_via_formula(a1, b1)\n    t_f = avg_evens_via_formula(a2, X0)\n    if v1_f != v1 or t_f != t:\n        raise RuntimeError(\"交叉核验失败：公式法与枚举法不一致\")\n\n    # Explanation: show evens list for part (1), and show t and a couple checks for part (2)\n    evs1 = even_numbers_between(a1, b1)\n    exp_lines = []\n    exp_lines.append(\"定义：a#b 等于 a 到 b（含端点）之间所有偶数的平均数。\")\n    exp_lines.append(f\"(1) {a1}#{b1}：区间内偶数为 {evs1}，平均数 = {sum(evs1)}/{len(evs1)} = {fmt_fraction(v1)}。\")\n    exp_lines.append(f\"(2) 解 {a2}#X = {fmt_fraction(t)}，并限定 X 为整数且 X∈[{L},{U}]。\")\n    # show derivation of t via endpoints first/last even for the constructed solution X0\n    lo, hi = (a2, X0) if a2 <= X0 else (X0, a2)\n    first = lo if lo % 2 == 0 else lo + 1\n    last = hi if hi % 2 == 0 else hi - 1\n    if first <= last:\n        exp_lines.append(f\"例如取构造用的一个满足值：X={X0} 时，区间偶数首项={first}、末项={last}，平均数=(首项+末项)/2={(first+last)}/2={fmt_fraction(t)}。\")\n    # show check for first two solutions\n    show_s = sols[:2]\n    for s in show_s:\n        evs = even_numbers_between(a2, s)\n        exp_lines.append(f\"检验：X={s} 时偶数为 {evs}，其平均数为 {fmt_fraction(avg_evens(a2, s))}。\")\n    exp_lines.append(f\"因此满足条件的 X 为：{ans2}。\")\n\n    problem = (\n        \"给定自定义运算：a#b 表示 a 与 b（含端点）之间所有偶数的平均数。\\n\"\n        f\"1）计算 {a1}#{b1}。答案用双中括号表示，例如 [[6]]。\\n\"\n        f\"2）在 X 为整数且 X∈[{L},{U}] 的条件下，解方程 {a2}#X = {fmt_fraction(t)}。\\n\"\n        \"若有多个解，用 or 连接，并用双中括号表示，例如 [[1or2]]。\"\n    )\n\n    answer = wrap_answer(ans1) + \"====\" + wrap_answer(ans2)\n    return {\"problem\": problem, \"answer\": answer, \"explanation\": \"\\n\".join(exp_lines)}\n\ndef make_problem_family_B(rng: random.Random) -> Dict[str, Any]:\n    \"\"\"\n    Three-part variant (still same core skill: apply custom operation + solve equation):\n    (1) compute a#b\n    (2) compute (a#b) + (c#d) or difference\n    (3) solve for X such that p#X equals a given rational; restrict X range\n    \"\"\"\n    a, b = rng.randint(-10, 20), rng.randint(-10, 20)\n    if a == b:\n        b += 3\n    # ensure defined\n    if not even_numbers_between(a, b):\n        b += 1\n    c, d = rng.randint(-12, 18), rng.randint(-12, 18)\n    if c == d:\n        d -= 4\n    if not even_numbers_between(c, d):\n        d -= 1\n\n    v_ab = avg_evens(a, b)\n    v_cd = avg_evens(c, d)\n    if v_ab is None or v_cd is None:\n        raise RuntimeError(\"构造失败：未定义\")\n\n    op = rng.choice([\"+\", \"-\"])\n    if op == \"+\":\n        v2 = v_ab + v_cd\n        op_text = \"相加\"\n        expr_text = f\"({a}#{b}) + ({c}#{d})\"\n    else:\n        v2 = v_ab - v_cd\n        op_text = \"相减\"\n        expr_text = f\"({a}#{b}) - ({c}#{d})\"\n\n    # Part (3): choose p and an X0 to create target\n    p = rng.randint(-6, 10)\n    X0 = rng.randint(p - 1, p + 18)\n    if not even_numbers_between(p, X0):\n        X0 += 1\n    tgt = avg_evens(p, X0)\n    if tgt is None:\n        raise RuntimeError(\"构造失败：tgt 未定义\")\n\n    L = min(p, X0) - rng.randint(0, 5)\n    U = max(p, X0) + rng.randint(2, 9)\n    L = max(L, -20)\n    U = min(U, 40)\n\n    sols = []\n    for X in range(L, U + 1):\n        val = avg_evens(p, X)\n        if val is not None and val == tgt:\n            sols.append(X)\n    if not sols or len(sols) > 14:\n        raise RuntimeError(\"构造失败：解的数量不合适\")\n\n    # cross-check numeric via formula\n    if avg_evens_via_formula(a, b) != v_ab or avg_evens_via_formula(c, d) != v_cd:\n        raise RuntimeError(\"交叉核验失败\")\n\n    ans1 = fmt_fraction(v_ab)\n    ans2 = fmt_fraction(v2)\n    ans3 = \"or\".join(str(s) for s in sols)\n\n    ev_ab = even_numbers_between(a, b)\n    ev_cd = even_numbers_between(c, d)\n\n    exp = []\n    exp.append(\"定义：a#b 为 a 到 b（含端点）之间所有偶数的平均数。\")\n    exp.append(f\"(1) {a}#{b}：偶数为 {ev_ab}，平均数 = {fmt_fraction(v_ab)}。\")\n    exp.append(f\"(2) {expr_text}（{op_text}）：{fmt_fraction(v_ab)} {op} {fmt_fraction(v_cd)} = {fmt_fraction(v2)}，其中 {c}#{d} 的偶数为 {ev_cd}。\")\n    exp.append(f\"(3) 解 {p}#X = {fmt_fraction(tgt)}，限制 X 为整数且 X∈[{L},{U}]。满足条件的 X 为：{ans3}。\")\n\n    problem = (\n        \"给定自定义运算：a#b 表示 a 与 b（含端点）之间所有偶数的平均数。\\n\"\n        f\"1）计算 {a}#{b}。\\n\"\n        f\"2）计算 {expr_text}。\\n\"\n        f\"3）在 X 为整数且 X∈[{L},{U}] 的条件下，解 {p}#X = {fmt_fraction(tgt)}。\\n\"\n        \"每问答案都用双中括号表示；第 3 问若多解用 or 连接。\"\n    )\n    answer = \"====\".join([wrap_answer(ans1), wrap_answer(ans2), wrap_answer(ans3)])\n    return {\"problem\": problem, \"answer\": answer, \"explanation\": \"\\n\".join(exp)}\n\n# =========================\n# Generator orchestration\n# =========================\n\ndef generate_one(rng: random.Random) -> Dict[str, Any]:\n    # Choose a family with probability\n    family = rng.choices([\"A\", \"B\"], weights=[0.7, 0.3], k=1)[0]\n    if family == \"A\":\n        return make_problem_family_A(rng)\n    else:\n        return make_problem_family_B(rng)\n\ndef signature(item: Dict[str, Any]) -> str:\n    # lightweight dedup signature\n    return item[\"problem\"]\n\ndef main():\n    data = json.load(sys.stdin)\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n    rng = random.Random(seed)\n\n    results = []\n    seen = set()\n\n    max_attempts = 2000\n    attempts = 0\n    while len(results) < count and attempts < max_attempts:\n        attempts += 1\n        try:\n            item = generate_one(rng)\n            sig = signature(item)\n            if sig in seen:\n                continue\n            # basic sanity checks\n            if not isinstance(item.get(\"problem\"), str) or not item[\"problem\"].strip():\n                raise RuntimeError(\"空题面\")\n            if \"answer\" not in item:\n                raise RuntimeError(\"缺少答案\")\n            if not isinstance(item.get(\"explanation\"), str) or not item[\"explanation\"].strip():\n                raise RuntimeError(\"缺少解析\")\n            seen.add(sig)\n            results.append(item)\n        except Exception as e:\n            # resample\n            print(f\"[warn] 生成失败：{e}\", file=sys.stderr)\n            continue\n\n    if len(results) != count:\n        raise SystemExit(f\"无法生成足够数量的题目：需要 {count}，实际 {len(results)}。请更换 seed 或降低 count。\")\n\n    json.dump(results, sys.stdout, ensure_ascii=False, indent=2)\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 3098,
+      "prompt_tokens": 1670,
+      "total_tokens": 4768,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1280
+      },
+      "cost": 0.0442785,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 9,
+        "engine_ttft_ms": 66,
+        "engine_ttlt_ms": 28855,
+        "pre_inference_ms": 265,
+        "service_tbt_ms": 9,
+        "service_ttft_ms": 953,
+        "service_ttlt_ms": 29737,
+        "user_visible_ttft_ms": 687
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261006051512-7603861f-default-r1-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176625.8505118
+}

@@ -1,0 +1,41 @@
+{
+  "anon_id": "8caa9b3841b20466ae39",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[GWMZRQONZMJORGMFJTMSHZIIGJLNNSTVKMNHIQLBWQPGBFWCRPNXNIACCJZVN##U]]",
+      "certificate": "将每轮旋转后的孔按从上到下、从左到右写入。四轮孔位对应明文位置为：(2,3)(2,4)(3,4)(4,1)；(1,2)(1,3)(2,2)(4,4)；(1,4)(2,1)(3,1)(3,2)；(1,1)(3,3)(4,2)(4,3)。因此每16字生成：GWMZRQONZMJORGMF、JTMSHZIIGJLNNSTV、KMNHIQLBWQPGBFWC、RPNXNIACCJZVN##U；明文长度为62，末块补两个#。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "四轮逆时针旋转后的孔位依次为 (2,3)(2,4)(3,4)(4,1)、(1,2)(1,3)(2,2)(4,4)、(1,4)(2,1)(3,1)(3,2)、(1,1)(3,3)(4,2)(4,3)，恰好覆盖16个格子。按这些孔位写入并逐行读取，四个分组分别得到 GWMZRQONZMJORGMF、JTMSHZIIGJLNNSTV、KMNHIQLBWQPGBFWC、RPNXNIACCJZVN##U，与 canonical_answer 完全一致。明文长度为62，最后一组补两个#。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先计算三次旋转后的孔位，按孔位顺序将字符映射到栅格，再按行重排并对最后不足16字符的分组补#；这些步骤相互依赖且包含空间变换、字符串分组和重排。",
+      "reasoning_type_tags": [
+        "cipher",
+        "spatial",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出四轮孔位、四个16字符输出块及长度和补齐情况；逐块按孔位填入后逐行读取可复核得到所列密文。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

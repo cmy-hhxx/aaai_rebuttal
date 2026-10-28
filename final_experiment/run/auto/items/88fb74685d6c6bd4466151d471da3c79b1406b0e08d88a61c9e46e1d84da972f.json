@@ -1,0 +1,40 @@
+{
+  "anon_id": "e639564fc1e97f8cd6db",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[X X X X 1,1 1 1 X X,X 1 X X 1,1 X X 1 1,X 1 X 1 X]]",
+      "certificate": "第3列约束为2，因此仅第2行第3列为1。第2行需满足权重6，故其余黑格必为第1、2列。第2列约束10且含第2行为1，故第2列黑格为第2、3、5行。第5行只能再取第4列；第4行只能取第1、4、5列。由第1列约束6得其黑格为第2、4行；第3行因此取第5列以满足行权重7；第5列约束8遂确定为第1、3、4行。剩余第1行取第5列，第4列取第4、5行。逐行权重为5,6,7,10,6，逐列权重为6,10,2,9,8。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的矩阵满足全部行列约束：各行权重分别为5、6、7、10、6，各列权重分别为6、10、2、9、8；输出格式也与要求一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次利用第3列约束确定第2行第3列，再结合第2行和第2列约束确定多个黑格，随后结合第1列、各行及第5列约束完成剩余位置，并进行行列权重核验。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书中的关键推导均可由约束直接核查，且最后明确验证了五行和五列的权重，所得矩阵与标准答案完全一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

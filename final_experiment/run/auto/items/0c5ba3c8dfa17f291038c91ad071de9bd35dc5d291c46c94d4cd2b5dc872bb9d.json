@@ -1,0 +1,42 @@
+{
+  "anon_id": "650178a7c7c208581bab",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[2,2,18,14,21,19,18,3,4,5]]",
+      "certificate": "清洗文本为WVKHNMKUWY。不同字母D=8，因此k=10+2×8=26；元音总数V=1但规则明确不加入k。按A=1至Z=26计算，位置加成奇数位4、偶数位3，字符加成辅音1/元音3，第一位邻接加成0、其余各位均为2。规范化后的数列为[2,2,18,14,21,19,18,3,4,5]；序列变换未启用，故最终结果不变。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "清洗文本WVKHNMKUWY正确，长度为10；不同字母为{W,V,K,H,N,M,U,Y}，D=8，因此k=10+2×8=26。逐位按位置加成、字符加成及邻接加成计算并按26规范化，得到[2,2,18,14,21,19,18,3,4,5]；序列变换未启用，因此与规范答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须先完成文本清洗并统计不同字母数，再据此计算k，随后逐位结合位置、元音/辅音和邻接规则运算，最后进行模26规范化并确认未启用整体变换。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "boolean",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确核对了清洗文本、D=8、k=26、元音规则、位置/字符/邻接加成，并给出与逐位计算一致的最终数列；未启用序列变换的处理也正确。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

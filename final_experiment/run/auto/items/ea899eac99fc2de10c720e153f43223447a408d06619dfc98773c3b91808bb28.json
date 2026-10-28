@@ -1,0 +1,38 @@
+{
+  "anon_id": "04882dd4d44c4ddff126",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[DXTVHYAB]] [[QNFEYNVQXXA]]",
+      "certificate": "字母表位置为 X=0,M=1,J=2,Q=3,U=4,D=5,O=6,N=7,P=8,R=9,G=10,T=11,V=12,B=13,W=14,F=15,A=16,K=17,S=18,H=19,Z=20,C=21,Y=22,E=23,I=24,L=25。加密位置序列 [0,7,2,11,22,23,21,20] 经 y=(3x+5) mod 26 得 [5,0,11,12,19,22,16,13]，对应 DXTVHYAB。解密密文位置 [14,0,24,22,19,0,15,14,5,5,1] 经 x=9(y-5) mod 26 得 [3,7,15,23,22,7,12,3,0,0,16]，对应 QNFEYNVQXXA。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "两段结果均正确。加密位置序列[0,7,2,11,22,23,21,20]经(3x+5) mod 26得到[5,0,11,12,19,22,16,13]，对应DXTVHYAB；解密位置序列[14,0,24,22,19,0,15,14,5,5,1]经9(y-5) mod 26得到[3,7,15,23,22,7,12,3,0,0,16]，对应QNFEYNVQXXA。尝试答案符合题目要求的两个[[...]]结果，分隔符差异不影响结果内容。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "对每个字母直接查位置并应用一次给定的模26仿射公式，再查回字母；没有必要的分支或多步相互依赖推理。",
+      "reasoning_type_tags": [
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出两段输入的位置序列、逐段模26计算所得位置序列及其对应字母，计算与最终答案均可逐项核验。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,42 @@
+{
+  "anon_id": "2b4baf6ca022c679003b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[F=1,G=8,I=3,M=5,R=2,T=7]]",
+      "certificate": "按列进位：万位进位使 F=1；个位得 I=R+1。枚举进位并结合千位、百位约束，唯一满足各字母异数字且首位非零的解为 F=1,R=2,I=3,T=7,G=8,M=5。验证：IIFF+GRTR=3311+8272=11583=FFMGI。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The mapping satisfies the distinct-digit and leading-digit conditions, and the arithmetic checks exactly: 3311 + 8272 = 11583, corresponding to IIFF + GRTR = FFMGI. The canonical answer and supplied attempt match this solution.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires column-wise carry analysis, deriving the leading digit from the final carry, constraining units/tens/hundreds/thousands digits, and combining those constraints with distinctness to obtain the full assignment.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate gives the key carry observations and a direct arithmetic verification. However, its claim that enumeration yields the unique solution is asserted without displaying the enumeration or ruling out all alternative carry cases, so the uniqueness justification is only partly checkable.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

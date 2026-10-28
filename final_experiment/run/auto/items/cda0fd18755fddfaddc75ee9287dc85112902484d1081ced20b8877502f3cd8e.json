@@ -1,0 +1,41 @@
+{
+  "anon_id": "140e17f4102aacdc4652",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "C: 800D21303B80-T: F2",
+      "certificate": "按 ASCII 编码逐字节计算。第一轮密钥 1B，置换掩码 C6，旋转 2，半字节交换后得到 77、9E、17、35、85、77；第二轮密钥 EB，置换掩码 DE，旋转 1，得到密文 80、0D、21、30、3B、80，即 800D21303B80。密文和为 409，明文字节异或为 59，因此标签=(409+0x59) mod 256=F2。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按 ASCII 计算，第一轮中间结果为 77、9E、17、35、85、77；第二轮分别得到 90、0D、11、30、3B、90，因此密文为 900D11303B90。密文数值和为 425，明文逐字节异或值为 59H，(425+89) mod 256 = 02H，与 canonical_answer 一致。 supplied attempt 的第二轮结果错误，例如第一字节 77 经第二轮应为 90 而非 80。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "每个字节必须依次经过第一轮异或、置换、旋转、掩码异或和半字节交换，再将结果作为第二轮输入；最后还需独立计算密文和与明文异或值来得到标签。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "other"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": 0,
+      "explanation_evidence": "该 attempt 的第一轮中间值基本正确，但第二轮输出与规则不符：例如 77 经第二轮应为 90，不是 80；因此其密文和标签结论错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

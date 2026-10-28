@@ -1,0 +1,44 @@
+{
+  "anon_id": "ac10712db1beb1133065",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "first_stage": "[[CIRALFHFLNLCOQQ]]",
+        "final": "[[KUDIXRPRXVXOWCC]]"
+      },
+      "certificate": "第一阶段按4字分组、每组将密钥IMM重置并后移（明文减密钥）：KUDI→CIRA，TRTN→LFHF，TZXK→LNLC，WCY→OQQ，得CIRALFHFLNLCOQQ。密钥数值和为8+12+12=32，32 mod 3 + 1=3，左移3位后仍为IMM。第二阶段按连续字母计数、密钥IMM前移，逐字相加，得到KUDIXRPRXVXOWCC。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "题目参数完整且一致。第一阶段按每4个字符重置密钥 IMM、明文减密钥计算：KUDI→CIRA，TRTN→LFHF，TZXK→LNLC，WCY→OQM，得到 CIRALFHFLNLCOQM。第一阶段密钥数值和为32，32 mod 3 + 1=3，左移3位后仍为 IMM。第二阶段连续按字母计数并前移：CIRALFHFLNLCOQM→KUDIXRPRXVXOWCY，与 canonical_answer 一致。尝试答案在第一阶段末组将 Y−M 错算为 Q，正确值为 M，因此最终结果也错误。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次进行分组与密钥重置、逐字符模26减法、密钥旋转位置计算，再将第一阶段结果作为第二阶段输入进行连续对齐的逐字符模26加法。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 0,
+      "explanation_evidence": "尝试证书的前三个第一阶段分组正确，但末组 WCY→OQQ 错误：W−I=O、C−M=Q、Y−M=M，应为 OQM。其最终第一阶段和第二阶段答案均因此错误，故证书整体结论不可接受。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

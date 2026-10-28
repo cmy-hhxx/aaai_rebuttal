@@ -1,0 +1,47 @@
+{
+  "anon_id": "f4fd4a2d6c84f65f0266",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "一": "[0, 1, 0, 0, 1, 1]",
+        "二": "[0]",
+        "三": "[0, 1, 2, 3, 4, 5]"
+      },
+      "certificate": "无故障时，M级在掩码位置2、4翻转，I级翻转全部位置；两次M和六次I的效果分别成对抵消，因此输出等于输入：[0, 1, 0, 0, 1, 1]。观测值是无故障输出的全位翻转；任一单级故障都会使该级相对计划全位翻转，因此单故障即可解释观测。最小故障数为1，按字典序最小选索引[0]。输入与观测在全部6个位置不同。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目明确定义，M级无故障时仅翻转掩码位置2、4。计划中有6个I级，因此无故障输出为[0, 1, 1, 0, 0, 1]，不是标准答案给出的[0, 1, 0, 0, 1, 1]。任一级故障相对计划都会使整条序列翻转；故障数不超过2时，可能输出只有无故障输出或其全位翻转[1, 0, 0, 1, 1, 0]，均不等于观测[1, 0, 1, 1, 0, 0]，所以故障定位题无可行解。 supplied certificate错误地将无故障M级解释为翻转未掩码位置。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目与标准答案在M级定义和输出上不一致，且故障定位约束无解。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "equality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用；给出的证书包含关键定义错误：将M级的无故障行为说成翻转非掩码位置，违背题面“仅对掩码位置进行翻转”。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

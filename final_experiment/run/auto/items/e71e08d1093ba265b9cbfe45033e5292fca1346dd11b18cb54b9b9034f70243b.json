@@ -1,0 +1,41 @@
+{
+  "anon_id": "6c26c66b46f42029cc3f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[BMQMX]]====[[BFXOB]]",
+      "certificate": "按规则分别从初始牌堆开始模拟，前5个有效输出牌值（取 mod 26）均为 [7,17,20,4,13]。自定义字母表索引：EVGAS=[13,19,15,6,21]，相加后=[20,10,9,10,8]，对应 BMQMX；DJWNC=[1,0,2,23,7]，相减后=[20,11,8,3,20]，对应 BFXOB。未遇到需重来的 Joker 输出。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定牌堆严格执行首轮：A Joker移至第15位，B Joker移至第45位；三切后底牌为26。按26计数切后，顶牌为47，因此取第47张得到输出牌4，而不是证书声称的首个有效输出值7。故第一字符加密应为 LETTERS[(13+4) mod 26]=LETTERS[17]=\"K\"，与canonical_answer的首字符\"D\"及attempt的\"B\"均不符。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目及所给答案已可由首轮牌堆模拟直接反例否定。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：attempt证书声称首个输出值为7，但首轮独立模拟得到4，且其解密算术也将0-17错误写成11、23-4错误写成3。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

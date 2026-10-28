@@ -1,0 +1,44 @@
+{
+  "anon_id": "343263f75ae8ac71993e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "condition_code=2; examples=[[2, 8, 56], [2, 14, 56]]",
+      "certificate": "设相邻倍数为 q、s，则三项为 a、aq、aqs。因三项均与3互质，a、q、s均不被3整除；由 a(1+q+qs)≡0 (mod 3) 得 q≡s≡1 (mod 3)。故最小可用倍数为4和7，且两者必须不同。词典序最小取 a=2、q=4、s=7，得 [2,8,56]；其后最小的是 a=2、q=7、s=4，得 [2,14,56]。两组均严格递增、元素均在[2,86]内，和分别为66、72，均为3的倍数，且倍数链取值互异。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "标准答案遗漏了更小的第二组候选。序列 [2,8,56] 对应倍数链 q=4,s=7；序列 [2,8,80] 对应 q=4,s=10，二者均满足所有约束，且 [2,8,56] 之后按词典序确实是 [2,8,80]。给出的尝试答案 [2,14,56] 虽然可行，但因其第二项 14 大于 [2,8,80] 的第二项 8，所以不是前两组中的第二组。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目判定为无效：所给尝试答案的第二组不是词典序最小的第二组。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "ordering"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释中的可行性检查基本成立，但其“随后最小”的结论未检查 q=4、s=10，因而遗漏了 [2,8,80]；由于判定为无效，不进行标准化解释评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

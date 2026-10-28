@@ -1,0 +1,41 @@
+{
+  "anon_id": "ca8f4bca4384e3873fd0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[T C X X C T X X X, X X X X X T X C T, T C X C X C X X T, X X X T X X X X C, T T C X X C T X X, C X X X X X X T C]]",
+      "certificate": "树的正交邻接候选位置中，第6列只能由(3,6)和(5,6)满足列数2，因此二者都为帐篷；第7列数量为0，排除所有第7列候选。第6行需放2个帐篷，故必有(6,9)及(6,1)/(6,2)之一；于是(5,8)不能放置。第5行的另一个帐篷只能是(5,3)或(5,4)。若为(5,4)，则第3列迫使(4,3)，但二者对角相邻，矛盾；所以(5,3)确定。随后(3,4)确定，(6,2)因与(5,3)对角相邻而不能放置，故(6,1)确定。第4行在相邻约束下只能选(4,9)，从而第9列另一帐篷为(4,9)，排除(1,9)。第1行因此为(1,2),(1,5)；第2行的候选(2,1),(2,5)分别被这两个帐篷阻挡，只能为(2,8)。第3行最后一个帐篷不能是(3,8)，故为(3,2)。所得各行数量为2,1,3,1,2,2，各列为1,2,1,1,1,2,0,1,2，且帐篷均与树正交相邻、彼此不相邻。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical matrix satisfies all row counts (2,1,3,1,2,2), column counts (1,2,1,1,1,2,0,1,2), every C is orthogonally adjacent to a T, and no two C cells are orthogonally or diagonally adjacent. The supplied attempt matches the canonical answer and uses the requested matrix format.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Solving requires a long chain of interacting row and column cardinality constraints together with orthogonal/diagonal adjacency exclusions: the two column-6 tents force placements in row 1, then column 9 and row 3/5/6 placements propagate through multiple rows and columns.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate's final placement and verification claims are correct, but some intermediate deductions are not fully justified. In particular, the row-6 claim initially omits the possible candidate (6,3), and the statement that choosing (5,4) forces (4,3) is inaccurate: (5,4) actually conflicts diagonally with (4,3), while the column-3 count becomes impossible after all exclusions. Thus the explanation is only partly checkable despite reaching the correct solution.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

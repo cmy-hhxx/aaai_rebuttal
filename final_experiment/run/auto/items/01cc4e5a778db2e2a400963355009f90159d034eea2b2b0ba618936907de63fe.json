@@ -1,0 +1,41 @@
+{
+  "anon_id": "ad7f9eb883fe505a3faf",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "30a67a069828====IOELV",
+      "certificate": "按字节循环异或：CIPHER 的 ASCII 字节与密钥前 6 字节异或得到 30 a6 7a 06 98 28，即 30a67a069828；密文 3a a0 6f 02 8b 分别与密钥前 5 字节异或得到 ASCII 字母 I O E L V，即 IOELV。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定密钥逐字节 XOR，\"CIPHER\" 得到 30a67a069828；密文 3aa06f028b 解得 IOELV。因此 canonical_answer 的两部分均错误。 supplied attempt 的计算内容正确，但未包含要求的双层方括号。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的 canonical_answer 与规则直接计算结果不一致，整体判定为无效。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目 canonical_answer 错误；尝试中的字节 XOR 计算本身可核验，但输出格式缺少方括号。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

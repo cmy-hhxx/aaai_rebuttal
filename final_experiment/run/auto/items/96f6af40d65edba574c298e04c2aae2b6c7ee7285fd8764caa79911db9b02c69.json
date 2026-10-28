@@ -1,0 +1,41 @@
+{
+  "anon_id": "d9c368cde34a99522ad9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "N SSR LLN",
+      "certificate": "删除“+”后得到 `=,``.,=~~`。按最长令牌优先逐字符替换：`=`→N，`,`→空格，两个反引号→SS，`.`→R，`,`→空格，`=`→N，两个`~`→LL，因此得到“N SSR NLL”。奇数位词第1、3词解码时循环左移一位：N不变，NLL→LLN；第2词保持SSR。最终为“N SSR LLN”。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "删除“+”后，密文为“`=,``.,=~~”。按给定单字符映射逐字符替换应得到“SN SSR NLL”：开头的反引号映射为S，等号映射为N。对第1和第3词执行循环左移后，最终明文为“NS SSR LLN”，与canonical_answer及attempt中的“N SSR LLN”均不一致。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的规范答案与可直接核验的逐字符解码结果不一致。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释遗漏了密文开头的反引号：该字符应替换为S，因此其声称的“N SSR NLL”不可由给定映射得到；难度与解释评分不适用。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

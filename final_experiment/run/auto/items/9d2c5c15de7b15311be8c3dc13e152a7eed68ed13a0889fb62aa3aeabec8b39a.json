@@ -1,0 +1,45 @@
+{
+  "anon_id": "649b7b1ca9c55fc11c93",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[35831808+sqrt(756)]]",
+        "[[2116]]",
+        "[[722]]",
+        "[[1527752]]"
+      ],
+      "certificate": "第一问：12^7=35831808，9·12·7=756。第二问：令 n=√X，则 n²+3n=2254，解得 n=46，故 X=2116。第三问：722²=521284，√(18·722)=114，和为521398，故 Y=722。第四问：2116·722=1527752。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "各问一致使用 c=9、m=3。第一问 12^7=35831808 且 9·12·7=756（756 非完全平方数）；第二问代入 X=2116 得 2116+sqrt(9·2116)=2116+138=2254；第三问 722²+sqrt(18·722)=521284+114=521398。第三问左侧随正整数 Y 严格递增，因此该解唯一。最后 2116·722=1527752。规范答案与题意相符。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "第二问需令 n=sqrt(X)，将方程化为 n²+3n=2254，解得 n=46 后再求 X=2116；第三问需核验平方项与根号项并结合单调性确认唯一解；第四问依赖前两问所得数值再相乘。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书中的幂、根号及乘积计算均正确，第二问的代换方程和解可核查，第三问给出了满足方程的值。证书未展开第二问解出 n=46 的计算，也未明说第三问的唯一性依据；题目本身保证唯一，且第三问函数严格递增，故只有轻微说明缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

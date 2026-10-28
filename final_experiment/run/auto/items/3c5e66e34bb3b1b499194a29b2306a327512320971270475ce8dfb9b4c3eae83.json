@@ -1,0 +1,42 @@
+{
+  "anon_id": "b41ed9ee3a5a5103cf0c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[VERIFY. SESSION VECTOR-8664: SYSTEM, ROUTER,]]",
+      "certificate": "n=168×21+839×38=35410, so the key is CENTER:35410:VERIFY. After the stated 5-byte inverse rotation, XORing block 0 with the supplied digest yields \"VERIFY. SESSION VECTOR-8664: SY\". Rotating the digest left by one byte for block 1 and XORing the remaining bytes yields \"STEM, ROUTER,\". No checksum segment is present."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "The supplied attempt omits a required space after the hyphen. Applying the stated inverse 5-byte rotation and XOR rules yields [[VERIFY. SESSION VECTOR- 8664: SYSTEM, ROUTER,]], matching the canonical answer, whereas the attempt gives [[VERIFY. SESSION VECTOR-8664: SYSTEM, ROUTER,]].",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the supplied answer is demonstrably incorrect.",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the supplied certificate supports the incorrect plaintext without the required space and does not match the decrypted byte sequence.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,42 @@
+{
+  "anon_id": "05688b3237b5283eeac1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[E:],C:]>,D:0,B:2",
+      "certificate": "按栈处理并在每个标记后清空：第1段 {<<<<[ 的栈顶为 [，? 输出 E:]；第2段 <<>[[] 后栈为 <[，最短补全为 ]>，# 输出 C:]>；第3段 [<>]<> 后栈为空，! 输出 D:0；第4段 <[< 有两种不同未闭合开括号 <、[，* 输出 B:2。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The bracket-stack processing is consistent: ? outputs E:], then the reset segment leaves <[ so # outputs C:]>, the next segment is balanced so ! outputs D:0, and the final <[< contains two distinct opener types so * outputs B:2. The canonical answer has the required four items. The supplied attempt is semantically correct but omits the required final closing square bracket, so it is not an exact-format answer.",
+      "error_types": [
+        "rendering"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "Requires sequentially matching and popping brackets within each segment, applying the reset after each marker, computing the shortest closure for the remaining stack, counting unclosed layers, and counting distinct opener types.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly identifies the stack state and output at all four markers, and each state can be checked directly against the input segments and reset rule. Its only omission is noting the attempt's missing final bracket, not a gap in the puzzle solution.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

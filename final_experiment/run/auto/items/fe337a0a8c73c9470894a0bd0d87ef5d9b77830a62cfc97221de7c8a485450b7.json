@@ -1,0 +1,39 @@
+{
+  "anon_id": "88d46d02e52428632a1f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "5",
+      "certificate": "步骤1正确：H(U+0048)<Γ(U+0393)。步骤2符合 Unicode 词典序：相同前缀时较短者在前。步骤3的首字符码点升序正确：0048、004D、0063、0072、00E0、010C、015A、0393。步骤4正确，Γ(U+0393)最大，故“Γειά”最后。步骤5错误：题设规定完全相同时应按词频高者在前，而非低者在前。因此首个错误是步骤5。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "步骤1、2、3、4均与题设的Unicode(NFC)词典序一致；步骤5将题设规定的“词频高者在前”错误地改为“词频低者在前”。因此恰有4条正确，首个错误步骤为5，且标准答案匹配。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要先核对字符码点和词典序规则以确认步骤1至4，再将步骤5与题设词频降序规则对照并定位首个错误。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐项核对了步骤1的码点比较、步骤2的前缀长度规则、步骤3的首字符排序、步骤4的最大首字符，并明确指出步骤5与题设词频降序规则相反；结论与标准答案5一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

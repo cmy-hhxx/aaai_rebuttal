@@ -1,0 +1,48 @@
+{
+  "anon_id": "c91bf001be2897175d9f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[[cB+cD;cE;cC]θ]]",
+        "[[⟨cB⟩θ]]",
+        "[[[cB+cD]θ]]",
+        "[[[cB*]θ]]",
+        "[[[cF]θ]]",
+        "[[⟨cA||cC;cB+cD⟩θ]]",
+        "[[B]]",
+        "[[A]]"
+      ],
+      "certificate": "1. 将 cB+cD 接在序列 cE;cC 前，选择项已按字典序排列，得到 cB+cD;cE;cC。2. cB 的可能语义为 ⟨cB⟩θ。3. 选择 cB+cD 已无重复且按字典序规范。4. cB 的零次或多次迭代为 cB*，保留必然模态。5. 由 cE 与 cF 等价，[cE]θ 替换为 [cF]θ。6. 并发项按 cA、cC 排序，后接规范化选择 cB+cD。7. 映射中异常 e 规则对应 B；8. 资源 R 规则对应 A。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "所有8个子题的规范化结果均与题干规则一致：选择项去重并按字典序排列，序列保持 cE;cC 顺序，并发项按 cA、cC 排列，模态与迭代形式正确；规则映射中异常 e 规则为 B、资源 R 规则为 A。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "第1题需要将选择与序列组合并保持序列顺序；第6题需要分别规范化并发排序和后续选择排序，再保留可能模态。其余各题为直接模态、迭代或映射判断。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "equality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐项对应8个答案，并明确说明了第1题的序列组合、第2至5题的模态和替换、第6题的并发与选择规范化，以及第7、8题的映射查找；这些说明均可由题干直接核验。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

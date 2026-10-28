@@ -1,0 +1,42 @@
+{
+  "anon_id": "2cdd5d27dc6d482f58a7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[EUVWZRPXVMHH]]",
+      "certificate": "去除Q后明文为KGFHJLAPFCL，共11位，补X得KG|FH|JL|AP|FC|LX。按Gird1/Gird2及Gird4/Gird3逐组映射：KG→EU，FH→VW，JL→ZR，AP→PX，FC→VM，LX→HH，拼接得到EUVWZRPXVMHH。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "After removing Q, the plaintext is KGFHJLAPFCL (11 letters), so X is appended: KG|FH|JL|AP|FC|LX. The mappings produce EU|VW|ZO|PX|VM|CH, yielding [[EUVWZOPXVMCH]], which matches the canonical answer. The supplied attempt is wrong because JL maps to ZO, not ZR.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "Requires cleaning the plaintext, detecting odd length and padding, grouping into pairs, then performing position-based lookups across the specified grids for each character.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "The attempt correctly performs cleaning, padding, grouping, and nearly all mappings, but its JL mapping is incorrect: L at (1,2) in Gird4 corresponds to O at (1,2) in Gird3, not R.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

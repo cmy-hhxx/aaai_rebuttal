@@ -1,0 +1,43 @@
+{
+  "anon_id": "d9d15a983d39782721e1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[NRIAMFOITTEHONR$O$$Y$]]====[[无法确定]]",
+      "certificate": "明文按7列分行：INFORMA、TIONTHE、ORY$$$$。按[1,4,0,6,5,2,3]重排后分别为NRIAMFO、ITTEHON、R$O$$Y$，连接得NRIAMFOITTEHONR$O$$Y$。第二问密文长度为16，而固定7列要求长度必须是7的倍数；无法划分为完整行，因此不能按给定规则唯一解密。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "两处均不符合题目规则：第一问按分行 INFORMA、TIONTHE、ORY$$$$ 并按 [1,4,0,6,5,2,3] 重排，结果应为 [[NRIAMFOITTEHONR$O$$Y$]]，而非给出的 canonical_answer。第二问密文长度为16，不是7的倍数，无法按固定7列逐行完整分组，因此不能按该规则解密。",
+      "error_types": [
+        "wrong_answer",
+        "missing_constraint"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目/规范答案本身无效：第一问规范答案错误，第二问输入长度违反7列分组要求。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效；所给证书对第一问的逐行计算是可核查的，但第二问只能证明输入不满足完整分组条件，不能产生所要求的解密答案。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,42 @@
+{
+  "anon_id": "7d578a788db34f360ca0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[178]]",
+      "certificate": "右端：235⊕420=335。由 X&228=160 得 X 的第7、5位为1，第6、2位为0；(X>>4)&198=2 与之相容，并要求第2位为0。令 X=160+16t+n，其中 t∈{0,1}，n∈{0,1,2,3,8,9,10,11}。代入主方程，t=0时无解，t=1时需 (n⊕11)+2(n⊕9)=31，唯一得到 n=2，因此 X=178。验证：11⊕178=185，178⊕249=75，185+2×75=335；178&228=160；(178>>4)&198=2；(178⊕242)%3=64%3=1；178的第2位为0。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied answer [[178]] satisfies every stated constraint: 11⊕178=185, 178⊕249=75, and 185+2×75=335=235⊕420; 178&228=160; (178>>4)&198=2; (178⊕242)%3=64%3=1; and bit 2 of 178 is 0. The certificate's candidate reduction and enumeration identify 178 as the unique solution in 0≤X<256, matching the canonical answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires combining bitmask constraints to restrict the binary form of X, parameterizing the remaining candidates, substituting into the XOR-arithmetic main equation, and checking the remaining modular and bit conditions.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "boolean"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly computes the right-hand side, derives the bit restrictions and finite candidate form, reduces the main equation to a finite check, identifies n=2 and t=1, and directly verifies all constraints for X=178.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

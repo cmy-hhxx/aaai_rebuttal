@@ -1,0 +1,40 @@
+{
+  "anon_id": "ec4a94949d20fde7c034",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "9496.89",
+      "certificate": "阶段一本息为 4731×(1+0.05/12)^24 ≈ 5227.47746 元；追加后本金约 8735.47746 元。第二阶段税前利息为 8735.47746×(1.03^3−1) ≈ 810.01462 元，不超过 1370 元，故按 6% 纳税。到期金额为 8735.47746 + 810.01462×0.94 ≈ 9496.89 元。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The stated compounding and tax rules determine the amount. Stage one gives approximately 5227.47746 yuan; after the 3508-yuan addition, the stage-two principal is approximately 8735.47746 yuan. Stage-two interest is approximately 810.01462 yuan, below the 1370-yuan threshold, so the 6% tax applies. The resulting total is approximately 9496.89120 yuan, which rounds to the canonical answer 9496.89.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The calculation depends on the stage-one monthly compounding result, adding the new deposit to determine stage-two principal, and using that principal to compute stage-two interest. That interest must then be compared with the threshold to select the tax rate before calculating the final after-tax total.",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "implication"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate gives the correct compound-interest formulas and intermediate values, checks that stage-two interest is below the threshold, applies tax only to that interest, and arrives at the correctly rounded total.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,45 @@
+{
+  "anon_id": "8c3d95f4f770b9c1d894",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        26,
+        1
+      ],
+      "certificate": "最长会议为星期二12:00开始：雨桐可用至12:26，丰杰此时无占用，雅婷在11:37至13:41间可用，因此可持续26分钟。其他整点或半点开始的共同可用时段均不超过26分钟；达到26分钟的开始时间只有这一个。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "在星期二12:00开始时，雨桐可用至12:26，丰杰在该时段没有已安排会议，雅婷可用至13:41，因此三人共同可用26分钟。检查所有工作日的整点或半点开始时间后，没有其他共同可用时段超过26分钟，且只有该开始时间达到26分钟；与规范答案[26,1]一致。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要对五个工作日中所有整点或半点候选开始时间求三人日程区间交集，并比较交集长度、再统计达到最大值的开始时间；这涉及多组时间区间的排除、长度计算和全局最大值确认。",
+      "reasoning_type_tags": [
+        "temporal",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "people",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确核实了星期二12:00开始时三人的可用区间以及26分钟长度，并给出了唯一性和最大性的结论。最大性和唯一性是可检查的，但证书没有逐一列出其他整点或半点候选的交集计算，因此存在小幅证明省略。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

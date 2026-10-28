@@ -1,0 +1,57 @@
+{
+  "anon_id": "06ec8a985ba5126fcf6e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": [
+          4,
+          3
+        ],
+        "B": [
+          2,
+          4
+        ],
+        "C": [
+          1,
+          2
+        ],
+        "D": [
+          3,
+          1
+        ]
+      },
+      "certificate": "B 只能位于 (2,4)，因此 C 区在第 3 行不能放星星；A 只能位于第 4 行第 3 或 4 列。D 区必须由第 3 行占据，且为避免与 A 相邻，只能取 (3,1)，从而 A=(4,3)。剩余列约束使 C=(1,2)。四颗星分别位于不同的行、列和区域，且相邻行的列差均至少为 2，因此满足所有条件。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给定答案满足所有约束：A=(4,3)、B=(2,4)、C=(1,2)、D=(3,1)分别占据不同的行、列和字母区域，且任意两颗星不相邻。B区域只有(2,4)；由于第2行和第4列已被占用，A只能为(4,3)；D随后只能占据第3行，且为避免与A对角相邻只能为(3,1)；剩余的行列约束确定C=(1,2)。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次结合区域唯一性、行列唯一性和对角相邻限制：先固定B，再确定A，利用A排除D=(3,2)，最后由剩余行列确定C。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "证书给出的最终位置和相邻性检查正确，且主要推导可核验。不过“B只能位于(2,4)，因此C区在第3行不能放星星”这一句省略了还需结合A占用第3列的理由；这是说明上的小缺口，不影响结论。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,41 @@
+{
+  "anon_id": "a6787a199a792a6ec454",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "QUXMDPLWOLAVXIYOQRQVX",
+      "certificate": "第一阶段：前11字按2字块右移3得 QMLLXORVUDW；后10字按4字块分别右移1、2、3得 AIQQXXPOVY。合并为 QMLLXORVUDWAIQQXXPOVY。按列宽8逐行排列为 QMLLXORV / UDWAIQQX / XPOVY，按列读取得到 QUX、MDP、LWO、LAV、XIY、OQ、RQ、VX，拼接即 QUXMDPLWOLAVXIYOQRQVX。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The plaintext has 21 letters and is correctly split into lengths 11 and 10. The first segment encrypts to QMLLXORVUDW using 2-character blocks shifted right by 3; the second encrypts to AIQQXXPOVY using shifts 1, 2, and 3. Row-wise filling with width 8 and column-wise reading yields QUXMDPLWOLAVXIYOQRQVX, exactly matching the canonical answer and the supplied attempt.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Requires sequentially splitting the plaintext, applying block-dependent Caesar shifts, combining the transformed segments, and performing a width-8 row-to-column transposition including the incomplete final row.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly shows both segment transformations, the intermediate concatenated string, the 8-column rows, each column readout, and the final concatenation; all computations check.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

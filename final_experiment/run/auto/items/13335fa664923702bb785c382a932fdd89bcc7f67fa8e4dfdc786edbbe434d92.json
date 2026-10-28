@@ -1,0 +1,39 @@
+{
+  "anon_id": "8cac3166e1e2ec5586fa",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "是, 否, 否",
+      "certificate": "设各地点说真话为1、说假话为0，分别记程路、郁街、任路、查路、宁德路、南昌街为C、Y、R、A、N、S。由发言可得：C=(Y=R)，A=(C=N)，S=(R=A)，R=(C≠N)，Y=(S≠C)，N=¬A。由A=(C=N)且R=(C≠N)，得A=¬R；再由N=¬A得N=R。代入R=(C≠N)得C=0；于是C=(Y=R)推出Y≠R。又S=(R=A)=0，故Y=(S≠C)=0，从而R=1。最终R=1、S=0、Y=0，因此答案为“是, 否, 否”。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "将各地点说真话记为布尔变量后，六条陈述分别正确转化为 C=(Y=R)、A=(C=N)、S=(R=A)、R=(C≠N)、Y=(S≠C)、N=¬A。由 A=(C=N) 与 R=(C≠N) 得 A=¬R；再由 N=¬A 得 N=R。代入 R=(C≠N) 可得 R=1、C=0；随后 A=0、S=0、Y=0。目标顺序任路、南昌街、郁街为“是、否、否”，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先把六条自然语言陈述转为布尔方程，再联立 A=¬R、N=R，并代入 R=(C≠N) 确定 R 与 C，最后依次推出 S 和 Y；包含至少三步相互依赖的逻辑推理。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "boolean"
+      ],
+      "scenario": "people",
+      "explanation_score": 4,
+      "explanation_evidence": "供给的证明明确声明变量含义，逐条列出方程；A=¬R、N=R、C=0、R=1、S=0、Y=0 的推导均可直接核验，且最终顺序与问题要求和标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

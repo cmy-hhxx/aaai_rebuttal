@@ -1,0 +1,43 @@
+{
+  "anon_id": "25800f8c402977fb517d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目按所给规则并不唯一。以下两组帐篷坐标（行、列从1开始）都满足所有行列数量、正交邻树及帐篷间不可相邻（含对角线）的条件：A={(1,1),(1,8),(2,4),(3,2),(3,6),(4,8),(5,1),(6,3),(6,6),(7,8)}；B={(1,1),(1,8),(2,4),(3,2),(3,8),(4,6),(5,1),(6,3),(6,6),(7,8)}。两组的行数均为(2,1,2,1,1,2,1,0)，列数均为(2,1,1,1,0,2,0,3)，且每个帐篷均正交邻接至少一棵树；A与B不同，因此无法按题面规则确定唯一矩阵。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目声称有唯一解，但证书给出的 A 和 B 是两个不同且均满足规则的帐篷配置。逐项检查可见，两者的行计数均为 (2,1,2,1,1,2,1,0)，列计数均为 (2,1,1,1,0,2,0,3)；每顶帐篷都与树正交相邻，且帐篷之间不存在正交或对角相邻。因此唯一性断言不成立，题目缺少足以排除其中一个配置的约束。",
+      "error_types": [
+        "ambiguous",
+        "missing_constraint"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目实例已被两个满足全部明示约束的不同解反驳。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释中的 A、B 坐标可直接逐格核验；它们具有相同的行列计数，并分别满足树相邻及帐篷不可正交/对角相邻，因此构成可检查的非唯一性反例。由于题目无效，不对解释质量进行标准评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

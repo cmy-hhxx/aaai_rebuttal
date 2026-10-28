@@ -1,0 +1,42 @@
+{
+  "anon_id": "ed0ddd9b15bd3f549fed",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[UGKCLIEYWGCNXCFJNHZVDOWG]]",
+      "certificate": "明文长度为24。5栏先下后上的栏序为1,2,3,4,5,4,3,2循环，按栏读出得到LIEYWGNHZVDOCNXCFJWGUGKC。均分为四个6字符块：LIEYWG、NHZVDO、CNXCFJ、WGUGKC；按奇数块后偶数块重排为LIEYWGCNXCFJNHZVDOWG。整体循环右移4位，得到UGKCLIEYWGCNXCFJNHZVDOWG。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "明文长度为24，按5栏先下后上的栏序1,2,3,4,5,4,3,2循环分栏，得到第一阶段密文LIEYWGNHZVDOCNXCFJWGUGKC。均分为四个6字符块并按奇数块后偶数块重排，得到LIEYWGCNXCFJNHZVDOWGUGKC；整体右移4位后为UGKCLIEYWGCNXCFJNHZVDOWG，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次完成折线栏位分配与按栏读取、四块切分及奇偶块重排、整体循环右移三项相互依赖的字符串操作。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确核对了24字符长度、栏序、各栏连接结果、四个6字符分块、奇数块后偶数块重排以及右移4位，最终结果与canonical_answer完全一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

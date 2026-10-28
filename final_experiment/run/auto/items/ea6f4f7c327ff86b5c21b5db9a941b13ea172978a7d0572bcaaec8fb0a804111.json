@@ -1,0 +1,40 @@
+{
+  "anon_id": "52ff9b9eba34e885ba6f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[C:}}}],B:2,B:3,B:3,E:),B:3,C:]}",
+      "certificate": "按标记分段并在每个标记后清空栈：1) [{{(()){ 后栈为 [,{,{,{，补全为 }}}]，得 C:}}}；2) []([ 后未闭合类型为 (、[，得 B:2；3) ([[{[{ 后有三种类型，得 B:3；4) [{[{( 后有三种类型，得 B:3；5) {}[(([{( 后栈顶为 (，需 )，得 E:)；6) ([(([{{[{( 后有三种类型，得 B:3；7) {}[]{[ 后栈为 {,[，补全为 ]}，得 C:]}. "
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐段清空栈后计算，7个标记的规范输出与 canonical_answer 一致：补全、不同开括号种类计数、栈顶所需右括号均正确。唯一 supplied attempt 的内容计算正确，但答案末尾缺少要求的外层右方括号，因此其字符串格式不完全匹配。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次解析7个分段，匹配已闭合括号、维护未闭合栈，并分别计算栈的最短补全、不同开括号种类数和栈顶匹配括号；例如第1段得到 }}}]，第5段栈顶为(得到 )，第7段得到 ]}。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐段列出了清空栈后的状态及对应输出，7项计算均可由原始分段直接核查；但 supplied answer 字符串本身缺少最后一个外层右方括号。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

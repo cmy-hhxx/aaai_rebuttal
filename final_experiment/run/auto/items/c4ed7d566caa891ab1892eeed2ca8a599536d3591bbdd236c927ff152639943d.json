@@ -1,0 +1,42 @@
+{
+  "anon_id": "cf3722ddb803ada1d338",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "cost=57, seq=[]<<[]><[]>()()<>>",
+      "certificate": "前缀中的两个需要向下匹配的 > 可通过提前关闭其上的开括号来避免额外的非栈顶加价。最优插入依次为 ]、]、)、>、>，完整序列为 []<<[]><[]>()()<>>。基础成本=8+8+5+6+6=33；5次插入各加深度费4，共20；相邻插入字符中 ]→)、)→> 两次切换，共4；无非栈顶匹配加价。因此总成本=33+20+4=57。任何延后关闭都会额外产生每次2点加价，且不减少基础、深度或切换成本，故该方案最优；最优方案的插入位置也确定，因而满足字典序要求。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "The canonical sequence can be formed by insertion, but its stated cost is miscomputed. Its five inserted right brackets, in order, are ], ), ], >, >, with base cost 8+5+8+6+6=33 and depth cost 5×4=20. The first ], and the ) and ] before the second prefix >, require three non-top-match surcharges totaling 6. Consecutive inserted brackets change three times (]→), )→], ]→>), adding 6. Thus this sequence costs 33+20+6+6=65, so the arithmetic actually supports 65; however, the supplied attempt is not a valid completion because it does not preserve the prefix substring '(>()<' after the relevant '[', closing that '[' before the required '(' and '>'. Therefore the supplied solver attempt is incorrect, while the canonical answer itself is consistent with the stated cost.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the supplied attempt is invalid as a completion of the prefix, so the requested canonical-answer assessment cannot be treated as a valid solved instance.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the supplied certificate claims a sequence that fails the insertion-only prefix-order constraint.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

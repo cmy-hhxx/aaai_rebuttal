@@ -1,0 +1,40 @@
+{
+  "anon_id": "dddd7eef4b06a72de8ed",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "1）[[BYLARWSUR]] 2）[[QVAVQGMBUQ]]",
+      "certificate": "按密钥循环分组逐位查表：G→GH、O→OP、W→WX、D→CD。明文 YFNPHGBMC 加密得到 B,Y,L,A,R,S,W,U,R，即 BYLARWSUR。解密时 E、F 均属 EF，X 属 WX；FKPKFVFXZF 逐位逆查得到 Q,V,A,V,Q,G,M,B,U,Q，即 QVAVQGMBUQ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按规则逐位查表，明文加密结果为 BYLARSYSR，密文解密结果为 QVAVQGQMKQ，均与 canonical_answer 一致。 supplied attempt 的两个结果均有误：其加密结果为 BYLARWSUR 而非 BYLARSYSR，解密结果为 QVAVQGMBUQ 而非 QVAVQGQMKQ。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 1,
+      "depth_evidence": "每一位只需依据循环密钥所属双字母组，在对应替换表中直接查找或逆查；不存在需要多步依赖或分支搜索的推理。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 0,
+      "explanation_evidence": "attempt 的证书声称逐位查表，但其列出的加密和解密字符与规则表的实际查表结果不符，因此证书整体不能作为正确证明。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

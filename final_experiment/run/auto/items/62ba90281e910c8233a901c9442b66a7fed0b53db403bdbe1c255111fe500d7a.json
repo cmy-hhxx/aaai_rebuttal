@@ -1,0 +1,42 @@
+{
+  "anon_id": "81842661e41a0a1cc338",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 30,
+      "certificate": "序列长度为29。逐步检查中，所有闭括号均与栈顶匹配；主载荷最大为12，未超过T_w=20。尖括号参与组载荷，组载荷最大为4，未达到T_g=10。末尾仍有未闭合的括号（包括位置28的“(”和位置29的“{”），因此按规则首错位置为长度+1=30。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The sequence has length 29. All closing brackets match the stack top, the maximum main load is 12 (<20), and the maximum group load from angle brackets is 4 (<10). Positions 28 and 29 remain unclosed, so the specified end-of-input error position is 29+1=30, matching the canonical answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Requires counting the sequence length, simulating stack matching and load updates through the nested suffix, checking both overflow thresholds, and then applying the end-of-input rule to the remaining stack.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate states the correct length, verifies absence of mismatched closers and threshold overflow using the relevant maxima, identifies the remaining unclosed brackets, and correctly computes the first error position as length+1.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

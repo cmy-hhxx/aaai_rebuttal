@@ -1,0 +1,45 @@
+{
+  "anon_id": "0bbc24e22d2f6baba365",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        205,
+        2
+      ],
+      "certificate": "按明确列出的空闲区间取交集，并允许仅清除A3长度不超过30分钟的忙碌片段。Mon的共同连续可用区间为09:30–12:55，长度205分钟，起始时间09:30；Fri中A3的09:13–09:42忙碌片段可清除，四人共同可用区间为09:00–12:25，长度205分钟，起始时间09:00。Tue因A3有09:00–16:44的不可清除忙碌区间不可行；Wed最多受A3固定15:00–15:30限制得到150分钟；Thu最多为12:00–15:00共180分钟。因此最长为205分钟，共2个起始时间。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The stated rules support the canonical result. Mon has a common available interval from 09:30 to 12:55 (205 minutes), and Fri has a common interval from 09:00 to 12:25 after clearing A3's 29-minute busy segment (also 205 minutes). Tue is blocked by A3's 09:00–16:44 busy segment, while Wed and Thu are limited to 150 and 180 minutes respectively by the fixed A3 unavailability and other schedules. The aligned maximizing starts are therefore 09:30 on Mon and 09:00 on Fri, giving [205, 2].",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires intersecting multiple participants' time intervals, applying the special A3 busy-segment-clearing rule, enforcing the fixed A3 unavailable period, comparing feasible durations across all five days, and counting the aligned maximizing starts.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic",
+        "temporal"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "temporal",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate identifies both 205-minute feasible intervals, correctly applies the 30-minute clearing rule to A3's 29-minute Friday segment, rules out Tue, and gives the shorter maxima for Wed and Thu. The listed starts correspond to the required 30-minute alignment.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

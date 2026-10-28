@@ -1,0 +1,43 @@
+{
+  "anon_id": "1678822c06e1e861560e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[BEATUIHCXGN]]====[[YSLIRKFARHE]]",
+      "certificate": "外盘按索引0–25对应 QWERTYUIOPASDFGHJZXCVBNMKL。第1问前9字符使用初始内盘，逐字符反查得到 BEATUIHC；处理9字符后内盘右移4位，TLANXVBHEGAW 的末3字符 G、A、W 分别解为 X、G、N，故为 BEATUIHCXGN。第2问前6字符按初始内盘加密得到 YSLIRK；处理6字符后内盘右移11位，剩余 K、B、Y、Q、T 分别加密为 F、A、R、H、E，故为 YSLIRKFARHE。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answer is correct. In question 1, the first nine ciphertext characters decrypt to BEAOTUIHC; after a right rotation of the inner disk by 4, the final three decrypt to XGN. In question 2, the first six plaintext characters encrypt to YSLIRK; after a right rotation by 11, the remaining characters encrypt to FARHE. The supplied attempt is demonstrably wrong in question 1 because it omits the O, giving BEATUIHCXGN instead of BEAOTUIHCXGN.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "Each subproblem requires indexed substitution for multiple characters, tracking the period boundary, applying the specified cyclic disk rotation, and then continuing substitution under the rotated mapping; the two operations are dependent.",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "The attempt correctly explains the period boundary, rotation, and all of question 2, but its question 1 certificate contains a checkable substitution error: ciphertext L maps to E and ciphertext N maps to O, so the first nine characters are BEAOTUIHC, not BEATUIHC. The stated final three XGN are correct.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

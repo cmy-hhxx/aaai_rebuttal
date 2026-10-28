@@ -1,0 +1,56 @@
+{
+  "anon_id": "8bcd9cca547b1cbe101a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "AZI"
+        ],
+        [
+          "YHOM"
+        ],
+        [
+          "FHLX"
+        ],
+        [
+          "OMMLY"
+        ]
+      ],
+      "certificate": "方阵按行依次为 SDVLT / OXKAB / CEFGH / IMNPQ / RUWYZ。对每个密文对 (r′,c′)，先还原原列 c=c′−2（循环取 1–5）；第二步的触发列取第一步之后、第二步之前的列 c′，若 c′∈{2,4}，原行减 3；若为分块尾字母且原列 c∈{1,2,3}，再减 4。所得行列查方阵。按 66 分块，解得 AZI / YHOM / FHLX / OMMLY；逐块重新正向变换分别得到 213233 / 51122314 / 35121144 / 2324141151，与密文一致。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目给定的方阵和逆变换解码，第一分块 213233 得到 AZI，而非 canonical_answer 中的 PHI；完整解码为 [[AZI], [YHOM], [FHLX], [OMMLY]]。 supplied attempt 的证书与密文逐块正向复核一致，因此错误在 canonical_answer 与题目规则不匹配。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为 canonical answer 与可复核的题目解码结果不一致。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "implication"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用；该尝试的证书实际上可复核，但整体题目因 canonical answer 错误而判 invalid。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

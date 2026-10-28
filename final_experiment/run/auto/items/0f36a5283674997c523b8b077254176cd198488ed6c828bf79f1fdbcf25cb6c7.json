@@ -1,0 +1,40 @@
+{
+  "anon_id": "f3669763d16676ee271e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[+,+,+];[+,+,-];[+,-,+];[-,-,+];[-,-,-]]",
+      "certificate": "令“+”为真、“-”为假。p=+时，表达式为 q∨r，满足 (+,+,+)、(+,+,-)、(+,-,+)；p=-时，表达式为 ¬q，满足 q=- 且 r 任意，即 (-,-,+)、(-,-,-)。按指定顺序排列如上。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规范答案包含错误项 [+,-,-]：此时 p 为真、q 和 r 均为假，(p ∧ (q ∨ r)) ∨ (¬p ∧ ¬q) 的值为假，因此输出不是“+”。给定尝试的五个三元组均满足表达式，但规范答案遗漏了该正确性问题。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于规范答案错误，难度评分不适用。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "由于判定为 invalid，解释评分不适用；给定证书本身对 p=+ 和 p=- 的分类是可核查的，但其排序结论未包含规范答案中的错误项。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

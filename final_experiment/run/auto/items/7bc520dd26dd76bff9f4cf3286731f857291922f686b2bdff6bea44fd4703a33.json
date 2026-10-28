@@ -1,0 +1,41 @@
+{
+  "anon_id": "3226dd80c9e4c3c6ec5e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[RJQGHTEL$E$$KT]]",
+        "2": "[[XTBXWXUSVJANSIU]]"
+      },
+      "certificate": "按每行7列将明文分组，并按新列顺序[1,4,0,6,5,2,3]取出。QRTEJHG→RJQGHTE，ELKT$$$→L$E$$KT，故密文为RJQGHTEL$E$$KT。解密时逆置换：每行密文[c0..c6]还原为[c2,c0,c5,c6,c1,c4,c3]；TWXUXBX→XTBXWXU，VNSSIJA→SVJANSI，$$U$$$$→U$$$$$$，去除末尾$得XTBXWXUSVJANSIU。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "两问均可按固定置换独立验证。加密结果为RJQGHTEL$E$$KT；解密时每个7字符块按逆置换还原，第二块VNSSIJA应还原为SVJANIS，因此明文为XTBXWXUSVJANISU，和canonical_answer一致。供应的attempt在第二块将SVJANIS误写为SVJANSI。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先按7列分组并补齐$，再应用给定列置换完成加密；解密还需推导逆置换、逐块还原并去除末尾补齐符号。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "证书正确说明了分组、补齐、正向置换和逆置换公式，且第一问及第一解密块可核对；但将VNSSIJA按其给出的逆置换应用时应得到SVJANIS，而证书写成SVJANSI，导致其第二问答案错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

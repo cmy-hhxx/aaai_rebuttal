@@ -1,0 +1,39 @@
+# ============================================================
+# 5x5 箭头迷宫（给定实例 / 直接计算型）
+# 修复点：
+# - 避免 desc 使用 YAML 多行块（|），以免翻译器生成 Python f-string 时出现未闭合引号
+# - 将 desc 全部改为单行字符串，并用 \n 显式换行
+# ============================================================
+
+custom_operator:
+  # pf_arrow_maze_0.py 中提供：
+  # - solve_arrow_maze(grid): 返回该实例的解（二维数组）
+  # - render_grid(grid): 渲染为题面要求的二维数组字符串
+  solve_arrow_maze: pf_arrow_maze_0.py
+  render_grid: pf_arrow_maze_0.py
+
+variables:
+  n:
+    type: int
+    domain: "[5, 5]"
+  m:
+    type: int
+    domain: "[5, 5]"
+  grid:
+    # 固定题面给定网格
+    formula: "[['X','3','2','X','2'],['4','X','X','X','X'],['X','X','X','3','X'],['X','X','2','2','X'],['X','X','X','X','X']]"
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    # 单行，使用 \n，避免生成未闭合 f-string
+    desc: "请填写完整的网格（用二维数组表示，箭头用 ↑、↓、←、→、↖、↗、↘、↙，数字保持为字符串数字）。\\n注意：完整的迷宫网格需要在回答的末尾的二维数组中给到。"
+    ans_formula: solve_arrow_maze(grid)
+    ans_text: render_grid(_ans)
+    ans_assertion: "True"
+
+# 同样改为单行字符串 + 显式换行
+desc: "你需要完成一个 {n} x {m} 的箭头迷宫。\\n在迷宫中，X 表示空白格子，数字表示射线箭头串的起点。\\n你的任务是在空白格子中填入箭头（↑、↓、←、→、↖、↗、↘、↙）。\\n每个数字指示从该位置发出的所有射线箭头串的总长度。\\n请填写完整的网格：\\n{grid}\\n{q1}"

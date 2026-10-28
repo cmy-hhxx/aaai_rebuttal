@@ -1,0 +1,42 @@
+{
+  "anon_id": "ef9b8be81a4ecfef4676",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "使用的密钥为 K5 解密明文为 AHTLFEBAHF",
+      "certificate": "按高位到低位的零基槽位索引，记 Q=P^{-1}。首字节为 B0，右旋一位后为 58；Q(B0)=45，Q(58)=C8，且 Q(K1…K5)=(6C,E2,0C,AB,89)。首字符候选（按 K1…K5 排列）为：方案1、步长0：(29,A7,49,EE,CC)；方案1、步长1：(A4,2A,C4,63,41)；方案2、步长0：(91,58,85,28,2D)；方案2、步长1：(1C,D5,08,A5,A0)。仅方案1、步长1、K5 的首字符是大写字母。对十个字节解密得到 41 48 54 4C 46 45 42 41 48 46，即 AHTLFEBAHF。校验：ASCII 和为 709，模9为7；首尾不同；有7种不同字符，最高出现次数为2；第8位A、第5位F；元音为A、A、E，共3个。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "Using the stated permutation convention, for plaintext byte A=0x41 the set input bits are 6 and 0. Since P[7]=6 and P[4]=0, permutation P produces 0x90. Scheme 1 with K5 then gives ROL1(0x90 XOR 0x68)=ROL1(0xF8)=0xF1, not the first ciphertext byte 0xB0. Thus the supplied plaintext/key pair does not satisfy the stated encryption pipeline; the certificate's claimed Q(58)=C8 is also inconsistent with the stated P.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the canonical answer fails a direct encryption check against the explicitly stated permutation and key.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the supplied certificate contains a demonstrable permutation/arithmetic inconsistency.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

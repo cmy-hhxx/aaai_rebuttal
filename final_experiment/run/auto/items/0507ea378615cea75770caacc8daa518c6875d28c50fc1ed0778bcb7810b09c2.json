@@ -1,0 +1,93 @@
+{
+  "anon_id": "cf6a2ccf922da526d74c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "C",
+          "T",
+          "X",
+          "X",
+          "C",
+          "X"
+        ],
+        [
+          "X",
+          "T",
+          "C",
+          "X",
+          "T",
+          "X"
+        ],
+        [
+          "C",
+          "T",
+          "X",
+          "X",
+          "X",
+          "C"
+        ],
+        [
+          "X",
+          "X",
+          "C",
+          "T",
+          "X",
+          "T"
+        ],
+        [
+          "X",
+          "X",
+          "X",
+          "X",
+          "C",
+          "X"
+        ],
+        [
+          "C",
+          "X",
+          "C",
+          "T",
+          "T",
+          "X"
+        ]
+      ],
+      "certificate": "帐篷位置为 (0,0),(0,4),(1,2),(2,0),(2,5),(3,2),(4,4),(5,0),(5,2)。行计数为 [2,1,2,1,1,2]，列计数为 [3,0,3,0,2,1]；区域 (0..4,0..2) 内有4顶。各帐篷八邻域互不相邻，并分别正交邻接且仅邻接一棵树。定向提示满足：(1,1)->(1,2),(1,4)->(0,4),(2,1)->(2,0),(5,3)->(5,2),(5,4)->(4,4)。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical grid satisfies the row counts, column counts, regional count, non-adjacency, one-to-one tree-tent adjacency, and all directional hints. However, the supplied attempt is invalid because it omits the original tree at (4,0), outputting X instead of T; its certificate also fails to verify preservation of all fixed trees.",
+      "error_types": [
+        "other"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "Verification requires combining row and column cardinalities, regional counting, king-neighborhood non-adjacency, exact orthogonal tree adjacency, and directional constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality",
+        "implication"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate correctly lists the nine tent positions and its row, column, region, non-adjacency, and directional claims are checkable. It does not check that every original tree remains in the output, and the displayed grid contradicts the required tree at (4,0).",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

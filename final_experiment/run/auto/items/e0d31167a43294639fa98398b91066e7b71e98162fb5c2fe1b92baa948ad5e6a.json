@@ -1,0 +1,91 @@
+{
+  "anon_id": "68ecab9a74997784cfb9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        [
+          12,
+          11,
+          10,
+          9,
+          8,
+          7
+        ],
+        [
+          13,
+          14,
+          15,
+          16,
+          17,
+          18
+        ],
+        [
+          24,
+          23,
+          22,
+          21,
+          20,
+          19
+        ],
+        [
+          25,
+          26,
+          27,
+          28,
+          29,
+          30
+        ],
+        [
+          36,
+          35,
+          34,
+          33,
+          32,
+          31
+        ]
+      ],
+      "certificate": "由线索间的曼哈顿距离等于数字差，3至6、8至12、15至24等各段被迫沿行或列连接。具体得到第1行为1至6，第2行为12至7，第3行为13至18，第4行为24至19，第5行为25至30，第6行为36至31。剩余的1、2必须位于左上角，且分别与3相邻。逐行蛇形排列中每个相邻数字共享一条边，所有1至36恰好出现一次。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的标准答案满足所有线索位置约束，包含1至36各一次，并且每一对连续数字都正交相邻。因此谜题可解且 canonical_answer 正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次利用线索间的连续区段、行列边界和相邻性完成多个数字区段，并将这些区段连接成完整的蛇形路径。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "all_different",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 2,
+      "explanation_evidence": "证书正确指出最终蛇形排列中的相邻数字共享边且所有数字恰好出现一次，但其中将“15至24”归入曼哈顿距离等于数字差的区段是不准确的：15在第3行第3列，24在第4行第1列，曼哈顿距离为3而数字差为9；因此证书部分可核查但不完整且含有这一错误表述。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

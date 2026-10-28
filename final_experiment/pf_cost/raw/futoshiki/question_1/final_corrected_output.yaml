@@ -1,0 +1,99 @@
+# 4x4 不等式数独（Futoshiki）
+# 修复点：解不唯一（找到 2 个解），说明 givens + 4 条不等式不足以锁定唯一解。
+# 处理方式：新增若干条与目标解一致的不等式（仍保持“题面给定数字”不变），从而使解唯一。
+# 说明：本框架的 max_solution=1 会在发现>1解时直接报错，所以必须增强约束。
+
+custom_operator:
+  to_grid: pf_futoshiki_0.py
+  format_grid: pf_futoshiki_0.py
+
+variables:
+  n:
+    type: int
+    domain: "[4, 4]"
+    diff_factor: 0
+
+  rows:
+    formula: "[str(i) for i in range(n)]"
+  cols:
+    formula: "[str(i) for i in range(n)]"
+
+  # 题面预填（保持用户题面）
+  givens:
+    formula: "[[0,0,0,0],[2,0,0,0],[1,0,0,0],[0,0,0,0]]"
+    diff_factor: 0
+
+  # 增强后的不等式集合（0-based），全部与目标解
+  # [[4,3,2,1],[2,1,4,3],[1,4,3,2],[3,2,1,4]] 一致
+  #
+  # 说明：仍包含之前那 4 条可行不等式，并增加更多相邻比较以确保唯一性。
+  ineqs_fixed:
+    formula: >-
+      [
+        [2,2,'>',2,3],
+        [0,1,'>',1,1],
+        [1,0,'>',1,1],
+        [3,0,'>',2,0],
+
+        [0,0,'>',0,1],
+        [0,1,'>',0,2],
+        [0,2,'>',0,3],
+
+        [1,2,'>',1,3],
+        [2,1,'>',2,2],
+        [2,2,'>',2,3],
+
+        [3,0,'>',3,1],
+        [3,1,'>',3,2],
+
+        [0,0,'>',1,0],
+        [1,3,'>',0,3],
+        [2,1,'>',3,1]
+      ]
+    diff_factor: 0
+
+symbols:
+  cell:
+    source:
+    - rows
+    - cols
+    type: int
+    desc: "格子({int(_rows)+1},{int(_cols)+1})的数字"
+
+conditions:
+  domain_each_cell:
+    formula: "And([And(cell[(r,c)] >= 1, cell[(r,c)] <= n) for r in rows for c in cols])"
+    desc: "每个格子填入1到{n}的整数"
+
+  row_distinct:
+    formula: "And([Distinct([cell[(r,c)] for c in cols]) for r in rows])"
+    desc: "每一行数字不重复"
+
+  col_distinct:
+    formula: "And([Distinct([cell[(r,c)] for r in rows]) for c in cols])"
+    desc: "每一列数字不重复"
+
+  givens_lock:
+    formula: "And([cell[(str(r),str(c))] == givens[r][c] for r in range(n) for c in range(n) if givens[r][c] != 0])"
+    desc: "题面给定数字必须满足"
+
+  inequalities_lock:
+    formula: "And([(cell[(str(a[0]),str(a[1]))] > cell[(str(a[3]),str(a[4]))]) if a[2] == '>' else (cell[(str(a[0]),str(a[1]))] < cell[(str(a[3]),str(a[4]))]) for a in ineqs_fixed])"
+    desc: "相邻格子不等式关系必须满足"
+
+# 现在要求唯一解
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请按照 [[A, B, C, D],[...],...] 的格式输出完整解。"
+    ans_formula: "to_grid(n, rows, cols, cell, _solutions[0])"
+    ans_text: "format_grid(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: >
+  这是一个{n}x{n}的不等式数独。题面如下（0/空表示未知）：
+  {givens}
+  不等式约束（0-based 坐标）：
+  {ineqs_fixed}
+  {q1}

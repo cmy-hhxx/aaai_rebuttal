@@ -1,0 +1,49 @@
+{
+  "anon_id": "85394c730be131b784ea",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[paired conjunctive terms: (¬p∧¬q∧¬r),(¬p∧q∧r),(p∧¬q∧r),(p∧q∧¬r)];[denoted: m0∨m3∨m5∨m6]]",
+        "[[A];[m0∨m3∨m5∨m6]]",
+        "[4]",
+        "[[m3];[C,D]]"
+      ],
+      "certificate": "按 pqr 为二进制位，四个指派分别为 000、011、101、110，对应 m0、m3、m5、m6；各项互异且均为含全部变元的最小项，因此第2问是主析取范式。三变元中具有偶数个真变元的指派为 000、011、101、110，从中选3个共有 C(4,3)=4 个。第4问中恰选两人时，甲乙违反乙→丙，甲丙违反多项约束，只有乙丙，即 011=m3；它是单个最小项构成的基本公式，且唯一真指派含2个真变元，属全偶公式。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规范答案与题目不一致。第3问中，含3个最小项且为全偶公式，应从偶数真变量的4个指派 m0、m3、m5、m6 中选3个，共 C(4,3)=4 个，不是0。第4问在恰选2人的约束下唯一可行方案是乙丙，对应 m3；其属于基本公式 C 和全偶公式 D，不是空表达式和矛盾式 B。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案已被第3问和第4问的直接反例证明错误。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "implication",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "people",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定无效；所给尝试的第3、4问推理实际上支持正确结果4和m3、C/D，而非规范答案。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

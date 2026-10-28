@@ -1,0 +1,42 @@
+{
+  "anon_id": "22874c2abce6d41afe0f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[65, 1]",
+      "certificate": "按工作日09:00–17:00取三人共同空闲时间，并要求开始时间为整点。最长可行时段为星期三14:00–15:05：子轩空闲至15:25，丰杰空闲至15:05，嘉怡空闲至15:20，因此共同可用65分钟。星期二最佳为09:00–10:03（63分钟），其余日期没有更长时段；达到65分钟的整点开始选项只有1个。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The schedules consistently define availability within 09:00–17:00, and requiring a whole-hour start gives a finite set of candidates. Checking their shared availability yields a maximum of 63 minutes, achieved only Tuesday at 09:00–10:03, so the canonical answer [63, 1] is correct. The supplied attempt is wrong: on Wednesday, 子轩 is busy from 14:53, so 14:00–15:05 is not available to all three.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Finding the maximum requires checking whole-hour starts across the five days, intersecting all three people's availability intervals, and comparing the resulting durations and counts. The best daily durations are Monday 24, Tuesday 63, Wednesday 53, and no feasible whole-hour start on Thursday or Friday; Tuesday 09:00 is the sole 63-minute option.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "arithmetic",
+        "temporal"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "people",
+      "explanation_score": 0,
+      "explanation_evidence": "The certificate's claimed Wednesday interval is contradicted by 子轩's 14:53–15:25 busy interval, and the proposed 65-minute maximum also conflicts with its own Tuesday example, which is only 63 minutes. The certificate therefore does not support the answer.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

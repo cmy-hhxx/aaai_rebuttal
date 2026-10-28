@@ -1,0 +1,78 @@
+{
+  "anon_id": "6d7631e1ac6385835c84",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "X",
+          "C",
+          "T",
+          "C",
+          "X"
+        ],
+        [
+          "X",
+          "T",
+          "X",
+          "X",
+          "X"
+        ],
+        [
+          "X",
+          "C",
+          "T",
+          "X",
+          "X"
+        ],
+        [
+          "X",
+          "X",
+          "X",
+          "X",
+          "X"
+        ],
+        [
+          "X",
+          "C",
+          "T",
+          "T",
+          "C"
+        ]
+      ],
+      "certificate": "帐篷位置为 (1,2),(1,4),(3,2),(5,2),(5,5)。各行数量为 [2,0,1,0,2]，各列数量为 [0,3,0,1,1]，总数为 5，与树数相等。每个帐篷均与至少一棵树正交相邻；任意两个帐篷既不正交相邻也不对角相邻。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "标准答案满足所有约束：5个帐篷分别位于(1,2)、(1,4)、(3,2)、(5,2)、(5,5)，每个都与至少一棵树正交相邻；任意帐篷之间既不正交相邻也不对角相邻；行计数为[2,0,1,0,2]，列计数为[0,3,0,1,1]；帐篷数5等于树数5。给出的尝试与标准答案一致，证书中的检查也正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先从二维网格确定树和帐篷坐标，再分别核验帐篷-树的正交邻接关系、帐篷间的八邻域分离关系，并同时核对行列计数及总数相等，涉及空间关系与多组计数约束的组合验证。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出了全部5个帐篷位置，并给出行数、列数和总数；这些计数与网格一致，逐个位置检查可确认每个帐篷邻接树，且任意两帐篷的行列距离不构成正交或对角接触。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,49 @@
+{
+  "anon_id": "60080996b0f7aae4a859",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[[cA+cC+cE;cF;cD;cA]φ]]",
+        "[[⟨cC⟩φ]]",
+        "[[[cA+cC+cE]φ]]",
+        "[[[cC*]φ]]",
+        "[[[cF]φ]]",
+        "[[⟨cD||cE;cA+cC+cE⟩φ]]",
+        "[[A]]",
+        "[[E]]"
+      ],
+      "certificate": "1. 选择项 cA、cC、cE 已无重复，按字典序排列；后接序列 cF;cD;cA 并保持顺序。2. cC 的可能语义为 ⟨cC⟩φ。3. 选择项规范化为 cA+cC+cE。4. cC 循环的必然语义为 [cC*]φ。5. 由 cE≡cF，将 [cE]φ 替换为 [cF]φ。6. 并发项 cD、cE 已按字典序排列，后接选择 cA+cC+cE。7. 映射中异常 e 规则对应 A。8. 映射中资源 R 规则对应 E。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answers match the requested normalizations: the choice terms are deduplicated and ordered, the given sequence order is preserved, the concurrent commands are ordered, and the modal operators and rule-letter mappings are applied as specified. The supplied attempt matches all eight answers.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The combined-expression items require normalizing constituent choices or concurrent commands and then composing them with the stated sequence and modality. These are simple, checkable dependencies rather than branching or a long proof.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "all_different",
+        "equality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate gives a checkable normalization or mapping justification for each of the eight answers; its claims agree with the prompt’s stated conventions and examples.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

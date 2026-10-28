@@ -1,0 +1,46 @@
+{
+  "anon_id": "87a5a9c9d06e687a1395",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        35,
+        1,
+        1
+      ],
+      "certificate": "逐日求必到者甲、丙、丁的共同空闲区间：周一为09:05-09:20，候选起点按中点取整为09:05；此时可选者戊空闲、乙忙碌，戊在09:40开始忙碌，因此可达35分钟。周二、周三无共同空闲区间。周四共同区间为12:25-13:05和17:59-18:25，候选起点分别为13:00、18:00，可达5分钟、25分钟。周五共同区间为11:00-12:27，候选起点为12:00，但乙、戊均不空闲，可达0分钟。全局最长为35分钟，仅周一的1个候选起点达到，因此答案为[35,1,1]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answer is consistent. On Monday the common mandatory-attendee interval is only 09:05-09:20, so the candidate starting at 09:05 can last at most 15 minutes, not 35. On Thursday the common intervals are 12:25-13:05 and 17:59-18:25; their candidates are 13:00 and 18:00, with achievable durations 5 and 25 minutes respectively. The latter is the unique global maximum. The supplied attempt incorrectly extends the Monday meeting beyond the common interval's right endpoint.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "The result requires intersecting mandatory participants' availability by day, applying midpoint rounding and inward adjustment to obtain candidate starts, and then limiting each duration by both the common-availability endpoint and optional-attendee coverage before comparing all days.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "people",
+      "explanation_score": 0,
+      "explanation_evidence": "The supplied certificate makes a demonstrably invalid Monday calculation: it states that the 09:05 candidate lasts 35 minutes even though the mandatory common interval ends at 09:20. Therefore its duration and final answer are wrong.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

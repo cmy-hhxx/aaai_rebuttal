@@ -1,0 +1,42 @@
+{
+  "anon_id": "8ef2cb7c9bdf09cfb9fa",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "18====10====21====16",
+      "certificate": "列和给出 r3c1=44-16-10=18，r1c3=47-20-11=16；未知数候选仅剩 10、21。行1规则：-16-2r1c2-2(16)-5=-73，得 r1c2=10。行2规则：-2(10)+3r2c2-2(20)=3，得 r2c2=21。校验行3：2(18)+13+2(11)+6=77；未知值为 10、16、18、21，18 为第二大，且 18<77；最后列和 -73+3+77=7。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All four unknowns are uniquely and consistently determined. Column sums give r3c1=44-16-10=18 and r1c3=47-20-11=16. Row 1's rule gives r1c2=10, and row 2's rule gives r2c2=21. The remaining column sum is 10+21+13=44; row 3 evaluates to 2(18)+13+2(11)+6=77; the last-column total is -73+3+77=7. The rank and inequality constraints also hold: 18 is second-largest among 10,16,18,21 and 18<77. The supplied answer matches the required order and format.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires combining column-sum arithmetic with row-specific linear equations, using the value obtained for r1c3 in the row-1 equation, determining the remaining candidate assignment, and checking rank, inequality, and total-sum constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "cardinality",
+        "all_different"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly derives r3c1 and r1c3 from column sums, derives r1c2 and r2c2 from the stated linear rules, and checks all row equations, the fourth-column sum, the rank condition, and the inequality. Every arithmetic step is correct.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

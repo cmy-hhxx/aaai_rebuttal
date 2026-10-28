@@ -1,0 +1,43 @@
+{
+  "anon_id": "030f5b618d6b965db879",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "00011110110111111111111011111011110100111111100011010001====无法按规则解密为仅含A-Z的明文",
+      "certificate": "加密NETWORK逐块得到：00011110 11011111 11111110 11111011 11010011 11111000 11010001，拼接即第一问结果。第二问分块后按P^-1重排并异或K，得到ASCII字节：01010111 01000100 00001101 00010010，即“WD\\r\\u0012”；后两字节不在A-Z范围内，因此题目给定密文与“明文仅A-Z”约束矛盾，第二问无合法明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按通常的按索引重排解释，第一字符 N 的 ASCII 为 01001110，异或 K 后为 11100100，再按 P=(2,0,3,1,4,6,5,7) 重排得到 11010010，而非标准答案中的 11011011。第二问按给定 P^-1 解密四个字节得到 01010111、01000100、00001101、00010010，即 \"WD\\r\\u0012\"，后两字节不是 A-Z，因此给定密文不存在满足“明文仅 A-Z”的合法明文；标准答案 CODE 与规则不符。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的标准答案与固定规则矛盾，且第二问在 A-Z 约束下无合法解。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度与解释质量评分不适用，因为整体题目无效；所给证书对第二问的 WD\\r\\u0012 计算可核查，但其第一问计算也不符合直接按 P 重排的规则。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

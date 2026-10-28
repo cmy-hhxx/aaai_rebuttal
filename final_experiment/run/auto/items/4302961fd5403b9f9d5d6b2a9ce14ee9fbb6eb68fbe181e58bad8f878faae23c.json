@@ -1,0 +1,41 @@
+{
+  "anon_id": "c5431c1696dd12339cb4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "15====26====14====16",
+      "certificate": "由列和得：r1c1=58-30-14=14；r3c2=46-7-13=26。行1规则验证：-14+3×7+16-6=17，故r1c3=16。第3列列和得r2c3=42-16-11=15。行2验证：2×30-13+15-4=58；行3验证：2×14+2×26+2×11+3=105。四个值按指定位置顺序为15====26====14====16，且恰为给定可用数字各一次。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All column sums and row rules are consistent: r1c1=58-30-14=14, r3c2=46-7-13=26, r1c3=17+14-21+6=16, and r2c3=42-16-11=15. The row equations evaluate to 17, 58, and 105, whose sum is 180. The additional constraints also hold: r1c3=16 is the maximum of row 1's first three entries, and 30<58 in row 2. The values use [14,16,26,15] exactly once, yielding the stated answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires multiple dependent arithmetic deductions: two unknowns are obtained from column sums, r1c3 is then derived using r1c1 and the row-1 rule, and r2c3 is derived from the third-column sum; the result is checked against all row equations and side constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly derives all four unknowns, verifies each row equation, checks the specified ordering/max and inequality constraints, and confirms the required output order and one-use condition.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,43 @@
+{
+  "anon_id": "941c9bf67e139ab027d8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "C: FFB85951631D63-T: 5E",
+      "certificate": "各轮旋转位移分别为 2、1、3；混合掩码分别为 1E、6C、DB。逐字节处理后，第一轮结果为 C3 B7 DF 5E 7E 9A 7A，第二轮为 0D 57 4A 6A 62 1A 22，第三轮为 FF B8 59 51 63 1D 63，因此密文为 FFB85951631D63。密文字节和为 0x344，取模 256 得 0x44；明文字节异或和为 0x1A，标签为 (0x44+0x1A) mod 256 = 0x5E。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目定义，第二轮混合掩码应为 0x68（01000110 按置换表重排为 01101000），第三轮混合掩码应为 0xC7（00011111 重排为 11000111），而证书使用了 0x6C 和 0xDB。逐步执行给出的规则得到密文 523638B0B1FCB5；明文异或和为 0x1A，密文和模 256 为 0xD2，因此标签为 EC，不是 canonical_answer 的 DB。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为 canonical_answer 与题目规则不一致。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度和证书评分不适用，因为该题判定为无效； supplied certificate 的第二、三轮混合掩码与置换规则直接矛盾。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

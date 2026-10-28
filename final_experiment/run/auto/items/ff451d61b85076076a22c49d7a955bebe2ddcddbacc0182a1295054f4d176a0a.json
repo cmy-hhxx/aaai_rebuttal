@@ -1,0 +1,41 @@
+{
+  "anon_id": "8c41b47c15d31a55ca2f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "D====A====c====gurq,qycv,dbjt,ycxs",
+      "certificate": "第1行的4个字母必须等于4个法语列词的首字母集合{g,u,r,q}，只有 gurq 满足，因此第1行是 gurq。第1列首字母为 g，只能对应法语词 gqdy，于是各行首字母依次为 g,q,d,y，确定行顺序为 gurq、qycv、dbjt、ycxs。交叉验证各列为 gqdy、uybc、rcjx、qvts；第2行第3列为 c。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "交叉一致性可完整验证：第1行必须由4个法语词的首字母组成，即{g,u,r,q}，英语词中只有gurq符合；因此第1行确定为gurq。其字母依次确定各列首字母为g、u、r、q，从而列词依次为gqdy、uybc、rcjx、qvts。各列首字母又确定英语行依次为gurq、qycv、dbjt、ycxs，且全部交叉字母一致。第2行第3列为c。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "先由列首字母集合筛出第1行；再由第1行的有序字母确定4列法语词；最后由各列首字母确定其余英语行顺序，并读取第2行第3列。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书中的每一步都可直接核验：gurq的字母集合为{g,u,r,q}；按其位置匹配列词得到gqdy、uybc、rcjx、qvts；这些列的首字母g、q、d、y分别唯一对应四个英语词；生成的网格逐格满足交叉一致性。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

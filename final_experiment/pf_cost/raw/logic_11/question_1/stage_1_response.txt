@@ -1,0 +1,146 @@
+#### final yaml begin
+# =========================
+# Modal logic symbolisation & relationship quiz
+# - 本题为“固定规则 + 固定答案”的符号化/关系判断/推理式匹配题
+# - 不需要 SMT/Z3 求解，因此 calc_solution: false
+# - 通过自定义算子在 Python 中集中维护“标准答案字符串”，避免 YAML 内硬编码过长
+# =========================
+
+custom_operator:
+  # pf_logic_11_0.py 中提供的函数：返回本题五问的标准答案（PuzzleClone 用 ==== 拼接）
+  get_modal_quiz_answer: pf_logic_11_0.py
+
+variables:
+  # 题目文本中的答案分隔符（保持与数据集规范一致）
+  sep:
+    formula: "'===='"
+
+symbols: {}
+conditions: {}
+
+# 本题为规则理解与符号化输出题，不依赖求解器
+calc_solution: false
+
+queries:
+  q1:
+    desc: >
+      1: Symbolise the following modal propositions:
+      "Science cannot be a one-man endeavour."
+      Use p to denote "Science is a human endeavour."
+      Please give your answer in [[]] format.
+    # 统一由 Python 返回整套答案，这里仅复用最终输出（避免逐问拆分造成格式不一致）
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[0]
+    ans_assertion: 'True'
+
+  q2:
+    desc: >
+      2: Symbolise the following modal propositions:
+      (1) There must be either life or no life in a fire. Use p to denote "there is life on Mars".
+      (2) If Li Ming plays well, then it is possible for him to win the championship.
+      Use p to indicate that "Li Ming plays well" and q to indicate that "he wins the championship".
+      First symbolize the propositions, then enclose them in parentheses,
+      and finally add modal symbols around them.
+      Please give your answer in [[];[]] format.
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[1]
+    ans_assertion: 'True'
+
+  q3:
+    desc: >
+      3: What is the relationship between each of the following sentences?
+      (1) "The Chinese women's volleyball team is definitely victorious"
+          and "The Chinese women's volleyball team may not win."
+      (2) "This project will definitely be completed ahead of schedule"
+          and "This project will definitely not be completed ahead of schedule."
+      Options:
+      A. * relationship
+      B. x relationship
+      C. @ relationship
+      D. % relationship
+      Please answer in the format of [[A/B/C/D];[A/B/C/D]].
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[2]
+    ans_assertion: 'True'
+
+  q4:
+    desc: >
+      4: "Arrogance necessarily results in falling behind"
+      can infer "Arrogance cannot possibly not result in falling behind."
+      Which truth-value modal reasoning formula corresponds to this?
+      Please answer in the format of [[number]].
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[3]
+    ans_assertion: 'True'
+
+  q5:
+    desc: >
+      5: According to the truth modal reasoning formula 9, what can be inferred from
+      "Xiao Lin will necessarily win the championship"?
+      A. Xiao Lin will possibly win the championship.
+      B. Xiao Lin will certainly win the championship.
+      C. Xiao Lin cannot win the championship.
+      D. Xiao Lin will never win the championship.
+      Please answer in the format of [[A/B/C/D]].
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[4]
+    ans_assertion: 'True'
+
+desc: >
+  You are an intelligent assistant that helps with various logical reasoning tasks.
+  Below is a custom-defined rule for a specific type of logic. When responding,
+  please ensure that your output adheres to the specified logical rules and format.
+
+  ### Logic Rule:
+  Symbols: Use # for necessity, $ for possibility, letters like p, q, r... for propositions,
+  ! for negation, + for conjunction, - for disjunction, = for equivalence, and > for implication.
+
+  1. Four Modal Proposition Relationships:
+  (1) * Relationship: (#p and $!p) ; (#!p and $p) cannot both be true or both be false.
+  (2) x Relationship: (#p and #!p) cannot both be true, but can both be false.
+  (3) @ Relationship: ($p and $!p) cannot both be false, but can both be true.
+  (4) % Relationship: (#p and $p) ; (#!p and $!p) can both be true or both be false.
+
+  2. Modal Logic Inference Formulas:
+  (1) #p ←→ !$!p
+  (2) $p ←→ !#!p
+  (3) #!p ←→ !$p
+  (4) $!p ←→ !#p
+  (5) #p → !#!p
+  (6) #!p → !#p
+  (7) !$p → $!p
+  (8) !$!p → $p
+  (9) #p → $p
+  (10) #!p → $!p
+  (11) !$p → !#p
+  (12) !$!p → !#!p
+  (13) #p → p
+  (14) #!p → !p
+  (15) p → $p
+  (16) !p → $!p
+
+  {q1}
+
+  {q2}
+
+  {q3}
+
+  {q4}
+
+  {q5}
+#### final yaml end
+
+#### final code begin
+# pf_logic_11_0.py
+# 本文件用于集中维护该“真值模态逻辑符号化/关系判断/推理式匹配”题的标准答案输出
+
+def get_modal_quiz_answer():
+    """
+    返回整套题的标准答案字符串。
+    题库侧使用 PuzzleClone 的多问答拼接规范：用 '====' 连接各问答案。
+
+    对应用户给定 Answer:
+    "[[!$p]]====[[#(p-!p)];[$(p>q)]]====[[A];[B]]====[[1]]====[[A]]"
+    """
+    return "[[!$p]]====[[#(p-!p)];[$(p>q)]]====[[A];[B]]====[[1]]====[[A]]"
+#### final code end

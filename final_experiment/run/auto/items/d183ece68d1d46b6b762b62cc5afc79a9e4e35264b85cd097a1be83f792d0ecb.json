@@ -1,0 +1,42 @@
+{
+  "anon_id": "1809c352ed3c9dde9318",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[E=8,R=4,Z=1,V=7,N=3,K=9]]",
+      "certificate": "按列计算：个位 E+N=Z+10c1；十位 Z+V+c1=K+10c2；百位 R+V+c2=Z+10c3；千位 E+R+c3=N+10c4；万位 c4=Z。因 c4=1，得 Z=1；又 E+N=11、E+R+c3=N+10，且百位推出 c3=1，故 R=20-2E、N=11-E。枚举可行的 E 得唯一解 E=8,R=4,N=3；百位给 V=7，十位给 K=9。验证：8418+4773=13191，恰为 ZNZKZ，且各字母数字互异、首位非零。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical assignment satisfies all constraints: 8418+4773=13191, corresponding to ERZE+RVVN=ZNZKZ, with distinct digits and nonzero leading digits. The column equations in the certificate are correct, and the stated enumeration yields the unique valid assignment.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires chained column-carry deductions to establish Z=1 and c3=1, algebraic relations R=20-2E and N=11-E, followed by enumeration of feasible E values and checking the resulting V and K against distinctness and carry constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly states and applies all column equations and verifies the final sum. The uniqueness claim is checkable, though the individual enumeration cases for E are not explicitly listed.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

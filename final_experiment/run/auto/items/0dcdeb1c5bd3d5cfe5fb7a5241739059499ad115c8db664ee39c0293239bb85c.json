@@ -1,0 +1,72 @@
+{
+  "anon_id": "999e387d028e531632d0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "placements": {
+          "A": [
+            3,
+            1
+          ],
+          "B": [
+            6,
+            2
+          ],
+          "C": [
+            5,
+            3
+          ],
+          "D": [
+            1,
+            4
+          ],
+          "E": [
+            4,
+            5
+          ],
+          "F": [
+            2,
+            6
+          ]
+        },
+        "score": 46,
+        "cost": 15
+      },
+      "certificate": "枚举满足每行、每列恰好一颗星的所有排列，并过滤禁用单元格、成本不超过15及距离约束后，最大价值为46；按行列向量为(4,6,1,5,3,2)，为并列最优中的字典序最小者。价值为3+11+11+9+4+8=46，成本为2+4+2+3+2+2=15。六个区域各有一颗星，组A数量为3、组B数量为3；所有星的行列均不同，因此曼哈顿距离至少为2，满足大于1，且未使用(6,6)。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical placement uses one cell in each row and column, one cell in each region A–F, and satisfies the group counts A–C=3 and D–F=3. It avoids (6,6); distinct rows and columns ensure every Manhattan distance is at least 2, hence greater than 1. The values total 3+11+11+9+4+8=46 and costs total 2+4+2+3+2+2=15, meeting the budget. The supplied exhaustive-enumeration certificate supports optimality and the stated lexicographic tie break.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Determining the result requires searching row-to-column permutations, enforcing column and region constraints, filtering by the cost budget and forbidden cell, evaluating total value, and applying lexicographic tie breaking among optima.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "cardinality",
+        "inequality",
+        "ordering"
+      ],
+      "scenario": "objects",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate explicitly states exhaustive permutation enumeration and gives checkable placement, value, cost, region-count, distance, and forbidden-cell checks. The maximum and tie-break result are asserted from the enumeration without listing all candidate permutations, so the certificate is substantially checkable but not fully reproduced.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

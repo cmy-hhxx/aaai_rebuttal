@@ -1,0 +1,42 @@
+{
+  "anon_id": "1472bff7b724fb3587d7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[ZHNCSYLWDGU|17]]",
+      "certificate": "由移位关系 x_i=(y_i-k) mod 26。两两和约束 x1+x10=31 在 k=1..25 中给出候选 k=4 或17；差值约束 x6-x10=18 排除 k=4，故 k=17。于是 x=[25,7,13,2,18,24,11,22,3,6,20]，对应明文 ZHNCSYLWDGU。验证：x1+x10=31，x6-x10=18，x5-x11=-2，3x2+5x10=51，x1+x2+x3=45；且代入8个线性方程的左端分别为[423,562,556,489,377,453,510,499]。将 x_i+17 对26取模得到[16,24,4,19,9,15,2,13,20,23,11]，与给定移位后字符串一致。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Using x_i=(y_i-k) mod 26, the constraint x1+x10=31 yields k=4 or k=17. The constraint x6-x10=18 eliminates k=4, so k=17. This gives x=[25,7,13,2,18,24,11,22,3,6,20], which decodes to ZHNCSYLWDGU. The supplied values satisfy the stated extra constraints and all eight linear equations, and shifting by 17 reproduces the given y values.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires modularly deriving candidate keys from a pair-sum constraint, filtering them with a difference constraint, and then decoding and verifying the resulting 11-character plaintext against multiple linear relations.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "boolean"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly derives the two candidate keys, uses the difference constraint to select 17, lists the resulting x values, gives the plaintext, checks the extra constraints, reports all eight linear-equation totals, and verifies the forward shift against the supplied y values.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,43 @@
+{
+  "anon_id": "42192b51495e4736d954",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "第1问：[[#SER],[ICDA],[TY#T],[A##U]]====第2问：ZLGFNBXAVCKJMHDS",
+      "certificate": "按空洞在每个旋转方向中按行、从左到右读写。初始空洞依次为(2,3),(2,4),(3,4),(4,1)，四次旋转覆盖全部16格。DATASECURITY补####后填入，得到各行#SER、ICDA、TY#T、A##U。将给定密文按行填格，依次透洞读出：ZLGF、NBXA、VCKJ、MHDS，合并为ZLGFNBXAVCKJMHDS。若题目未约定空洞内部的读写顺序，则结果会有歧义；以上采用通常的行优先约定。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按模板空洞的自然行优先顺序计算，初始空洞为(2,3),(2,4),(3,4),(4,1)，加密“DATASECURITY####”得到各行“#SER”“ICDA”“TY#T”“A##U”，即[[#SER],[ICDA],[TY#T],[A##U]]，而非 canonical_answer 的 [[D##ATSIAT#EUCYR#]]。对给定密文按同样顺序解密得到 XZGFNΒCAVCKJMHDS（实际字符串为 XZGFNBCAVCKJMHDS），也不同于 canonical_answer 的 ASLDXHFMCGKBNJVZ。另，题目未明确规定每个方向内空洞的写入顺序，存在顺序歧义； supplied attempt 采用的行优先约定与计算结果一致，但不能修复 canonical answer 的错误。",
+      "error_types": [
+        "wrong_answer",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目及其 canonical answer 已被上述直接计算证伪。",
+      "reasoning_type_tags": [
+        "cipher",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：该 supplied attempt 的证书在明确采用行优先顺序时可核查，但整体任务因 canonical answer 与题目计算结果不一致而无效。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

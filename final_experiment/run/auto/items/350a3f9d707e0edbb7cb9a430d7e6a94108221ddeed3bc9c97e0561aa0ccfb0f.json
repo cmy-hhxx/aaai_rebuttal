@@ -1,0 +1,43 @@
+{
+  "anon_id": "0fd3f1c06555aa710994",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "ambiguous",
+      "certificate": "题目没有唯一解，共有3组满足全部约束。按字母表顺序分别为 [[B=7,G=5,O=0,Q=9,U=8,V=1,W=3,Y=2]]、[[B=8,G=4,O=0,Q=9,U=7,V=1,W=3,Y=2]]、[[B=7,G=5,O=0,Q=9,U=3,V=1,W=4,Y=2]]。逐列约束为：B+G=Y+10，Y+G+1=U+10c2，1+Y+c2=W，O+W=W，Q+1=O+10；由V为奇数且最高位进位为1得V=1，由Q+1=O+10及O为偶数得O=0、Q=9，且各解均满足Q>B、W<G、c5=c6=1，并可直接验证整体加法等式。因此无法给出唯一映射。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "标准答案 [[B=7,G=5,O=0,Q=9,U=8,V=1,W=3,Y=2]] 满足整体等式 70127+953255=1023382、各列进位及全部附加规则。题目虽有多个满足解，但这不妨碍给出的标准答案成立。 supplied attempt 的结论不正确：其列出的第三组 [[B=7,G=5,O=0,Q=9,U=3,V=1,W=4,Y=2]] 不满足逐列加法，因为第1列应有 Y+G+c1=2+5+1=8，故 U 应为8而非3；第2列也应有 W=3而非4。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先按列建立进位方程，再由最高位进位推出 V=1，由 O+进位关系和 O 为偶数推出 O=0、Q=9，随后联合 B+G=Y+10、U 的列方程及 W<G 等约束筛选数字分配。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "all_different",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "attempt 的若干核心列方程及 O=0、Q=9、V=1 等推导可核查且正确，但其声称有三组解并列出的第三组违反两列加法，因此证书只能算部分可检查。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

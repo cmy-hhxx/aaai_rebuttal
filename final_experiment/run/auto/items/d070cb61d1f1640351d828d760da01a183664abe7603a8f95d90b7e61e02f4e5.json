@@ -1,0 +1,45 @@
+{
+  "anon_id": "111ff30f7c53a075ec64",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "无法唯一确定====无法唯一确定",
+      "certificate": "题面规则不足且示例2与规则不相容。按“每个向下列第1行放#、随后第2~5行放字母；向上列第5行放#、随后第4~1行放字母”理解，加密9字母时每列最多承载4个字母，但题目没有说明最后一列不足时如何处理空格/列数；解密串分成5行后长度为[2,3,2,2,1]，各行无法还原为明确的规则网格（例如第2行有3个字符而其他行没有对应的列结构）。因此两问均存在多种或不完整的解释，不能在不补充约束的情况下给出唯一答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题面“按*分成5行填回、按列交替下读/上读、去掉#”直接处理密文，五行是 [\"M#\",\"TSA\",\"E#\",\"C#\",\"#\"]。左对齐填回后，第一列下读得到 MTEC#，第二列上读得到 #S##，第三列下读得到 A，去掉#后得到 \"MTECSA\"，而不是规范答案 \"METASC\"。此外，“第1字母放第1行第1列”与向下列“行1写#”本身也存在规则冲突；空缺单元格如何处理未明确。因此规范答案不能由给定规则推出。难度和解答证书评分不适用于无效题面；该尝试也只能判为未能独立验证。",
+      "error_types": [
+        "ambiguous",
+        "missing_constraint",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "题面规则与首字母位置相冲突，且解密按最直接的左对齐解释产生 MTECSA 而非 METASC；因此无效题目的难度评分不适用。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "所提供尝试指出规则不足，但没有给出完整的替代计算；由于题面和规范答案已可由直接反算证伪，解答证书评分不适用。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

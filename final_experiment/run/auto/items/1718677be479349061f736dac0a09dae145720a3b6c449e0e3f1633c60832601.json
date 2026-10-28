@@ -1,0 +1,45 @@
+{
+  "anon_id": "2bb7bf09eaa829c53c7e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[I1,I2,O];[-,-,-];[-,+,+];[+,-,+];[+,+,+]]",
+        "[[I1,I2,O];[-,-,-];[-,+,+];[+,-,-];[+,+,-]]",
+        "[[+]]",
+        "[[+]]",
+        "[[-,-,+];[+,-,+];[+,+,-];[+,+,+]]"
+      ],
+      "certificate": "1) OR 在任一输入为“+”时输出“+”。2) E=(t∨q)∧¬t，四种输入对应输出依次为“-、+、-、-”。3) (-)∨(+)=(+)。4) t∧¬r∨q=(-)∧(-)∨(+)=(+)。5) G 为“+”的输入恰为 (p,t,r)=(-,-,+)、(+,-,+)、(+,+,-)、(+,+,+)，按 I1=p、I2=t、I3=r 排列如上。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All five answers are logically correct. The OR truth table in item 1 uses a different but valid row order; its outputs correctly indicate '+' whenever either input is '+'. Item 2 evaluates (t∨q)∧¬t as -, +, -, -. Items 3 and 4 both correctly produce '+'. Item 5 lists exactly the four assignments satisfying p∧(t∨r)∨¬t∧r.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "The solution requires evaluating two Boolean expressions, applying input/output constraints, and exhaustively checking the interacting cases of the three-variable expression in item 5 to identify all satisfying assignments.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly states the OR rule, gives the four evaluations for E, directly evaluates the specified inputs for items 3 and 4, and identifies all four satisfying assignments for G; each claim is independently checkable.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

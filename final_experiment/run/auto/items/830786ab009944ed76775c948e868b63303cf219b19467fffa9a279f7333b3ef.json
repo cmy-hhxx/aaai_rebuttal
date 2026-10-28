@@ -1,0 +1,66 @@
+{
+  "anon_id": "c59dfd2e98fcd6c48355",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          4,
+          3,
+          2,
+          1
+        ],
+        [
+          1,
+          4,
+          3,
+          2
+        ],
+        [
+          3,
+          2,
+          1,
+          4
+        ],
+        [
+          2,
+          1,
+          4,
+          3
+        ]
+      ],
+      "certificate": "每行和每列均恰好包含1到4。预填数字(1,3)=2、(3,2)=2满足。四个不等式分别为1<2、3>2、1<4、4>3，全部成立。由(1,4)<(2,4)且行1已有2，可枚举行1的可能排列；逐一结合列约束和其余不等式传播后，仅保留行1=[4,3,2,1]，并唯一得到其余三行=[1,4,3,2]、[3,2,1,4]、[2,1,4,3]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied grid satisfies the 4x4 Latin-square requirements, matches the clues (1,3)=2 and (3,2)=2, and satisfies all inequalities: 1<2, 3>2, 1<4, and 4>3. The canonical answer therefore matches the requested output type and is a valid solution.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Determining the completed grid requires branching over possible row-1 permutations, propagating row and column all-different constraints, and checking the inequality constraints to eliminate alternatives.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate directly checks all rows, columns, clues, and inequalities. Its uniqueness claim is plausible and consistent with the constraints, but the stated enumeration and propagation do not list the eliminated cases in enough detail to constitute a fully checkable uniqueness proof.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

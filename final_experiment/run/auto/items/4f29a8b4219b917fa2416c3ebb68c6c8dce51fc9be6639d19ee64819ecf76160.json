@@ -1,0 +1,45 @@
+{
+  "anon_id": "886c869d57241f0bbbcb",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "final": "[[DUKGSSXRTCV]]",
+        "letters_only": "[[GKKUDTRXSSVC]]",
+        "permutation": "[[4,3,2,1,0,9,8,7,6,5,11,10]]"
+      },
+      "certificate": "组合字母变换为 x→15x+2→+4→25−x→19x+19→+20，即最终为 x→x+10 (mod 26)。WAAKTJHNIILS变为 GKKUDTRXSSVC。按每5字符反转：GKKUD→DUKKG，TRXSS→SSXRT，VC→CV，得 DUKKGSSXRTCV。原始索引到最终索引为 [4,3,2,1,0,9,8,7,6,5,11,10]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐步复核得到字母变换的合成结果为 x→x+10 (mod 26)。明文 WAAKTJHNIILS 对应 GKKUDTRXSSVC；按每5个字符分块反转得到 DUKKG、SSXRT、CV，最终为 DUKKGSSXRTCV。长度12时原始索引到最终索引为 [4,3,2,1,0,9,8,7,6,5,11,10]，均与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次合成两次仿射变换、平移和镜像得到统一字符变换，再逐字符计算中间串，最后进行分块位置反转并单独处理长度为2的末块。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "所给证书明确验证了字母变换合成为 x→x+10，正确列出中间结果，正确按块反转，并给出与长度12分块一致的索引置换；各关键步骤均可直接复算。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

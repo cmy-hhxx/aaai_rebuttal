@@ -1,0 +1,41 @@
+{
+  "anon_id": "bd6eb1cdb903bd847c22",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "WSSCYEPYVJ",
+      "certificate": "按每组6字符分组：PLLVRX、ENKY。g=1位移s=3+4×1=7，g=2位移s=11；前两组方向均为LEFT。解密取反向右移：PLLVRX右移7得WSSCYE，ENKY右移11得PYVJ。未启用组内置换，合并得WSSCYEPYVJ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按明确规则分组为 PLLVRX（g=1）和 ENKY（g=2）。两组位移分别为 7 和 11，且切换方向前两组均为 LEFT；解密时反向右移，得到 WSSCYE 和 PYVJ，合并后与标准答案 WSSCYEPYVJ 一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先根据组号和公式算出两组位移 7、11，再反转 LEFT 加密方向并逐组右移，最后按原顺序合并。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确给出分组、位移和解密方向，并且逐组结果可核验：PLLVRX 右移 7 得 WSSCYE；ENKY 右移 11 得 PYVJ。合并结果正确，且无需组内置换。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

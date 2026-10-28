@@ -1,0 +1,46 @@
+{
+  "anon_id": "2a2ffc6db36e9bd374bd",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "question1": "[[MCVLVNGZIDCCEOLM]]",
+        "question2": "[[WEXRULNEQEOEPZ]]"
+      },
+      "certificate": "采用0起始行列坐标。加密每对(a,b)取a在网格二坐标(r1,c1)、b在网格四坐标(r2,c2)，输出顺序为：网格三[r2+2,c1+4]、网格一[r1+2,c2+2]（模5）。明文补Z后分组为 YS OF RV RM FM LS XR QZ，各组输出 MC VL VN GZ ID CC EO LM，得 [[MCVLVNGZIDCCEOLM]]。解密密文分组 TM ED UM RW RM DY YK，按逆偏移及逆交叉还原为 WE XR UL NE QE OE PZ，得 [[WEXRULNEQEOEPZ]]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给出的逆向规则，密文第二对 ED 中，E 在网格三第1行第3列、D 在网格一第4行第2列。逆偏移并还原交叉坐标后，明文字母为 X、R，因此解密结果应以 WEXR 开头，而不是规范答案中的 WEXM。问题二的 canonical_answer 与规则不符；问题一的加密结果与证书一致。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案已被直接反例证明错误。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为 invalid；不过证书对问题二给出的 XR 与 ED 这一对的直接逆向计算相符，而 canonical_answer 给出 XM。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

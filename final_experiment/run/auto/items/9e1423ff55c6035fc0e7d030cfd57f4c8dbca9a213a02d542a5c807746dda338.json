@@ -1,0 +1,42 @@
+{
+  "anon_id": "38f9ed308367c571b548",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[81 80 79 78 77 76 75 74 73,64 65 66 67 68 69 70 71 72,63 62 61 60 59 58 57 56 55,46 47 48 49 50 51 52 53 54,45 44 43 42 41 40 39 38 37,28 29 30 31 32 33 34 35 36,27 26 25 24 23 22 21 20 19,10 11 12 13 14 15 16 17 18,9 8 7 6 5 4 3 2 1]]",
+      "certificate": "The fixed clues force the straight runs 1–7, 10–17, 22–26, 39–54, 55–68, and 78–81. The remaining cells complete the connecting runs: 17→22 via 18 at r8c9, then r7c9, r7c8, r7c7; 26→39 via r7c1, across row 6, then r5c9 and r5c8; and 68→78 across the upper-right cells. The displayed rows contain each integer 1–81 exactly once, and each successive integer occupies an orthogonally adjacent cell."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical matrix contains each integer from 1 to 81 exactly once, matches the given clues, and places each consecutive pair in orthogonally adjacent cells. For example, it follows a continuous serpentine path through the rows.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Completing the grid requires linking multiple numbered runs: consecutive numbers follow adjacent cells within runs, and the endpoints of those runs must connect across rows without reusing cells. These dependent spatial deductions support the supplied completion.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "all_different",
+        "cardinality",
+        "ordering"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate gives runs and connecting paths that can be checked against the clues and grid; the displayed completion confirms those paths. It asserts that some runs are forced without spelling out every geometric deduction, leaving a minor justification gap.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

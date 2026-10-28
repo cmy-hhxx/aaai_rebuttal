@@ -1,0 +1,42 @@
+{
+  "anon_id": "2d6ff66a5b5f080d36bd",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "2818.33",
+      "certificate": "完整数据共有7条记录；末尾数值为噪声并忽略。sleep_minutes样本方差为2830.33（全体7条：393,424,271,542,418,391,329），num_calls样本方差为55.24（20,6,5,9,0,19,6）。满足num_tasks_completed>3且num_emails!=3的记录为第2、5、7条，对应sleep_minutes=[424,418,329]、num_calls=[6,0,6]。两者样本方差分别为2830.33和12.00，绝对差为2818.33。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "前7条完整记录构成数据行，末尾为噪声。满足 num_tasks_completed > 3 且 num_emails != 3 的记录是第2、5、7条（第6条的 num_tasks_completed 为空，不能核实）。对应 sleep_minutes=[424,418,329]，num_calls=[6,0,6]；样本方差分别为2830.33和12.00，绝对差为2818.33。因此 supplied canonical_answer=1817748.52 错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的规范答案与可复核计算结果不一致。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为 verdict 不是 valid；尽管所给尝试的计算证书支持2818.33，但它与canonical_answer冲突。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

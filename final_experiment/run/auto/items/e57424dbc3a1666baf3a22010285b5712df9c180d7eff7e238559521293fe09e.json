@@ -1,0 +1,40 @@
+{
+  "anon_id": "4515f80cca7071e98cbe",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[WQQPV#JOTR#QKOV#QQFF#NNXA#]]",
+      "certificate": "明文按每行最多5字母分为：WJQQN、NQKOQ、QTOFX、AFVRP、V。偶数行反向写入后各行是 WJQQN、QOKQN、QTOFX、PRVFA、V。按列读取得到 WQQPV#、JOTR#、QKOV#、QQFF#、NNXA#，拼接即所给密文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "明文长度为21，按每行最多5个字母分为 WJQQN、NQKOQ、QTOFX、AFVRP、V；偶数行反向后为 WJQQN、QOKQN、QTOFX、PRVFA、V。按列读取分别得到 WQQPV#、JOTR#、QKOV#、QQFF#、NNXA#，与规范答案完全一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次完成分行、对偶数行反转、按列读取并处理不完整末行及列分隔符，后一步依赖前一步结果。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": " supplied certificate explicitly lists all five rows after parity reversal and verifies each column segment, including the shorter final row；每个关键步骤均可直接复核。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

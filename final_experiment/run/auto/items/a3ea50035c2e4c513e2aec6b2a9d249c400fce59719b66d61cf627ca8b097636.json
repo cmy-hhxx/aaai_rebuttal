@@ -1,0 +1,43 @@
+{
+  "anon_id": "dd4a56da4afd2ea6e468",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解。右上角数字 1 为单格岛，因此 (1,4) 与 (2,5) 必为 A。数字 2 在 (2,2) 的岛只能通过一个相邻格扩展；为避免左上方 2×2 全为 A，(1,3)、(2,3)、(2,4) 中必须有岛格。但 (1,3) 和 (2,4) 不可能属于任何给定数字的合法岛（分别无法在对应大小内连接到数字岛），故只能取 (2,3)，即该 2 岛已完成。此时右上方 2×2 区域 (2,4),(2,5),(3,4),(3,5) 中，前两格为 A，因而必须有 (3,4) 或 (3,5) 为岛格；然而这两格均无法在大小 1、2、3、2 的限制下连接到任一数字岛。因此不存在满足全部规则的最终矩阵。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规范答案不满足规则：右下角的 (4,4)、(4,5)、(5,5) 均为 X，且与数字 2（(5,4)）构成被 A 隔离的连通非墙区域。由于不同岛不能上下左右相邻，这四个非墙格必须属于同一岛，但该岛包含数字 2，大小应为 2，实际至少为 4。因此 canonical_answer 错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：规范答案可由局部反例直接判定无效。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality",
+        "graph"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：题目及规范答案已经存在可直接核验的局部矛盾；按要求不对该尝试的解释进行评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

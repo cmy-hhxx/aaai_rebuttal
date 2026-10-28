@@ -1,0 +1,54 @@
+{
+  "anon_id": "b02528944ab80e91c199",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "HYNTI"
+        ],
+        [
+          "SDT"
+        ],
+        [
+          "VZDL"
+        ],
+        [
+          "SDFE"
+        ]
+      ],
+      "certificate": "方阵为：BUWPL/QSACD/EFGHI/KMNOR/TVXYZ。按二位数分块并以66分隔，得到41 51 45 53 42 51 12 | 34 25 53 | 14 25 12 32 22 | 34 25 44 33。解码时列先逆平移2；第二步的触发条件按该步变换前的列值（即密文第二位）为2或4，首字母再依据初始列值为3、4、5额外逆移一行。四组分别得到HYNTI、SDT、VZDL、SDFE。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answer matches the stated decoding rules. The square is BUWPL/QSACD/EFGHI/KMNOR/TVXYZ, and reversing the column shift, the conditional row shift based on the original column, and the first-letter boundary shift yields CONTROL, SAT, VALID, SAFE. The supplied attempt is wrong: it treats the ciphertext column as the trigger input and consequently decodes 41 as H rather than C.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Correct decoding requires constructing the keyed square, splitting the ciphertext at 66, reversing the column arithmetic, and conditionally reversing row shifts with a separate first-letter boundary case.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "implication",
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 0,
+      "explanation_evidence": "The certificate correctly gives the square and block segmentation, but its central inversion rule is incorrect: it uses the ciphertext second digit for the trigger condition. For example, 41 should decode to C by reversing both row shifts from original column 4, whereas the certificate obtains H.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

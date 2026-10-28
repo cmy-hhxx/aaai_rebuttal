@@ -1,0 +1,40 @@
+{
+  "anon_id": "90c4ece728a9bc4a8778",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[MOKOHVZYLAIFK]]====[[DVAJSWADDSAJ]]",
+      "certificate": "外盘索引为 Q0,W1,E2,R3,T4,Y5,U6,I7,O8,P9,A10,S11,D12,F13,G14,H15,J16,Z17,X18,C19,V20,B21,N22,M23,K24,L25。加密时内盘右移累计量分别为 0、10、20、4，对四段 PKWK、LJFY、NTZI、Y 映射得到 MOKO、HVZY、LAIF、K。解密时累计右移量分别为 0、12、24、10，对四段 DRА、XOH、QGG、KJV 映射得到 DVA、JSW、ADD、SAJ。因此结果为 [[MOKOHVZYLAIFK]]====[[DVAJSWADDSAJ]]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "内盘字符串 \"JKLZXCVBNMASDFGHJQWERTYUIO\" 中字母 J 出现两次（初始索引 0 和 16）。解密最后一段 KJV 在累计右移 10 位时，K 和 V 分别解为 S、J，但 J 可对应两个位置，因而最后一段可为 SAJ 或 SQJ。规范未规定重复字符应选择哪个位置，所以最终解密结果不唯一；canonical_answer 只选择了其中一种。",
+      "error_types": [
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目本身存在未约束的重复字符位置，无法确认唯一答案。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目不具备唯一确定的解；此外 supplied certificate 的索引映射也存在可核查错误，例如加密首段中 K 应对应内盘索引 24 的 I，而证书写成了 O。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

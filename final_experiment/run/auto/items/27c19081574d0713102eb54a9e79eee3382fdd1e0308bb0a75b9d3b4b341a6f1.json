@@ -1,0 +1,44 @@
+{
+  "anon_id": "abc69811ee94875b27c2",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        90,
+        1
+      ],
+      "certificate": "逐日求Y与Z的共同可用区间，再与X的可用时间（允许清除X的≤30分钟占用片段）相交，并限制开始时间为整点或半点。各日可达到的最长时长分别为：周一40分钟、周二90分钟、周三60分钟、周四40分钟、周五60分钟。全周最大值为周二15:30–17:00，共90分钟；该时段三人均可用，且只有这一个开始时刻达到90分钟。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "核对三人的可用时间、X可清除的不超过30分钟占用片段及整点/半点起始限制后，周二15:30–17:00三人均可参加，时长90分钟。其余各日最长分别为40、90、60、40、60分钟，达到90分钟的仅此一个时段。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要逐日求Y与Z的交集，再与X的可用区间相交；同时处理X可清除的短占用片段、半点起始限制，并比较五日最大值及达到最大值的时段数量。",
+      "reasoning_type_tags": [
+        "deduction",
+        "temporal",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "temporal",
+      "explanation_score": 3,
+      "explanation_evidence": "证书给出了正确的交集求解方法、五日最长时长及唯一的90分钟时段；但各日交集的具体边界和排除过程未逐项展开，因此有 minor gaps。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

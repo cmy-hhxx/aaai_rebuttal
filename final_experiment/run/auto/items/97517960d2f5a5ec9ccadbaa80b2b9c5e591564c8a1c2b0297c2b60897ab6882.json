@@ -1,0 +1,52 @@
+{
+  "anon_id": "b485430b486eb7479550",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          1,
+          2
+        ],
+        [
+          3,
+          2
+        ]
+      ],
+      "certificate": "设 x=(1,2)、y=(2,2)、z=(3,2) 是否为雷，取值为0或1。数字(1,1)和(1,3)给出 x+y=1；数字(3,1)和(3,3)给出 y+z=1；数字(2,1)和(2,3)给出 x+y+z=2。因此 z=1、y=0、x=1。故必定为雷的格子按行优先为 (1,2)、(3,2)。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目约束不可满足：例如 (0,1)、(0,2)、(0,3) 都是 0，而它们相邻的未揭示格 (1,2) 必须不是雷；同理底部的 0 也要求 (3,2) 不是雷。但内部数字约束要求 x=(1,2)、y=(2,2)、z=(3,2) 满足 x+y=1、y+z=1、x+y+z=2，从而 x=z=1、y=0，与边界 0 的约束矛盾。因而不存在满足所有数字的摆雷方案，canonical_answer [[2,2]] 也不是有效解。",
+      "error_types": [
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目本身无满足约束的解；边界 0 与内部数字约束已直接构成矛盾。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为 supplied solver certificate 虽正确推出内部三个变量的局部结果，却遗漏了边界 0 所施加的约束；且题目整体不可满足。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

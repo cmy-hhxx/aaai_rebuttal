@@ -1,0 +1,43 @@
+{
+  "anon_id": "3ad9748d1d64e2c6965b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "45====m=7, n=5, o=3, p=9, q=1, r=4, s=6, t=0, u=8, v=2",
+      "certificate": "10个变量两两不同且均取0到9，因此必恰好使用数字0到9，和值固定为45，故也是最大值。校验：加权和=197，197%7=1；(9t+v)%n+(6q)%m=2+6=8；(s+9(m%n))%p=(6+9*2)%9=6；p+v+n+t+s=22；t+o+q=4；q<v即1<2，u>r即8>4；m、n、p均非零。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The assignment uses each digit 0 through 9 exactly once, so the total sum is necessarily 45. All six rules and the nonzero conditions check: weighted sum 197%7=1; (9t+v)%n+(6q)%m=2+6=8; (s+9(m%n))%p=(6+18)%9=6; p+v+n+t+s=22; t+o+q=4; q<v and u>r; and m,n,p are nonzero. The supplied format and canonical answer are correct.",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "The maximum sum follows directly from ten pairwise-distinct digits chosen from 0 through 9, forcing the set to be exactly {0,...,9}; the candidate assignment then passes direct arithmetic checks.",
+      "reasoning_type_tags": [
+        "counting",
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly establishes the forced total 45 and provides checkable arithmetic for every rule, inequality, and nonzero condition; each calculation is correct.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

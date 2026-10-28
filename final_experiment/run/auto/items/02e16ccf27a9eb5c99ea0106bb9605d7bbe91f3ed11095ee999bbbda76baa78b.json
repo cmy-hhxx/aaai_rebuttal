@@ -1,0 +1,42 @@
+{
+  "anon_id": "caaa32b819e4414ff1c0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "7====5====8====11",
+      "certificate": "由普通列和：r1c2+6+3=17，得 r1c2=8；r1c3+3+5=15，得 r1c3=7。行2规则：2r2c1-2·6+2·3-7=9，得 r2c1=11。行3规则：-r3c1+2·3+2·5-4=7，得 r3c1=5。校验第1列：9+11+5=25；最后列：-51+9+7=-35。各行最小/最大约束及可用数字[8,7,5,11]均满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied answer matches the unique values implied by the column sums and row equations: r1c2=8, r1c3=7, r2c1=11, and r3c1=5. Substitution verifies all row outputs and sums: 9+11+5=25, 8+6+3=17, 7+3+5=15, and -51+9+7=-35. The minimum/maximum constraints and one-use condition for [8,7,5,11] also hold.",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "Each unknown is obtained by a direct arithmetic inference from either a column-sum equation or its row's linear equation; no branching or chained dependency between unknowns is necessary.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "all_different",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly derives all four unknowns, checks the first-column and final-column totals, and states that the extrema and one-use constraints are satisfied; each calculation is independently verifiable.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

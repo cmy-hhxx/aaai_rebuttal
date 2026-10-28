@@ -1,0 +1,56 @@
+{
+  "anon_id": "77be23b6aaa5ab3734ff",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          0.2,
+          0.91,
+          0.91
+        ],
+        [
+          0.883,
+          0.91,
+          0.91
+        ],
+        [
+          0.747,
+          0.231,
+          0.692
+        ]
+      ],
+      "certificate": "列均值阈值为[1.158333,0.835,0.961667]，故掩码M=[[1,0,0],[0,0,0],[0,1,0]]。加法激活后矩阵为[[2.14,0.39,0.66],[0.42,0.34,0.29],[0.39,1.60,0.52]]。全局最小值0.29、最大值2.14；反转归一化为(2.14-x)/1.85，再按行乘[1.33,0.95,0.79]，截断至[0.2,0.91]并四舍五入，得到所示矩阵。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The column means plus 0.115 are [1.158333, 0.835, 0.961667], producing mask [[1,0,0],[0,0,0],[0,1,0]]. The activated matrix, global min-max inversion, row weighting, clipping, and rounding reproduce the canonical matrix.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The result requires dependent mask threshold comparisons, selective addition, global extrema normalization and inversion, row-wise scaling, clipping, and final rounding.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "other"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly gives the thresholds, mask, activated matrix, global minimum and maximum, inversion formula, row weights, and resulting values; recomputation matches every canonical entry.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,38 @@
+{
+  "anon_id": "530dfd357add0b8ee8a5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[!(p|r)|!s]]",
+      "certificate": "先对内层：(!p>r)=!(!p)|r=p|r；再对外层：(p|r)>!s=!(p|r)|!s。所有“>”均已消去，仅使用 !、&、|。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The inner implication gives (!p>r)=!(!p)|r=p|r. Applying the definition to the outer implication yields !(p|r)|!s, exactly the submitted answer and using only !, &, and |. By De Morgan's law and commutativity of |, this is equivalent to the canonical form !s|!p&!r.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Two dependent implication eliminations are required: first eliminate the inner >, then use that result to eliminate the outer >. The submitted form is already valid without needing further normalization.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly computes the inner implication, simplifies the double negation, and then computes the outer implication. Each step is checkable and reaches a valid permitted expression.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

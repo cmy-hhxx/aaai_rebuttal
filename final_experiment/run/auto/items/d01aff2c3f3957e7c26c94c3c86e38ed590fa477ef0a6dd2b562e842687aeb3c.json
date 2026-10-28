@@ -1,0 +1,44 @@
+{
+  "anon_id": "fe94c49183d4bf0e6d23",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          2147483648
+        ]
+      ],
+      "certificate": "6个命题变元共有64个极小项m_0至m_63。全偶条件只允许偶数编号的极小项，共32个（m_0,m_2,…,m_62）；基本公式要求主析取范式必须含m_0。其余31个偶数编号极小项可任意选取，因此共有2^31=2147483648个。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "有6个命题变元时共有2^6=64个极小项。编号为偶数的极小项共有32个；m0必须出现，因此其余31个偶数编号极小项可独立选择，公式数量为2^31=2147483648，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次计算极小项总数、按编号奇偶筛选允许项、强制包含m0并对剩余项计数，最后进行幂运算。",
+      "reasoning_type_tags": [
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出64个极小项、32个偶数编号项、固定m0后剩余31项自由选择，以及2^31的计算；各步均可直接核验。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

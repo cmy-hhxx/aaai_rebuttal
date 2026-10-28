@@ -1,0 +1,43 @@
+{
+  "anon_id": "b3bad8d06a935597caa5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": "1110110111001111111001101110000111000011110001101100010011000111111011101100111011000000",
+        "B": "NSXTZSPC"
+      },
+      "certificate": "按 Perm 将每个 XOR 结果重排，LXEFTQSPIYW 的 8 位分组依次为 11101101、11001111、11100110、11100001、11000011、11000110、11000100、11000111、11101110、11001110、11000000，拼接得 A。对 B 分组并按 InvPerm 逆置换后再 XOR 11110111，得到 ASCII 十六进制：4E、53、58、54、5A、53、50、43，即 NSXTZSPC。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "A部分的规范答案错误。对明文字符T：01010100 XOR 11110111 = 10100011，按Perm置换后应为11000011；规范答案的第5个8位分组为11000101。规范答案的A部分因此与规则不符。B部分NSXTZSPC可由给定密文正确解出，但不能弥补A部分错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于规范答案存在可直接验证的错误，难度评分不适用。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "由于整体判定为无效，且证书中的A部分分组与规则不符，解释质量评分不适用。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

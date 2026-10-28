@@ -1,0 +1,40 @@
+{
+  "anon_id": "8a075264439e8f8d9a54",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[B]]\n====\n[q∨¬r∨r∨s; ¬p∨q∨p∨s]\n====\n[[]]\n====\n[[]; [p∨q, ¬p∨r, ¬q∨r, ¬r∨s]; []; [q∨r, p∨r, ¬p∨s, ¬q∨s]]\n====\n[[Plausible]; [4]]",
+      "certificate": "1）两子句没有互补文字，不能归结。2）分别以 p、r 为消去文字，按给定规则得两个所列子句（未额外删去互补文字）。3）互补单位子句归结为空子句。4）首轮只由原始子句两两归结，得到四个所列子句。5）第二轮的新子句为 q∨s、p∨s、r、r∨s；第三轮得 s；第四轮无新子句且未出现空子句，因此输出 Plausible，共 4 个 cycle。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规范答案与给定归结规则不一致：第2题以 r 和 ¬r 为消去文字时应得到 ¬p∨q∨p∨s，而不是 ¬p∨q∨s；第3题明确规定空子句输出 0，规范答案应标示 0；第5题按算法首轮得到4个新子句，第二轮得到 r、q∨s、p∨s、r∨s，第三轮得到 s，第四轮无新子句，因此应为 Plausible、4 cycles，而不是2。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案与题目规则存在可验证的矛盾。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效；不过所给证明中第2题和第5题的推导反而支持上述反例，第3题答案格式也未输出题目要求的 0。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

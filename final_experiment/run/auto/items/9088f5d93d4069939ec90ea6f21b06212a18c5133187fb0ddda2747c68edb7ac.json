@@ -1,0 +1,43 @@
+{
+  "anon_id": "ed02965df36ea68a637c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[takeoff][land][return]ψ]]",
+        "2": "1"
+      },
+      "certificate": "程序只有顺序结构 takeoff;land;return，无并列分支或循环。按顺序展开规则，[takeoff;land;return]ψ 等价于 [takeoff][land][return]ψ，并加题目要求的外层方括号得到 [[takeoff][land][return]ψ]]。因此没有 ∧ 并列项，项数为 1。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The sequence expands to [takeoff][land][return]ψ, so the required wrapped expression is [[[takeoff][land][return]ψ]]. It has no conjunctions and therefore one conjunctive item. The canonical answer matches both requested parts.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The sequence requires two dependent applications of the sequential expansion rule: first separate takeoff from the remaining sequence, then expand land;return. The resulting single conjunctive item gives the count.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 0,
+      "explanation_evidence": "The certificate's displayed formula, [[takeoff][land][return]ψ]], is malformed: it lacks the opening bracket for the takeoff modality and has unmatched brackets. The correct wrapped expression is [[[takeoff][land][return]ψ]].",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

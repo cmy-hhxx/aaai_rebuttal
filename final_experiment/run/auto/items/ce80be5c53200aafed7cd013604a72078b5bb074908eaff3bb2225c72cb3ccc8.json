@@ -1,0 +1,43 @@
+{
+  "anon_id": "70990b0f4ea343c99736",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[PEVNSE#AREETR#TSADRU#TNLDUT#ERHIC#]]====[[HELLOWORLD]]",
+      "certificate": "明文按每行最多5字母分为 PATTE/RNSRE/VEALH/IDDEN/STRUC/TURE；蛇形写入后逐列读取，得 PEVNSE#AREETR#TSADRU#TNLDUT#ERHIC#。解密 HELLO#WORLD# 时，5行分别填入两列，按蛇形逐行读取得到 HELLOWORLD。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定规则，第一问明文分为 PATTE/RNSRE/VEALH/IDDEN/STRUC/TURE，蛇形写入后按列读取应为 [[PEVNSE#AREETR#TSADRU#TNLDUT#ERHIC#]]，因此所给 canonical_answer 的第一问错误。第二问按5行逐列填入 HELLO 和 WORLD 后，逐行蛇形读取为 HWOELLRLOD，而不是 canonical_answer 中的 HWEOLLRLOD，也不是 supplied attempt 中的 HELLOWORLD；attempt 的解密证书因此可直接反驳。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目给出的 canonical_answer 与规则不一致，且 supplied attempt 的第二问也可由直接逐格检查证明错误。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：attempt 的第一问加密过程可核验，但其第二问声称得到 HELLOWORLD，与5行蛇形读取的 HWOELLRLOD 不符。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

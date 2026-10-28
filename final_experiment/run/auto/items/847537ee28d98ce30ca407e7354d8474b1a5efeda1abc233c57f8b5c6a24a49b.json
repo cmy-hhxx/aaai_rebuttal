@@ -1,0 +1,51 @@
+{
+  "anon_id": "049f98b7d2fefc5a83b5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "h0": 0.0,
+        "h1": -120.0,
+        "h2": -18520.0,
+        "sign_right": "negative",
+        "sign_left": "positive",
+        "monotonic_left": "decreasing",
+        "monotonic_right": "decreasing",
+        "convexity_at_0": "concave",
+        "reason": "ask<0"
+      },
+      "certificate": "g(0)=0, g'(0)=-10, g''(0)=-160. Since f'(0)=12 and f''(0)=-166, h(0)=0, h'(0)=12(-10)=-120, and h''(0)=(-166)(100)+12(-160)=-18520. Thus h(t)~-120t near 0: negative on the right and positive on the left. Also h'(t)<0 on both sufficiently small one-sided neighborhoods, and h''(0)<0 gives concavity. Finally ask=12·(-1)·10=-120<0."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The derivatives are correct: g(0)=0, g'(0)=-10, g''(0)=-160; f'(0)=12 and f''(0)=-166. Therefore h(0)=0, h'(0)=-120, and h''(0)=-18520. Since h'(0)<0 and h''(0)<0, h is decreasing on both sufficiently small one-sided neighborhoods and concave near 0. The linear term -120t gives negative values to the right and positive values to the left. Also ask=12·(-1)·10=-120<0.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires computing derivatives of g and f, applying the second-order chain rule for h'', then using the resulting nonzero first and second derivatives to infer side signs, monotonicity, concavity, and the sign of ask.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly verifies g(0), g'(0), g''(0), f'(0), f''(0), both derivatives of h, the local sign from the linear approximation, monotonicity from h'(0)<0 and continuity, concavity from h''(0)<0 and continuity, and ask<0.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,45 @@
+{
+  "anon_id": "fbeb8e327ec9a8a5590a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解：若“备用加权和”与主加权和都属于必须满足的约束，则仅看第1行即矛盾。设该行楼高为 a,b,c,d,e；由于每行是1..5排列，a+b+c+d+e=15。主权重给出 3a+b+c+2d+e=28，即 2a+d=13。备用权重给出 2a+3b+3c+2d+e=30，即 a+2b+2c+d=15。代入 b+c=15-a-d，后式化为 30-a-d=15，即 a+d=15；但 a,d∈{1,2,3,4,5}，故 a+d≤10，矛盾。因此在题面要求“满足所有约束”的解释下不存在二维列表。若“备用”表示与主约束二选一，题面未指定选择规则，答案也不唯一确定。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给定答案满足所有显式约束。在第1行，a+b+c+d+e=15，主加权和给出2a+d=13；备用加权和应使用 a+2b+2c+d=15，不能将 b+c 错写成15-a-d，因为还包含 e。给定矩阵的行列加权和、备用加权和、奇数计数、峰位、对角线加权和均匹配；按 height 与 ge 计算的边缘可见度也匹配全部线索。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "验证需要结合每行每列的1..5排列约束、主/备用加权算术约束、峰位与可见度的序关系，并进一步检查两条对角线加权和；这些是多个相互独立但必须全部满足的推导步骤。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "cardinality",
+        "ordering"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 0,
+      "explanation_evidence": "所给证书的关键代换遗漏了 e：由排列只能得到 b+c=15-a-d-e，而不是15-a-d。因此其推出 a+d=15 的矛盾不成立；给定答案实际满足第1行主加权和28和备用加权和30。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,42 @@
+{
+  "anon_id": "d1708790ab3cb8593237",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[{6, 15, 17, 18, 23, 25, 29, 39, 41, 42, 65, 71, 72, 77, 81, 89, 96, 101, 102, 109, 111, 113, 114, 119, 125, 132, 143, 149, 150, 151, 161, 165, 167, 168, 173, 185, 191, 193, 197, 204}]]",
+      "certificate": "去除 C（8 的倍数或立方数）后，A 中保留的元素按恰能被 3、7、8 之一整除筛选；与 B 的对称差还需去掉 9、36、49、81、196，并加入 4、25、100、121、169。映射时偶数 x→x+11，奇数 x→3x−3，且结果不超过 207；121、169及部分大于阈值的元素被舍弃。最终去重升序得到所列集合。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "独立核算后，先取 A 与 B 的对称差，再剔除 8 的倍数及完全立方数，最后按奇偶映射并筛除超过 207 的结果，得到的升序集合与 canonical_answer 完全一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须依次判断 3、7、8 中恰有一个整除，计算与平方数/立方数的对称差并剔除 C，再进行奇偶分支映射、阈值筛选和去重排序。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "boolean",
+        "ordering"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确说明了剔除 C、处理对称差中的平方数以及按偶奇映射和 207 阈值筛选；虽未逐项展示全部中间集合，但其关键结论可核查且与最终答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

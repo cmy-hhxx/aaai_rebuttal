@@ -1,0 +1,48 @@
+{
+  "anon_id": "3ffac165872b8520f3fa",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "turn_matrix": "0 0 0 0\n0 0 5 0\n0 0 0 4\n0 2 3 0\n0 1 0 0",
+        "total_turns": 5,
+        "marked_sequence": "S,K1,AL1,G3,E",
+        "G_entries": "G3@3",
+        "P_O_entries": "NONE"
+      },
+      "certificate": "路径为S(3,1)→(4,1)→K1(5,1)→(5,2)→AL1(4,2)→(4,3)→(4,4)→G3(3,4)→(2,4)→E(2,3)。方向依次为下、下、右、上、右、右、上、上、左，共5次拐弯，拐点依次位于(5,2)、(4,2)、(4,3)、(3,4)、E，编号分别为1至5。进入G3前已有3次拐弯，满足G3要求；K1先于AL1取得，且已经过锁。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied path follows every arrow from S to E: S(3,1)→(4,1)→K1(5,1)→(5,2)→AL1(4,2)→(4,3)→G3(3,4)→(2,4)→E(2,3). It obtains K1 before entering AL1, and all locks are traversed before E. The five direction changes occur at (5,2), (4,2), (4,3), (3,4), and E, matching the matrix and total 5. G3 is entered after 3 prior turns, satisfying G3's requirement. The marked sequence and absence of P/O also match.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Verification requires following the multi-step arrow path, tracking direction changes and their arrival cells, then combining the turn count with the K1-before-AL1 and G3@3 constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "ordering",
+        "inequality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly lists coordinates, movement directions, all five turn locations, the turn total, the G3 entry count, and the key/lock ordering; each claim is directly checkable against the grid.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

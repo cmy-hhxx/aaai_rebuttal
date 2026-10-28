@@ -1,0 +1,43 @@
+{
+  "anon_id": "d383dfca2d68116bbbba",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[PXXFEYFJDMCOXMAKAFTHAYRBEHKYHM]]====[[5]]",
+      "certificate": "密文按每块28字符分为两块。逆第2轮后，第1块得到 DMCOXMAKAYRBAFTHPXXFEYFJEHKY，第2块得到16个“-”后接HM再接10个“-”。逆第1轮的列映射 [5,6,1,2,4,3,7] 后，第1块恢复为 PXXFEYFJDMCOXMAKAFTHAYRBEHKY，第2块为 HM 加26个填充符。去除全部“-”得明文 PXXFEYFJDMCOXMAKAFTHAYRBEHKYHM，共30字符；按7列分行需 ceil(30/7)=5行。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规范答案的明文与解密结果一致，但行数错误：去除填充符后明文长度为30，按7列分行应为ceil(30/7)=5行，而不是8行。 supplied attempt给出的[[...]]====[[5]]与规则及其证书中的30字符明文一致。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案与题目要求的行数计算不一致，整体判定为无效。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为规范答案错误；不过 supplied certificate中给出的逆变换结果支持30字符明文及5行，而非规范答案的8行。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

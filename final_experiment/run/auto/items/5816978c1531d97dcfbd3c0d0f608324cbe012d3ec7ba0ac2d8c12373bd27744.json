@@ -1,0 +1,45 @@
+{
+  "anon_id": "438349de4b52c3e97711",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "task1": "[[82, 379, 280, 272, 181, 379, 274, 371, 82, 173, 179, 82, 272, 278, 175]]",
+        "task2": "[[IBXAMXRURBGJHC]]"
+      },
+      "certificate": "明文整体逆序并仅保留字母得到 JGWDJSZATHAWKP，对应数值 9,6,22,3,9,18,25,0,19,7,0,22,10,15。逐项计算 (301x mod 402)+82 mod 402，得到任务一列表。任务二忽略大于402的 577,544,463,585；301 在模402下的逆元为199。对剩余密文先减82，再乘199 mod402，最后对26取模，得到 8,1,23,0,12,23,17,20,17,1,6,9,7,2，即 IBXAMXRURBGJHC。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "任务一的明文保留字母并整体逆序后为 JGWDJSZATHAWKP，共14个字母，因此加密结果应有14个整数：[379, 280, 272, 181, 379, 274, 371, 82, 173, 179, 82, 272, 278, 175]。canonical_answer 多了一个开头的82，成为15个整数。任务二的解密结果与给定字符串一致，但整体 canonical_answer 仍因任务一错误而不匹配。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：canonical answer 已被任务一的可核查长度和数值错误否定。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：题目判定为无效；所给证书正确计算出14项任务一结果，但 canonical answer 错误地包含15项。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

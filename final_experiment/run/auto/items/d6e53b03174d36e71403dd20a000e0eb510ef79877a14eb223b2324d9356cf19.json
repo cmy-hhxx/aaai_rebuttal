@@ -1,0 +1,38 @@
+{
+  "anon_id": "6cd09431c77e2dc8ab7c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[<({[[]]})(<{}>[()])>)]",
+      "certificate": "从左到右匹配后，末尾仍有未闭合的[、<、(，其嵌套顺序为[<(...，因此按后进先出追加)>]即可。追加后所有括号均正确闭合。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐个匹配后，末尾未闭合的括号栈为[、<，因此只能按后进先出追加>、]。canonical_answer正确。attempt中的追加部分为>)]，其中>之后的)与当前应闭合的[不匹配，因此答案错误；其证书还声称追加)>]，与实际答案及正确补全均不一致。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "只需进行括号栈匹配并识别末尾未闭合的[、<，再按后进先出追加>]。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 0,
+      "explanation_evidence": "attempt的答案>)]会在>闭合<后用)错误地匹配[；证书所述)>]也不是正确的追加序列，且与该attempt答案不一致。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

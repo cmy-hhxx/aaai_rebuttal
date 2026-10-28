@@ -1,0 +1,53 @@
+{
+  "anon_id": "f9c9175a708bf515fa34",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "nums": [
+          31,
+          15,
+          33,
+          11
+        ],
+        "ops": [
+          "+",
+          "*",
+          "/"
+        ]
+      },
+      "certificate": "计算 c/d=33/11=3，满足对3取模为0；b*(c/d)=15*3=45，满足能被3整除；两中间值之和为3+45=48>42。最终结果为31+45=76，所有结果均为整数且未除以0，仅使用1次除法、0次取模。验证唯一性：顶层运算为/或*时，给定数无法分别满足 a/y=76 或 a*y=76；顶层为+或-时，因中间值y须被3整除，仅a=31可行，分别得到y=45或y=-45。枚举剩余数及四种允许运算后，只有y=45由15*(33/11)得到；y=-45无满足条件的构造。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的标准答案满足全部约束：33/11=3，3 mod 3=0；15*3=45且45可被3整除；3+45=48>42；31+45=76。全程结果为整数、未除以0，使用1次除法和0次取模，答案格式也正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次确定内层除法得到3、中层乘法得到45，再由顶层加法与31得到76，并同时核验整除性、模约束及中间值和约束。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书对标准答案的各项算术和约束检查完整且可复核；关于唯一性的结论与可行分支相符，但“枚举剩余数及四种允许运算”未逐项列出，因此穷举证明存在轻微证据缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

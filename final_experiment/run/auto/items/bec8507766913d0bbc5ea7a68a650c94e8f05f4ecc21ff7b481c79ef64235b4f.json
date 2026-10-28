@@ -1,0 +1,43 @@
+{
+  "anon_id": "89ef5f696c104ebc97f5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[A(5,2)\nB(3,4)\nC(7,8)\nD(9,1)\nE(4,7)\nF(1,9)\nG(2,6)\nH(6,5)\nI(8,3)]]",
+      "certificate": "外框星数为2且主对角线星数为0、每行每列各一颗，故外框两颗必为(1,9)和(9,1)，同时满足副对角线数量2。锚点给出E=(4,7)、A在第5行、I在第8行。F已由(1,9)占用，故第3行只能在B区，得B=(3,4)；G只能在第2行且避开相邻，结合列约束得G=(2,6)。随后列约束依次得H=(6,5)、C=(7,8)、I=(8,3)、A=(5,2)，其余为D=(9,1)、E=(4,7)、F=(1,9)。各行列及分区均恰一颗；无八邻域相邻；主对角线0颗、副对角线2颗；分区边界星为7颗，外框星2颗，中心星7颗，角星2颗。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied assignment satisfies the grid, region, row, column, and non-adjacency constraints. Its main-diagonal star count is 0, anti-diagonal count is 2 at (1,9) and (9,1), partition-boundary count is 7, outer-frame count is 2, center count is 7, and non-blocked corner count is 2. All anchors are satisfied.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires coordinating region membership with one-star-per-row and one-star-per-column constraints, enforcing eight-neighbor exclusion, and then checking several global counts and anchor positions.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "cardinality",
+        "adjacency",
+        "boolean"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate gives the correct assignment and its final constraint checks are verifiable, but several key deductions are asserted without showing the candidate eliminations, especially why G must be in row 2 and why the subsequent positions follow from column constraints.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

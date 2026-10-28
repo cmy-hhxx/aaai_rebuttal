@@ -1,0 +1,272 @@
+#### final yaml begin
+custom_operator:
+  # 逻辑表达式解析与主析取/主合取范式相关工具函数（见 pf_logic_3_0.py）
+  parse_term: pf_logic_3_0.py
+  mi_index_of_conj_term: pf_logic_3_0.py
+  Mi_index_of_disj_term: pf_logic_3_0.py
+  denote_m_terms: pf_logic_3_0.py
+  denote_M_terms: pf_logic_3_0.py
+  classify_by_m_indices: pf_logic_3_0.py
+  is_pdnf_text: pf_logic_3_0.py
+
+variables:
+  # 题目固定使用的命题变元（按字典序/下标升序）
+  vars3:
+    formula: "['p','q','r']"
+  # 4个命题变元情形用于第5/6问（按字典序）
+  vars4:
+    formula: "['p','q','r','s']"
+
+  # 第1问给定的析取式（^ 表示 ∧，V/∨ 表示 ∨，¬ 表示 否定）
+  expr_q1:
+    formula: "(¬p^¬q^r)∨(¬p^q^r)"
+  # 第2问给定的合取式
+  expr_q2:
+    formula: "(p∨¬q∨r)^(¬p∨¬q∨r)"
+
+  # 第3问给定的“配对合取项”（单个）
+  term_q3:
+    formula: "¬p^¬q^¬r"
+
+  # 第4问给定的表达式（用于判断是否为主析取范式/主合取范式）
+  expr_q4:
+    formula: "(¬p∧¬q∧¬r)V(¬p∧¬q∧r)V(¬p∧q∧r)V(p∧¬q∧r)V(p∧q∧r)"
+
+  # 第5问：4变元且为永真式的“主析取范式”表示（包含全部 m_i）
+  tautology_dnf_4:
+    formula: denote_m_terms(list(range(2**len(vars4))))
+  # 第6问答案：4变元“既是基本式(含m0)又是全偶式(所有i为偶数)”的公式数量
+  # 允许的偶数索引集合大小为 2^(n-1)=8，且必须包含0，所以是 2^(8-1)=128
+  count_basic_and_all_even_4:
+    formula: 2**(2**(len(vars4)-1) - 1)
+
+  # 第7问给定的主析取范式（题面已化简为配对合取项之析取）
+  expr_q7_pdnf:
+    formula: "(¬p∧¬q∧r)∨(¬p∧q∧¬r)∨(p∧¬q∧r)"
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "1: According to the above rules, what are the paired conjunctive terms of (¬p^¬q^r)∨(¬p^q^r)? How can this expression be denoted?"
+    # 解析为配对合取项列表（保持题面中的顺序输出），并计算对应的 m_i
+    ans_formula: |
+      (lambda terms:
+        [terms, denote_m_terms([mi_index_of_conj_term(t, vars3) for t in terms], joiner='∨')]
+      )(parse_term(expr_q1, kind='dnf'))
+    ans_text: "'[[pairedconjunctiveterms:' + ','.join(_ans[0]) + '];[denoted:' + _ans[1] + ']]'"
+    ans_assertion: 'True'
+
+  q2:
+    desc: "2: According to the rules above, what are the paired disjunctive terms of (p∨¬q∨r)^(¬p∨¬q∨r)? How can this expression be denoted?"
+    # 解析为配对析取项列表，并计算对应的 M_i
+    ans_formula: |
+      (lambda terms:
+        [terms, denote_M_terms([Mi_index_of_disj_term(t, vars3) for t in terms], joiner='^')]
+      )(parse_term(expr_q2, kind='cnf'))
+    ans_text: "'[[paireddisjunctiveterms:' + ','.join(_ans[0]) + '];[denoted:' + _ans[1] + ']]'"
+    ans_assertion: 'True'
+
+  q3:
+    desc: "3: Identify ¬p∧¬q∧¬r as: (select all that apply)"
+    # 对单个配对合取项 ¬p^¬q^¬r，其真值赋值为 000（二进制=0），所以包含 m0：
+    # 既是 basic（含m0），又是 all-even（所有m索引为偶数），非永真/非矛盾。
+    ans_formula: classify_by_m_indices([mi_index_of_conj_term(term_q3, vars3)], n=len(vars3))
+    ans_text: "'[[' + ''.join(_ans) + ']]'"
+    ans_assertion: 'True'
+
+  q4:
+    desc: "4: Determine whether (...) conforms to the principal disjunctive normal form or principal conjunctive normal form? If yes, how can it be denoted?"
+    # 若是主析取范式：输出 A 与其 m-表示；否则输出 B
+    ans_formula: is_pdnf_text(expr_q4, vars3)
+    ans_text: "(('[[' + _ans[0] + '];[' + _ans[1] + ']]') if _ans[0] == 'A' else '[[B]]')"
+    ans_assertion: 'True'
+
+  q5:
+    desc: "5: Given that formula A contains 4 propositional variables, what should it be denoted as if it is both a tautology and a basic form?"
+    # 4变元永真式的主析取范式包含全部 16 个 m_i，因此其表示为 m0∨m1∨...∨mF（自然也包含m0，即basic）
+    ans_formula: tautology_dnf_4
+    ans_text: "'[[' + _ans + ']]'"
+    ans_assertion: 'True'
+
+  q6:
+    desc: "6: Given that formula A contains 4 propositional variables, how many formulas satisfy the conditions of being both a basic form and an all-even form?"
+    ans_formula: count_basic_and_all_even_4
+    ans_text: "'[[' + str(_ans) + ']]'"
+    ans_assertion: 'True'
+
+  q7:
+    desc: "7: ... The formula (...) is in principal disjunctive normal form and can be denoted as what? This formula belongs to: (multiple choice)"
+    # 计算其对应的 m-表示，并按“永真/矛盾/basic/all-even/all-odd/none”分类
+    ans_formula: |
+      (lambda terms, idxs:
+        [denote_m_terms(idxs, joiner='∨'), classify_by_m_indices(idxs, n=len(vars3))]
+      )(parse_term(expr_q7_pdnf, kind='dnf'),
+        [mi_index_of_conj_term(t, vars3) for t in parse_term(expr_q7_pdnf, kind='dnf')])
+    ans_text: "'[[' + _ans[0] + '];[' + ''.join(_ans[1]) + ']]'"
+    ans_assertion: 'True'
+
+desc: |
+  You are an intelligent assistant that helps with various logical reasoning tasks.
+
+  (1) {q1}
+  (2) {q2}
+  (3) {q3}
+  (4) {q4}
+  (5) {q5}
+  (6) {q6}
+  (7) {q7}
+#### final yaml end
+
+#### final code begin
+# pf_logic_3_0.py
+# 工具函数：解析配对合取/析取项，并计算 m_i / M_i 的编号与分类
+import re
+
+HEX_DIGITS = "0123456789ABCDEF"
+
+def _normalize(s: str) -> str:
+    """统一符号：∧/^ -> ^, ∨/V -> ∨, 去空白"""
+    s = s.replace(" ", "")
+    s = s.replace("∧", "^")
+    s = s.replace("V", "∨")
+    s = s.replace("|", "∨")
+    return s
+
+def parse_term(expr: str, kind: str):
+    """
+    将形如 (a)∨(b) 或 (a)^(b) 的表达式解析成项列表（字符串）。
+    kind:
+      - 'dnf': 按 ∨ 分割得到配对合取项
+      - 'cnf': 按 ^ 分割得到配对析取项
+    注意：题目均为“项”的直接合取/析取，不做一般逻辑化简。
+    """
+    expr = _normalize(expr)
+    # 去掉最外层多余括号（不强制）
+    if kind == "dnf":
+        parts = re.split(r"∨", expr)
+    elif kind == "cnf":
+        parts = re.split(r"\^", expr)
+    else:
+        raise ValueError("kind must be 'dnf' or 'cnf'")
+    # 去外层括号
+    cleaned = []
+    for p in parts:
+        if p.startswith("(") and p.endswith(")"):
+            p = p[1:-1]
+        cleaned.append(p)
+    return cleaned
+
+def _lit_value_for_m(lit: str) -> int:
+    """配对合取项里：p 表示1，¬p 表示0"""
+    return 0 if lit.startswith("¬") else 1
+
+def _lit_value_for_M(lit: str) -> int:
+    """配对析取项的“假赋值”：p 在假赋值下为0，¬p 在假赋值下为1"""
+    return 1 if lit.startswith("¬") else 0
+
+def _split_literals(term: str, sep: str):
+    term = _normalize(term)
+    return term.split(sep) if term else []
+
+def mi_index_of_conj_term(conj_term: str, vars_order):
+    """
+    输入配对合取项，如 ¬p^q^r
+    输出其真赋值对应的十六进制编号 i（以 int 返回）
+    约定：vars_order = ['p','q','r',...]，对应二进制从高位到低位按此顺序拼接。
+    """
+    lits = _split_literals(conj_term, "^")
+    m = {v: None for v in vars_order}
+    for lit in lits:
+        v = lit[1:] if lit.startswith("¬") else lit
+        m[v] = _lit_value_for_m(lit)
+    if any(m[v] is None for v in vars_order):
+        raise ValueError("Not a paired conjunctive term (missing variable).")
+    bits = "".join(str(m[v]) for v in vars_order)
+    return int(bits, 2)
+
+def Mi_index_of_disj_term(disj_term: str, vars_order):
+    """
+    输入配对析取项，如 p∨¬q∨r
+    输出其“假赋值”对应的十六进制编号 i（以 int 返回）
+    """
+    lits = _split_literals(disj_term, "∨")
+    m = {v: None for v in vars_order}
+    for lit in lits:
+        v = lit[1:] if lit.startswith("¬") else lit
+        m[v] = _lit_value_for_M(lit)
+    if any(m[v] is None for v in vars_order):
+        raise ValueError("Not a paired disjunctive term (missing variable).")
+    bits = "".join(str(m[v]) for v in vars_order)
+    return int(bits, 2)
+
+def denote_m_terms(indices, joiner="∨"):
+    """把一组 m_i（i为int）按升序转为 m0∨m1∨... 的字符串（十六进制位大写）"""
+    idxs = sorted(indices)
+    return joiner.join([f"m{HEX_DIGITS[i]}" for i in idxs])
+
+def denote_M_terms(indices, joiner="^"):
+    """把一组 M_i（i为int）按升序转为 M0^M1^... 的字符串（十六进制位大写）"""
+    idxs = sorted(indices)
+    return joiner.join([f"M{HEX_DIGITS[i]}" for i in idxs])
+
+def classify_by_m_indices(indices, n: int):
+    """
+    按题面五类判别，输出选项字母列表（如 ['C','D']）。
+    A. Tautology: 含全部 2^n 个 m_i
+    B. Contradiction: 含 0 个 m_i
+    C. Basic formula: 含 m0
+    D. All-even formula: 所有 i 为偶数
+    E. All-odd formula: 所有 i 为奇数
+    F. None
+    """
+    idxs = sorted(indices)
+    opts = []
+
+    if len(idxs) == 2**n:
+        opts.append("A")
+    if len(idxs) == 0:
+        opts.append("B")
+    if 0 in idxs:
+        opts.append("C")
+    if len(idxs) > 0 and all(i % 2 == 0 for i in idxs):
+        opts.append("D")
+    if len(idxs) > 0 and all(i % 2 == 1 for i in idxs):
+        opts.append("E")
+    if len(opts) == 0:
+        opts.append("F")
+    return opts
+
+def is_pdnf_text(expr: str, vars_order):
+    """
+    判断一个表达式是否为主析取范式（PDNF）。
+    若是：返回 ['A', 'm...']；否则：返回 ['B', '']
+    判定标准（贴合题面）：
+      - 形如 若干个“配对合取项”用 ∨/V 连接
+      - 每个合取项包含且只包含每个变元一次（p 或 ¬p），并按 vars_order 的字典序排列
+    """
+    expr = _normalize(expr)
+    terms = re.split(r"∨", expr)
+    conj_terms = []
+    for t in terms:
+        t = t.strip()
+        if t.startswith("(") and t.endswith(")"):
+            t = t[1:-1]
+        lits = _split_literals(t, "^")
+        if len(lits) != len(vars_order):
+            return ["B", ""]
+        # 检查顺序与完备性
+        seen = []
+        for lit in lits:
+            v = lit[1:] if lit.startswith("¬") else lit
+            seen.append(v)
+        if seen != list(vars_order):
+            return ["B", ""]
+        # 能计算 mi 说明每个变量都出现且恰一次
+        conj_terms.append(t)
+
+    idxs = [mi_index_of_conj_term(t, vars_order) for t in conj_terms]
+    return ["A", denote_m_terms(idxs, joiner="∨")]
+#### final code end

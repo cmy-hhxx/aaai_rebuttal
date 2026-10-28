@@ -1,0 +1,40 @@
+{
+  "anon_id": "da3d8c534ef8d6381b47",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "(1,1,2,1),(2,2,3,2),(3,1,4,1),(4,2,5,2),(1,3,1,4),(2,4,3,4),(3,5,3,6),(4,4,4,5),(5,3,5,4),(5,6,6,6),(6,2,6,3),(6,4,6,5)",
+      "certificate": "非X格共24个，以下12块多米诺恰好覆盖它们且无重叠。约束传播得到：(1,1)-(2,1)、(2,2)-(3,2)、(3,1)-(4,1)、(4,2)-(5,2)为强制配对；随后(1,3)-(1,4)、(2,4)-(3,4)、(3,5)-(3,6)、(4,4)-(4,5)、(5,6)-(6,6)、(6,2)-(6,3)、(5,3)-(5,4)、(6,4)-(6,5)被依次强制确定。每对均为水平或垂直相邻格，且所有未标记格恰好出现一次。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Canonical answer is a valid domino tiling: it contains 12 pairs covering the 24 non-X cells exactly once; every pair consists of horizontally or vertically adjacent cells, and no X cell is used. The supplied attempt matches the canonical solution as an unordered set of dominoes, differing only in pair ordering.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Several forced placements depend on earlier placements: (1,1)-(2,1) forces (2,2)-(3,2), which contributes to forcing (3,1)-(4,1) and (4,2)-(5,2); analogous propagation determines the remaining right-side pairs. Verification also requires checking adjacency and exact coverage of all 24 available cells.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate lists all 12 dominoes, identifies the forced-placement propagation, and asserts exact coverage and non-overlap. Direct inspection confirms each listed pair is adjacent and collectively covers every non-X cell exactly once.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

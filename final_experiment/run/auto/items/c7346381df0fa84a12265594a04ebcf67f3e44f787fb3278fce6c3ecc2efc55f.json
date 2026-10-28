@@ -1,0 +1,40 @@
+{
+  "anon_id": "aebe03fb6eb00dc181bc",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "unknown",
+      "certificate": "令右下方向为向量 a，右上方向为向量 b，则左上=-a、左下=-b。已知物品421所在位置相对于跳转后的物品367位置的位移为 3a+b+4a=7a+b。题目最后一段相对于物品421位置的位移为 (-5b)+(-3a)+(6a)+(-6b)+a+(-5b)=4a-16b。因此最终位置相对于跳转点为 (7a+b)+(4a-16b)=11a-15b。12层网络的任一坐标方向跨度至多为12，尤其不可能从一个网络顶点沿该净位移仍到达网络顶点；故最终位置在网络外，输出 unknown。中间两次看到367相符，因为其间位移 2b-7b+5b=0。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "从物品421所在位置出发，位移为 -5b-3a+6a-6b+a-5b=4a-16b，其中a为右下方向、b为右上方向。12层网络在任一坐标方向的跨度不超过12，因此沿b方向净移动16步必然离开网络，答案为unknown。证书中的两次物品367之间位移2b-7b+5b=0也一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先合并最后六段移动得到4a-16b，再将该位移与网络的最大坐标跨度12比较，推出最终位置在网络外。",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "spatial",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "inequality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "证书明确给出了方向向量定义、最后路径的逐项位移合并以及与12层网络跨度的比较；关于网络坐标跨度至多为12的结论依赖对该网络结构的标准解释，但与题目描述一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

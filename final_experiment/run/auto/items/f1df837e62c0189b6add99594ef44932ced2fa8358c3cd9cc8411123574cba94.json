@@ -1,0 +1,55 @@
+{
+  "anon_id": "29d658cff330801aaea7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          4,
+          1
+        ],
+        [
+          1,
+          5,
+          2,
+          3,
+          4
+        ]
+      ],
+      "certificate": "N1在1号且与C2相邻，故C2=2。由C4紧右于C1，排除涉及2的情形，仅有(C1,C4)=(3,4)或(4,5)。前者因N4在C5且N1占1号，必得C5=5；若N3=4则D2与D1同在4号，若N3=2则结合S4在1号、P1必须在2号及S3=P3会产生冲突，故前者不成立。后者必有C1=4、C4=5、C5=3、C3=1，故N4=3。若N3=4，则N5=2而P4=2，同时S4在1号迫使P1=2，矛盾。因此N3=2，D2=2；N2=5、N5=4，且D5=4、S1=4。S4在1号迫使P1=2；剩余约束得S3=P3在3号、S2在2号，故P2在1号。最终国籍位置为N1至N5=[1,5,2,3,4]，喝D5的房屋为4号。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "将规范答案对应的完整分配代入可满足全部线索：国籍位置为N1至N5=[1,5,2,3,4]，D5在4号房，P2在1号房；颜色、饮料、香烟和宠物的相应位置也可一致安排，且不存在重复标签或违反相邻/紧右关系。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要先由N1与C2相邻确定C2位置，再分支检验C1/C4的紧右组合；随后继续分支排除N3位置，并联立国籍、饮料、香烟、宠物及相邻约束，才能确定D5、P2和全部国籍位置。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "ordering",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "证书的主要推导与最终分配可核查，且最终分配确实满足全部线索；但排除第一种颜色排列时未明确讨论N3=3的分支，若干“结合剩余约束得出”步骤也未展开，因此存在小幅证明缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

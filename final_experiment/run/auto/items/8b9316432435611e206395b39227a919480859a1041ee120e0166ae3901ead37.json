@@ -1,0 +1,45 @@
+{
+  "anon_id": "06039a9cf571776e7b83",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[!P#Q#A#G#K#Z#A#&MVHODAZDUFPHXH&XOVDNFQWQXTMKF&E+K+T+H+R+U+W&]]",
+        "2": "[[PMXEOVQKVHDOATNDFAGHQZWDKRQUXFZUTPMHAWKXFH]]"
+      },
+      "certificate": "初始列为PMXE。随后明文分组为上行OVQ、下行KVH、上行DOA、下行TND、上行FAG、下行HQZ、上行WDK、下行RQU、上行XFZ、下行UTP、上行MHA、下行WKX、上行FH。下行组按倒序分配到第2至第4行，即首字符入第4行、次字符入第3行、末字符入第2行；各行末加&并拼接，得到第1问密文。按相同规则从给定密文逐行取回，得到第2问明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按规则复核：初始列PMXE正确；随后上行组按第3行至第1行分配、下行组按倒序分配，得到各行分别为 !P#Q#A#G#K#Z#A#&、MVHODAZDUFPHXH&、XOVDNFQWQXTMKF&、E+K+T+H+R+U+W&，拼接结果与第1问答案一致。对给定密文按行解析并交替取回字符，得到明文PMXEOVQKVHDOATNDFAGHQZWDKRQUXFZUTPMHAWKXFH，与第2问答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先处理初始列，再交替解析上行和下行分组，并依据不同的行分配方向重建各行；随后还需按分隔符逐行逆向读取并交替合并字符。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出了初始列、全部明文分组、下行组的倒序分配方式及两问结果；逐行字符核对后与标准答案完全一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

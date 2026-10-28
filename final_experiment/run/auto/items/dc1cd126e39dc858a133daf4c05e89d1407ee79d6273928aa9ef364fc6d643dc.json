@@ -1,0 +1,43 @@
+{
+  "anon_id": "583bdad81231a454d4ac",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目无解。左侧第1行提示为1，因此第1行第1列必须是5。第1列下方提示为2：从底部看到第1列时，顶部已有5，底部第5行第1列必须是其余楼中的最高值，即4，否则会在看到顶部5之前产生额外可见楼。因此第5行第1列=4。第4列下方提示为1，故第5行第4列必须是5。于是第5行从左侧扫描时先看到4，直到第4列才看到5，中间没有比4更高的楼，左侧可见数恰为2，而题目要求第5行左侧提示为3，矛盾。因此不存在满足所有提示的5×5结果。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目无解，且给出的 canonical_answer 不满足提示。由左侧第1行提示为1可知第1行第1列=5；第1列下方提示为2时，为避免在到达顶部5前看到多个更高楼，第5行第1列必须为4。第4列下方提示为1则第5行第4列必须为5。因此第5行从左侧至少看到4和5，共2栋，但题目要求左侧提示为3，产生矛盾。另，canonical_answer 的第4列自下而上为2,4,1,5,3，可见2、4、5共3栋，不符合下方提示1。",
+      "error_types": [
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "题目存在直接矛盾，难度评分不适用。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "all_different"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "由于题目无解且 verdict 不是 valid，标准化解释评分不适用；所给证书中的矛盾链条本身可核查，但按要求不对无效题目评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

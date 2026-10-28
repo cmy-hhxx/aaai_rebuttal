@@ -1,0 +1,59 @@
+{
+  "anon_id": "1991f9d0ed8db683ae8c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          10,
+          19,
+          25
+        ],
+        [
+          19,
+          8,
+          22
+        ],
+        [
+          25,
+          22,
+          2
+        ]
+      ],
+      "certificate": "主对角线镜像对称要求栅格形如 [[a,b,c],[b,d,e],[c,e,f]]。逐一尝试三词作为第一行：ZWC 的第二字母 W 不是任何单词首字母，TIW 的第二字母 I 也不是；因此第一行只能是 KTZ。随后对称性要求第二行首字母为 T、第三行首字母为 Z，故第二、三行为 TIW、ZWC，且其余对称条件满足。所得栅格为 KTZ/TIW/ZWC；各列分别为 KTZ、TIW、ZWC，恰好匹配 down 集合；中列 T、I、W 互不相同，副对角线两端均为 Z。编码 K=10,T=19,Z=25,I=8,W=22,C=2。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的栅格 [[10,19,25],[19,8,22],[25,22,2]] 解码为 KTZ/TIW/ZWC。三行分别恰好是 across 集合中的 KTZ、TIW、ZWC；三列分别为 KTZ、TIW、ZWC，恰好覆盖 down 集合。主对角线镜像对称，副对角线两端均为 Z，中列 T、I、W 互不相同。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "先利用主对角线对称性排除首行为 ZWC 和 TIW，确定首行为 KTZ；再由对称性确定第二、三行为 TIW、ZWC；最后检查列匹配、中心列互异、副对角线端点相等及字母编码。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "all_different",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确写出对称矩阵形式，依据候选单词首字母排除两种首行，确定三行排列，并逐项核验列、中心列、副对角线和编码；这些步骤均可由题面直接检查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

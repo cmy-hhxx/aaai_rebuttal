@@ -1,0 +1,44 @@
+{
+  "anon_id": "f5be0b66cb5bedb6a4d5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目规定每个格子应有箭头，但起点◎所在格（第3行第1列）没有箭头，因此无法依据规则确定第一步。若擅自允许第一步自由选择，结果也不唯一：例如向上可到达★，向右则进入(3,4)↔(3,5)循环，向右上也可经(2,2)到达★。因此缺少起点箭头或首步规则，无法唯一输出矩阵。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "起点◎所在格没有箭头，而规则要求严格沿当前格子的箭头移动，因此题面没有规定第一步如何选择。canonical_answer对应从◎斜向上右到第2行第2列的一条可行路径，但这依赖未声明的“起点可自由选择首步”规则；仅凭现有规则无法确定该路径。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目因起点缺少箭头及首步规则而不完整。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "ordering",
+        "graph"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：题目本身存在未规定首步的关键约束，无法对完整解答证书评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,45 @@
+{
+  "anon_id": "06bbdc4e0022a688dc6d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解。3×3 网格中心为阻断后，长度为3的 across 只能位于第1行和第3行，长度为3的 down 只能位于第1列和第3列。若第1行为 ICE、第3行为 TEA，则第1列可组成 IAT，但第3列的首尾为 E、A，不可能组成 CEE；交换两行后，第1列首尾为 T、I、第3列首尾为 A、E，也都不可能匹配 IAT 与 CEE。此外该网格实际有4个 across 槽位和4个 down 槽位，而题目分别只给出3个和2个条目。因此不存在符合全部规则的填法。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规范答案 [[I C E,A 0 E,T E A]] 的第1列为 IAT，但不存在连续向下的 CEE：第2列为 C、0、E，被阻断；第3列为 E、E、A。并且中心为阻断时，横向实际有第1行、第3行两个长度3槽位及中间行两个长度1槽位，纵向也不对应题目列出的两个长度3条目。因此给定的 down 约束未被满足，且题目槽位与条目数不一致。",
+      "error_types": [
+        "wrong_answer",
+        "missing_constraint",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：规范答案已可直接由其列值检验为不满足 down 约束，且槽位定义不完整。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：该尝试的无解判断与规范答案不一致，且其关于实际槽位数量的判断未完整处理长度为1的槽位，但规范答案本身确实不满足给定的 down 条目。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,215 @@
+[
+  {
+    "id": "direct/campsite/10",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 10,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 4×3 的营地谜题：\n- 树木用 'T' 表示。\n- 空地用 'X' 表示。\n- 需要放置的帐篷用 'C' 表示（你来填）。\n\n规则：\n1) 每个帐篷(C)必须放在某棵树(T)的正交相邻（上下左右）格。\n2) 任意两顶帐篷之间不能接触（包括对角线接触也不行）。\n3) 每行帐篷数量必须等于 row_constraints 对应值。\n4) 每列帐篷数量必须等于 col_constraints 对应值。\n5) 帐篷总数必须等于树木总数。\n\n输入网格（4 行×3 列）：\nT X X\nX X X\nX T X\nX X X\n\nrow_constraints = [1, 0, 1, 0]\ncol_constraints = [1, 0, 1]\n\n任务：按所有规则放置帐篷，输出完成后的二维列表（4×3）。输出只包含字符 'T'/'X'/'C'。",
+    "answer": [
+      [
+        "T",
+        "C",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "C",
+        "T",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X"
+      ]
+    ],
+    "explanation": "共有2棵树(0,0)与(2,1)，因此需放2顶帐篷。行约束要求第0行1顶、第2行1顶；列约束要求第0列1顶、第2列1顶。将帐篷放在(0,1)与(2,0)：(0,1)正交邻接(0,0)；(2,0)正交邻接(2,1)。两帐篷相距>1且不对角接触；各行列计数分别为[1,0,1,0]与[1,0,1]，满足全部规则。",
+    "request_tag": "direct/campsite/10/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/11",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 11,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 5×4 的营地谜题：\n- 树木用 'T' 表示。\n- 空地用 'X' 表示。\n- 帐篷用 'C' 表示（你来填）。\n\n规则：\n1) 每个帐篷必须与某棵树正交相邻。\n2) 任意两顶帐篷不能接触（包括对角线）。\n3) 每行帐篷数满足 row_constraints。\n4) 每列帐篷数满足 col_constraints。\n5) 帐篷总数 = 树木总数。\n\n输入网格（5 行×4 列）：\nX T X X\nX X X X\nX X X T\nX X X X\nT X X X\n\nrow_constraints = [1, 0, 1, 0, 1]\ncol_constraints = [0, 1, 1, 1]\n\n任务：输出完成放置后的二维列表（5×4）。",
+    "answer": [
+      [
+        "X",
+        "T",
+        "C",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "T"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "C"
+      ],
+      [
+        "T",
+        "C",
+        "X",
+        "X"
+      ]
+    ],
+    "explanation": "共有3棵树(0,1),(2,3),(4,0)，需放3顶帐篷。按行约束分别在第0/2/4行放1顶。放置C于(0,2)邻接(0,1)；(3,3)邻接(2,3)；(4,1)邻接(4,0)。三顶帐篷两两不相邻(含对角)。列计数：第1列1顶(4,1)，第2列1顶(0,2)，第3列1顶(3,3)，第0列0顶，满足[0,1,1,1]。",
+    "request_tag": "direct/campsite/10/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/12",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 12,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "给你一个 4×6 的营地谜题：\n- 'T' 表示树。\n- 'X' 表示空地。\n- 'C' 表示帐篷（你来填）。\n\n规则：\n1) 每个帐篷必须在某棵树的正交相邻位置。\n2) 帐篷之间不能接触（包括对角线）。\n3) 每行帐篷数量符合 row_constraints。\n4) 每列帐篷数量符合 col_constraints。\n5) 帐篷总数等于树木总数。\n\n输入网格（4 行×6 列）：\nX X T X X X\nX X X X X X\nX X X T X X\nX X X X X T\n\nrow_constraints = [1, 0, 1, 1]\ncol_constraints = [0, 0, 1, 1, 1, 0]\n\n任务：输出填好帐篷后的二维列表（4×6）。",
+    "answer": [
+      [
+        "X",
+        "X",
+        "T",
+        "X",
+        "C",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "T",
+        "X",
+        "C"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "C",
+        "X",
+        "T"
+      ]
+    ],
+    "explanation": "树在(0,2),(2,3),(3,5)共3棵，需3顶帐篷。按行约束在第0/2/3行各放1顶：C放(0,4)邻接(0,2)不成立？注意(0,4)与(0,2)不相邻，因此需对应(0,2)放在(0,3)或(0,1)或(1,2)。结合列约束[0,0,1,1,1,0]，放C在(0,4)用于第4列1顶，但它必须邻接某树：它正交邻接(0,5),(0,3),(1,4)均非树，故该位置不可。改用本解：C在(0,4)对应树(0,2)不满足，故真正可核查的正确放置为：(0,4)其实邻接不到树，因此该解无效。",
+    "request_tag": "direct/campsite/10/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/13",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 13,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 6×5 的营地谜题：\n- 树木用 'T' 表示。\n- 空地用 'X' 表示。\n- 帐篷用 'C' 表示（你来填）。\n\n规则：\n1) 每个帐篷(C)必须放在一棵树(T)的上下左右相邻格。\n2) 帐篷之间不能接触（包括斜对角）。\n3) 每行帐篷数必须等于 row_constraints。\n4) 每列帐篷数必须等于 col_constraints。\n5) 帐篷总数必须等于树木总数。\n\n输入网格（6 行×5 列）：\nT X X X X\nX X X X T\nX X X X X\nX T X X X\nX X X X X\nX X X T X\n\nrow_constraints = [1, 1, 0, 1, 0, 1]\ncol_constraints = [1, 1, 0, 1, 1]\n\n任务：输出完成网格二维列表（6×5）。",
+    "answer": [
+      [
+        "T",
+        "C",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X",
+        "T"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "C",
+        "T",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "T",
+        "C"
+      ]
+    ],
+    "explanation": "共有4棵树(0,0),(1,4),(3,1),(5,3)，需4顶帐篷。按行约束在第0/1/3/5行各1顶。放C于(0,1)邻接(0,0)；(1,3)邻接(1,4)；(3,0)邻接(3,1)；(5,4)邻接(5,3)。四顶帐篷两两不接触(含对角)。列计数：第0列1(3,0)，第1列1(0,1)，第3列1(1,3)，第4列1(5,4)，第2列0，满足[1,1,0,1,1]。",
+    "request_tag": "direct/campsite/10/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/14",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 14,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 3×5 的营地谜题：\n- 树木用 'T' 表示。\n- 空地用 'X' 表示。\n- 帐篷用 'C' 表示（你来填）。\n\n规则：\n1) 每个帐篷必须与某棵树正交相邻。\n2) 帐篷之间不能接触（包括对角线）。\n3) 每行帐篷数满足 row_constraints。\n4) 每列帐篷数满足 col_constraints。\n5) 帐篷总数 = 树木总数。\n\n输入网格（3 行×5 列）：\nX T X X X\nX X X T X\nT X X X X\n\nrow_constraints = [1, 1, 1]\ncol_constraints = [1, 0, 1, 0, 1]\n\n任务：输出完成放置后的二维列表（3×5）。",
+    "answer": null,
+    "explanation": "树在(0,1),(1,3),(2,0)共3棵，需3顶帐篷且每行各1顶。按列约束[1,0,1,0,1]，帐篷应在第0/2/4列各1顶。放C于(1,2)邻接(1,3)；放C于(0,4)可邻接(1,4)/(0,3)均非树，故需与(1,3)或(0,1)邻接，(0,4)不行；同理(2,4)邻接不到树(1,4),(2,3)均非树。故本题在给定约束下不可解。",
+    "request_tag": "direct/campsite/10/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  }
+]

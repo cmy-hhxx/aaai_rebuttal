@@ -1,0 +1,45 @@
+{
+  "anon_id": "67dfcbb3491d2af4acb0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[B]]",
+        "[c∨m∨¬w∨¬g]",
+        "[¬m∨z∨w∨¬z; ¬g∨¬m∨g∨w]",
+        "[[∅];[{c,m∨w,¬m∨w∨¬z}];[∅];[{w∨¬z}]]",
+        "[[Plausible];[2]]"
+      ],
+      "certificate": "1. 两个相同子句中没有互补文字，不能归结。2. 以 z 与 ¬z 归结，得到 c∨m∨¬w∨¬g。3. 可分别以 ¬g/g 和 z/¬z 归结，得到 ¬m∨z∨w∨¬z 及 ¬g∨¬m∨g∨w。4. 初始 S0=S2=∅，S1={c,m∨w,¬m∨w∨¬z}；第一轮仅由 m 与 ¬m 得到 w∨¬z。5. 第二轮没有新归结式，因此输出 Plausible，共2轮。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "所有题目的标准答案均与题面定义一致。第1题相同子句中不存在互补文字；第2题按 z 与 ¬z 归结得到 c∨¬g∨m∨¬w；第3题可分别按 ¬g/g 和 z/¬z 归结，两个结果均正确；第4题初始集合及第一轮得到的 w∨¬z 正确；第5题第二轮无新归结式，因此输出 Plausible，共2轮。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要先由 m 与 ¬m 归结得到 w∨¬z，再将该结果带入下一轮判断无新归结式，从而确定最终输出和轮数。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "other"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 3,
+      "explanation_evidence": "证书逐题给出了互补文字、归结结果、初始集合、第一轮新子句以及第二轮终止理由；主要推导可核查。对第二轮未逐一列出所有不可归结的子句对，但不影响结论。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

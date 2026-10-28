@@ -1,0 +1,43 @@
+{
+  "anon_id": "f063063027bae47d9040",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "无唯一答案",
+      "certificate": "设各地点说真话为1。咖啡店陈述使咖啡店=1；书店陈述咖啡店为真，因此书店=1；动物园称书店说假话，所以动物园=0。机场与电影院满足机场=非电影院、电影院=非机场，故二者可为（是，否）或（否，是）。银行与广场仅要求二者相同，银行可为是或否。图书馆=非商场，商场=超市，超市=非图书馆，因此超市可为是或否。故问题所问五项不唯一，可能组合为（机场与电影院互补，银行任意，超市任意，动物园为否），无法按要求给出唯一的五词列表。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "约束不足，答案不唯一。令各地点说真话为布尔变量，则机场与电影院满足 a=非i、i=非a，可取（否，是）或（是，否）；银行与广场只要求相同，可同时为是或否；图书馆、商场、超市可有两组一致取值；书店与咖啡店满足 b=c，动物园满足 z=非b。因此题目不能唯一确定所问五项。标准答案“否,是,是,否,否”只是一个可行赋值，不是必然答案。尝试答案指出了不唯一性，但其称第1条使咖啡店为真并不成立：该自指陈述只形成 c=c，不能强制 c=真。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目约束不足且标准答案不具唯一性。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "equality"
+      ],
+      "scenario": "people",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效；所给证书虽正确指出存在多解，但对咖啡店自指陈述的强制性判断有错误。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

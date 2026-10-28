@@ -1,0 +1,44 @@
+{
+  "anon_id": "096ecf5b5478736c9712",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[124524556625524112311524425451]]",
+        "[[KKBNYWJGFAS]]",
+        "[[ZEGAJSTWEJGXPHS]]"
+      ],
+      "certificate": "坐标数字重编号为 f(1)=1,f(2)=2,f(3)=5,f(4)=4,f(5)=3。明文 KNXBOJHAKTSXRPL 分组编码为 12 45 24 55 66 25 52 41 12 31 15 24 42 54 51。第二段密文分组 12 12 35 45 44 32 25 21 34 41 15 逆映射为 K K B N Y W J G F A S。第三段中步骤1、2均交换从0开始编号的奇数组，连续执行两次相互抵消；逆向左移8位即右移8位，得到分组 11 22 21 41 25 15 31 32 22 25 21 24 54 52 15，解码为 ZEGAJSTWEJGXPHS。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answers are consistent with the stated coordinate renumbering and transformations. The first encryption yields the listed 15 coordinate pairs; the second ciphertext decrypts to KKVNYWJGFAS; and reversing the third transformation by right-rotating the 15 groups by 8 yields pairs decoding to XPHSZEGAJSTWEJG. The supplied attempt is wrong: ciphertext pair 35 decodes to V, not B, and its third result uses an incorrect rotation.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires applying the coordinate renumbering to each character, inversely decoding ciphertext pairs, recognizing that the two identical odd-group swaps cancel, and then reversing the eight-group rotation before decoding the final text.",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate correctly gives the first encryption and correctly observes that the two swap steps cancel, but it incorrectly decodes 35 as B and gives an incorrect inverse rotation/result for the third part. Thus only part of the certificate is checkable.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

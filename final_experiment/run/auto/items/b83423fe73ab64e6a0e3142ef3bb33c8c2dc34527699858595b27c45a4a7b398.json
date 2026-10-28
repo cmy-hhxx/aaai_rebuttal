@@ -1,0 +1,47 @@
+{
+  "anon_id": "e5fb9a67a5e0b3e7a017",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "problem1": "965278314",
+        "problem2": 86391,
+        "problem3": 13434
+      },
+      "certificate": "按竖式列设进位为c1至c4。由J=Y+W-1、L为偶数且Y为偶数，可得c3=1，并且c4=0、L=Y-2。再由百位和十位方程可得c2=0、H=W+10-Y、K=10-Y-c1。结合不同数字、首位非零、W<S及XWYWY的个位关系，唯一可行解为Y=4，W=3，L=2，H=9，J=6，K=5，Q=7，X=1，S=8。按H,J,K,L,Q,S,W,X,Y排列为965278314。验证：13434+72957=86391；各列计算为4+7=11、3+5+1=9、4+9=13、3+2+1=6、1+7=8，进位依次为1,0,1,0且最高位无进位。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The assignment satisfies all stated constraints and the arithmetic: 13434 + 72957 = 86391. The digits 9,6,5,2,7,8,3,1,4 are distinct; L, Y, and J are even; W<S; H+X=10 is even; Y+W=7=J+1; and H≠2. The requested outputs exactly match the canonical answer.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Solving requires interacting column-carry equations across five addition columns, distinctness and nonzero-leading constraints, multiple parity conditions, an inequality, and the relation Y+W=J+1; the resulting digit assignment depends on branching or equivalent multi-constraint elimination.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "inequality",
+        "boolean"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate directly verifies the final mapping, column sums, carries, and requested numerical answers. However, the asserted deductions that c3=1, c4=0, L=Y-2, and especially uniqueness are not fully derived; the phrase combining distinctness and other constraints leaves a substantial elimination gap.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

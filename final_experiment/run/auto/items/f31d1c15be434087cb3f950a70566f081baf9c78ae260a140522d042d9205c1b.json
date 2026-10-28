@@ -1,0 +1,42 @@
+{
+  "anon_id": "f92287f877e25a630c98",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无法在当前响应中可靠完成全部约束求解，因此不能提供可验证的完整网格。已确定：第0行目标和为4，而列权重为1至8，故第0行只能是 ['X','X','X','1','X','X','X','X'] 或 ['1','X','1','X','X','X','X','X']；但列0加权和为6排除了第二种（其行0权重为8会超出列0目标），所以第0行确定为 ['X','X','X','1','X','X','X','X']，该行含1个'1'。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical grid satisfies all eight row weighted sums and all eight column weighted sums. It also satisfies the fixed X at (3,4), has four 1s in column 7, has exactly one 1 on M_5, and contains 28 1s, which is even. The three requested outputs match the grid: the grid, 28, and row 0 count 1.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Solving requires coordinating row and column weighted-sum equations across the 8x8 grid, together with the fixed-cell, column-cardinality, diagonal-cardinality, and total-parity constraints; this involves branching or extended interacting constraint propagation.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 2,
+      "explanation_evidence": "The supplied certificate correctly checks that row 0's target 4 permits only columns {3} or {0,2}, and correctly eliminates {0,2} because row 0's weight 8 would exceed column 0's target 6. However, it does not provide or verify the remaining grid and requested outputs.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

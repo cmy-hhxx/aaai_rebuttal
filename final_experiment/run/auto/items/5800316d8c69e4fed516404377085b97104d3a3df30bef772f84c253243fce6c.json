@@ -1,0 +1,39 @@
+{
+  "anon_id": "896291caeb1c22347d8a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "1）[[1001100110010011101111001001101110110110100110101001100010011111]]；2）[[QKNEJQ]]",
+      "certificate": "加密：各字符先与密钥00101110异或，再按Perm=(2,0,3,1,4,6,5,7)重排，得到分组：G→10011001，K→10010011，T→10111100，C→10011011，X→10110110，B→10011010，F→10011000，A→10011111；拼接即第一问结果。解密时按InvPerm=(1,3,0,2,4,6,5,7)重排并异或密钥，六组分别得到ASCII：01010001(Q)、01001011(K)、01001110(N)、01000101(E)、01001010(J)、01010001(Q)，故明文为QKNEJQ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "已独立核验两部分结果。对明文 GKTCXBFA 的每个字符按 ASCII、与 00101110 异或并按 Perm 置换后，拼接结果为 1001100110010011101111001001101110110110100110101001100010011111；对给定 48 位密文分成 6 组，按 InvPerm 逆置换并异或密钥后分别得到 Q、K、N、E、J、Q。均与 canonical_answer 及请求格式一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "每个字符至少依赖 ASCII 二进制转换、逐位 XOR、位置置换三个连续步骤；解密还需分组、逆置换、XOR 和 ASCII 转换，且两问均需重复应用这些步骤。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "供应的证书逐字符列出了加密后的 8 位分组，并给出解密的 6 个 ASCII 二进制及对应字母；这些分组与规则逐项核对均正确，拼接和最终明文也正确。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

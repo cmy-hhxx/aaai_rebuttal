@@ -1,0 +1,40 @@
+{
+  "anon_id": "4d8fcf6291e0a08c818c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[G,#,#,L],[#,#,U,L],[S,U,N,N],[B,R,#,Y],[#,R,K,G]]",
+      "certificate": "按遮罩与交叉约束：纵向第2段 *B 使 r4c1=B；纵向末段 LLN** 使 r1c4=L、r2c4=L、r3c4=N。横向已知得到 r3c1=S、r3c3=N、r3c4=N、r5c3=K、r5c4=G。行和推出 r3c2=U、r5c2=R；列和分别验证 r4c2=R、r4c4=Y。各行和为 19,33,68,45,36，各列和为 28,57,46,70；行最小值为 7,12,14,2,7，列最小值为 2,18,11,7，均满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "网格、横纵段、遮罩、交叉字母、行列总和及最小值均一致。给出的答案内容与规范答案相同；各行和为19、33、68、45、36，各列和为28、57、46、70，行最小值和列最小值也全部满足。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先依据纵向遮罩和横向遮罩确定多个交叉字母，再利用行和推出r3c2=U、r5c2=R，随后利用列和确定r4c2=R和r4c4=Y，并进行行列最小值复核。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确指出关键遮罩对应的字母位置，并给出由行列和推出的剩余字母；列出完整行和、列和及最小值，均可直接按A=1至Z=26逐项核验。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,37 @@
+custom_operator:
+  # pf_cipher_4_0.py 中实现：polybius_encrypt / polybius_decrypt
+  polybius_encrypt: pf_cipher_4_0.py
+  polybius_decrypt: pf_cipher_4_0.py
+
+variables:
+  # 固定Polybius方阵（行列均从1开始计数）；不含O
+  polybius_rows:
+    formula: "['RTXFS','WCMVH','ZJAPB','LQYGK','NEUDI']"
+
+  # 题目1：明文（全大写无空格标点）
+  plaintext_1:
+    formula: "'AYHYLFHYVYO'"
+
+  # 题目2：密文（数字串，长度为偶数）
+  ciphertext_2:
+    formula: "'3513452143145312244135'"
+
+symbols: {}
+conditions: {}
+calc_solution: false  # 纯计算题，不需要SMT求解
+
+queries:
+  q1:
+    desc: "请给出明文的加密结果，并用[[...]]包裹。"
+    ans_formula: polybius_encrypt(plaintext_1, polybius_rows)
+    ans_text: "'[[' + _ans + ']]'"
+    ans_assertion: 'True'
+
+  q2:
+    desc: "请给出密文的解密结果，并用[[...]]包裹。"
+    ans_formula: polybius_decrypt(ciphertext_2, polybius_rows)
+    ans_text: "'[[' + _ans + ']]'"
+    ans_assertion: 'True'
+
+# 题面组织：两问输出，PuzzleClone会用====分隔多问答案
+desc: "### Cipher Rule: Polybius_square given.\n1: Plaintext: \"{plaintext_1}\"\n2: Ciphertext: \"{ciphertext_2}\"\n{queries}\n"

@@ -1,0 +1,39 @@
+{
+  "anon_id": "4c76f5b67c765b255aac",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[KWFKWLQINPZVZD]]",
+      "certificate": "将数字逐位还原为摩斯字符对：8→-.，7→-/，4→.-，7→-/，5→..，8→-.，1→/-，4→.-，3→/.，6→--，3→/.，8→-.，9→./，6→--，4→.-，3→/.，9→./，8→-.，3→/.，6→--，9→./，6→--，5→..，3→/.，5→..，7→-/，6→--，5→..，1→/-，5→..。拼接并按“/”切分得到：-.- / .-- / ..-. / -.- / .-- / .-.. / --.- / .. / -. / .--. / --.. / ...- / --.. / -..，查表还原为 KWFKWLQINPZVZD。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "将30位密文数字逐位按映射表还原为60个摩斯字符，拼接后按“/”分割得到 -.-、.--、..-.、-.-、.--、.-..、--.-、..、-.、.--.、--..、...-、--..、-..，对应字母 KWFKWLQINPZVZD，与规范答案及双中括号输出格式一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "必须先完成数字到摩斯字符对的逐位映射，再处理拼接后的斜杠分隔并查摩斯表还原字母。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐位列出了全部30个数字的映射结果，并给出了拼接后的14个摩斯字母片段及其对应明文；这些片段可逐一核验，且最终结果与规范答案完全一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

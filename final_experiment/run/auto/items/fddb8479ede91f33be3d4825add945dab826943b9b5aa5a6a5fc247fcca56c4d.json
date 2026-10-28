@@ -1,0 +1,39 @@
+{
+  "anon_id": "42d24eeb01c7158d5ed5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[X 1 X X,X X X X,X X X 1,X X 1 X]]",
+      "certificate": "第2行目标为0，因此全为X；第1列目标为0，因此全为X。第1行权重为2，只能在第2列取1；第2列列权重为1也验证该格为1。第3行权重为4，在第1、2列均为X，只能第4列取1；第4行权重为3，只能第3列取1。列3的权重为4、列4的权重为3，均满足约束。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The proposed grid satisfies all row and column weighted-sum constraints: rows sum to 2, 0, 4, 3 respectively, and columns sum to 0, 1, 4, 3 respectively. The certificate's deductions are correct.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires chaining the zero constraints to eliminate column 1 and row 2, then using row 1's target 2 to select column 2, column 2's target 1 to confirm exclusivity, and finally solving rows 3 and 4 using the remaining available columns and their targets 4 and 3.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "Each certificate step is checkable: row 2 target 0 makes it empty; column 1 target 0 makes it empty; row 1 target 2 forces column 2; column 2 then has weighted sum 1; row 3 forces column 4 for weight 4; row 4 forces column 3 for weight 3; all column totals are verified.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

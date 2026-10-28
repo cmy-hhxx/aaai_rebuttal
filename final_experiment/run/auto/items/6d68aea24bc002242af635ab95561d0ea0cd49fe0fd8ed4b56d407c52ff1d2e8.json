@@ -1,0 +1,43 @@
+{
+  "anon_id": "2276718920659f20bac0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[YUEHPDWIVOAMNJV$F$$YW]]",
+        "2": "[[MBKQOZJV]]"
+      },
+      "certificate": "按每行7列写入，并按列索引[1,4,0,6,5,2,3]读取。明文分行：EYDWUPH、OINJVMA、FVYW$$$，分别得到YUEHPDW、IVOAMNJ、V$F$$YW，合并为第一问结果。第二问分行后逆置换：BOMJZKQ→MBKQOZJ，$$V$$$$→V$$$$$$；去除末尾补齐符号$后为MBKQOZJV。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Both answers follow the specified 7-column row transposition. Encryption yields YUEHPDW, IVOAMNJ, and V$F$$YW, concatenating to [[YUEHPDWIVOAMNJV$F$$YW]]. Inverting the permutation on BOMJZKQ and $$V$$$$ yields MBKQOZJ and V$$$$$$; removing trailing padding gives [[MBKQOZJV]].",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Each part requires partitioning into 7-character rows and applying the stated permutation or its inverse; the second part additionally requires removing trailing padding symbols.",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly lists each plaintext row, applies the permutation [1,4,0,6,5,2,3], performs the inverse permutation for decryption, and correctly removes only trailing $ padding.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

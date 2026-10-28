@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"You are an intelligent assistant specializing in evaluating custom operations. Below is a specific rule defined for a custom operation. Your task is to apply this rule accurately to the provided question.\\n\\n### Instructions:\\n\\n1. Carefully read and understand the definitions of the new operations in the rule.\\n2. If the question does not specifically ask for it, your answer should be a number or a group of numbers.\\n3. Double-check your final answer to ensure it follows the rule accurately.\\n\\n### Operation Rule:\\n\\na●b=\\\\int_{a}^{b} f(x) \\\\, dx+6.\\n\\n### Question:\\n1: Given f(x)=x^3 a★1=6, find a.\\nThe answer may be negative, if so write it in a format such as '-5'.\\nIf there is more than one answer, please separate them with 'or',e.g.[[1or2]].\\nPlease wrap the answer in double square brackets, like this: [[your answer]].\\n\\n### Answer:\\n\", \"seed_answer\": \"[[1or-1]]\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/operation_20/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtRzLhxLxSeWqQUKnPrIPteJK9ja",
+    "created": 1793176651,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, math, random\nfrom fractions import Fraction\n\n# We generate problems about a custom operation:\n# a ● b = ∫_a^b f(x) dx + C\n# f(x) is an odd polynomial chosen so that ∫_a^b f(x) dx becomes an even polynomial in a when b is fixed at 1,\n# making it natural to have symmetric solutions ±a (like the seed).\n#\n# We enforce that the asked equation is: a●1 = K, solve for a, and require more than one answer (typically 2).\n#\n# No network, deterministic by seed, bounded resampling.\n\ndef frac_to_str(fr: Fraction) -> str:\n    if fr.denominator == 1:\n        return str(fr.numerator)\n    # keep as reduced fraction\n    return f\"{fr.numerator}/{fr.denominator}\"\n\ndef format_answers(ans_list):\n    # ans_list: list of Fraction, already unique\n    # sort numerically\n    ans_list = sorted(ans_list, key=lambda x: (x.numerator / x.denominator))\n    s = \"or\".join(frac_to_str(a) for a in ans_list)\n    return f\"[[{s}]]\"\n\ndef poly_text_zh(terms):\n    # terms: list of (coeff:int, power:int), like [(1,3),(2,1)] => x^3+2x\n    # assume coeff != 0\n    parts = []\n    for c, p in sorted(terms, key=lambda t: -t[1]):\n        if p == 0:\n            term = str(abs(c))\n        elif p == 1:\n            term = \"x\" if abs(c) == 1 else f\"{abs(c)}x\"\n        else:\n            term = f\"x^{p}\" if abs(c) == 1 else f\"{abs(c)}x^{p}\"\n        sign = \"+\" if c > 0 else \"-\"\n        parts.append((sign, term))\n    # first term sign handling\n    if not parts:\n        return \"0\"\n    sign0, term0 = parts[0]\n    out = (term0 if sign0 == \"+\" else f\"-{term0}\")\n    for sign, term in parts[1:]:\n        out += sign + term\n    return out\n\ndef build_instance(rng: random.Random):\n    # Choose family:\n    # f(x) = sum c_i x^{p_i} with odd p_i (1,3,5) and small integer coefficients.\n    # Then ∫_a^1 f(x) dx = const - sum c_i/(p_i+1)*a^{p_i+1}\n    # which depends on even powers of a: (p_i+1) even.\n    # If we target equation to become a^2 = t or A a^2 + B a^4 = t with t>0 etc.\n    #\n    # We'll use one-term or two-term cases.\n    # To keep solutions simple and usually two-valued, often reduce to a^2 = t (rational).\n    family = rng.choice([\"one_term\", \"two_term_quadratic_in_a2\"])\n\n    C = rng.randint(2, 9)  # constant added outside integral\n    b = 1  # fixed upper limit in question, mirrors seed\n\n    if family == \"one_term\":\n        # f(x) = k x^{p} with p in {1,3,5}; choose k so that equation leads to a^2 = t or a^4 = t etc.\n        p = rng.choice([1, 3, 5])\n        k = rng.choice([-6, -4, -3, -2, -1, 1, 2, 3, 4, 6])\n        # Integral from a to 1: k/(p+1)*(1 - a^{p+1})\n        # So a●1 = k/(p+1)*(1 - a^{p+1}) + C\n        # Let K be chosen so that a^{p+1} = T is positive rational giving two real solutions if p+1 even.\n        # Here p is odd => p+1 even. Great: solutions are ±(T)^{1/(p+1)}.\n        # For simplicity, we make T a perfect power so that root is rational/integer.\n        # Choose base q (rational) and set a = ±q, then compute K.\n        q_num = rng.choice([1, 2, 3, 4, 5, 6])\n        q_den = rng.choice([1, 1, 1, 2, 3])  # bias to integers\n        q = Fraction(q_num, q_den)\n        # Compute K from chosen a=q (one of solutions), but since even power, ±q both satisfy.\n        # a●1 = k/(p+1)*(1 - q^{p+1}) + C\n        K = Fraction(k, p + 1) * (Fraction(1, 1) - q ** (p + 1)) + Fraction(C, 1)\n\n        # Validate that k != 0 and that yields two distinct solutions (q != 0).\n        if q == 0:\n            return None\n        # Now solve for a from equation:\n        # k/(p+1)*(1 - a^{p+1}) + C = K  => 1 - a^{p+1} = (K - C)*(p+1)/k\n        # a^{p+1} = 1 - (K - C)*(p+1)/k\n        rhs = Fraction(1, 1) - (K - C) * Fraction(p + 1, k)\n        # We need rhs = q^(p+1). This should hold by construction.\n        if rhs != q ** (p + 1):\n            return None\n        # Two real solutions: a = ±q (since p+1 even)\n        ans = [q, -q]\n        # Ensure distinct (q != 0)\n        if ans[0] == ans[1]:\n            return None\n\n        f_terms = [(k, p)]\n        return {\n            \"C\": C,\n            \"b\": b,\n            \"f_terms\": f_terms,\n            \"K\": K,\n            \"answers\": sorted(set(ans), key=lambda x: (x.numerator / x.denominator)),\n            \"family\": family,\n            \"extra\": {\"p\": p, \"k\": k, \"q\": q, \"rhs\": rhs}\n        }\n\n    else:\n        # family == \"two_term_quadratic_in_a2\"\n        # Choose f(x) = k1 x + k3 x^3 (odd terms) so that the equation becomes:\n        # a●1 = (k1/2)(1-a^2) + (k3/4)(1-a^4) + C = K\n        # Rearranged in t=a^2:\n        # (k3/4) t^2 + (k1/2) t + (K - C - k1/2 - k3/4) = 0\n        # We want exactly two solutions for a: ±sqrt(t0) with a single positive rational t0 root\n        # AND the other root in t is negative (discarded), or root t0 positive and distinct, but still only ± for a.\n        k1 = rng.choice([-6, -4, -2, -1, 1, 2, 4, 6])\n        k3 = rng.choice([-6, -4, -2, -1, 1, 2, 4, 6])\n        # avoid k3=0 (we want quadratic in t sometimes), but it can be linear; keep quadratic:\n        if k3 == 0:\n            return None\n\n        # Choose t0 as positive rational perfect square to keep sqrt rational: t0 = (m/n)^2\n        m = rng.choice([1, 2, 3, 4, 5, 6])\n        n = rng.choice([1, 1, 2, 3])\n        s = Fraction(m, n)\n        t0 = s * s  # a^2\n        a_vals = [s, -s]\n\n        # Choose another root t1 negative rational to ensure only ±sqrt(t0) are real solutions.\n        # We'll set the quadratic in t to have roots t0 and t1.\n        # For quadratic A t^2 + B t + D = 0, with A = k3/4, B = k1/2, D = (K - C - k1/2 - k3/4)\n        # Root sum: -(B/A) = t0 + t1 => t1 = -(B/A) - t0\n        A = Fraction(k3, 4)\n        B = Fraction(k1, 2)\n        t1 = -B / A - t0\n\n        # Require t1 < 0\n        if t1 >= 0:\n            return None\n\n        # Now determine D from product: D/A = t0*t1 => D = A*t0*t1\n        D = A * t0 * t1\n        # Then K computed from: D = K - C - k1/2 - k3/4  => K = D + C + k1/2 + k3/4\n        K = D + Fraction(C, 1) + Fraction(k1, 2) + Fraction(k3, 4)\n\n        # sanity check: plug back for a=s\n        # integral: (k1/2)(1-a^2) + (k3/4)(1-a^4)\n        integral = Fraction(k1, 2) * (1 - t0) + Fraction(k3, 4) * (1 - t0 * t0)\n        lhs = integral + C\n        if lhs != K:\n            return None\n\n        f_terms = [(k3, 3), (k1, 1)]\n        return {\n            \"C\": C,\n            \"b\": b,\n            \"f_terms\": f_terms,\n            \"K\": K,\n            \"answers\": sorted(set(a_vals), key=lambda x: (x.numerator / x.denominator)),\n            \"family\": family,\n            \"extra\": {\"k1\": k1, \"k3\": k3, \"s\": s, \"t0\": t0, \"t1\": t1}\n        }\n\ndef render_problem_zh(inst, rng):\n    # Different phrasings\n    styles = rng.choice([1, 2, 3])\n    f_expr = poly_text_zh(inst[\"f_terms\"])\n    C = inst[\"C\"]\n    K = inst[\"K\"]\n    # K as string: if fraction, show as a/b\n    K_str = frac_to_str(K if isinstance(K, Fraction) else Fraction(K, 1))\n\n    op_symbol = rng.choice([\"●\", \"★\", \"⊙\"])\n    # operation definition\n    rule = f\"a{op_symbol}b=∫_a^b f(x) dx + {C}。\"\n\n    if styles == 1:\n        problem = (\n            \"你需要按如下自定义运算规则计算未知数。\\n\\n\"\n            \"【运算规则】\\n\"\n            f\"{rule}\\n\\n\"\n            \"【已知】\\n\"\n            f\"f(x)={f_expr}。\\n\\n\"\n            \"【问题】\\n\"\n            f\"若 a{op_symbol}1 = {K_str}，求 a。\\n\"\n            \"答案可能为负数；若有多个答案，用“or”连接。请将最终答案写成 [[...]] 的形式。\"\n        )\n    elif styles == 2:\n        problem = (\n            \"定义一种新运算（与普通乘法无关）：\\n\"\n            f\"{rule}\\n\"\n            f\"其中 f(x)={f_expr}。\\n\"\n            f\"现在给出等式 a{op_symbol}1={K_str}，求满足条件的 a。\\n\"\n            \"若有多解，请用 or 分隔，并用双中括号包裹，例如 [[1or2]]。\"\n        )\n    else:\n        problem = (\n            \"设自定义运算满足：\\n\"\n            f\"{rule}\\n\"\n            f\"并给定函数 f(x)={f_expr}。\\n\"\n            f\"求解方程 a{op_symbol}1={K_str} 中的 a（可能为负）。\\n\"\n            \"多解用 or 连接，最后答案写作 [[你的答案]]。\"\n        )\n    return problem, op_symbol\n\ndef render_explanation_zh(inst, op_symbol):\n    f_expr = poly_text_zh(inst[\"f_terms\"])\n    C = inst[\"C\"]\n    K = inst[\"K\"]\n    K_str = frac_to_str(K)\n    # Provide a checkable derivation with the concrete antiderivative.\n    # Build antiderivative text.\n    anti_parts = []\n    for c, p in sorted(inst[\"f_terms\"], key=lambda t: -t[1]):\n        anti_c = Fraction(c, p + 1)\n        pow2 = p + 1\n        coef_str = frac_to_str(abs(anti_c))\n        if pow2 == 1:\n            core = \"x\"\n        else:\n            core = f\"x^{pow2}\"\n        if abs(anti_c) == 1:\n            term = core\n        else:\n            term = f\"{coef_str}{core}\"\n        sign = \"+\" if anti_c > 0 else \"-\"\n        anti_parts.append((sign, term))\n    sign0, term0 = anti_parts[0]\n    F = term0 if sign0 == \"+\" else f\"-{term0}\"\n    for sgn, trm in anti_parts[1:]:\n        F += sgn + trm\n\n    ans_str = format_answers(inst[\"answers\"])\n    # show key equation leading to even power\n    explanation = (\n        f\"由定义：a{op_symbol}1=∫_a^1 f(x)dx+{C}。\\n\"\n        f\"已知 f(x)={f_expr}，其一个原函数可取 F(x)={F}。\\n\"\n        f\"因此 ∫_a^1 f(x)dx = F(1)-F(a)。\\n\"\n        f\"把它代入 a{op_symbol}1={K_str} 得到关于 a 的方程，解得 a 的取值为 {ans_str}。\\n\"\n        \"（可将解代回 ∫_a^1 f(x)dx+常数 进行核对。）\"\n    )\n    return explanation\n\ndef canonical_key(problem: str, answer):\n    return (problem.strip(), json.dumps(answer, ensure_ascii=False, sort_keys=True))\n\ndef main():\n    data = json.load(sys.stdin)\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n    rng = random.Random(seed)\n\n    results = []\n    seen = set()\n    attempts = 0\n    max_attempts = 4000\n\n    while len(results) < count and attempts < max_attempts:\n        attempts += 1\n        inst = build_instance(rng)\n        if inst is None:\n            continue\n        # Require multiple answers\n        if len(inst[\"answers\"]) < 2:\n            continue\n\n        problem, op_symbol = render_problem_zh(inst, rng)\n        answer = format_answers(inst[\"answers\"])\n        explanation = render_explanation_zh(inst, op_symbol)\n\n        key = canonical_key(problem, answer)\n        if key in seen:\n            continue\n        seen.add(key)\n        results.append({\n            \"problem\": problem,\n            \"answer\": answer,\n            \"explanation\": explanation\n        })\n\n    if len(results) < count:\n        print(f\"Failed to generate enough unique problems: got {len(results)}/{count} after {attempts} attempts\",\n              file=sys.stderr)\n        # Still output what we have to keep JSON valid; but spec wants exactly count.\n        # Raise to signal failure.\n        raise SystemExit(1)\n\n    sys.stdout.write(json.dumps(results, ensure_ascii=False))\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 3473,
+      "prompt_tokens": 1647,
+      "total_tokens": 5120,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1280
+      },
+      "cost": 0.04948825,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 10,
+        "engine_ttft_ms": 71,
+        "engine_ttlt_ms": 35481,
+        "pre_inference_ms": 96,
+        "service_tbt_ms": 10,
+        "service_ttft_ms": 714,
+        "service_ttlt_ms": 36124,
+        "user_visible_ttft_ms": 618
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261006051512-7603861f-default-r0-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176688.68942
+}

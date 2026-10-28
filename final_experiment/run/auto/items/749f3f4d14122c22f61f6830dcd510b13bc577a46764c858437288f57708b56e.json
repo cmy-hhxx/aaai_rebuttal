@@ -1,0 +1,43 @@
+{
+  "anon_id": "cc7d69f3b5bcbda96db7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "9293.47",
+      "certificate": "忽略表头后的尾部噪声，仅取前 8 条完整记录。筛选条件 num_tasks_completed>3 且 num_emails!=3 后，sleep_minutes 有效值为 [519,326,264,302,274,396]，样本方差为 9333.7667；num_calls 有效值为 [7,12,20,10,3]，样本方差为 40.3。两者绝对差为 9293.4667，四舍五入并保留两位小数为 9293.47。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题意解析出前 8 条完整记录。满足 num_tasks_completed>3 且 num_emails!=3 的记录共有 7 条；分别忽略空值后，sleep_minutes=[519,326,264,302,274,396]，样本方差为 9333.7667；num_calls=[7,12,20,10,10,3]，样本方差为 32.2667。因此绝对差为 9301.50，而不是 canonical_answer 的 54012.04。给出的尝试还漏掉了满足筛选条件且 num_calls=10 的记录。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的 canonical answer 与数据计算结果不一致，判定为 invalid。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目判定为 invalid；尝试的证书明确遗漏了一条有效的 num_calls 值 10，且其结果不能支持 canonical answer。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

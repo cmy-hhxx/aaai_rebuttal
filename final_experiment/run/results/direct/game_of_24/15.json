@@ -1,0 +1,117 @@
+[
+  {
+    "id": "direct/game_of_24/15",
+    "method": "direct",
+    "seed_id": "game_of_24",
+    "slot": 15,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "用数字 [1, 2, 9, 12]，通过合适的算术运算 ['+', '-', '*', '/']，使其计算结果为 24。\n规则：必须把 4 个数字全部用且各用一次；只允许使用给定四则运算；按从左到右依次计算（即 (((a op1 b) op2 c) op3 d)），不允许加括号。\n答案格式：以字典形式返回 {\"nums\": [...], \"ops\": [...]}，其中 nums 为参与运算的数字顺序（长度为 4），ops 为长度为 3 的运算符序列。\n为避免多解：在所有可行解中，选择 nums 的字典序最小者；若 nums 相同，再选择 ops 的字典序最小者（按字符比较，'*' < '+' < '-' < '/'）。",
+    "answer": {
+      "nums": [
+        1,
+        2,
+        12,
+        9
+      ],
+      "ops": [
+        "+",
+        "*",
+        "-"
+      ]
+    },
+    "explanation": "按从左到右计算：((1+2)*12)-9 = (3*12)-9 = 36-9 = 27（不对）→ 注意顺序应为 (((1+2)*9)-12)：但题面 nums 指定表达式为 (((a op1 b) op2 c) op3 d)。取 nums=[1,2,12,9], ops=['+','*','-'] 得 (((1+2)*12)-9)=27 不满足；改为可行且满足字典序最小：nums=[1,2,9,12], ops=['+','*','-']，则 (((1+2)*9)-12)=27-12=15 仍不满足。最终可行解为 nums=[1,12,2,9], ops=['*','+','-']：(((1*12)+2)-9)=12+2-9=5 不满足。——为保证可复核，此题唯一可行最小解为 nums=[2,12,1,9], ops=['*','-','/']：(((2*12)-1)/9)=(24-1)/9=23/9 不满足。该题条件下无解。",
+    "request_tag": "direct/game_of_24/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/game_of_24/16",
+    "method": "direct",
+    "seed_id": "game_of_24",
+    "slot": 16,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "用数字 [3, 5, 7, 9]，通过合适的算术运算 ['+', '-', '*', '/']，使其计算结果为 24。\n规则：必须把 4 个数字全部用且各用一次；允许添加括号，括号只能改变运算顺序但不能引入新运算；只允许四则运算。\n答案格式：以字典形式返回 {\"expr\": \"...\"}，其中 expr 为一个只由数字、运算符和括号组成的表达式。\n为避免多解：在所有可行表达式中，选择去掉空格后字符串字典序最小的那个（按常规字符比较）。",
+    "answer": {
+      "expr": "((7-5)+3)*9/2"
+    },
+    "explanation": "题目数字应为[3,5,7,9]但表达式中出现2，违反“只能用给定数字且各用一次”。该题无有效答案。",
+    "request_tag": "direct/game_of_24/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/game_of_24/17",
+    "method": "direct",
+    "seed_id": "game_of_24",
+    "slot": 17,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "用数字 [2, 4, 9, 11]，通过合适的算术运算 ['+', '-', '*', '/']，使其计算结果为 24。\n规则：必须把 4 个数字全部用且各用一次；允许添加括号；只允许四则运算。\n答案格式：以字典形式返回 {\"expr\": \"...\"}。若存在多个解，选择去掉空格后字符串字典序最小的那个（按常规字符比较）。",
+    "answer": {
+      "expr": "(11-9+2)*4"
+    },
+    "explanation": "(11-9+2)*4 = (2+2)*4 = 16，不等于24，因此不满足。",
+    "request_tag": "direct/game_of_24/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/game_of_24/18",
+    "method": "direct",
+    "seed_id": "game_of_24",
+    "slot": 18,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "用数字 [1, 6, 8, 10]，通过合适的算术运算 ['+', '-', '*', '/']，使其计算结果为 24。\n规则：必须把 4 个数字全部用且各用一次；只允许使用给定四则运算；按从左到右依次计算（即 (((a op1 b) op2 c) op3 d)），不允许加括号。\n答案格式：以字典形式返回 {\"nums\": [...], \"ops\": [...]}。\n为避免多解：在所有可行解中，选择 nums 的字典序最小者；若 nums 相同，再选择 ops 的字典序最小者（按字符比较，'*' < '+' < '-' < '/'）。",
+    "answer": {
+      "nums": [
+        1,
+        6,
+        8,
+        10
+      ],
+      "ops": [
+        "+",
+        "*",
+        "/"
+      ]
+    },
+    "explanation": "按从左到右：(((1+6)*8)/10)=(7*8)/10=56/10=5.6，不等于24。",
+    "request_tag": "direct/game_of_24/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/game_of_24/19",
+    "method": "direct",
+    "seed_id": "game_of_24",
+    "slot": 19,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "用数字 [2, 2, 3, 9]，通过合适的算术运算 ['+', '-', '*', '/']，使其计算结果为 24。\n规则：必须把 4 个数字全部用且各用一次（两个 2 视为不同位置的数但数值相同）；允许添加括号；只允许四则运算。\n答案格式：以字典形式返回 {\"expr\": \"...\"}。若存在多个解，选择去掉空格后字符串字典序最小的那个。",
+    "answer": {
+      "expr": "(9-3)*(2+2)"
+    },
+    "explanation": "(9-3)*(2+2)=6*4=24，使用了9、3、2、2各一次，满足要求。",
+    "request_tag": "direct/game_of_24/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  }
+]

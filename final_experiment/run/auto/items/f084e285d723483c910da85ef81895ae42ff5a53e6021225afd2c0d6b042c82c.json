@@ -1,0 +1,43 @@
+{
+  "anon_id": "05a43cd6a7ce8a15be75",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解。数字 1 在(2,2)，因此(3,2)必须为墙。考虑2×2区域(3,1),(3,2),(4,1),(4,2)：(3,1)到最近数字(3,4)距离为3，而对应岛大小仅3，无法连入；到其他数字也不可能。(4,1)到最近数字(5,3)距离为3，而该岛大小为2；到其他数字同样不可能。(4,2)到(5,3)距离为2，但该岛大小为2，无法连入；到(2,2)距离为2而其岛大小为1。故这三个格子也都必须是墙，连同(3,2)形成2×2全墙，违反规则。因此不存在满足条件的最终矩阵。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目无解，且给出的 canonical_answer 也不满足规则。数字 1 在(2,2)迫使(3,2)为墙；(3,1)、(4,1)、(4,2)分别无法在对应岛大小限制内连接到任何数字格，因此也必须为墙，形成(3,1)、(3,2)、(4,1)、(4,2)组成的2×2全墙，违反规则。此外，canonical_answer 中数字3的岛实际有5格、数字2的岛只有1格、右下数字1的岛有2格，均违反岛大小规则。",
+      "error_types": [
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目本身无解，且给出的矩阵直接违反多个岛大小约束。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "adjacency",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：供应的标准答案不是合法解；尝试中的无解论证与上述局部强制墙和2×2全墙矛盾相符。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

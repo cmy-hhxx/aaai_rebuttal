@@ -1,0 +1,44 @@
+{
+  "anon_id": "c9269d711f055e2a2e55",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "西班牙人====挪威人",
+      "certificate": "西班牙人在第1户，且其相邻的象牙色房子只能在第2户。黄绿相邻且绿色在右，不能涉及第2户；绿色也不能在第3户（第3户喝橙汁，而绿色对应喝茶），故第4户黄色、第5户绿色。英国人不在第1户，因此由英国人对应蓝色可知英国人在第3户；第1户为红色，故抽酷儿香烟。酷儿香烟与马相邻，所以第2户养马。议会香烟只能在第2或第4户（第1户是酷儿，第3户喝橙汁，第5户喝茶）。若议会在第2户，则第2户喝牛奶，第4户为乌克兰人喝咖啡；此时第2户既不能是挪威人（其应养斑马而第2户养马），也不能是日本人（日本人应抽幸运而第2户抽议会），矛盾。因此议会在第4户，第4户喝牛奶，第2户为乌克兰人喝咖啡。第4、5户剩下挪威人与日本人；第4户抽议会，不能是日本人，故第4户为挪威人并养斑马，第5户为日本人。饮料中第1户未确定者只能是水，所以喝水的是西班牙人；养斑马的是挪威人。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The clues are consistent, and the canonical answer is correct. The omitted color case in the certificate (yellow at position 3, green at position 4) is impossible: it forces position 5 to be British and position 2 to be Ukrainian, after which the remaining nationalities and smoker/pet constraints conflict. The other color case yields water at the Spaniard’s house and the zebra at the Norwegian’s house.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Solving requires branching on the two possible placements of the adjacent yellow-green pair. One branch must be eliminated by combining nationality, drink, smoker, and pet constraints; the other uses further linked deductions to determine the water drinker and zebra owner.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "adjacency",
+        "ordering",
+        "implication",
+        "cardinality"
+      ],
+      "scenario": "people",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate’s later deductions are mostly checkable conditional on its arrangement, but it jumps from green not being at position 3 to green at position 5, without ruling out yellow at position 3 and green at position 4. That omitted case is essential; the certificate does not show its elimination.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

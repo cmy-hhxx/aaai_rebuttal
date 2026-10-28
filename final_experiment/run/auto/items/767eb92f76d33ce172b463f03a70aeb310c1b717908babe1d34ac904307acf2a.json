@@ -1,0 +1,53 @@
+{
+  "anon_id": "50ce57afe5240203ae7b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "fraction": "2690/1",
+        "parity": "even",
+        "mod12": 2,
+        "hidden": [
+          4,
+          1,
+          3,
+          1,
+          2,
+          2
+        ]
+      },
+      "certificate": "C(21,18)=C(21,3)=1330 and C(6,4)=15, so S=2·1330+2·15=2690=2690/1. Thus S is even and 2690 mod 12=2. For the hidden values, rule 4 gives a=4,c=3; rule 7 then gives b=1; rule 2 gives d=1. Rule 3 gives beta=2, rule 1 gives alpha=2, and rule 5 is satisfied because b=1 is true while alpha=3 is false."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The binomial calculations are correct: C(21,18)=1330 and C(6,4)=15, giving S=2690=2690/1. Thus S is even and 2690 mod 12=2. The hidden values are uniquely forced: a>c gives (a,c)=(4,3); a+b odd gives b=1; the modulo-3 rule gives d=1; beta+d odd gives beta=2; alpha+beta even gives alpha=2. Rule 5 is satisfied because b=1 is true and alpha=3 is false.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The hidden assignment requires a chain of dependent deductions across ordering, parity, modular arithmetic, and boolean exclusivity: (a,c) -> b -> d -> beta -> alpha, followed by verification of rule 5.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "boolean"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate correctly evaluates both binomial coefficients and S, checks parity and the modulo-12 remainder, and provides all necessary chained deductions for the hidden variables, including verification of the exclusive-or rule.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

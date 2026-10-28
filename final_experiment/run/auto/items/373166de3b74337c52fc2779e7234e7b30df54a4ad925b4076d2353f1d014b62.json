@@ -1,0 +1,39 @@
+{
+  "anon_id": "930cf86c08d0d3a9941d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[9 6 5 7 8 1 2 4 3,1 4 7 9 2 3 8 5 6,3 8 2 6 4 5 9 1 7,2 7 1 5 9 6 4 3 8,6 3 4 1 7 8 5 9 2,5 9 8 2 3 4 6 7 1,4 1 6 8 5 7 3 2 9,8 5 9 3 1 2 7 6 4,7 2 3 4 6 9 1 8 5]]",
+      "certificate": "逐格应用行、列和宫约束得到唯一完成：r3=382645917，r8=859312764；左上宫迫使r1c3=5、r2c1=1、r2c2=4；其余单值推导完成全盘。核验时每一行、每一列及每个3×3宫均恰好含有1至9各一次，且所有题给数字均保持不变。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied grid preserves every given clue, and each row, column, and 3x3 box contains the digits 1 through 9 exactly once. The output also follows the requested double-bracket, space-separated rows with comma separators.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Solving requires chained deduction across row, column, and 3x3-box constraints, including determining entries such as r1c3=5, r2c1=1, and r2c2=4 before completing the remaining cells.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate correctly identifies intermediate rows and box deductions, and the final grid is independently checkable. However, it omits the detailed deduction chain and does not explicitly demonstrate the claimed uniqueness.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,40 @@
+{
+  "anon_id": "2a79bb4d6e0c2d002030",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[\"+\",\"+\",\"+\",\"+\"];[\"+\",\"+\",\"-\",\"-\"];[\"+\",\"-\",\"+\",\"-\"];[\"+\",\"-\",\"-\",\"+\"];[\"-\",\"+\",\"+\",\"-\"];[\"-\",\"+\",\"-\",\"+\"];[\"-\",\"-\",\"+\",\"+\"];[\"-\",\"-\",\"-\",\"-\"]]====[[\"-\"]]",
+      "certificate": "XOR 输出为三个输入中“+”的奇数个：三正时为+，两正时为-，一正时为+，全负时为-。行序按 I1、I2、I3 各自从+到-排列，故共8行如答案所示；特别地 (-)⊕(-)=(-)，再⊕(-)=(-)。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The truth table correctly evaluates O=(I1 XOR I2) XOR I3: outputs are + for an odd number of '+' inputs and - otherwise. The rows follow the required lexicographic order from '+' to '-', and for (−,−,−), O=−. The omitted column-label header in the attempt does not change the complete eight data rows.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires applying XOR twice, recognizing the resulting odd-parity rule, and enumerating all eight inputs in the specified nested order.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate states the odd-parity characterization, checks the row ordering, and explicitly evaluates (−) XOR (−) XOR (−) as −; these claims match every listed row.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

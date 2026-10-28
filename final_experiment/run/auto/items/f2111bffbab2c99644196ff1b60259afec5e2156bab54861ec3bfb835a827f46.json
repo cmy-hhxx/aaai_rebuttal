@@ -1,0 +1,38 @@
+{
+  "anon_id": "e2f37ff923c9ed156995",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "否, 是, 是",
+      "certificate": "设各地点人的说真话状态为 T。周路：T周=非T鞠；吴街：T吴=非T王；北镇路：T北=T鞠。由于 T吴 与 T王 必相反，鞠路所说“吴街和王路的话真假不同”为真，所以 T鞠=真。于是 T周=假，且王路所说“周路和鞠路的话真假不同”为真，故 T王=真、T吴=假；再得 T北=真。因此按吴街、北镇路、鞠路为：否, 是, 是。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "将各地点居民是否说真话分别记为变量，可得：周路=非鞠路，吴街=非王路，北镇路=鞠路，鞠路=(吴街与王路真假不同)，王路=(周路与鞠路真假不同)。由于吴街与王路必然真假相反，鞠路陈述为真，因此鞠路为真；继而周路为假、王路为真、吴街为假、北镇路为真。按吴街、北镇路、鞠路顺序确为“否, 是, 是”。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先由吴街与王路的互相否定关系推出二者真假相反，再推出鞠路为真；随后依次推出周路、王路、吴街和北镇路的状态，包含多步相互依赖的布尔推理。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean"
+      ],
+      "scenario": "people",
+      "explanation_score": 4,
+      "explanation_evidence": "供给的证明正确表达了五条陈述的真假关系，并逐步验证了鞠路为真、周路为假、王路为真、吴街为假、北镇路为真，最终答案与推导一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

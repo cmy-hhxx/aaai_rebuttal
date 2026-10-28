@@ -1,0 +1,56 @@
+{
+  "anon_id": "e65afe5a7ef9058a9f2e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          2,
+          0,
+          -4
+        ],
+        [
+          0,
+          -2,
+          -4
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "certificate": "设上三角矩阵 X=[[a,b,c],[0,d,e],[0,0,f]]。由 AX=F 得 a=2，4b-3d=6，-3b+d=-2，故 b=0,d=-2；并得 4c-3e+f=-4、-3c+e+4f=8。由 XB=G 得 3d-2e=2、4d-2e=0、f=0，故 e=-4；再由上述方程得 c=-4。验证 AX=F、XB=G。X 的下三角为零，主对角线和为 2-2+0=0，总和为 -8，第一行和为 -2，且所有元素均为偶数并在 [-4,4] 内。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给定答案满足全部约束。直接计算可得 AX=[[8,6,-4],[8,6,-4],[-6,-2,8]]=F，XB=[[6,6,10],[0,2,0],[0,0,0]]=G。X 为上三角矩阵，主对角线和为 0，总和为 -8，第一行和为 -2，所有元素均为偶数且位于 [-4,4]。标准答案与题目及尝试答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先利用上三角结构设定变量，再从 AX=F 的多个方程求出 a、b、d，并结合 XB=G 求出 e、f，最后代回 AX=F 求出 c；随后还需进行两个矩阵乘法和全部数值约束的验证。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确设 X=[[a,b,c],[0,d,e],[0,0,f]]，逐步列出 AX=F 和 XB=G 的关键方程并解出 a=2、b=0、d=-2、e=-4、f=0、c=-4；随后正确验证了两次矩阵乘法及结构、和、奇偶性和取值范围约束。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

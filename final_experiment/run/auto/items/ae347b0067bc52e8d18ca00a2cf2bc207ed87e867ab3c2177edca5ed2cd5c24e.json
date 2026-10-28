@@ -1,0 +1,99 @@
+{
+  "anon_id": "13452ddf3a99006cde5b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          1,
+          5
+        ],
+        [
+          1,
+          6
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          7
+        ],
+        [
+          3,
+          4
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          4,
+          3
+        ],
+        [
+          4,
+          7
+        ],
+        [
+          5,
+          1
+        ],
+        [
+          5,
+          2
+        ],
+        [
+          6,
+          3
+        ],
+        [
+          6,
+          4
+        ],
+        [
+          7,
+          1
+        ],
+        [
+          7,
+          6
+        ]
+      ],
+      "certificate": "由列权重[1,4,9,16,25,36,49]及各列线索，唯一确定各列黑格行号为：第1列{5,7}（25+49=74），第2列{2,5}（4+25=29），第3列{4,6}（16+36=52），第4列{3,6}（9+36=45），第5列{1,3}（1+9=10），第6列{1,7}（1+49=50），第7列{2,4}（4+16=20）。按行汇总得到：第1行列{5,6}和为11；第2行{2,7}和为9；第3行{4,5}和为9；第4行{3,7}和为10；第5行{1,2}和为3；第6行{3,4}和为7；第7行{1,6}和为7。每行每列恰有2格，且各列行号均不相邻。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Canonical answer satisfies all constraints. Each column contains exactly two cells, with row-weight sums 74, 29, 52, 45, 10, 50, and 20 respectively; each row contains exactly two cells with column-index sums 11, 9, 9, 10, 3, 7, and 7. In every column the two black cells are nonadjacent. The listed cells are sorted by row and then column.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires decoding each column's two row indices from the weighted sums, checking the nonadjacency condition column by column, transposing the resulting placements into rows, and verifying all seven row index-sum clues and cardinality constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "adjacency",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly reconstructs every column pair and verifies each weighted sum, then lists the induced row pairs and checks every row sum, the two-per-row/two-per-column condition, and column nonadjacency.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

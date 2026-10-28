@@ -1,0 +1,45 @@
+{
+  "anon_id": "152c34359d43d61c22c3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "N2",
+          "N3",
+          "N5"
+        ]
+      ],
+      "certificate": "初始相信者为 N3。传播范围仅一跳；由 N3->N2 和 N3->N5，N2、N5 获得命题。N1 仅是 N2 的信赖对象，不能反向传播；无其他传播。因此按名称升序为 N2、N3、N5。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "初始相信者为N3，传播范围仅一跳。由边N3->N2和N3->N5可推出N2、N5相信；N1->N2不能反向传播，且不进行二跳传播。因此最终列表为[[N2,N3,N5]]，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "仅需从初始代理N3沿两条一跳信赖边直接推出N2和N5，并保留N3。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "graph",
+        "ordering"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确识别初始相信者、应用N3->N2和N3->N5的一跳传播，并正确排除N1及二跳传播；结论与给定答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

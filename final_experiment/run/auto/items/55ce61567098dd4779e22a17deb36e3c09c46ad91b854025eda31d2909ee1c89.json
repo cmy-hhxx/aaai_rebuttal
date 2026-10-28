@@ -1,0 +1,50 @@
+{
+  "anon_id": "9874134dcd682a1bf0ff",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        -536,
+        [
+          5,
+          -399,
+          0,
+          -26,
+          3,
+          -513,
+          0
+        ]
+      ],
+      "certificate": "6¥1=6^1−1^6=5；5¥4=5^4−4^5=−399；|−399| mod 6=3，因此后续为3¥3=0。其余各项为1¥3=−26、4¥1=3、6¥3=−513、2¥4=0。故S=0−26+3−513+0=−536。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按定义计算：6¥1=5，5¥4=−399，|−399| mod 6=3，故后续为3¥3=0；尾项分别为1¥3=−2、4¥1=3、6¥3=−513、2¥4=0，S=0−2+3−513+0=−512，关键列表为[5,−399,0,−2,3,−513,0]，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次计算6¥1、将结果代入第二次幂运算、进行绝对值取模并再次运算，再独立计算四个尾项并求和。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 2,
+      "explanation_evidence": "尝试正确计算了6¥1、5¥4、取模后的3¥3、4¥1、6¥3和2¥4，但将1¥3误算为−26而非−2，导致总和−536错误；因此证书的主要步骤部分可核查，但存在关键算术错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

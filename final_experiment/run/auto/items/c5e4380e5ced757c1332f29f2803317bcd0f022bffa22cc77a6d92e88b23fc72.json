@@ -1,0 +1,42 @@
+{
+  "anon_id": "dcaad2a216a398651c40",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "111110101101111111111000110101011101101011110101====[EE]",
+      "certificate": "按每8位分块，并采用新位序列取原序列中P对应位置。加密：VERIFY各字符经与10101010异或再按P=(2,0,3,1,4,6,5,7)置换，得到11111010|11011111|11111000|11010101|11011010|11110101，拼接即密文。解密：11110001|11011111|11011111按P^-1=(1,3,0,2,4,6,5,7)还原并异或密钥，分别得到01011011、01000101、01000101，即[EE。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按证书采用的置换约定计算，VERIFY的正确密文应为111110101101111111111000110101111101100011110111，而非canonical_answer中的内容；例如“I”经异或后为11100011，按P置换得到11010111，不是11010101。给定密文按P^-1解密确实得到“[EE”，不是“OK”，因此标准答案错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为标准答案与题目规则不一致，任务判定为无效。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目的canonical_answer错误；证书中的加密分块至少从第四个字符起计算错误，尽管其解密“[EE”部分与给定P^-1一致。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

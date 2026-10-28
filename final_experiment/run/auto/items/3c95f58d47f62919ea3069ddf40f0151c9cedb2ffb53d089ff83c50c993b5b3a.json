@@ -1,0 +1,42 @@
+{
+  "anon_id": "625c720dc16e5edf4b7d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[D=5,O=2,N=6,A=4,L=8,G=1,E=9,R=7,B=3,T=0]]",
+      "certificate": "按个位至最高位进位：2D=T+10c1，2L+c1=R+10c2，2A+c2=E+10c3，N+R+c3=B+10c4，O+E+c4=O+10c5，D+G+c5=R。由第五列得E=9、c4=c5=1；第三列进一步得A=4、c2=1、c3=0。枚举进位及不同数字约束后唯一可行的是L=8、R=7、D=5、G=1、T=0；第四列给出N=6、B=3，剩余O=2。验证：526485+197485=723970。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied assignment satisfies the distinct-digit and nonzero-leading-letter constraints, and direct verification gives 526485 + 197485 = 723970, matching ROBERT. The requested double-bracket format and all ten letters are present.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Solving requires column-wise carry equations, dependent deductions about E and the carries, further deductions for A and the remaining carries, and case/enumeration under the all-different constraint to determine the remaining digits.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "The carry equations and the numerical verification are checkable and correct. However, the certificate states directly that the fifth column forces E=9 and the carries to 1 without explicitly excluding the E=0, zero-carry case; the uniqueness claim is summarized as enumeration rather than shown in detail.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

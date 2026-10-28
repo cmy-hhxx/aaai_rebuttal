@@ -1,0 +1,80 @@
+{
+  "anon_id": "5230be51109afad56170",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "3",
+          "X",
+          "A",
+          "X",
+          "X"
+        ],
+        [
+          "X",
+          "A",
+          "X",
+          "A",
+          "X"
+        ],
+        [
+          "A",
+          "X",
+          "X",
+          "A",
+          "X"
+        ],
+        [
+          "2",
+          "A",
+          "6",
+          "A",
+          "5"
+        ],
+        [
+          "X",
+          "A",
+          "X",
+          "X",
+          "A"
+        ]
+      ],
+      "certificate": "岛屿坐标（行、列）：3岛为(1,1),(1,2),(2,1)，共3格；2岛为(4,1),(5,1)，共2格；6岛为(4,3),(2,3),(3,2),(3,3),(5,3),(5,4)，共6格；5岛为(4,5),(3,5),(2,5),(1,5),(1,4)，共5格。各岛内部水平或垂直连通，岛间相邻处均由A隔开。A共9格，逐一检查所有2×2区域均至少含一个非A格，因此没有2×2全墙块。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规范答案满足所有规则：四个岛屿分别包含3、2、6、5个格子，均连通；不同岛屿之间均由墙隔开；所有墙的2×2区域都至少包含一个非墙格。唯一的问题是所给尝试答案把数字写成了字符串（如\"3\"）而非题目要求的数字值，因此该尝试在严格输出类型上不正确。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "验证需要分别核对四个岛屿的格子计数、水平或垂直连通性、岛屿间隔离以及所有2×2墙块限制，涉及计数与空间邻接的多步检查。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency",
+        "graph"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐一列出了四个岛屿的坐标和大小，并说明了连通性、岛屿间隔离及9个墙格的2×2检查；这些内容与规范网格一致且可直接核验。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

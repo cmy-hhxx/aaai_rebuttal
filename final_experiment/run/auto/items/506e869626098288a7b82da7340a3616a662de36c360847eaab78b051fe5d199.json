@@ -1,0 +1,50 @@
+{
+  "anon_id": "3daede9954919a9e6df9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[!c|(!b|!a)]]",
+        "[[A]]",
+        "[[!c|(!b&a)];[!c&!b]]",
+        "[[A];[B]]",
+        "[[c&!b];[!c&b];[a&!c]]",
+        "[[丢失];[EC:L2];[PC:L3];[EI:L1]]"
+      ],
+      "certificate": "1) c>(b>!a)=!c|(!b|!a)。2) 蕴涵分配律成立，故为A。3) 德摩根律得 !c|(!b&a)；(c⇓b)&(b⇑a)=!(c|b)&!(b&a)=!c&!b。4) (c>b)&(c>!b)恒等于!c，故A；c=b与!c=b不等价，故B。5) 直接按定义得到三式。6) 恰一真时：c真导致EC:L1、EI:L2/L3；b真导致EC:L2、PC:L3、EI:L1；a真导致EC:L3且有两名PC。因此满足公开约束的唯一状态是b真，即丢失。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All six supplied answers match the stated definitions and constraints. The equivalence elimination, implication distribution, De Morgan/NAND/NOR simplifications, validity judgments, agent formulas, and the unique b-true state under the exact correctness counts are all correct.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "The final question requires branching over the three mutually exclusive truth states c, b, and a, evaluating all three agents in each case, and enforcing the cardinality condition of exactly one completely correct, one partially correct, and one completely incorrect agent. The earlier questions also require chained implication and Boolean simplifications.",
+      "reasoning_type_tags": [
+        "deduction",
+        "algebra",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "boolean",
+        "cardinality",
+        "implication"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate correctly derives c>(b>!a) as !c|(!b|!a), confirms implication distribution, applies De Morgan's laws and the NAND/NOR definitions, verifies both validity results, and checks all three possible exactly-one-true states. It correctly identifies b as the unique state yielding EC:L2, PC:L3, and EI:L1.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,42 @@
+{
+  "anon_id": "c025e48799364b4b35b0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目在给定规则下不唯一。以下两组完整数独均满足所有已知数、标准行列宫约束及箭头约束：解A=[[1,3,9,4,6,2,7,8,5],[9,4,6,8,7,5,2,1,3],[5,7,8,1,2,3,9,4,6],[3,6,1,7,5,4,8,2,9],[8,9,2,5,3,1,6,7,4],[7,2,4,6,9,8,5,3,1],[6,8,3,9,4,7,1,5,2],[2,1,5,3,8,6,4,9,7],[4,5,7,2,1,9,3,6,8]]；解B=[[1,3,2,4,6,9,7,8,5],[9,4,6,8,7,5,2,1,3],[5,7,8,1,2,3,9,4,6],[3,6,1,7,5,4,8,2,9],[8,5,9,2,3,1,6,7,4],[7,2,4,6,9,8,5,3,1],[6,8,3,9,4,7,1,5,2],[2,1,5,3,8,6,4,9,7],[4,9,7,5,1,2,3,6,8]]。两解中箭头数值均相同：第1条为 r5c8=7，且 r4c8+r3c8+r2c8=2+4+1=7；第2条为 r6c6=8，且 r5c6+r4c6+r3c6=1+4+3=8；第3条为 r8c8=9，且 r7c8+r6c8+r6c9=5+3+1=9。各路径内部数字分别为{1,2,4}、{1,3,4}、{1,3,5}，均互不相同；圆圈7、8、9两两不同且奇偶性符合。因此无法唯一给出一个完整解。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical matrix satisfies the supplied clues, standard Sudoku row/column/box constraints, and all arrow constraints. The certificate also provides a second distinct valid solution, so uniqueness is not required and the canonical answer is still valid.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Verification requires checking a complete Sudoku assignment across rows, columns, and boxes, evaluating three arrow sums, checking same-arrow path distinctness, and checking circle parity and pairwise distinctness. The existence of two assignments indicates branching or substantial constraint interaction.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "boolean"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate supplies two complete 9x9 assignments and explicitly verifies the arrow sums: 2+4+1=7, 1+4+3=8, and 5+3+1=9. It also lists the path-value sets, confirms their internal distinctness, and confirms circle values 7, 8, and 9 are pairwise distinct with the required odd/even/odd parity. Direct checking confirms both grids satisfy the givens and Sudoku constraints.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

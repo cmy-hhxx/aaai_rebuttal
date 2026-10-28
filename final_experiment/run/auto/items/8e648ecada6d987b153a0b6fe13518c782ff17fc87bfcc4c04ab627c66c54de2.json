@@ -1,0 +1,43 @@
+{
+  "anon_id": "876470261093b55d938a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "12645.30",
+      "certificate": "前 144 个值构成表头及 7 条完整记录；其后的值为噪声。筛选后保留前 6 条记录，sleep_minutes 为 [525,331,515,540,568,313]，num_calls 为 [6,17,7,20,12,17]。样本方差分别为 12678.67 与 33.37，绝对差为 12645.30。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按前 144 个值解析为表头加 7 条完整记录后，筛选条件保留前 6 条记录。sleep_minutes 的样本方差为 12678.67，num_calls 的样本方差为 33.37，绝对差为 12645.30，而 canonical_answer 为 9365.98。因此标准答案错误；所给 attempt 的计算与数据一致。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的 canonical_answer 与可复核计算结果不一致。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "objects",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体 verdict 为 invalid；但 supplied certificate 中的 6 条筛选记录、两项样本方差及差值均可直接复核。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

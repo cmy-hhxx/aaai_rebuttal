@@ -1,0 +1,43 @@
+{
+  "anon_id": "536564553af7c30cd993",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 137,
+      "certificate": "按1-based坐标，方向顺序取下、右、左、右下、左下、左上；已包含奇偶临时权重及遇阻停止规则。各数字格加权贡献依次为：(1,5)=8，(2,4)=10，(2,5)=5，(2,9)=6，(4,3)=10，(4,8)=9，(5,8)=13，(6,4)=13，(7,3)=11，(7,4)=13，(7,8)=13，(8,5)=10，(9,6)=8，(10,3)=2，(10,4)=2，(10,6)=4。总和为8+10+5+6+10+9+13+13+11+13+13+10+8+2+2+4=137。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目规则重新计算，16个数字格的加权贡献依次为 7,10,5,6,11,8,13,15,13,13,13,10,8,2,2,4，总和为140而非canonical_answer 141。示例证书也有误，例如(1,5)=7的贡献为7而非8，(6,4)=4的贡献为15而非13。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目答案与规则计算结果不一致，因此不能对有效解的必要推理深度评分。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "implication",
+        "other"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用： supplied certificate 的多个逐格贡献可被直接反例检查，且总和错误。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

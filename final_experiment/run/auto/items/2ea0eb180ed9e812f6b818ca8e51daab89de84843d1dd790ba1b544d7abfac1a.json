@@ -1,0 +1,46 @@
+{
+  "anon_id": "880aeaad37aaad31f6c6",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[855565A51495026574854454A4056402855565A51495026574854454A4056402]]",
+        "FPJ DXGE YAVVUXZ",
+        "64",
+        "855565A51495",
+        "95"
+      ],
+      "certificate": "字母后移6位得到 FPJ DXGE YAVVUXZ。其ASCII十六进制为 46504A2044584745205941565655585A；按每4字节右旋后为 2046504A45445847562059415A565558，整体字符逆序为 855565A51495026574854454A4056402。该串重复2次并加双中括号即问题1；长度为32×2=64，前12位如问题4。旋转不改变字节总和，ASCII字节和为1173，1173 mod 256 = 149 = 95十六进制。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规则可完整执行且标准答案一致：位移后为 FPJ DXGE YAVVUXZ，ASCII 十六进制经每4字节右旋后为 2046504A45445847562059415A565558，整体字符逆序为 855565A51495026574854454A4056402，重复两次并加双中括号得到问题1。输出总长度为64个十六进制字符加4个包裹字符，即68；旋转后字节和为1173，模256为95，即十六进制95。所给尝试仅将问题3回答为64，未计入包裹字符，因此与标准答案不完全一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须依次完成字母位移、ASCII转十六进制、按4字节分块右旋、整体字符逆序、重复拼接并处理包裹长度；校验值还需基于旋转结果进行字节求和取模，包含至少三步相互依赖的操作。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "证书正确说明了位移结果、ASCII编码、分块右旋、整体逆序及校验值95，且密文内容与标准答案一致。但其将最终长度写为32×2=64，遗漏了双中括号的4个字符；因此问题3及对应解释并非完整正确。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

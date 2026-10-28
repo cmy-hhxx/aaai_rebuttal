@@ -1,0 +1,44 @@
+{
+  "anon_id": "5685e67d9fa46bfa0df1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "1[[p|r|!q]] 2[[B]] 3[[p&!p];[p|q]] 4[[B];[A]] 5[[3]]",
+      "certificate": "1. 用 p=r=(p&r)|(!p&!r)，再用 a>b=!a|b，原式化为 p|r|!q。2. (q>p)|(!q>!r)=(!q|p)|(q|!r)=真，而原式不恒真，故否。3. (p=q)&(q=!p) 为矛盾，可写 p&!p；⇓ 为 NOR，故 !((p|q)⇓(p|q))=p|q。4.(1) 不成立，例如 p=真、r=假、q=假时左右分别为假、真；(2) ⇑为 NAND，p⇑q=!p|!q，成立。5. 按 (p,s) 分情况计数：00 有0组，01 有2组，10 有1组，11 有0组，总数为3。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "The canonical answer to item 5 is wrong. There are three assignments with exactly two true statements: (p,q,r,s)=(0,1,0,1), (0,1,1,1), and (1,0,1,0). Thus the requested count is 3, not 2.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the canonical answer is incorrect.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "implication",
+        "equality",
+        "boolean"
+      ],
+      "scenario": "people",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the puzzle's canonical answer is incorrect; the certificate's item 5 count of 3 agrees with the direct enumeration.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

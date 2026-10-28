@@ -1,0 +1,43 @@
+{
+  "anon_id": "ca8ae78d1cad5075248a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[A(3,8)\nB(8,3)\nC(2,5)\nD(9,6)\nE(4,2)\nF(5,4)\nG(1,9)\nH(7,1)\nI(6,7)]]",
+      "certificate": "锚点强制E=(4,2)、I=(6,7)，且A在第3行；结合行列唯一、非相邻及分区边界星数为9，A=(3,8)。随后F不能取第2行，只能取F=(5,4)，从而C=(2,5)。剩余列与行及边界约束依次强制H=(7,1)、B=(8,3)、D=(9,6)、G=(1,9)。坐标覆盖每行每列和每个分区各一次；无八邻域相邻。主对角线星数为0，副对角线仅有G=(1,9)；外框星为G、H、D共3，四角星仅G共1，中心星为其余6颗，且9颗均在分区边界格。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的9个坐标分别位于对应分区，恰好覆盖9行和9列，且不存在八邻域相邻星。主对角线无星，副对角线仅有G(1,9)；分区边界星为9颗，外框星为G、H、D共3颗，中心区域星为其余6颗，四角非井号格中仅G为星。因此答案与全部题目约束一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "证书涉及锚点行位置、行列唯一性、八邻域排除以及分区边界等全局计数约束的连续推导：先确定E和I，再确定A、F、C，最后由剩余行列和约束确定H、B、D、G，至少包含三层相互依赖的推理。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "adjacency",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "证书给出了主要坐标推导链，并明确核验了行、列、分区、八邻域、两条对角线、外框、中心区域、四角及分区边界计数；但没有逐步展示每个‘只能’结论排除的全部候选，因此不是完全形式化证明。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

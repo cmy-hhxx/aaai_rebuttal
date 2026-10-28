@@ -1,0 +1,45 @@
+{
+  "anon_id": "b4b1058843ff5f95fdb2",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[C4B30ABFCBBCD1B9CCA9BDABA9AAB6CCC8D2]]",
+        "[[2D8CCC6BAA9ABADB9ACC9B1DCBBCFB0A3B4C]]",
+        "[[18]]"
+      ],
+      "certificate": "明文18字节。密钥循环异或后依次左旋4位、与3B异或，得到第3步中间值2D8CCC6BAA9ABADB9ACC9B1DCBBCFB0A3B4C；半字节交换并反转字节序后得到最终密文C4B30ABFCBBCD1B9CCA9BDABA9AAB6CCC8D2。逐字节比较最终密文与明文，18个位置均不同，因此汉明距离为18。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "题目流程完整且可计算。逐字节核验得第3步中间值为2D8CCC6BAA9ABADB9ACC9B1DCBBCFB0A3B4C，半字节交换后反转字节序得到规范答案C4B3A0BFCBBCD1B9CCA9BDABA9AAB6CCC8D2，长度均为36；最终密文与明文逐字节比较有18处不同。 supplied attempt的中间值和汉明距离正确，但最终密文写成了C4B30ABF...，其中应为C4B3A0BF...，因此该尝试整体错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "必须依次进行循环密钥异或、逐字节左旋4位、常量异或、半字节交换和整段字节反转，并最后逐字节比较密文与明文；这些是至少三层相互依赖的变换。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "证书正确给出了第3步中间值及18字节汉明距离，但其最终密文与实际半字节交换并反转后的结果不符，具体将应为A0的位置写成了0A，因此只能部分核验。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

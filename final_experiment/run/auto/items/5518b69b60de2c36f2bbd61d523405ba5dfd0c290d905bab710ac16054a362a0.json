@@ -1,0 +1,43 @@
+{
+  "anon_id": "a7e3cea3961001125af2",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[281,247,156,22,222,53,17]]====[[S,U,\\u0000,Y,P,I,Y]]",
+      "certificate": "因299=13×23且263≡−1 (mod 132)，对与299互质的数有x^263≡x^−1 (mod 299)。逐项计算明文SANDBOX得281,247,156,22,222,53,17。解密密文得83,85,0,89,80,73,89，即S、U、NUL、Y、P、I、Y；其中299^263 mod 299=0，不是A-Z对应的ASCII值，因此第二问严格按规则无法得到全为大写字母的明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "The canonical answer is incorrect, and the supplied ciphertext does not decrypt to all-uppercase letters under the stated rules. Since 263≡−1 (mod 264), coprime values decrypt to modular inverses: 281→83 (S), 197→85 (U), 299→0, 84→89 (Y), 228→80 (P), 213→73 (I), and 12→25. Also, encrypting SANDBOX gives [281,247,13,22,222,53,17], not the canonical [54,156,281,197,197,240,89].",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the canonical answer fails direct modular-arithmetic checks and the decryption instance violates the uppercase-plaintext requirement.",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the puzzle is invalid. The supplied certificate contains a checkable error: it gives 78^263 mod 299 as 156, whereas the value is 13; it also gives 12^263 mod 299 as 89, whereas the value is 25.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

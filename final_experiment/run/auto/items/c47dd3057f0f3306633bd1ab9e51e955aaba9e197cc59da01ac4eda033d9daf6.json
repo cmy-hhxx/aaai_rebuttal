@@ -1,0 +1,45 @@
+{
+  "anon_id": "10774a517614fa2716b0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": "0010110000001001001000100000110100100010000001110000110100100100",
+        "B": "VFNTUMXDAQ"
+      },
+      "certificate": "按规则逐字符计算。加密分组依次为 G→00101100、T→00001001、I→00100010、V→00001101、I→00100010、X→00000111、V→00001101、O→00100100，拼接得到 A。解密密文按8位分组为 00001101|00101101|00100101|00001001|00001000|00100000|00000011|00101001|00101010|00001010；应用 InvPerm 后与 01011101 异或，得到 ASCII 字符 V|F|N|T|U|M|X|D|A|Q，即 B。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The rules are complete and consistent. The canonical ciphertext for A is correct; in particular, X encrypts to 00000011, not 00000111. The supplied B plaintext VFNTUMXDAQ correctly decrypts the given ciphertext, but the supplied A answer is wrong.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "Each character requires ASCII-to-binary conversion, XOR with the key, and permutation; decryption additionally requires inverse permutation, XOR, and binary-to-ASCII conversion.",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate's B grouping and decryption are checkable and correct, but its A calculation is incorrect for X: the correct block is 00000011, so the claimed concatenation and answer are wrong.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

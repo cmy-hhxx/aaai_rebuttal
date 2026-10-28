@@ -1,0 +1,47 @@
+{
+  "anon_id": "46ee8258cc25f42d1060",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "问题一": "[(U1,V1),(U2,V4),(U3,V3),(U4,V2),(U5,V2)]",
+        "问题二": "[1,2,1,1]",
+        "问题三": "V2",
+        "问题四": "[U4,U5]"
+      },
+      "certificate": "U1必须部署在最靠前的服务器V1。除V2外，V1、V3、V4各恰承载一个关键服务；因U3不能在V4且U1已在V1，故U3在V3、U2在V4。V2恰承载两个服务且需含非关键服务，因此U4、U5均在V2。各服务器数量为[1,2,1,1]，V2服务列表为[U4,U5]；所有容量、互斥、V4/V2非空及两个恰有其一约束均满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "将末尾无标点文本解析为两个“恰有其一”约束后，给定映射满足全部约束：U1因字典序条件位于V1；V1、V3、V4分别承载一个关键服务，结合U3不能位于V4且不能与U1同服，得到U3在V3、U2在V4；V2容量为2且需含非关键服务，因此U4、U5位于V2。容量、非空、互斥及两个恰有其一约束均满足，四个问题的标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次使用字典序约束确定U1=V1，关键服务的基数分配及U3排除V1/V4确定U3=V3、U2=V4，再利用容量和V2恰承载两个服务确定U4、U5均在V2。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "ordering",
+        "inequality",
+        "implication"
+      ],
+      "scenario": "objects",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出U1、U3、U2的必要推导，并由V2容量及非关键服务要求推出U4、U5；其列出的容量、互斥、非空和恰有其一约束都可由该映射直接核验。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

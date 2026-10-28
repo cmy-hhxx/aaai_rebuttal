@@ -1,0 +1,41 @@
+{
+  "anon_id": "ca8fdb6f7fdc6594deb1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "37ae7e0f====IODG",
+      "certificate": "DATA 的 ASCII 字节为 44 41 54 41，与密钥前四字节 73 ef 2a 4e 异或得到 37 ae 7e 0f，即 37ae7e0f。密文 3a a0 6e 09 与同样的密钥字节异或得到 49 4f 44 47，即明文 IODG。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定密钥逐字节异或，DATA 得到 37ae7e0f；3aa06e09 解密得到 IODG，而非 canonical_answer 中的 INDE。因此 canonical_answer 错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的 canonical_answer 与算法计算结果不一致。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为 invalid；不过 supplied attempt 中的两步异或计算均可核验且正确。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

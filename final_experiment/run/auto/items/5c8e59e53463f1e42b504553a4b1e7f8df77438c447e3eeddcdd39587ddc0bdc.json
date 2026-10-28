@@ -1,0 +1,39 @@
+{
+  "anon_id": "bdf884ddfdf591894c1c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "6089959492864693525921",
+      "certificate": "按从左到右的原密文位置删除第5、10、15、20、25、30位的冗余字符0，并去除非数字字符，得到9163121832550817467774。按第i位偏移量(i mod 3)+7，即8、9、7循环解码，得到1295253964682949599806；整体逆序后为6089959492864693525921。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按密文原始位置删除第5、10、15、20、25、30位的冗余字符0后，去除非数字字符得到9163121832550817467774。按1-based位置使用偏移循环8、9、7解码，得到1295253964682949599806，逆序后为6089959492864693525921，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须依次完成冗余位删除、非数字过滤、按位循环偏移解码和整体逆序；后续数字解码依赖前一步得到的数字串。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "objects",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出冗余位、过滤后的数字串、8/9/7循环偏移、解码结果及逆序结果，各步骤均可逐项复核且与标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

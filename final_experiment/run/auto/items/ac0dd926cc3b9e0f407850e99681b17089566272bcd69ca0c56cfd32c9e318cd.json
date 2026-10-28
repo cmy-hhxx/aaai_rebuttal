@@ -1,0 +1,44 @@
+{
+  "anon_id": "7144cb63d87f041693d9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解。考虑左上角2×2区域：(1,1)、(1,2)、(2,1)、(2,2)。数字1位于(3,2)，其岛大小为1，因此(2,2)必为墙。其余三个格子也不可能属于任何岛：距(1,5)分别至少为3、2、4步，而该岛大小仅为2；距(4,4)等其他数字更远，且对应岛大小最多为3（(6,3)为2、(6,6)为1）。因此该2×2区域必全为墙，违反规则5“任意2×2不能全部是墙”，所以不存在最终矩阵。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目无解，且给出的 canonical_answer 违反规则。左上角 2×2 区域的四格均必为墙：数字 1 在 (3,2) 且岛大小为 1，因此 (2,2) 必为墙；其余三格到所有数字的距离都超过相应岛大小，不能属于任何岛。于是左上角 2×2 全为墙，违反规则 5。此外，canonical_answer 本身的第 1–2 行第 1–4 列也是全为 A，且数字 3 (4,4) 仅连接到一个 X，岛大小不是 3。",
+      "error_types": [
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为实例本身无解，且规范答案不满足约束。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality",
+        "graph"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目无解；不过所给尝试对左上角 2×2 全为墙的反证是可核查的。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

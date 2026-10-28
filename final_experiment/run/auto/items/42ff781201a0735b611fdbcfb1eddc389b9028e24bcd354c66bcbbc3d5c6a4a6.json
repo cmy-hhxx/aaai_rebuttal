@@ -1,0 +1,40 @@
+{
+  "anon_id": "8014cfa8e7bc0773131c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[Z U M],[0 Z 0],[0 H 0]]",
+      "certificate": "横向三段分别为 ZUM、Z、H，填得第一行为 Z U M，第二行中心为 Z，第三行中心为 H。纵向得到第一列单格 Z、第二列 UZH、第三列单格 M，均与 down 列表一致。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The 3×3 grid has across runs of lengths 3, 1, and 1, matching ZUM, Z, and H. Filling these gives ZUM / 0 Z 0 / 0 H 0. The down runs are then Z, UZH, and M, exactly matching the down list. The canonical answer also follows the specified comma-separated row format.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "First match the length-3 and length-1 across entries to the horizontal runs; then use the vertical UZH run and its crossings to determine and verify the placement of Z and H.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly identifies all three across runs, gives the resulting rows, derives all three down runs, and checks them against the down list.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

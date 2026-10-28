@@ -1,0 +1,39 @@
+{
+  "anon_id": "d4f816610852404222fa",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 18,
+      "certificate": "从左到右匹配：1号<、2号{、3号[、4号(依次入栈，5—7号正确闭合；8号<及其内部括号在17号>前正确闭合。此时栈顶是1号<，但18号是右括号}，与栈顶不匹配，因此第一个错误位置为18。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按1起始索引扫描：1号<、2号{、3号[、4号(入栈，5—7号依次正确闭合；8号<及其内部括号在17号>处正确闭合。此时栈顶仍为1号<，18号}与其不匹配，因此第一个错误位置确为18。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次维护嵌套括号栈，验证1—7号的闭合关系，再验证8—17号的嵌套闭合，最后将18号}与当前栈顶<比较并判定不匹配。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出关键入栈位置、5—7号和8—17号的闭合过程，并正确指出18号}与栈顶<不匹配；这些步骤可由题目规则直接核查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

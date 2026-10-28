@@ -1,0 +1,90 @@
+{
+  "anon_id": "aa17349af0d462ad7a9c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "x",
+          "d",
+          "b",
+          "l",
+          "k",
+          "e"
+        ],
+        [
+          "x",
+          " ",
+          "j",
+          " ",
+          " ",
+          "l"
+        ],
+        [
+          "x",
+          " ",
+          "g",
+          " ",
+          " ",
+          "k"
+        ],
+        [
+          "a",
+          "k",
+          "r",
+          "s",
+          "w",
+          "o"
+        ],
+        [
+          "h",
+          " ",
+          "w",
+          " ",
+          " ",
+          "m"
+        ],
+        [
+          "m",
+          "n",
+          "f",
+          "s",
+          "e",
+          "i"
+        ]
+      ],
+      "certificate": "第1行只能匹配横向单词 xdblke，因为其在第1、3、6列的字母为 x,b,e，恰对应纵向单词在第1行的字母 x,b,e；因此第1、3、6列分别使用 xxxahm、bjgrwf、elkomi。第4行匹配 akrswo（对应纵向第4行 a,r,o），第6行匹配 mnfsei（对应纵向第6行 m,f,i）。按三个纵向单词补全其余X位置，所有交叉字母一致，0位置均为空格。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "网格中的完整行是第1、4、6行，分别可放入 xdblke、akrswo、mnfsei。可将第1、3、6列分别对应 xxxahm、bjgrwf、elkomi；这些交叉字母与三条横向单词完全一致，其余 X 位置也由纵向单词唯一填出，且所有 0 位置均为空格。给出的 canonical_answer 与此完整网格一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先根据网格结构将三条横向单词放入第1、4、6行，再通过交叉字母确定三条纵向单词与第1、3、6列的对应关系，最后填充第2、3、5行的剩余 X 位置。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string",
+        "graph"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确验证了第1行的交叉字母 x、b、e，从而确定三列与纵向单词的对应；又验证第4行交叉字母 a、r、o 及第6行交叉字母 m、f、i，均与相应纵向单词一致，并说明其余 X 位置按纵向单词补全、0 位置保持为空格。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

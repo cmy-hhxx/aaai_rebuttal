@@ -1,0 +1,44 @@
+{
+  "anon_id": "b71ae2372359b266aba3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[BVCPLVHDCJUHOYIZFDCMSRYXAUOMNKFK######SN########]]",
+      "certificate": "按每轮模板孔位从上到下、从左到右填入明文；孔位初始为(2,3),(2,4),(3,4),(4,1)，每轮逆时针旋转。前三个16字符分组分别得到BVCPLVHDCJUHOYIZ、FDCMSRYXAUOMNKFK、######SN########，拼接即上式。若未规定每轮孔位的填入顺序，则结果存在歧义；上述采用通常的行优先顺序。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "密文与明文在采用“每轮孔位按从上到下、从左到右填入”的额外约定时完全一致，但题目本身未规定每轮4个孔的写入顺序。改变同一轮内孔位的填入顺序会产生不同密文，因此答案不唯一。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目因未规定孔位写入顺序而存在多种可能密文。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用：所给证明明确依赖题目未声明的行优先填入约定；它能验证该约定下的密文，但不能证明原题答案唯一。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

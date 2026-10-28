@@ -1,0 +1,44 @@
+{
+  "anon_id": "e8d931a6b3f2e8d8627a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "小问一": "[[FWNCTNQCTJUCUNCLL]]",
+        "小问二": "[[17]]",
+        "小问三": "[[0]]"
+      },
+      "certificate": "第0行末尾缺少“/”，故缺失行索引为0。设加密为字母值加k后模26。第1行校验约束为15−(4+7+19+10)+3k≡0 (mod 26)，得k=17；其余各行分别验证同样得到成立。左移17解密各行并去除校验字母：FWNCT、NQCT、JUCUN、CLL，拼接得FWNCTNQCTJUCUNCLL。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "密文按“~”分为4行，只有第0行末尾缺少“/”，因此缺失行索引为0。以A=0计，使用第1行可得校验约束 15-(4+7+19+10)+3k≡0 (mod 26)，解得k=17；其余各行也满足同一约束。将各基础字母左移17位后分别得到FWNCT、NQCT、JUCUN、CLL，拼接为FWNCTNQCTJUCUNCLL，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先定位缺失的行末分隔符，再通过模26校验方程求出k，最后对四行逐字解密并去除校验字母后拼接；这些步骤相互依赖并包含算术与字符串处理。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "证书明确指出第0行缺少末尾“/”，给出了第1行的模26方程并正确求得k=17，也列出了四行解密结果。其余行仅声称验证成立而未展示具体校验计算，因此有小幅证据省略。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

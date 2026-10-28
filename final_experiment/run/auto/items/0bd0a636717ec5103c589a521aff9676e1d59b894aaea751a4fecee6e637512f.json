@@ -1,0 +1,43 @@
+{
+  "anon_id": "a1f10b770ad651085f76",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "22,247,89,247====48,25,85,84（非有效大写字母明文）",
+      "certificate": "299=13×23，且对与299互质的数有 x^263≡x^{-1} (mod 299)。D=68的逆元为22，T=84的逆元为89；A=65满足模13为0、模23为17，故65^263≡247，得到第一问 22,247,89,247。第二问逐项计算：81^263≡48，12^263≡25，197^263≡85，89^263≡84 (mod 299)，对应ASCII为48、25、85、84，其中48和25不是大写字母，因此题设第二问无符合“仅含大写字母”的有效明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按规则逐项计算，D=68的密文为22，A=65的密文为247，T=84的密文为89，因此第一问应为[[22,247,89,247]]，不是规范答案[[81,215,12,81]]。第二问中81^263 mod 299=48、12^263 mod 299=25、197^263 mod 299=85、89^263 mod 299=84，对应ASCII为0、控制字符、U、T，并非DRUY，也不构成仅含大写字母的明文。因此规范答案错误，且第二问与明文域约束不相容。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目及其规范答案已被直接算术反例否定。",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：该题无效，且规范答案与逐项模幂计算不符； supplied attempt 的正确性按要求不作布尔判定。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

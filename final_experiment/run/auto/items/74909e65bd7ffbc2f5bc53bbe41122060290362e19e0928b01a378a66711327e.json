@@ -1,0 +1,109 @@
+{
+  "anon_id": "3e6f8510b81c47cb4b52",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": [
+          0,
+          2
+        ],
+        "2": [
+          [
+            "1/4096",
+            "1/49",
+            1,
+            1,
+            36
+          ],
+          [
+            "-1/216",
+            16,
+            625,
+            -1,
+            1
+          ],
+          [
+            1,
+            1,
+            1,
+            "1/64",
+            1
+          ],
+          [
+            "1/2401",
+            1,
+            "1/25",
+            4,
+            9
+          ]
+        ],
+        "3": 166541289062400,
+        "4": [
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            3,
+            2
+          ]
+        ]
+      },
+      "certificate": "已知指数中负数、零数、正数分别有 7、6、5 个；因此两个遮蔽值中恰有一个零和一个正数。第0列正数个数须为偶数，故 [2,0]=0；第3列正数个数须为奇数，故 [3,3] 为正偶数。指数和为 x+y-6，模5等于1，故 y≡2 (mod 5)；在允许的正偶数中 y=2。结果矩阵按对应底数逐项乘方并约分。分母乘积为 4096×49×216×64×2401×25=166541289062400；负指数位置共7处，列表如上。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The two masked exponents are uniquely determined: known counts are 7 negative, 6 zero, and 5 positive, so the masked values are one zero and one positive. Column 0 parity forces B[2][0]=0; column 3 parity forces B[3][3] to be positive. The sum condition gives y-6 ≡ 1 (mod 5), hence y=2 within the allowed positive even exponents. The resulting matrix, denominator product, and seven negative-exponent positions all check correctly against the puzzle.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires dependent counting of exponent categories, column-based parity constraints to assign the masked positions, modular arithmetic to determine the remaining exponent, and then elementwise exponentiation with fraction reduction and denominator multiplication.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality",
+        "inequality",
+        "implication"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate correctly identifies the known category counts, derives one zero and one positive masked value, applies the two column parity constraints, solves the modular condition, and reports results matching direct recomputation. Its denominator product and negative-position list are also correct.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

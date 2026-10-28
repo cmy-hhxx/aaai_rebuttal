@@ -1,0 +1,52 @@
+{
+  "anon_id": "7501974f9e38c4a23a0e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        false,
+        false,
+        false,
+        true,
+        true,
+        false,
+        true
+      ],
+      "certificate": "26 mod 9=8；A⊆B为真，因此A、B中的结论分别为8=4和8=6，均假。26为偶数而3为奇数，C假。(26+3)×9=261≠260，但gcd(26,3)=1，故D真。26不是质数，且|3|<9²，所以“二者皆成立”为假，其否定E为真。min(A)+max(B)=3+8=11≠29，F假。前5条中真陈述有D、E共2条，为偶数，故G真。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied answer matches the canonical answer. Verification: 26 mod 9 = 8 and A⊆B, so A and B are false; 26 is even while 3 is odd, so C is false; D is true because gcd(26,3)=1; E is true because 26 is not prime, so the negation of the conjunction holds; F is false since 3+8=11≠29; exactly two of A–E are true, so G is true.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Requires computing the remainder and set relations, evaluating parity, arithmetic and coprimality conditions, applying negation to a conjunction, and then counting the truth values of the first five statements for G.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "implication",
+        "equality",
+        "cardinality",
+        "boolean",
+        "other"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly checks every statement: remainder 8, subset inclusion, parity mismatch, disjunction via coprimality, negated primality conjunction, set extrema sum, and the count of two true statements among the first five.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

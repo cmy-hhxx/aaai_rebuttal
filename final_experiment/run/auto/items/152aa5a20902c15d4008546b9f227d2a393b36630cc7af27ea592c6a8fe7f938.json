@@ -1,0 +1,42 @@
+{
+  "anon_id": "2543e5315370f8127ee3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[(7-17)/(-5/-9)]]",
+      "certificate": "将四数分成三种无序配对：(-9,-5)|(7,17)、(-9,7)|(-5,17)、(-9,17)|(-5,7)，分别枚举每对的两种顺序及减法/除法结果，并检验两中间结果的两种连接运算。唯一得到-18的是(7-17)/((-5)/(-9))=(-10)/(5/9)=-18；其余组合均不满足。该式恰用-9、-5、7、17各一次，且同时使用减法和除法，除数非零，结构符合要求。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical expression uses -9, -5, 7, and 17 exactly once, has the required ((a-b)/(c/d)) pairing structure, uses only subtraction and division, and has no zero divisor. Its value is (7-17)/((-5)/(-9))=(-10)/(5/9)=-18. Exhaustive checking of the three pair partitions, both orders, both allowed operations within each pair, and the two possible connecting operations leaves this as the unique solution.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Uniqueness requires branching over the three pair partitions, operand orders, subtraction/division choices, and the final connector, followed by arithmetic verification and legality checks.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly evaluates the proposed expression and identifies the three unordered pairings and the required enumeration dimensions. It does not list all rejected cases explicitly, so the exhaustive uniqueness claim is checkable in principle but has a minor presentation gap.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

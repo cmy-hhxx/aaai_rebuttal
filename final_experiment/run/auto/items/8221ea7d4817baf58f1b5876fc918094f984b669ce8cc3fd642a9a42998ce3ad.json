@@ -1,0 +1,55 @@
+{
+  "anon_id": "e0a07cb6d33538e8df0c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          3
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "certificate": "按一步逻辑检查：数字(0,1)的两个未揭示邻格为(0,0)、(1,0)，数量2恰等于数字2，因此二者必为雷；数字(0,2)唯一的未揭示邻格为(0,3)，数量1恰等于数字1，因此(0,3)必为雷。其余数字格的未揭示邻格数量均不等于对应数字所需的地雷数，不能再推出必为雷的单元格。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "整个扫雷网格不可满足。数字(0,1)=2迫使(0,0)和(1,0)为雷；数字(1,1)=2随后迫使(2,0)、(2,1)、(2,2)不是雷；数字(0,2)=1迫使(0,3)为雷，数字(1,2)=2进一步迫使(2,3)不是雷；数字(3,0)=0迫使(2,0)、(2,1)、(3,1)不是雷。于是数字(3,2)=1的所有未揭示邻格(2,1)、(2,2)、(2,3)、(3,1)都不是雷，无法达到1。虽然给出的列表符合局部一步规则，但不符合完整且一致的扫雷约束。",
+      "error_types": [
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为网格约束本身不可满足。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用；所给证书正确验证了局部一步推出的三个坐标，但遗漏了完整数字约束导致的矛盾。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

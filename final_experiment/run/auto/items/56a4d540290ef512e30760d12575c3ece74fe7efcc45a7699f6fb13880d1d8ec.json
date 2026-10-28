@@ -1,0 +1,79 @@
+{
+  "anon_id": "17e70b41348003686e6f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        {
+          "A": [
+            2,
+            3
+          ],
+          "B": [
+            4,
+            2
+          ],
+          "C": [
+            1,
+            1
+          ],
+          "D": [
+            3,
+            4
+          ]
+        },
+        {
+          "A": [
+            4,
+            3
+          ],
+          "B": [
+            3,
+            1
+          ],
+          "C": [
+            1,
+            2
+          ],
+          "D": [
+            2,
+            4
+          ]
+        }
+      ],
+      "certificate": "题目约束有两个解，因此不存在唯一答案。解1按行星列为(1,3,4,2)，区域分别为C、A、D、B；解2按行星列为(2,4,1,3)，区域分别为C、D、B、A。两者均各行各列恰有一颗、各区域恰有一颗，且相邻行星星列差均至少为2，满足包括对角线在内的不相邻条件。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "题目约束完整且可满足；标准答案 {(A):(4,3),(B):(3,1),(C):(1,2),(D):(2,4)} 满足每行、每列及每个区域恰有一颗星，且任意两星均不相邻。给出的尝试声称有两个解，但其第一个解 C(1,1)、A(2,3)、D(3,4)、B(4,2) 中 A(2,3) 与 D(3,4) 对角相邻，因此该解无效；实际上在约束下只有标准答案这一组排列。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "必须分情况检查 A 区域位于第2行第3列或第4行第3列；若选第2行第3列，邻接约束迫使相邻行使用第1列并造成列冲突。故 A 只能在第4行第3列，随后邻接约束迫使第3行第1列、第2行第4列、第1行第2列，完成唯一解。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "all_different",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 0,
+      "explanation_evidence": "证书明确把第一个候选解称为有效，但其中 (2,3) 与 (3,4) 的行列差均为1，属于对角相邻；其列序列 (1,3,4,2) 也包含相邻差为1的 3 与4。因此证书的核心结论“两解”错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

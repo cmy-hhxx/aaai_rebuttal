@@ -1,0 +1,43 @@
+{
+  "anon_id": "9a21607abbf0ed4fe947",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[!e|(c&d)]]\n[[A]]\n[[(!e&!c)|!d];[!c&!d]]\n[[A];[B]]\n[[e&!c];[!e&c];[!d&!e]]\n[[丢失];[EC:L1];[PC:L3];[EI:L2]]",
+      "certificate": "1. e>(c>!d)=!e|(c&d)。2. !e|(c&d)与(!e|c)&(!e|d)等价。3. 德摩根律得!((e|c)&d)=(!e&!c)|!d；(e⇑c)&(c⇓d)=(!(e&c))&(!(c|d))化简为!c&!d。4. (e>c)&(!e>c)=c，有效；e=c与!e=c不等价。5. 三个代理式按题面直接为e&!c、!e&c、!d&!e。6. 恰有一个真命题时，只有e为真能产生一位完全正确(L1)、一位部分正确(L3)、一位完全错误(L2)，故状态为丢失。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第一问答案错误：e>(c>!d) = !e|(!c|!d)，而提交答案为 !e|(c&d)，两者不等价。例如 e=false、c=false、d=false 时，正确式为 true，提交式为 false。其余各问与标准答案一致，但整份答案因此无效。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为提交答案至少有一处可证实的错误。",
+      "reasoning_type_tags": [
+        "deduction",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "equality",
+        "implication"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用；说明第1步错误地将 c>!d 处理为 c&d，未按蕴涵等价式 c>!d = !c|!d 展开。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

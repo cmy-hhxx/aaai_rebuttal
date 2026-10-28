@@ -1,0 +1,42 @@
+{
+  "anon_id": "a0dadb0b1aa054440286",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[HAZDMZVRUJY]]====[[NTSLVUMH]]",
+      "certificate": "加密初始映射得到 HARDPR→HAZDMZ；处理6个字符后内盘右转2位，余下 OBLEM→VRUJY，因此密文为 HAZDMZVRUJY。解密时每3个字符右转3位：YXS→NTS，QZR→LVU；再右转3位后 M→M？校正：累计右转6位时，M在初始内盘下标9，当前位置为15，对应 outer_disk[15]=H，因此明文为 NTSLVUMH。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题述规则，第一问前6个字符 HARDPR 的映射确为 HAZDMZ；内盘右转2位后，OBLEM 映射为 VRIJY，因此密文应为 HAZDMZVRIJY，而非 canonical_answer 的 FJPKOQHRZXU 或作答中的 HAZDMZVRUJY。第二问按每3个字符右转3位解密：YXS→BTS，QZR→CUN，最后 M 在累计右转6位后的内盘位置对应 outer_disk[15]=H，明文为 BTSCUNH，既非 MYSTERY 也非 NTSLVUMH。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于标准答案与题述密码规则直接矛盾，难度评分不适用。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度和解释评分不适用；所给 certificate 的首段加密在第8个字符处将 L 错映射为 U，且解密首组三字符 YXS 实际映射为 BTS 而非 NTS。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

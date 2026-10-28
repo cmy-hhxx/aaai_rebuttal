@@ -1,0 +1,67 @@
+{
+  "anon_id": "111b0e8700d3f4e58cdc",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          4,
+          2,
+          1,
+          3
+        ],
+        [
+          1,
+          3,
+          2,
+          4
+        ],
+        [
+          2,
+          4,
+          1,
+          3
+        ],
+        [
+          3,
+          1,
+          4,
+          2
+        ]
+      ],
+      "certificate": "由第4行约束及第2列不重复，(4,2)=1；故第2列其余两个空格为3、4。第4列固定(2,4)=4，且(1,3)<(1,4)，结合第1行已有2可得第1行只能为[4,2,1,3]。第1列于是剩余为1、2，结合第3行约束得(3,1)=2、(2,1)=1；第2列约束再得(2,2)=3、(3,2)=4。各行列补全为答案，且不等式依次满足：4>1，1<3，2>3? 注意第2行约束应为(2,3)=2且(2,2)=3，实际上2>3不成立，因此题目约束与该方格解矛盾，无法满足全部条件。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "标准答案不满足题目约束：其第1行有 (1,3)=3、(1,4)=1，但要求 (1,3)<(1,4)，即 3<1 不成立；其第2行有 (2,3)=2、(2,2)=3，但要求 (2,3)>(2,2)，即 2>3 不成立。所给尝试也明确承认该不等式矛盾，且其方格第3列为 1、2、1、4，存在重复。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于标准答案直接违反显式不等式，难度评分不适用。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "inequality",
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释中指出了第2行不等式 2>3 不成立；但该尝试答案还违反第3列不重复，且标准答案也违反第1行不等式，因此无法作为正确解答证书。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

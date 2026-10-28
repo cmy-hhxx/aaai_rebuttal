@@ -1,0 +1,41 @@
+{
+  "anon_id": "e6684903e5ed2b03fb1f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "No",
+      "certificate": "步骤1：位置1、2、4的单词按字典序为 gwefind、iagufuqy、yzfyofrx，结果正确。步骤2排序位置1–7后为 asjqbj、gwefind、iagufuqy、sarxy、sfuvrjj、spkfbydso、yzfyofrx，正确。步骤3将位置5–8右移3位得到 spkfbydso、yzfyofrx、msscbjh、sfuvrjj，正确。步骤4中已归位的前三词之后，未归位单词中字典序最小的是 kwnvjxcb，将其插入位置4，结果正确。步骤5位置1–9整体字典序为 asjqbj、gwefind、iagufuqy、kwnvjxcb、msscbjh、sarxy、sfuvrjj、spkfbydso、yzfyofrx，与给出结果一致。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐步核对结果均符合操作规则：步骤1按位置1、2、4的字典序重排；步骤2和步骤5的区段端点均含元音且整体排序正确；步骤3右移3位正确；步骤4剩余单词中字典序最小的kwnvjxcb放到第4位。因此全过程无误，标准答案No正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次核验位置抽取重排、两个指定区段的字典序排序、区段循环右移以及基于前序结果的最小未归位单词定位；后续步骤均依赖前一步的列表状态。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐步给出了每个操作涉及的单词序列，并可直接核对：步骤1的三词为gwefind、iagufuqy、yzfyofrx；步骤3右移后为spkfbydso、yzfyofrx、msscbjh、sfuvrjj；步骤5的全段字典序结果与给出列表一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

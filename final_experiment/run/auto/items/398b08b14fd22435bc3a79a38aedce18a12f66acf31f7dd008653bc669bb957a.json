@@ -1,0 +1,44 @@
+{
+  "anon_id": "16effa3b6967afc13762",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目未规定大写字母如何编码为整数，也未规定解密后的整数如何还原为字母，因此结果不唯一。即使采用常见的 A=1,…,Z=26，φ(299)=264 且 e=263≡−1，因此解密幂仍为263；给定密文对应的数值为 [84,76,18,85]，并非均属于1至26，无法还原为合法明文。故两问均无法按现有规则唯一确定。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规则未规定大写字母到整数的编码，也未规定解密整数到字母的还原方式，因此问题本身不唯一。标准编码 A=1,…,Z=26 也无法支持所给 canonical_answer：例如 P=16 时 16^263 mod 299=243，而不是首项 12；并且给定密文在该幂运算下解得 [84,76,18,85]，其中数值不全对应 A-Z。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目缺少必要的字母数值编码约束，且 canonical_answer 与常见编码不一致。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目本身不完整；所给尝试指出了编码缺失，并可核验 89^263 mod 299=84、240^263 mod 299=76、216^263 mod 299=18、197^263 mod 299=85。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

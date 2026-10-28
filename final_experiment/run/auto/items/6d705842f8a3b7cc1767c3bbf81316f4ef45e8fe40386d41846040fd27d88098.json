@@ -1,0 +1,41 @@
+{
+  "anon_id": "3efb38395551aa319247",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[3,23]]; [[KEJTQMUTXIGZ]]; [[9]]",
+      "certificate": "字母表一中 I=20、B=19，E=23、V=10。由 19=20A+B+5×8、10=23A+B+5×20 (mod 26)，相减得 3A=9，故 A=3，B=23。A^{-1}=9 (mod 26)。逐位按偶数位字母表一、奇数位字母表二解密，得到的位置序列 24,23,13,0,4,5,9,0,1,20,11,22；转回字母表一为 KEJTQMUTXIGZ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "任务一计算正确：在字母表一中 I=20、B=19、E=23、V=10，代入位置相关位移后得到 3A=9 (mod 26)，从而 A=3、B=23。A 的模 26 乘法逆元为 9。按偶数位使用字母表一、奇数位使用字母表二解密，得到位置序列 24,23,13,0,4,5,9,0,1,20,11,22，对应明文 KEJTQMUTXIGZ；与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先将字符转换为自定义字母表位置，结合位置相关位移建立并相减求解模 26 方程；随后计算 A 的逆元，并对 12 个字符按两种字母表交替进行逆仿射变换再映回字母表一。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出了字母表位置、两条模 26 方程、相减求得 3A=9、A=3、B=23 及逆元 9，并给出逐位解密的位置序列和对应明文；这些步骤可直接核验且与输入规则和标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

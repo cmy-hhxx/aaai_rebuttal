@@ -1,0 +1,45 @@
+{
+  "anon_id": "44c0567f350a45b5ef99",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "最少步数": 3,
+        "路径": "[LEAD, LOAD, GOAD, GOLD]",
+        "插入或删除操作总次数": 0,
+        "元音翻转总次数": 1
+      },
+      "certificate": "LEAD→LOAD仅将E替换为O；LOAD→GOAD仅将L替换为G；GOAD→GOLD仅将A替换为L。三步均为单字母替换，无插入或删除；仅最后一步发生一次元音与辅音互换。LEAD与GOLD有三个不同位置，故至少需要3步，因此该路径最短。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "路径中的每一步都只替换一个字母，且所有词均在给定词表中：LEAD→LOAD→GOAD→GOLD。实际插入或删除次数为0，满足不超过0；仅GOAD→GOLD将元音A替换为辅音L，因此元音翻转次数为1，满足最多1次。LEAD与GOLD有3个位置不同，在禁止插入或删除的条件下至少需要3次替换，所以该路径最短。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先验证三次相邻单字母替换及操作计数，再通过比较LEAD和GOLD的三个不同字母位置得到至少三步的下界，并与路径长度匹配。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐步核对了三次替换、插入删除次数、唯一一次元音翻转，并给出了基于端点汉明距离的最短性证明。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

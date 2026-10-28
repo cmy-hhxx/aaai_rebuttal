@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"在这个分区的 4 x 4 网格中，每个分区用不同的字母标记。请放置星星，满足以下条件：每行恰好有 1 颗星星，每列恰好有 1 颗星星，每个字母区域恰好有 1 颗星星，并且任何两颗星星都不能相邻（包括对角线方向）。\\n\\n给定以下区域网格：\\n\\n[\\n    [\\\"C\\\", \\\"C\\\", \\\"C\\\", \\\"A\\\"],\\n    [\\\"C\\\", \\\"D\\\", \\\"A\\\", \\\"A\\\"],\\n    [\\\"B\\\", \\\"B\\\", \\\"B\\\", \\\"A\\\"],\\n    [\\\"D\\\", \\\"B\\\", \\\"D\\\", \\\"D\\\"]\\n]\\n\\n按字母顺序输出星星的坐标，如果一个区域有多个星星坐标，先写行号较小的坐标，如果行号相同，则写列号较小的坐标。\\n\\n答案以字典形式返回，例如: {'A': (1, 1),'B': (3, 2),'C': (2, 3)}。注意：1. 确保您的答案完全符合游戏规则：每行、每列和每个区域恰好有且只有一颗星星，并且没有星星相邻。\\n2. 在提交答案前，请仔细检查您的答案是否满足这些条件。\", \"seed_answer\": \"{'A': (2,4),'B': (3,2),'C': (1,1),'D': (4,3)}\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/star_placement_puzzle/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtYg8Xdhz5ukIp31YsolZP3Ilo0O",
+    "created": 1793177066,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, random\nfrom typing import List, Tuple, Dict, Any, Optional\nfrom z3 import Solver, Int, Distinct, And, Or, Not, sat\n\n# -----------------------------\n# Star Battle (1 star per row/col/region) generator for n x n (here n=4 fixed by seed domain)\n# Regions are labeled with letters; exactly 1 star per region; stars are non-adjacent (incl diagonals).\n# Output asks: dictionary mapping each region label -> (row, col) 1-indexed, sorted by label.\n# -----------------------------\n\ndef z3_solve_unique(grid: List[List[str]]) -> Tuple[Optional[Dict[str, Tuple[int,int]]], int]:\n    \"\"\"\n    Solve and also determine uniqueness of the region->cell assignment.\n    Return (solution_map, num_solutions_capped_at_2).\n    solution_map uses 1-indexed coordinates.\n    \"\"\"\n    n = len(grid)\n    labels = sorted({grid[r][c] for r in range(n) for c in range(n)})\n    # each label must appear at least once\n    for lab in labels:\n        if not any(grid[r][c] == lab for r in range(n) for c in range(n)):\n            return None, 0\n\n    # Variables: for each row r, pick a column col_r in [0, n-1] where the star is placed.\n    col = [Int(f\"col_{r}\") for r in range(n)]\n    s = Solver()\n    for r in range(n):\n        s.add(And(col[r] >= 0, col[r] < n))\n    # exactly 1 per column\n    s.add(Distinct(col))\n\n    # adjacency constraints: no two stars adjacent (including diagonal)\n    for r1 in range(n):\n        for r2 in range(r1+1, n):\n            dr = r2 - r1\n            # adjacency only possible for dr in {0,1}; but dr>=1 here, so only dr==1 matters\n            if dr == 1:\n                s.add(Or(col[r1] - col[r2] >= 2, col[r2] - col[r1] >= 2))\n\n    # region constraints: each region label exactly once.\n    # For each label L, the chosen cells (r, col[r]) across rows must hit L exactly once.\n    # Define for each row r whether its star is in label L via disjunction of possible columns.\n    # Then sum==1. Use pseudo-boolean via Ors + counting with Int indicators.\n    def in_label(r, lab):\n        # returns a z3 Bool: grid[r][col[r]] == lab\n        # implement as Or(col[r]==c for c where grid[r][c]==lab)\n        cs = [c for c in range(n) if grid[r][c] == lab]\n        if not cs:\n            return False  # Python bool False, safe in constraints\n        return Or([col[r] == c for c in cs])\n\n    # count occurrences for each label == 1\n    for lab in labels:\n        indicators = []\n        for r in range(n):\n            b = in_label(r, lab)\n            # If b is Python bool False, treat as 0 indicator\n            if b is False:\n                indicators.append(0)\n            else:\n                # convert Bool to Int 0/1\n                v = Int(f\"ind_{lab}_{r}\")\n                s.add(Or(And(b, v == 1), And(Not(b), v == 0)))\n                indicators.append(v)\n        s.add(sum(indicators) == 1)\n\n    # Get first solution\n    if s.check() != sat:\n        return None, 0\n    m = s.model()\n    sol_cols = [m.evaluate(col[r]).as_long() for r in range(n)]\n\n    # Build region->(row,col)\n    sol_map: Dict[str, Tuple[int,int]] = {}\n    for r in range(n):\n        c = sol_cols[r]\n        lab = grid[r][c]\n        # uniqueness of region constraint ensures no duplicate label\n        sol_map[lab] = (r+1, c+1)\n\n    # Uniqueness check: block this exact assignment of (row->col) and see if another exists\n    block = Or([col[r] != sol_cols[r] for r in range(n)])\n    s.add(block)\n    if s.check() == sat:\n        return sol_map, 2\n    return sol_map, 1\n\n\ndef pretty_grid(grid: List[List[str]]) -> str:\n    # Render as JSON-like with double quotes to match seed style\n    return \"[\\n\" + \",\\n\".join(\"    \" + json.dumps(row, ensure_ascii=False) for row in grid) + \"\\n]\"\n\n\ndef all_partitions_of_4_into_4_parts(rng: random.Random) -> List[int]:\n    # Random composition of 4 into 4 positive integers -> must be [1,1,1,1]\n    # But region sizes can vary; we need 4 regions total, sizes sum 16; not this.\n    return [1, 1, 1, 1]\n\n\ndef generate_grid_via_solution(rng: random.Random, n: int = 4, max_tries: int = 2000) -> List[List[str]]:\n    \"\"\"\n    Construct a region-letter grid that admits a unique valid star placement.\n    Strategy:\n      1) Sample a star permutation col[r] with non-adjacency.\n      2) Place 4 region labels A,B,C,D each assigned to exactly one star cell.\n      3) Fill remaining cells with labels while ensuring each label appears >=1 and\n         final puzzle has unique solution (checked by solver).\n    \"\"\"\n    labels = [\"A\", \"B\", \"C\", \"D\"]\n    assert n == 4\n\n    def sample_star_cols():\n        # sample permutation of 0..3 with adjacent-row column distance >=2\n        cols = list(range(n))\n        for _ in range(200):\n            rng.shuffle(cols)\n            ok = True\n            for r in range(n-1):\n                if abs(cols[r] - cols[r+1]) <= 1:\n                    ok = False\n                    break\n            if ok:\n                return cols\n        return None\n\n    for attempt in range(max_tries):\n        cols = sample_star_cols()\n        if cols is None:\n            continue\n\n        # base grid unknown\n        grid = [[None for _ in range(n)] for _ in range(n)]\n        star_cells = [(r, cols[r]) for r in range(n)]\n        # Assign labels to star cells: bijection between labels and star cells\n        perm_labels = labels[:]\n        rng.shuffle(perm_labels)\n        for lab, (r, c) in zip(perm_labels, star_cells):\n            grid[r][c] = lab\n\n        # Fill remaining cells with labels with some structure variability:\n        # - Sometimes create a \"band\" or \"patches\" by biasing to neighbor labels.\n        # - Ensure all labels present (already, via star cells).\n        for r in range(n):\n            for c in range(n):\n                if grid[r][c] is not None:\n                    continue\n                # neighbor bias\n                neighbor_labs = []\n                for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)]:\n                    rr, cc = r+dr, c+dc\n                    if 0 <= rr < n and 0 <= cc < n and grid[rr][cc] is not None:\n                        neighbor_labs.append(grid[rr][cc])\n                if neighbor_labs and rng.random() < 0.65:\n                    lab = rng.choice(neighbor_labs)\n                else:\n                    lab = rng.choice(labels)\n                grid[r][c] = lab\n\n        # Occasionally mutate some cells to increase diversity\n        if rng.random() < 0.5:\n            k = rng.randint(1, 4)\n            for _ in range(k):\n                r = rng.randrange(n)\n                c = rng.randrange(n)\n                if (r, c) not in star_cells:\n                    grid[r][c] = rng.choice(labels)\n\n        # Check uniqueness\n        sol, num = z3_solve_unique(grid)  # also verifies satisfiable\n        if sol is None or num != 1:\n            continue\n\n        # Additional sanity: every label appears at least twice sometimes for variety\n        counts = {lab: 0 for lab in labels}\n        for r in range(n):\n            for c in range(n):\n                counts[grid[r][c]] += 1\n        # Avoid extremely lopsided grids to keep puzzles reasonable\n        if max(counts.values()) >= 13:\n            continue\n\n        return grid\n\n    raise RuntimeError(\"在采样上限内未能生成具有唯一解的 4x4 分区星星题。\")\n\n\ndef solve_and_explain(grid: List[List[str]], output_language: str = \"zh\") -> Tuple[Dict[str, Tuple[int,int]], str]:\n    sol, num = z3_solve_unique(grid)\n    if sol is None:\n        raise RuntimeError(\"内部错误：生成的题目不可解。\")\n    if num != 1:\n        raise RuntimeError(\"内部错误：生成的题目不是唯一解。\")\n\n    labels = sorted(sol.keys())\n    # Build explanation with verifiable checks\n    # Also include row/col star positions derived from sol for easier verification\n    n = len(grid)\n    stars = [sol[lab] for lab in labels]\n    # For row-wise view:\n    row_to_col = {}\n    for lab, (r, c) in sol.items():\n        row_to_col[r] = c\n    row_list = [(r, row_to_col[r]) for r in sorted(row_to_col)]\n\n    # adjacency verification text\n    def adjacent(p, q):\n        return max(abs(p[0]-q[0]), abs(p[1]-q[1])) == 1\n\n    adj_pairs = []\n    for i in range(len(stars)):\n        for j in range(i+1, len(stars)):\n            if adjacent(stars[i], stars[j]):\n                adj_pairs.append((stars[i], stars[j]))\n\n    # region check: each star lies in its label\n    region_ok = all(grid[r-1][c-1] == lab for lab, (r,c) in sol.items())\n\n    if output_language == \"zh\":\n        expl = []\n        expl.append(\"解的坐标采用 1-based（行,列）。\")\n        expl.append(\"按区域字母得到的星星位置为：\"\n                    + \", \".join([f\"{lab}:{sol[lab]}\" for lab in labels]) + \"。\")\n        expl.append(\"逐行恰好 1 颗星：各行星星列号分别为 \"\n                    + \", \".join([f\"第{r}行→第{c}列\" for r, c in row_list]) + \"。\")\n        expl.append(\"逐列恰好 1 颗星：这些列号互不相同（形成一个 4 列的排列）。\")\n        expl.append(\"逐区域恰好 1 颗星：上面每个字母区域各出现一次，且每颗星都落在对应字母格内。\"\n                    + (\"（已核对通过）\" if region_ok else \"（核对失败：这不应发生）\"))\n        if adj_pairs:\n            expl.append(\"相邻性检查：发现存在相邻星星对：\" + str(adj_pairs) + \"（这不应发生）\")\n        else:\n            expl.append(\"相邻性检查：任意两颗星的行列差不同时为 0/1，因此不存在横、竖或对角相邻。\")\n        return sol, \"\\n\".join(expl)\n    else:\n        # fallback (still no external translation)\n        expl = []\n        expl.append(\"Coordinates are 1-based (row,col).\")\n        expl.append(\"Region-sorted stars: \" + \", \".join([f\"{lab}:{sol[lab]}\" for lab in labels]) + \".\")\n        return sol, \"\\n\".join(expl)\n\n\ndef make_problem_text(grid: List[List[str]], output_language: str = \"zh\") -> str:\n    g = pretty_grid(grid)\n    if output_language == \"zh\":\n        return (\n            \"在这个分区的 4 x 4 网格中，每个分区用不同的字母标记。请放置星星，满足以下条件：\\n\"\n            \"1) 每行恰好有 1 颗星星；\\n\"\n            \"2) 每列恰好有 1 颗星星；\\n\"\n            \"3) 每个字母区域恰好有 1 颗星星；\\n\"\n            \"4) 任何两颗星星都不能相邻（包括对角线方向）。\\n\\n\"\n            \"给定以下区域网格：\\n\\n\"\n            f\"{g}\\n\\n\"\n            \"请按字母顺序输出每个字母区域中星星的坐标 (行,列，均从 1 开始)。\\n\"\n            \"答案以字典形式返回，例如：{'A': (1,1), 'B': (3,2), ...}。\\n\"\n        )\n    else:\n        return (\n            \"In this 4x4 partitioned grid, each region is marked by a letter. Place stars such that:\\n\"\n            \"1) Each row has exactly 1 star;\\n\"\n            \"2) Each column has exactly 1 star;\\n\"\n            \"3) Each lettered region has exactly 1 star;\\n\"\n            \"4) No two stars are adjacent (including diagonals).\\n\\n\"\n            \"Region grid:\\n\\n\"\n            f\"{g}\\n\\n\"\n            \"Output the star coordinates (row,col, 1-based) for each region letter in alphabetical order as a dict.\\n\"\n        )\n\n\ndef canonical_signature(grid: List[List[str]]) -> str:\n    # Use the full grid serialization as signature to avoid duplicates\n    return json.dumps(grid, ensure_ascii=False)\n\n\ndef main():\n    data = json.loads(sys.stdin.read())\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n    # optional settings passed by outer harness\n    output_language = data.get(\"output_language\", \"zh\")\n\n    rng = random.Random(seed)\n    seen = set()\n    out = []\n    attempts = 0\n    max_total_attempts = 20000\n\n    while len(out) < count and attempts < max_total_attempts:\n        attempts += 1\n        try:\n            grid = generate_grid_via_solution(rng, n=4, max_tries=200)\n        except Exception as e:\n            print(f\"[stderr] 生成失败（attempt {attempts}）：{e}\", file=sys.stderr)\n            continue\n\n        sig = canonical_signature(grid)\n        if sig in seen:\n            continue\n\n        try:\n            ans, expl = solve_and_explain(grid, output_language=output_language)\n        except Exception as e:\n            print(f\"[stderr] 求解/校验失败：{e}\", file=sys.stderr)\n            continue\n\n        seen.add(sig)\n        out.append({\n            \"problem\": make_problem_text(grid, output_language=output_language),\n            \"answer\": {k: ans[k] for k in sorted(ans.keys())},\n            \"explanation\": expl\n        })\n\n    if len(out) != count:\n        raise RuntimeError(f\"仅生成了 {len(out)}/{count} 题；请更换 seed 或减少 count。\")\n\n    sys.stdout.write(json.dumps(out, ensure_ascii=False, indent=2))\n\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 3365,
+      "prompt_tokens": 1768,
+      "total_tokens": 5133,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1152
+      },
+      "cost": 0.0483896,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 10,
+        "engine_ttft_ms": 78,
+        "engine_ttlt_ms": 32451,
+        "pre_inference_ms": 105,
+        "service_tbt_ms": 10,
+        "service_ttft_ms": 823,
+        "service_ttlt_ms": 33170,
+        "user_visible_ttft_ms": 718
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261006051512-7603861f-default-r2-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793177100.751182
+}

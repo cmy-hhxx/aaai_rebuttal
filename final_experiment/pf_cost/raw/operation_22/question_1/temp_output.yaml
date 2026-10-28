@@ -1,0 +1,26 @@
+custom_operator:
+  # pf_op：按题目规则计算 f■g = ∂f/∂x + ∂g/∂x（不依赖 sympy）
+  pf_op: pf_operation_22_0.py
+  # to_latex：把结果格式化为 LaTeX（本题直接返回 LaTeX 字符串）
+  to_latex: pf_operation_22_0.py
+
+variables:
+  # 用结构化形式表示题目中的 f 与 g，避免外部CAS依赖
+  f_type:
+    formula: "'x_over_y'"      # f(x,y)=x/y
+  g_type:
+    formula: "'x3_plus_y3'"    # g(x,y)=x^3 + y^3
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "1: f(x,y)=x/y,g(x,y)=x^3+y^3, compute f■g. Please provide your answer in LaTeX format. Wrap the final answer in double square brackets, like this: [[your answer]]."
+    # pf_op 直接返回“结果的 LaTeX 主体”（不含 [[ ]])
+    ans_formula: pf_op(f_type, g_type)
+    ans_text: "'[[' + to_latex(_ans) + ']]'"
+    ans_assertion: 'True'
+
+desc: "{q1}"

@@ -1,0 +1,41 @@
+{
+  "anon_id": "ea67ab3c6c58011ad410",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[C T X X X X X X X C],[X X X X X X X X X T],[X X X T C X X X C X],[X X X X X X X X T X],[X X X X X X C T T C],[X X X X X T X T X X],[C T X X X C X C X X]]",
+      "certificate": "第1行可放帐篷的位置为 c1,c3,c10；因第3列数量为0且该行需2个，故为c1,c10。第7行候选为c1,c6,c8（c3受第3列为0排除），行数为3，三者全选。第5列数量为1，迫使第3行c5；第6列已有第7行c6，故第5行不能选c6，只能选c7,c10。第10列已有第1行c10和第5行c10，故第3行选c9而非c10。得到帐篷位置：(1,1),(1,10),(3,5),(3,9),(5,7),(5,10),(7,1),(7,6),(7,8)。各行列数量分别符合给定数字，且帐篷间无正交或对角相邻；每个帐篷均与对应树正交相邻。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的帐篷位置满足所有约束：每个帐篷均与树正交相邻，帐篷之间不存在正交或对角相邻；各行数量为2,0,2,0,2,0,3，各列数量为2,0,0,0,1,1,1,1,1,2。候选消去和行列计数也可推出该配置。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "先利用第2、4、6行数量为0及第2、3、4列数量为0消去候选；第7行的三个候选必须全部选取，第3行由第5列数量确定c5，再结合第6、10列数量确定第5行和第3行的剩余位置，形成至少三步依赖推理。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出关键候选、零计数列的排除、各行列数量带来的强制选择，并给出最终九个帐篷坐标；这些坐标逐项满足相邻树、非相邻帐篷及行列计数条件。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

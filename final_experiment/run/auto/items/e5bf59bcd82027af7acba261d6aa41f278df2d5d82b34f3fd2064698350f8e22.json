@@ -1,0 +1,40 @@
+{
+  "anon_id": "6cdd401b38b99eac8b80",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[3B28298F966D31302F9C9986938C9784]]",
+      "certificate": "明文共9字节，补7个00后分为两组。KEY前8字节为3132333435363738。第一组“BDERY BB”经逐字节异或、S盒、左循环移位1位、再异或KEY得到3B28298F966D3130；第二组“A00000000000000”得到2F9C9986938C9784。拼接后密文为3B28298F966D31302F9C9986938C9784。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "明文长度为9字节，补7个00后分为两组。按KEY前8字节3132333435363738逐字节执行异或、S盒代换、循环左移1位及再次异或，第一组得到3B28298F966D3130，第二组得到2F9C9986938C9784，拼接结果与标准答案完全一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先计算长度并进行填充分组，再对每个字节依次执行异或、半字节S盒代换、循环移位和再次异或，最后进行十六进制拼接；这些步骤存在连续依赖。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确说明了9字节明文、7字节填充、两组划分，并给出了两组中间密文及最终拼接值；可由题目规则逐步复核，且最终值与标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

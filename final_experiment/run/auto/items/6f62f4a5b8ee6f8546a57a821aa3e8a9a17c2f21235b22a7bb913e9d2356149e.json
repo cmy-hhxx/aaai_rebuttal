@@ -1,0 +1,42 @@
+{
+  "anon_id": "5074a0fd52073a4b5808",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[HVYNGDPEUQNGDFTJGZXCLBLESFGYKRWKRHBYOUZRAYZJYU]]",
+      "certificate": "将每16字符按行写入4×4栅格，孔位为(2,3)、(2,4)、(3,4)、(4,1)，每轮读孔后逆时针旋转。三组分别读得：HVYNGDPEUQNGDFTJ、#GZXCLBLESFGYKRW、#KRHBYOUZRAYZJYU；按#为补位字符删除#后拼接，得到答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题述规则将第一组密文 DGDUNPHVQGFYNTJE 按行填入栅格，并按孔位逐轮逆时针旋转读取，得到 HVYNGDPEGDPEUQGNDHFJ（若每轮孔位按行扫描）。这既不等于 canonical_answer 的 HVYNGDPEUNQGDFTJ，也不等于 supplied attempt 的 HVYNGDPEUQNGDFTJ；后两者使用了与给定模板旋转不一致的字符顺序。因此 canonical answer 与题目规则不匹配。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的规范答案已被第一组栅格的直接反算明确反驳。",
+      "reasoning_type_tags": [
+        "cipher",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为 supplied certificate 的第一组输出可由栅格逐项检查为错误，且按要求非 valid 时不能对尝试判定正确性。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

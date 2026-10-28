@@ -1,0 +1,42 @@
+{
+  "anon_id": "2c4d65502b0934245699",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "GXSBAVTBOVYA====KT@AY@NT@MCNQZOHB@====VTLL@AMML@UZTS@YNXMCVHAUTYOHCT====0====4====4",
+      "certificate": "按列号取反 i→5−i、列序列取逆为倒序：第二段 [0,1,2,3,4,5] 右循环3位得 [3,4,5,0,1,2]，取反得 [2,1,0,5,4,3]，读取序列为 [3,4,5,0,1,2]；第三段先取逆再取反得 [0,1,2,3,4,5]，读取序列为 [5,4,3,2,1,0]。三段长度分别为12、14、26，故填充数为0、4、4。按行填入6列并逐列读取，得到三段密文如答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第二段列序列按题面应为基础序列右循环3位后取反：[2,1,0,5,4,3]，再取逆读取为[3,4,5,0,1,2]。栅格填充为MQHKAN/CZBPTY/NO@@@@，因此第二段密文应为KP@AT@NY@MCNQZOHB@，而标准答案给出HB@QZOMCNNY@AT@KP@，使用的是未取逆的列序列。故 canonical_answer 与规则不一致；此外 supplied attempt 的第一段也将正确的 GSXBAVTBOVYA 写成了 GXSBAVTBOVYA。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的标准答案与明确的列序列读取规则发生可验证冲突。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效； supplied certificate 的第二段明确给出了读取序列[3,4,5,0,1,2]，但其声称的密文及 canonical_answer 均未按该序列读取。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

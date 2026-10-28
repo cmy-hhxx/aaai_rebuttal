@@ -1,0 +1,38 @@
+{
+  "anon_id": "fb47151e7bd8936fbb6d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[38b86504912e2ce94cb7153beed22a]]====[[BAYIURXPXLBN]]",
+      "certificate": "Using the given 32-byte key, XORing KWOJLTSVKJJTAKM bytewise yields 38b86504912e2ce94cb7153beed22a. XORing 31ae7307882827ef5fb11d21 with the first 12 key bytes yields ASCII BAYIURXPXLBN."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按给定密钥字节逐字节异或验证：明文 KWOJLTSVKJJTAKM 生成密文 38b86504912e2ce94cb7153beed22a；密文 31ae7307882827ef5fb11d21 解密为 BAYIURXPXLBN。规范答案、格式和求解器答案均一致。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "两问均只需将输入字节与循环密钥按位异或，并进行十六进制或 ASCII 表示转换；无额外分支或多步依赖。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确说明了两次逐字节异或，并给出与独立计算一致的完整密文和明文结果。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

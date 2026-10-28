@@ -1,0 +1,44 @@
+{
+  "anon_id": "5fb09c826f4703df0bac",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": "11110101111111101111100011110100111100001111101111010000110111101111010011111111111110111111110011110110",
+        "B": "LFPRPIXYDHJ"
+      },
+      "certificate": "A中各字符的 XOR 结果依次为 F3、FE、F8、F2、F0、FD、E0、EE、F2、FF、FD、FC、F6；按 Perm 置换后分组为 11110101|11111110|11111000|11110100|11110000|11111011|11010000|11011110|11110100|11111111|11111011|11111100|11110110，拼接即 A。B 分组为 11111000|11110100|11010010|11010110|11010100|11111011|11011010|11011011|11110000|11111100|11111110；按 InvPerm 后 XOR 10110100 得到 ASCII 十六进制 4C|46|50|52|50|49|58|59|44|48|4A，即 LFPRPIXYDHJ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按规则逐组计算，A 的明文 H：0x48 XOR 0xB4 = 0xFC，经过 Perm 后为 11111010（FA），而 canonical_answer 对应分组为 11111110（FE），因此 A 错误。正确的 A 分组应为 F5|FE|F8|F4|F0|FB|D0|DE|F4|FF|FB|FA|F6。B 解密确实为 LFPRVIXYDNJ，但 supplied attempt 给出的 LFPRPIXYDHJ 错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为 canonical answer 与规则不一致，且 supplied attempt 也包含可直接验证的错误。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释中的 A 证书把 H 的置换结果错误写成 FC；按给定 Perm 实际为 FA。B 证书的中间分组可解出 LFPRVIXYDNJ，而非其声称的 LFPRPIXYDHJ，因此解释不可作为正确证明。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

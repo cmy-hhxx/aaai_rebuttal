@@ -1,0 +1,41 @@
+{
+  "anon_id": "8149a53ce1c3dcf863c8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[1 2 3 4, 4 3 2 1, 2 1 4 3, 3 4 1 2]]",
+      "certificate": "由笼[(1,1),(2,1)]=5且(1,1)=1，得(2,1)=4；结合第2行已知3、2，得(2,4)=1。第3列已有3、2、4、1。第3行缺1、2，列1只能取2，故第3行为2 1 4 3。第4行由宫和列约束得3 4 1 2；再由第1行及笼[(1,4),(1,3),(1,2)]=9得1 2 3 4。各行、列、2×2宫及主对角线均为1到4且不重复。温度计列表[]；杀手笼列表{[(1,4),(1,3),(1,2)]=9;[(1,1),(2,1)]=5}；中心十字[]的和为0；棋盘奇偶False"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied grid satisfies all row, column, 2×2 box, main-diagonal, clue, and killer-cage constraints. The cage [(1,1),(2,1)]=5 forces (2,1)=4, and the remaining constraints eliminate the alternative ordering in row 1, yielding the stated unique solution. The canonical additional-structure text is also correct.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Dependent deductions use the two-cell cage to determine (2,1), row completion to determine (2,4), row/column intersection to determine row 3, box and column constraints to determine row 4, and the three-cell cage plus row 1 givens to determine the remaining row-1 cells; diagonal and all structural constraints then verify the result.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate correctly derives (2,1)=4 from the sum-5 cage, (2,4)=1 from row 2, row 3 as 2 1 4 3 from row/column constraints, row 4 as 3 4 1 2, and row 1 from its cage and givens. Direct checking confirms every stated Sudoku and diagonal condition. The certificate also reproduces the required standardized additional-structure text.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

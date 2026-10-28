@@ -1,0 +1,43 @@
+{
+  "anon_id": "8ce398299cef276d9e84",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目约束自相矛盾：一方面规定 A、B 为不限制符号的非零整数，另一方面又规定 A、B 均为正整数。若允许任意非零整数，最优解有两组：(19, 6) 与 (-19, -6)，均有 w=50；对应 [(u,v,w)] 分别为 [(1,61,50)] 与 [(-1,-61,50)]。若要求 A、B 均为正整数，则唯一解为 [(19, 6)]，且 [(u,v,w)] 为 [(1,61,50)]。因此无法在不补充约束的情况下给出唯一答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目同时要求 A、B 为“不限制符号的非零整数”和“A、B 均为正整数”，约束相互矛盾。若允许任意非零整数，最小加权和有两组解 (19,6) 与 (-19,-6)，而 canonical_answer 只给出正解；若要求正整数，则 canonical_answer 才成立。",
+      "error_types": [
+        "ambiguous",
+        "missing_constraint"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目约束不一致，无法确定唯一的可验证问题。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目本身存在符号范围冲突；所给证书指出的两种解释及对应解可核验，但不能消除歧义。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

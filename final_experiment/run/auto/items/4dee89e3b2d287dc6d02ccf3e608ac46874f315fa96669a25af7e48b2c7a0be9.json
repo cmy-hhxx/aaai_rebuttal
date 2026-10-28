@@ -1,0 +1,43 @@
+{
+  "anon_id": "da6a353f1b1d5e19f7cf",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[%WDRX%CCJZ%XQIZ%VSIS%ZXNHZ%TQWTP%MSMQA%IWEA%%]]====[[AEUFWTEOIBVYZEOXNACNHRNJLAYKHFOSQTDUUJ]]",
+      "certificate": "明文按8列分行后，各列交替读取得到 ZXNHZ、TQWTP、MSMQA、IWEA、WDRX、CCJZ、XQIZ、VSIS；循环右移4列为 WDRX、CCJZ、XQIZ、VSIS、ZXNHZ、TQWTP、MSMQA、IWEA，再按首加1个%、尾加2个%连接。解密时分段后逆移4列并按交替方向还原，逐行重建得到 AEUFWTEOIBVYZEOXNACNHRNJLAYKHFOSQTDUUJ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The encryption checks out: the eight alternating-direction column groups are ZXNHZ, TQWTP, MSMQA, IWEA, WDRX, CCJZ, XQIZ, VSIS; right-rotating by four yields WDRX, CCJZ, XQIZ, VSIS, ZXNHZ, TQWTP, MSMQA, IWEA, matching the canonical ciphertext with the required delimiters. Decrypting the ciphertext by inverse rotation and alternating-direction restoration reconstructs AEUFWTEOIBVYZEOXNACNHRNJLAYKXHFOSQTDUUJ, matching the canonical answer. The supplied attempt is wrong because it omits the X in ...LAYKXHFO....",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "The result requires constructing uneven rows, reading columns with alternating directions, applying a cyclic column permutation, adding delimiters, and reversing those dependent transformations for decryption.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The attempt certificate correctly verifies the encryption column groups and permutation, but its decryption result is incorrect: it gives ...LAYKHF... instead of ...LAYKXHF..., so the explanation is only partly checkable.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

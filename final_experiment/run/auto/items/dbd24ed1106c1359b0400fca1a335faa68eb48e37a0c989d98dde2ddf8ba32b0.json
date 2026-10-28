@@ -1,0 +1,47 @@
+{
+  "anon_id": "8ed5797ca10f914a019e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "completion": "()[()[()()]]",
+        "length": 12,
+        "counts": [
+          1,
+          0
+        ]
+      },
+      "certificate": "扫描前缀后，外层未闭合的栈为 [、[；末尾已有一个 ] 闭合内层 [，因此只需追加一个 ]。完整序列长度为 11+1=12。按给定字符顺序，左括号类型 [ 先于 (，新增右括号计数分别为 [ 对应 1、( 对应 0，故列表为 [1,0]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The prefix has length 11 and leaves one unmatched outer '[' after the existing final ']'. Appending one ']' yields the valid sequence ()[()[()()]], of length 12. Under the specified left-bracket order '[', '{', '(', the added-right-bracket counts are [1,0,0], matching the canonical answer.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Scanning the nested prefix determines the remaining stack entry, and appending the matching right bracket then determines both the final length and the count vector.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The attempt correctly verifies the remaining stack, completion, and length, but its count list [1,0] omits the required zero-count category and therefore does not match the specified three-entry list [1,0,0].",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

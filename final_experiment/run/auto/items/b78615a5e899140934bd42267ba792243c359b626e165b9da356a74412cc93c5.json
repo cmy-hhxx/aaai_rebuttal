@@ -1,0 +1,39 @@
+{
+  "anon_id": "ffe3b00e83ca7dd3d70b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "(('傅瀚鑫','青色地图'),('谢磊清','橙色发夹'),('伍三诚','亮绿色发夹'),('赵然诚','浅灰色手表'),('马琳乐','草绿色电脑'),('元一宁','亮绿色手表'),('秦三清','玫红色项链'),('严七杰','紫色钱包'),('孟三嘉','天蓝色电脑'),('尤五旭','蓝色地图'),('鲍峰旭','银色项链'),('卜强宁','玫红色小刀'),('邬昱乐','浅绿色口哨'),('沈刚伟','粉色水壶'),('和勇鑫','米色笔记本'),('顾宁武','蓝色手表'),('孙勇','墨绿色钥匙扣'),('郑亮辰','棕色手表'))",
+      "certificate": "前两项是描述，不改变归属。按后续交换顺序追踪：顾宁武与卜强宁交换后，卜强宁持蓝色地图、顾宁武持亮绿色手表；紫色钱包与玫红色小刀交换后，伍三诚持钱包、尤五旭持小刀；蓝色地图与小刀交换后，卜强宁持小刀、尤五旭持蓝色地图。孟三嘉与郑亮辰交换后分别持天蓝色电脑、棕色手表；和勇鑫与傅瀚鑫交换后分别持草绿色电脑、青色地图。银色项链与米色笔记本交换后，马琳乐持笔记本、邬昱乐持项链；钱包与亮绿色发夹交换后，严七杰持钱包、伍三诚持发夹。草绿色电脑持有者和马琳乐交换后，马琳乐持草绿色电脑、和勇鑫持米色笔记本。邬昱乐与鲍峰旭交换后分别持浅绿色口哨、银色项链。最后顾宁武与元一宁交换手表，分别持蓝色手表、亮绿色手表。其余物品按未变玩家列出；结果中18件物品各出现一次。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "There are 18 distinct players and 18 distinct items. Applying the events in order, with the first two as non-transfer descriptions, produces the canonical assignment. For example, the first exchange gives 卜强宁 the blue map, which later changes hands in the exchange involving the knife; the later exchanges also yield the listed transfers of the wallet, green computer, and watches. The untouched players retain their initial items.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "The result requires tracking item ownership through a long sequence of dependent exchanges: an item's holder after one exchange determines who participates in later holder-based exchanges, and the final assignments depend on preserving the order of all 10 swaps.",
+      "reasoning_type_tags": [
+        "deduction",
+        "temporal"
+      ],
+      "constraint_type_tags": [
+        "ordering"
+      ],
+      "scenario": "objects",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate correctly treats the first two events as non-transfers and traces each subsequent exchange in order. Its intermediate ownership claims, the unchanged assignments, and the final item count are consistent with the puzzle.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,39 @@
+{
+  "anon_id": "f741c85f602b0aa3d3fe",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[6^29^29^47^25^13^14^26^12^28^17^49^29^29^3]]====[[DWHPPNMNSB]]",
+      "certificate": "第1问按表逐字替换：N=6^2、X=9^2、Z=9^4、Q=7^2、J=5^1、D=3^1、H=4^2、M=6^1、B=2^2、T=8^1、S=7^4、X=9^2、X=9^2、Y=9^3，直接拼接得 6^29^29^47^25^13^14^26^12^28^17^49^29^29^3。第2问每3个字符切分为 4^1,9^1,4^2,7^1,7^1,6^2,6^1,6^2,7^4,2^2，依次还原为 D,W,H,P,P,N,M,N,S,B。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "两问均可按规则确定。第1问逐字替换并直接拼接得到标准答案；第2问按每3个字符切分为4^1、9^1、4^2、7^1、7^1、6^2、6^1、6^2、7^4、2^2，对应GWHPPNMNSB。尝试答案将首字母写成D，但4^1按表应为G，因此尝试答案错误。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要先将每个明文字母映射为多击码并保持顺序拼接；解密则需按固定3字符边界切分，再逐组查表还原字母。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "尝试的第1问替换和第2问分组列表均可核查且正确，但其解密结论写成DWHPPNMNSB，与列出的首组4^1及正确表项G不一致，且最终答案错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

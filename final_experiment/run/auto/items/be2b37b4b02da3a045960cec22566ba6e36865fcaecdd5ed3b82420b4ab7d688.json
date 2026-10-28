@@ -1,0 +1,42 @@
+{
+  "anon_id": "8ce2498d87398d7deba0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目无法唯一确定：明文有12个字符，而密钥2“VLJERYQNOTI”只有11个字符；第1步只说明密钥指针推进方式，没有说明密钥到末尾后是否循环重复。因此第12个字符的移位量未定义。若补充“循环使用密钥2”，则第4步为JGRZWJKXQMCT，最终密文为TCMQXKJWZRGJ；但该补充约束并未给出。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第1步处理第12个字符时，密钥2只有11个字母，题目未说明密钥到末尾后是否循环，因此第12个字符的移位量未定义，结果无法确定。另 canonical_answer 使用“====”连接两个结果，但“=”不在允许的非字母字符集合中，且题目要求分别输出两项。",
+      "error_types": [
+        "missing_constraint",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目因密钥循环规则缺失而未完全定义，且规范答案格式不符合题目要求。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：唯一 supplied attempt 指出了密钥长度与明文长度不匹配及循环规则缺失，且给出的条件性结果依赖题目未声明的补充约束。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

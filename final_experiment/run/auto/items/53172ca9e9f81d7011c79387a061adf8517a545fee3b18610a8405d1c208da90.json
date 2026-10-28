@@ -1,0 +1,39 @@
+{
+  "anon_id": "523162dc6096164d0738",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[3]]",
+      "certificate": "DID 与 COT 的三个位置均不同，因此至少需要 3 步。可行路径为 DID → DIT → DOT → COT：每步只改变一个字母，且 DIT、DOT、COT 都是有效英文单词。因此最少步数为 3。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "起始词 DID 与目标词 COT 的三个字母位置均不同，因此任何路径至少需要 3 步。路径 DID → DIT → DOT → COT 每步只改变一个字母，且 DIT、DOT、COT 都是有效英文单词，所以最少步数确为 [[3]]。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先由三个不同位置得到 3 步下界，再验证存在一条长度为 3 的合法单词路径，从而上下界相等。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出了汉明距离下界，并逐步核验了 DID→DIT→DOT→COT 的单字母变化及中间词的有效性。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

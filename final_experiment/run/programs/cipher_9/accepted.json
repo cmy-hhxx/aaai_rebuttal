@@ -1,0 +1,22 @@
+{
+  "attempt": 0,
+  "sample_seed": 1337381982,
+  "code_sha256": "d94da802042617d5ff3cb9fd5c35a9472543d3d6508bda6721de709085969e3b",
+  "probe": [
+    {
+      "problem": "你需要按如下旋转替换密码执行加密/解密。\n\n规则（必须严格遵守）：\n- 外盘 outer_disk = \"QWERTYUIOPASDFGHJZXCVBNMKL\"\n- 内盘 inner_disk 初始 = \"JKLZXCVBNMASDFGHJQWERTYUIO\"\n- 加密：明文每个字符在外盘找位置，用内盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\n- 解密：密文每个字符在内盘找位置，用外盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\n\n请将每问的最终结果用双中括号包裹输出，且两问答案用“====”连接，例如：[[答案1]]====[[答案2]]。\n\n1）请解密：密文 \"QYWJGOUCHJO\"，period=7，increment=1。\n2）请加密：明文 \"ZZLRTKBJJKZ\"，period=5，increment=7。",
+      "answer": "[[ZNXQGLMUJWQ]]====[[QQOZXQGMMQZ]]",
+      "explanation": "要点：逐字符按外盘/内盘同位置替换；每处理 period 个字符，内盘向右轮转 increment 位。\n\n（1）第1问计算过程（展示前4步示例）：\n外盘: QWERTYUIOPASD FGHJZXCVBNMKL\n初始内盘: JKLZXCVBNMASD FGHJQWERTYUIO\n第1个字符 Q：查内盘索引→外盘同位=Z（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第2个字符 Y：查内盘索引→外盘同位=N（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第3个字符 W：查内盘索引→外盘同位=X（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第4个字符 J：查内盘索引→外盘同位=J（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n\n（2）第2问计算过程（展示前4步示例）：\n外盘: QWERTYUIOPASD FGHJZXCVBNMKL\n初始内盘: JKLZXCVBNMASD FGHJQWERTYUIO\n第1个字符 Z：查外盘索引→内盘同位=Q（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第2个字符 Z：查外盘索引→内盘同位=Q（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第3个字符 L：查外盘索引→内盘同位=O（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第4个字符 R：查外盘索引→内盘同位=Z（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n\n校验：对每一问将结果按同参数做逆运算，均能还原题目给定字符串。"
+    },
+    {
+      "problem": "你需要按如下旋转替换密码执行加密/解密。\n\n规则（必须严格遵守）：\n- 外盘 outer_disk = \"QWERTYUIOPASDFGHJZXCVBNMKL\"\n- 内盘 inner_disk 初始 = \"JKLZXCVBNMASDFGHJQWERTYUIO\"\n- 加密：明文每个字符在外盘找位置，用内盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\n- 解密：密文每个字符在内盘找位置，用外盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\n\n请将每问的最终结果用双中括号包裹输出，且两问答案用“====”连接，例如：[[答案1]]====[[答案2]]。\n\n1）请加密：明文 \"QXEHLVBDAGVYT\"，period=3，increment=11。\n2）请解密：密文 \"SDMKOSSSZGJD\"，period=9，increment=3。",
+      "answer": "[[JWLXGMOJGBFID]]====[[SDPWLSSSRZRH]]",
+      "explanation": "要点：逐字符按外盘/内盘同位置替换；每处理 period 个字符，内盘向右轮转 increment 位。\n\n（1）第1问计算过程（展示前4步示例）：\n外盘: QWERTYUIOPASD FGHJZXCVBNMKL\n初始内盘: JKLZXCVBNMASD FGHJQWERTYUIO\n第1个字符 Q：查外盘索引→内盘同位=J（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第2个字符 X：查外盘索引→内盘同位=W（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第3个字符 E：查外盘索引→内盘同位=L（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n已处理满 3 个字符，内盘右移 11：JKLZXCVBNMASD FGHJQWERTYUIO → HJQWERTYUIOJK LZXCVBNMASDFG\n第4个字符 H：查外盘索引→内盘同位=X（此时内盘=HJQWERTYUIOJK LZXCVBNMASDFG）\n\n（2）第2问计算过程（展示前4步示例）：\n外盘: QWERTYUIOPASD FGHJZXCVBNMKL\n初始内盘: JKLZXCVBNMASD FGHJQWERTYUIO\n第1个字符 S：查内盘索引→外盘同位=S（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第2个字符 D：查内盘索引→外盘同位=D（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第3个字符 M：查内盘索引→外盘同位=P（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第4个字符 K：查内盘索引→外盘同位=W（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n\n校验：对每一问将结果按同参数做逆运算，均能还原题目给定字符串。"
+    },
+    {
+      "problem": "你需要按如下旋转替换密码执行加密/解密。\n\n规则（必须严格遵守）：\n- 外盘 outer_disk = \"QWERTYUIOPASDFGHJZXCVBNMKL\"\n- 内盘 inner_disk 初始 = \"JKLZXCVBNMASDFGHJQWERTYUIO\"\n- 加密：明文每个字符在外盘找位置，用内盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\n- 解密：密文每个字符在内盘找位置，用外盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\n\n请将每问的最终结果用双中括号包裹输出，且两问答案用“====”连接，例如：[[答案1]]====[[答案2]]。\n\n1）请解密：密文 \"HSYTUBNOUEHWJ\"，period=8，increment=2。\n2）请加密：明文 \"KOGOMRLBPS\"，period=9，increment=9。",
+      "answer": "[[HSNBMIOLLBZVE]]====[[INGNUZOTML]]",
+      "explanation": "要点：逐字符按外盘/内盘同位置替换；每处理 period 个字符，内盘向右轮转 increment 位。\n\n（1）第1问计算过程（展示前4步示例）：\n外盘: QWERTYUIOPASD FGHJZXCVBNMKL\n初始内盘: JKLZXCVBNMASD FGHJQWERTYUIO\n第1个字符 H：查内盘索引→外盘同位=H（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第2个字符 S：查内盘索引→外盘同位=S（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第3个字符 Y：查内盘索引→外盘同位=N（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第4个字符 T：查内盘索引→外盘同位=B（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n\n（2）第2问计算过程（展示前4步示例）：\n外盘: QWERTYUIOPASD FGHJZXCVBNMKL\n初始内盘: JKLZXCVBNMASD FGHJQWERTYUIO\n第1个字符 K：查外盘索引→内盘同位=I（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第2个字符 O：查外盘索引→内盘同位=N（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第3个字符 G：查外盘索引→内盘同位=G（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n第4个字符 O：查外盘索引→内盘同位=N（此时内盘=JKLZXCVBNMASD FGHJQWERTYUIO）\n\n校验：对每一问将结果按同参数做逆运算，均能还原题目给定字符串。"
+    }
+  ]
+}

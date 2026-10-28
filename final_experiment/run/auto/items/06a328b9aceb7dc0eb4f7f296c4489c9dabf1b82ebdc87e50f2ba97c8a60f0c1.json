@@ -1,0 +1,40 @@
+{
+  "anon_id": "f1ef3d8ef8512819cb6f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[+,+,+];[+,-,+];[+,-,-];[-,+,+]]",
+      "certificate": "令“+”表示真、“-”表示假。若 q 为真，则第二项要求 r 为真，p 任意；得到 [+, +, +]、[-, +, +]。若 q 为假，则第二项恒真，而第一项要求 p 为真，r 任意；得到 [+, -, +]、[+, -, -]。按 I1、I2、I3 从“+”到“-”排序即为所列结果。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "给定表达式 (p∨q)∧(¬q∨r) 的满足项只有四个：[++,+,+]、[+,-,+]、[+,-,-]、[-,+,+]。标准答案额外包含 [-,-,+]，但此时 p∨q 为假，因此输出应为“-”而非“+”。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的规范答案与逻辑表达式不一致。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目本身的规范答案错误；所给尝试的四项枚举实际上与表达式一致。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

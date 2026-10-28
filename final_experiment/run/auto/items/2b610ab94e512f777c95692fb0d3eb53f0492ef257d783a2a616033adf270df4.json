@@ -1,0 +1,41 @@
+{
+  "anon_id": "5188d645ef30329424b4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "B,C,D,E,F",
+      "certificate": "A 以 False and 开头，故为假。B 为 True，C 中 7>3。D 的内层 and False 为假，且 1<0 为假；括号内整体为假，外层 not 后为真。E 中 √9=3、x=x+0，且三角形内角和为 180°，故为真。F 中 2 是偶数，故为真。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "各选项可直接验证：A 以 False 与其他表达式作 and，结果为假；B 为真；C 中 7>3 为真；D 内层含 False 且 1<0 为假，括号整体为假，经外层 not 得真；E 中 √9=3、x=x+0 且三角形内角和为180°，三者均真；F 中2为偶数，故为真。因此规范答案 B,C,D,E,F 正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要分别计算数值比较和等式、组合嵌套布尔运算，并验证多个合取或析取分支；D尤其涉及内层 and、双重 not 和外层 not 的依赖，E涉及三个数学事实的合取。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "equality",
+        "inequality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐项说明了A至F的真假依据；D正确识别了两个导致内层结果为假的条件并应用外层not，E和F的数学事实也均与表达式一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

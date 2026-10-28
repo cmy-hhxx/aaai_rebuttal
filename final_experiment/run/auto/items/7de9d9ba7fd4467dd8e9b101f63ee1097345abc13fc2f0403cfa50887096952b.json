@@ -1,0 +1,40 @@
+{
+  "anon_id": "2debbc40a260d0796e46",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[X X 1 1 X 1,X X X X X X,X X X X X X,X X X X X 1,X X X X X X,X X 1 X X 1]]",
+      "certificate": "第2、3、5行和为0，故全为X；第1、4、6行是唯一可能有黑格的行。第1列、第2列、第5列约束为0，故全为X。第4列约束为1，只能取第1行；第6列约束为11，必须取第1、4、6行；第3列约束为7，只能取第1、6行。所得第1行列号3+4+6=13，第4行列号6=6，第6行列号3+6=9，所有列约束也分别为0,0,7,1,0,11。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的答案满足全部行列约束：第1行黑格在第3、4、6列，权重13；第4行在第6列，权重6；第6行在第3、6列，权重9；其余行权重均为0。各列权重分别为0、0、7、1、0、11，与题目一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "先由行约束为0确定第2、3、5行全为X，再结合列约束为0确定第1、2、5列全为X；随后利用第4列和第6列的精确权重确定相应黑格，最后由第3列及各行权重完成一致性核验。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确说明了零约束导致的全X行列、第4列权重1和第6列权重11的确定过程，并逐项计算了各非零行及各列的权重，所有计算均可直接核查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

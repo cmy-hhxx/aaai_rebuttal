@@ -1,0 +1,41 @@
+{
+  "anon_id": "d3e661641267f56aad33",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[D=0,E=8,K=4,Q=1,S=6,T=9,W=2]]",
+      "certificate": "按位进位：万位进位必为1，因此Q=1；千位需T+c3≥10，只能T=9、c3=1，从而D=0。设个位、十位、百位进位为c1,c2,c3，则有W+S=E+10c1，K+W+c1=S+10c2，K+E+c2=W+10。消元得2K+W=10+9(c1+c2)。逐一检查进位组合，唯一可行的是c1=c2=0，得到K=4、W=2、S=6、E=8。验证：9442+826=10268。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按位验证成立：9442+826=10268，对应T=9、K=4、W=2、E=8、Q=1、D=0、S=6，所有字母数字互异且首字母不为0。进位方程也正确，且对进位组合的检查得到唯一可行解，与canonical_answer一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先确定最高位进位Q=1，再由千位确定T=9、D=0；随后建立个位、十位、百位进位方程，并检查进位组合以得到K=4、W=2、S=6、E=8。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书明确给出了各列进位方程、最高位推导、消元结果以及最终数值验证9442+826=10268。未逐项展示四种进位组合的排除过程，因此存在小幅省略，但主要推导均可检查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

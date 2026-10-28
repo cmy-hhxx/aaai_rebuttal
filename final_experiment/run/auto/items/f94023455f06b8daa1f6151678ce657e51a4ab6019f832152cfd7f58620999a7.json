@@ -1,0 +1,44 @@
+{
+  "anon_id": "e502c2f0e8c3835e6137",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "FCI*ILP*VEH*EVE*LER*====无法唯一确定",
+      "certificate": "第一问：按5行、列方向交替填充，FIVEL向下，EVELC向上，IPHER向下；按行得到 FCI、ILP、VEH、EVE、LER，并各加*。第二问不符合该密码的行长度约束：去除*后共有11个字符，5行交替列填充应产生行长3、2、2、2、2，但给出的分行是4、4、1、1、1（若将#视为空白，分行仍不匹配）。因此无法唯一解密；得到“HIDDEN”需要额外规定如何处理#及重新分行。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "在题面给出的自然解释下，明文长度为15，按5行交替列填充形成3列网格：F C I / I L P / V E H / E V E / L E R，逐行并加星号应为“FCI*ILP*VEH*EVE*LER*”，与canonical_answer的第一问不符。题面未定义“#”的含义；第二问按星号分行得到长度4、4、1、1、1，也不符合该填充方式通常产生的行长3、2、2、2、2，因此“HIDDEN”无法由给定规则唯一推出。",
+      "error_types": [
+        "wrong_answer",
+        "ambiguous",
+        "missing_constraint"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为canonical_answer与题面规则不一致，且“#”的处理及第二问的分行约束未定义。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用。 supplied attempt 对第一问给出了可核查的网格计算，并指出第二问的行长不匹配；但由于题目本身无效，不能据此给出有效的标准化解释评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

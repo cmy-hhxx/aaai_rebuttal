@@ -1,0 +1,41 @@
+{
+  "anon_id": "6a10bfba662c69e286dc",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[11010111110111011111111011010100]]====[[无有效明文]]",
+      "certificate": "加密：M、A、T、H分别经异或K及P置换得到11010111、11011101、11111110、11010100，拼接为11010111110111011111111011010100。解密给定密文分块后按P^-1重排并异或K，得到十六进制AE A5 A9 EF（字符为®¥©ï），均不是A-Z，因此第二问不存在符合规则的有效明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按通常的置换约定，置换后第i位取异或结果的第P[i]位。M的ASCII为01001101，与K异或得11100111，经P置换为11010111，而标准答案给出的首块是11100010，因此加密答案不匹配。对给定密文按P^-1解密得到AE A5 AF EF（第三字节为AF，不是尝试说明中的A9），均不是A-Z，不能得到CODE。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的标准答案与规则直接矛盾，无法对其作为有效任务进行依赖深度评估。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目无效；所给尝试的加密结果符合上述置换约定，但其解密第三字节计算错误，且其结论与标准答案不一致。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

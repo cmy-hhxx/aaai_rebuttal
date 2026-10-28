@@ -1,0 +1,40 @@
+{
+  "anon_id": "5e4eb59a5f187336e16e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[W T 0 G, 0 N 0 S, 0 L F W]]",
+      "certificate": "纵向单词按列填入：第1列 W；第2列 TNL；第3列 F；第4列 GSW。因此各行分别为 WTG（中间阻隔位置保留为0）、NS、LFW；横向连续 X 段得到 WT、G、N、S、LFW，全部一致。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The 3×4 grid has across entries WT, G, N, S, LFW and down entries W, TNL, F, GSW exactly as listed. Filling them yields [[W T 0 G,0 N 0 S,0 L F W]], and every crossing letter is consistent. The supplied attempt matches this grid; its extra whitespace after commas does not change the specified structure.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "One must identify the contiguous across and down slots from the X/0 pattern, then place the length-compatible words and verify dependent crossing letters, especially TNL and GSW against the across entries.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly assigns each down word to its column, derives the rows, and checks that the across segments are WT, G, N, S, and LFW. This is complete and consistent with the grid.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

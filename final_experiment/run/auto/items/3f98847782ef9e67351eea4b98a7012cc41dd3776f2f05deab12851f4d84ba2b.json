@@ -1,0 +1,41 @@
+{
+  "anon_id": "57ca54f1976769ba8547",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[(r0c0,r0c1),(r0c3,r0c4),(r0c5,r0c6),(r1c1,r1c2),(r1c4,r2c4),(r1c6,r2c6),(r2c0,r3c0),(r2c2,r2c3),(r3c1,r3c2),(r3c3,r4c3),(r3c5,r4c5),(r3c6,r4c6),(r4c1,r5c1),(r4c2,r5c2),(r5c0,r6c0),(r5c3,r6c3),(r5c4,r5c5),(r5c6,r6c6)]",
+      "certificate": "每个非零配额区域恰有2个格子，因此必须放置且只能放置一个区域内骨牌；Q、W配额为0且不放置。给出的必覆盖线索恰好分别覆盖T、N、Y、G、B、S、P、O、K、Z、F、I、H、M、E、D、A、L这18个区域，且各对均相邻、互不重叠并未跨区。列表按起始格子的字典序排列；其余禁止覆盖、行列奇偶及横纵数量约束均由这些固定骨牌满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规范答案中的18个骨牌均覆盖同一区域内的相邻格子、互不重叠，并满足各区域配额；其中17个初始必覆盖线索和补充线索(r5c6,r6c6)全部出现。横向、纵向数量及行列奇偶性逐项一致，且未使用禁止覆盖对。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "所有骨牌位置由给出的必覆盖线索和补充必覆盖线索直接确定；配额与计数约束用于确认没有额外骨牌。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 1,
+      "explanation_evidence": "证书正确指出了骨牌互不重叠、区域内相邻及计数约束满足，但包含明显错误：并非每个非零配额区域恰有2个网格格子，且初始必覆盖线索只有17对，补充线索才构成第18对。因此证书结论可核查但论述含有重要不准确之处。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

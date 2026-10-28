@@ -1,0 +1,41 @@
+{
+  "anon_id": "2749171c74daf0cc2724",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解。按二叉表达式根节点穷举：二元运算仅为减法和除法。两数子表达式的可能值由对应数字对产生，例如(7,6)为{-1,7/6,6/7}，(7,2)为{-5,7/2,2/7}，(6,2)为{-4,3,1/3}；所有两两分割的比值都不可能为-11。若根为减法且分割为1对3，三数子表达式必须分别为13、17或18，穷举其两种括号形状及运算顺序均无此值；分割为2对2也无差值-11。若根为除法且分割为1对3，三数子表达式需为-2/11、-6/11、-7/11，或在单数为除数时需为-22、-66、-77，穷举同样均不存在。因此不存在满足全部数字恰用一次、至少一次除法且结果为-11的表达式。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "标准答案 (((6 / 2) - 7) - 7) 满足所有约束：6 / 2 = 3，3 - 7 - 7 = -11；数字 7、2、6、7 各使用一次，至少使用一次除法，除数不为零，未使用阶乘或平方，且完全括号化并达到要求的括号嵌套深度。供给的“无解”证明被该表达式直接反驳。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先计算 6 / 2 = 3，再将结果依次减去两个 7 得到 -11；这些运算还同时验证了数字使用次数、除法和括号格式约束。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality",
+        "string"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 0,
+      "explanation_evidence": "唯一 supplied certificate 声称无解，但未涵盖有效反例 (((6 / 2) - 7) - 7)，其结论明确错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

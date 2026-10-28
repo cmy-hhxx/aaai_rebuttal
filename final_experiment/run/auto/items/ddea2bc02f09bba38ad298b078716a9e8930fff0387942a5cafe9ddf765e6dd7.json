@@ -1,0 +1,42 @@
+{
+  "anon_id": "842b758b5f2c77ad7faa",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "encryption": "[[1010011110011001101110101000011110100111101001111001111010100011101110011010010010111001]]",
+        "decryption": "[[FXHGIJECW]]"
+      },
+      "certificate": "加密时各字符 XOR 后的字节依次为 37,29,3C,27,37,37,2E,35,39,32,39（十六进制）；按 Perm=(2,0,3,1,4,6,5,7) 置换后分组为 10100111 10011001 10111010 10000111 10100111 10100111 10011110 10100011 10111001 10100100 10111001，拼接即给出的密文。解密密文分组为 10101101,10000011,10100011,10101100,10100010,10100111,10101000,10101110,10001100；按 InvPerm 逆置换并 XOR 01111101 后得到 ASCII 十六进制 46,58,48,47,49,4A,45,43,57，即 FXHGIJECW。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical encryption is consistent with the stated XOR and permutation rules for all 11 characters, and decrypting the supplied 72-bit ciphertext yields FXHGIJECW. The supplied attempt is wrong because its encryption differs: for example, T XOR 01111101 = 00101001, which permutes to 10001001, not 10011001.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Each character requires XOR followed by the specified bit permutation; decryption additionally requires 8-bit grouping, inverse permutation, XOR, and ASCII conversion.",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate correctly lists the XOR byte values and correctly verifies the decryption as FXHGIJECW, but its encryption groups and claimed encrypted output are incorrect; specifically, the second group for T should be 10001001 rather than 10011001.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

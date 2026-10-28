@@ -1,0 +1,43 @@
+{
+  "anon_id": "eccc96e1bd727de5361d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[AIMENCHENLNIAR$$G$$$$]]====[[无法确定]]",
+      "certificate": "明文分成三行：MACHINE、LEARNIN、G$$$$$$。按列序[1,4,0,6,5,2,3]重排后分别为AIMENCH、ENLNIAR、$$G$$$$，故第一问为AIMENCHENLNIAR$$G$$$$。第二问密文长度为16，不是7的倍数；按7列分行后最后一行仅有“R$”，无法取得该行所需的第2至第6列，因此依据给定解密规则不能唯一或合法解密。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定加密规则，明文 MACHINELEARNING 分成 MACHINE、LEARNIN、G$$$$$$ 三行，分别加密为 AIMENCH、ENLNIAR、$$G$$$$，所以第一问应为 [[AIMENCHENLNIAR$$G$$$$]]，不是 canonical_answer。第二问密文长度为16，不是7的倍数，无法按固定7列规则形成完整表格；且 CRYPTOGRAPHY 按规则加密应为 RTCGOYPAYR$$PH，而不是题给密文。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目及其 canonical_answer 不一致，第二个密文也不满足固定7列输入条件。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用：整体判定为无效；所给证书对第一问的逐行重排是正确的，并正确指出第二问长度问题，但不能使错误的 canonical_answer 成立。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

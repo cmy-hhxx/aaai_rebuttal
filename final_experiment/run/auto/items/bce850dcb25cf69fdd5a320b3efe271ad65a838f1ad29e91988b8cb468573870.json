@@ -1,0 +1,40 @@
+{
+  "anon_id": "8a08ba496464ab576ee5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": -1,
+      "certificate": "从左到右扫描，所有右括号均与栈顶左括号类型匹配：[]、{}、[]、()、{}、{}、[]、{}、<<>>、{}、<<[]>>、以及后续的 >、]、}}、)、]、} 均依次合法；扫描结束时栈为空。因此序列完全合法，答案为 -1。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐字符栈扫描可得所有闭合括号均匹配：匹配对为 (1,2)、(3,28)、(4,27)、(5,26)、(6,25)、(7,24)、(8,23)、(9,10)、(11,22)、(12,13)、(14,21)、(15,20)、(16,19)、(17,18)。扫描结束时栈为空，因此规范答案为 -1，与尝试答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次维护栈状态，处理多层嵌套，并在内部的 <、{、[ 结构闭合后继续验证外层括号，最后确认栈为空；这些是多个相互依赖的匹配推断。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "尝试正确指出了所有闭合括号与栈顶匹配且最终栈为空，足以支持答案；但证书将部分嵌套结构概括为“<<>>”并列出“后续”括号，未逐位置完整展示，因此存在轻微表述缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

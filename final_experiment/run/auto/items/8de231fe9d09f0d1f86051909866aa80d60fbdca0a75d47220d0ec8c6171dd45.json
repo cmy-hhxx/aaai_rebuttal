@@ -1,0 +1,43 @@
+{
+  "anon_id": "42f6660aad5e3d226678",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "按全部给定条件推导：总和为570，边框和为395，所以内部六格满足 e+g+h=73。由第2、3行及第5列可得 i=e+13、n=d+7、f=76-d-e。第4列四格均为奇数，结合 h+m=54，逐一检查可行的(e,i)、(h,m)、(d,n)组合后，唯一可能形成第1行三数和88的分支为：1) (e,h,g,m,d,f,n,i)=(17,31,25,23,19,40,26,30)，第1行集合为{22,29,37}，但代入第1列/第2列关系无可行排列；2) (17,31,25,23,22,37,29,30)，第1行集合为{19,34,35}，同样无可行排列；3) (17,35,21,19,22,37,29,30)，第1行候选集合虽有{23,25,40}或{23,31,34}，但不满足恰有一个数除以4余2；4) (21,23,29,31,30,25,37,34)，第1行必须为{22,26,40}，有两个数除以4余2；5) (22,17,34,37,23,31,30,35)，第1行只能为{19,29,40}，没有数除以4余2；6) (22,25,26,29,23,31,30,35)，第1行只能为{17,34,37}，但第1列要求 j=59-a，对a=17,34,37分别得到42,25,22，均已不存在或与已用数字冲突。因此给定数据无满足条件的填法。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Canonical answer satisfies all row sums (149,142,140,139), column sums (100,116,104,134,116), uses each of the 20 specified numbers exactly once, and has border sum 395. It also satisfies the modulo-4 condition, the diagonal-cell sum condition (36+40=41+35), four odd numbers in column 4, and the row-2 maximum at column 4. The supplied attempt incorrectly claims that no valid filling exists; the canonical grid is a direct counterexample.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Verification depends on checking the complete 4x5 assignment against multiple interacting sum, uniqueness, parity/modulo, positional, and maximum constraints; establishing the intended solution requires branching or multi-constraint elimination rather than a single direct inference.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "cardinality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 0,
+      "explanation_evidence": "The supplied certificate concludes unsatisfiability, but the stated canonical grid satisfies every condition, so its central conclusion and purported elimination are demonstrably wrong.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

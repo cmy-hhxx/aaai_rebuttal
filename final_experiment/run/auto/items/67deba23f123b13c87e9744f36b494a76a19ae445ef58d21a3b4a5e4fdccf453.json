@@ -1,0 +1,43 @@
+{
+  "anon_id": "ae604aeec98a0b0e239f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "无法确定",
+      "certificate": "题面未明确置换表的方向（例如 PERM 输出位 i 取输入位 p[i]，还是输入位 i 放到输出位 p[i]），也未明确旋转的位编号方向。按常见约定 y[i]=x[p[i]]、位串从左到右编号、ROT_R 为右旋，解密第1个密文块 01011100 得到 00111000（不是大写 ASCII）；按另一常见约定 y[p[i]]=x[i]，同一块得到 10111111（也不是大写 ASCII）。因此给定信息无法唯一且一致地确定任务一明文，任务二和任务三也随之无法确定。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "置换表的方向未定义，至少存在两种常见且彼此不同的解释：y[i]=x[p[i]]，或 y[p[i]]=x[i]。对首个密文块01011100按题面操作逆序解密，前一种解释得到00111001，后一种得到00111111，结果不同，且均不形成大写英文字母。因此任务一的明文以及任务二、任务三都不能由题面唯一确定，给出的canonical_answer也无法被题面充分验证。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题面存在未定义的置换方向，无法建立唯一的完整推导链。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：所供尝试正确指出了置换方向歧义，但其首块具体计算值与逐步复核结果不完全一致；无论如何，该歧义本身已足以阻止唯一验证。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

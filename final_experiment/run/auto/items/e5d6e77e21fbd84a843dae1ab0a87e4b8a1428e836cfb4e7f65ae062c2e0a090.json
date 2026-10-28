@@ -1,0 +1,41 @@
+{
+  "anon_id": "0462ac9b0280c2153916",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[VGGAZVSOYTWOQSXHLDUPJJRKRIZNMYLOW]]====[[5]]",
+      "certificate": "每块28字符，按列填入意味着每个4字符段对应一列。两轮置换合并后，密文第1至第7列块应还原为第3、第7、第1、第6、第2、第5、第4块。第一块得到 VGGA|ZVSO|YTWO|QSXH|LDUP|JJRK|RIZN；第二块得到 MYLO|W___|____|____|____|____|____。去除填充符后明文为 VGGAZVSOYTWOQSXHLDUPJJRKRIZNMYLOW，共33字符，按7列分行需 ceil(33/7)=5行。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目明确的“第k列来自原始第p[k]列”规则逆置换：两轮合并后，第一块还原为 VGGA|ZVSO|YTWO|QSXH|LDUP|JJRK|RIZN；第二块密文分列为 ____|MYLO|____|____|____|____|W___，逆置换后为 ____|W___|____|____|MYLO|____|____，因此去除填充符后的明文应为 VGGAZVSOYTWOQSXHLDUPJJRKRIZNWMYLO，共33字符，按7列分行为5行。canonical_answer中的 MYLOW 顺序错误，且其行数8也不符。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：canonical answer与题目规则不一致，故无法对有效解答的必要推理深度评分。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：题目给出的标准答案错误，且 supplied attempt 的第二块也将 WMYLO 错排为 MYLOW；因此不能按有效标准解答评估其解释完整性。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

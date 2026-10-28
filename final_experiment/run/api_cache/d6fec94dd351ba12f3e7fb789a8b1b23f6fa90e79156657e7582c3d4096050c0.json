@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"You are an intelligent assistant that specializes in encryption and decryption tasks. Below are the rules for a specific cipher. When responding, please ensure that your output adheres to the specified encryption and decryption rules and format.\\n\\n### Instructions:\\n\\n1. Identify the relevant properties and objects specified in the rule, including the plaintext, keyword, and ciphertext.\\n2. Follow the specified encryption or decryption operations precisely as described in the rules.\\n3. Ensure your output is formatted according to the specified notation and symbols.\\n\\n### Cipher Rule:\\n\\n**Encryption Rules:**\\n\\n- Input:\\n    - Plaintext: Uppercase letters string without punctuation and spaces.\\n- Output:\\n    - Ciphertext: Uppercase letters string without punctuation and spaces.\\n- Preparation:\\n    - 5x5 Gird(All row and column numbers are counted from 0.):\\n        - M Z S D P\\n        K N F L Q\\n        G A O X U\\n        W R Y V C\\n        B T E H I\\n        - Located at the first letter of all rows, MKGWB is the row header letter.\\n        - Located at the last letter of all columns, BTEHI is the bottom column letter.\\n- Encryption Steps:\\n    - Remove spaces and punctuation and the letter J from plain text and convert all letters to uppercase.\\n    - For each letter p in the plaintext.\\n        - Find the position of the letter p in the grid, and then find the corresponding row header and column footer characters accordingly.\\n        - Concatenate the row-header and column-bottom characters into a binary as the encrypted message for that letter p.\\n        - For example, if the letter p is H, it is in the 4th row, and the row header character is B; it is in the 3rd column, and the column bottom character is H, so the encrypted message is BH.\\n    \\n    Concatenate all the encrypted messages for the final ciphertext output.\\n    \\n\\n **Decryption Rules:**\\n\\n- Input:\\n    - Ciphertext: Uppercase letters string without punctuation and spaces.\\n- Output:\\n    - Plaintext: Uppercase letters string without punctuation and spaces.\\n- Preparation:\\n    - 5x5 Gird (Same as encryption)\\n- Decryption Steps (exact opposite of encryption steps):\\n    - Take two letters c1,c2 at a time from the ciphertext.\\n        - The letter c1 identifies the row position of the decrypted letter p in the grid, find the row where c1 is the row header.\\n        - The letter c2 identifies the column position of the decrypted letter p in the grid, and finds the row with c2 at the bottom of the column.\\n        - Find the letter at this row and column position in the grid, which is the c1,c2 decrypted message p.\\n        - For example, if c1,c2=BH, B is the header of the row is the 4th row, H is the bottom of the row is the 2nd column, (4,2) at the letter H, so BH decrypted to H.\\n    - Decrypt the letters in the ciphertext two by two, and output the connected decrypted message as the final plaintext.\\n\\n### Question:\\n1: Plaintext: \\\"LGINNBRSEMC\\\"\\n\\nPlease provide the encrypted answer, encapsulated in double square brackets. For example, the format should be: [[encrypted answer]].\\n2: Ciphertext: \\\"WBWBMBGIBBGHMHBEGTGEKB\\\"\\n\\nPlease provide the decrypted answer, encapsulated in double square brackets. For example, the format should be: [[decrypted answer]].\\n\\n### Answer:\\n\", \"seed_answer\": \"[[KHGBBIKTKTBBWTMEBEMBWI]]====[[WWMUBXDEAOK]]\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/cipher_15/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtPBg3Th29awhIjdouhUTwFYkWG7",
+    "created": 1793176477,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, random, string\nfrom typing import Dict, Tuple, List\n\n# --- Cipher definition (fixed) ---\nGRID = [\n    list(\"MZSDP\"),\n    list(\"KNFLQ\"),\n    list(\"GAOXU\"),\n    list(\"WRYVC\"),\n    list(\"BTEHI\"),\n]\nROW_HEADERS = \"MKGWB\"   # first letter of each row\nCOL_FOOTERS = \"BTEHI\"   # last row letters, used as column footers\n\n# Build lookup maps\nPOS: Dict[str, Tuple[int, int]] = {}\nfor r in range(5):\n    for c in range(5):\n        POS[GRID[r][c]] = (r, c)\n\nROW_INDEX: Dict[str, int] = {ch: i for i, ch in enumerate(ROW_HEADERS)}\nCOL_INDEX: Dict[str, int] = {ch: j for j, ch in enumerate(COL_FOOTERS)}\n\nALPHABET_25 = \"\".join([ch for ch in string.ascii_uppercase if ch != \"J\"])\nALLOWED_PLAINTEXT_CHARS = set(ALPHABET_25)\nALLOWED_C1 = set(ROW_HEADERS)\nALLOWED_C2 = set(COL_FOOTERS)\n\ndef normalize_plaintext(s: str) -> str:\n    s = \"\".join(ch for ch in s.upper() if 'A' <= ch <= 'Z')\n    s = s.replace(\"J\", \"\")  # rule says remove J\n    return s\n\ndef encrypt(plaintext: str) -> str:\n    pt = normalize_plaintext(plaintext)\n    out = []\n    for ch in pt:\n        if ch not in POS:\n            # Should not happen due to J removal and grid coverage\n            raise ValueError(f\"plaintext contains unsupported letter: {ch}\")\n        r, c = POS[ch]\n        out.append(ROW_HEADERS[r])\n        out.append(COL_FOOTERS[c])\n    return \"\".join(out)\n\ndef decrypt(ciphertext: str) -> str:\n    ct = \"\".join(ch for ch in ciphertext.upper() if 'A' <= ch <= 'Z')\n    if len(ct) % 2 != 0:\n        raise ValueError(\"ciphertext length must be even (two letters per plaintext letter).\")\n    out = []\n    for i in range(0, len(ct), 2):\n        c1, c2 = ct[i], ct[i+1]\n        if c1 not in ROW_INDEX or c2 not in COL_INDEX:\n            raise ValueError(f\"ciphertext contains invalid pair letters: {c1}{c2}\")\n        r = ROW_INDEX[c1]\n        c = COL_INDEX[c2]\n        out.append(GRID[r][c])\n    return \"\".join(out)\n\ndef explain_encrypt(pt: str, ct: str, max_show: int = 6) -> str:\n    pt_n = normalize_plaintext(pt)\n    pairs = []\n    for ch in pt_n[:max_show]:\n        r, c = POS[ch]\n        pairs.append(f\"{ch}->({ROW_HEADERS[r]}{COL_FOOTERS[c]})\")\n    more = \"\" if len(pt_n) <= max_show else f\" …（共{len(pt_n)}个字母）\"\n    return (\n        \"加密：逐字母查表，输出“行首字母+列底字母”。\\n\"\n        f\"示例映射：{', '.join(pairs)}{more}\\n\"\n        f\"得到密文：{ct}\"\n    )\n\ndef explain_decrypt(ct: str, pt: str, max_show: int = 6) -> str:\n    ct_n = \"\".join(ch for ch in ct.upper() if 'A' <= ch <= 'Z')\n    pairs = []\n    for i in range(0, min(len(ct_n), 2*max_show), 2):\n        c1, c2 = ct_n[i], ct_n[i+1]\n        r = ROW_INDEX[c1]\n        c = COL_INDEX[c2]\n        pairs.append(f\"{c1}{c2}->{GRID[r][c]}\")\n    more = \"\" if len(ct_n) <= 2*max_show else f\" …（共{len(ct_n)//2}对）\"\n    return (\n        \"解密：每两字母一组，第一字母定行（行首字母），第二字母定列（列底字母），取交叉格字母。\\n\"\n        f\"示例映射：{', '.join(pairs)}{more}\\n\"\n        f\"得到明文：{pt}\"\n    )\n\ndef render_problem(pt: str, ct: str, lang: str = \"zh\") -> str:\n    # Keep it self-contained: include grid and rules succinctly.\n    grid_lines = \"\\n\".join([\n        \"M Z S D P\",\n        \"K N F L Q\",\n        \"G A O X U\",\n        \"W R Y V C\",\n        \"B T E H I\",\n    ])\n    if lang == \"zh\":\n        return (\n            \"你需要按如下固定密码规则进行加密/解密（不需要任何外部信息）。\\n\\n\"\n            \"5x5 字母表（行列从0开始计数）：\\n\"\n            f\"{grid_lines}\\n\\n\"\n            f\"行首标识（每行第1个字母组成）：{ROW_HEADERS}\\n\"\n            f\"列底标识（每列最底部字母组成）：{COL_FOOTERS}\\n\\n\"\n            \"加密：明文仅含大写字母；先去掉非字母字符并删除字母J。对明文每个字母p：\\n\"\n            \"1) 在表中找到p的位置(行r,列c)；2) 输出 行首标识[r] + 列底标识[c] 作为两字母密文。\\n\"\n            \"将所有两字母密文依次连接得到最终密文。\\n\\n\"\n            \"解密：密文每两字母(c1,c2)一组：c1确定行（它必须是某行的行首标识），c2确定列（它必须是某列的列底标识），\\n\"\n            \"取该行该列交叉处的字母作为明文，连接得到最终明文。\\n\\n\"\n            \"问题：\\n\"\n            f\"1）明文：\\\"{pt}\\\"。请给出加密结果，用双中括号包裹：[[...]]\\n\"\n            f\"2）密文：\\\"{ct}\\\"。请给出解密结果，用双中括号包裹：[[...]]\"\n        )\n    else:\n        # Default to Chinese per requirement; keep fallback minimal.\n        return render_problem(pt, ct, \"zh\")\n\ndef make_instance(rng: random.Random) -> Tuple[str, str, str, str]:\n    # Generate plaintext (no J) and a valid ciphertext (even length, valid symbols)\n    pt_len = rng.randint(8, 14)\n    pt = \"\".join(rng.choice(ALPHABET_25) for _ in range(pt_len))\n\n    # For ciphertext, either encrypt another random plaintext or sample valid pairs directly\n    mode = rng.choice([\"from_pt\", \"pairs\"])\n    if mode == \"from_pt\":\n        pt2_len = rng.randint(9, 15)\n        pt2 = \"\".join(rng.choice(ALPHABET_25) for _ in range(pt2_len))\n        ct = encrypt(pt2)\n    else:\n        pairs_n = rng.randint(10, 16)\n        ct = \"\".join(rng.choice(ROW_HEADERS) + rng.choice(COL_FOOTERS) for _ in range(pairs_n))\n\n    return pt, encrypt(pt), ct, decrypt(ct)\n\ndef canonical_key(problem: str) -> str:\n    # For de-dup: normalize whitespace\n    return \" \".join(problem.split())\n\ndef main():\n    data = json.load(sys.stdin)\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n    rng = random.Random(seed)\n\n    output_language = data.get(\"output_language\", \"zh\")\n\n    results = []\n    seen = set()\n\n    attempts = 0\n    max_attempts = 2000\n\n    while len(results) < count and attempts < max_attempts:\n        attempts += 1\n        try:\n            pt, pt_enc, ct, ct_dec = make_instance(rng)\n\n            problem = render_problem(pt, ct, output_language)\n            key = canonical_key(problem)\n            if key in seen:\n                continue\n\n            # Cross-check correctness via inverse properties\n            if decrypt(pt_enc) != normalize_plaintext(pt):\n                raise AssertionError(\"encrypt/decrypt inverse check failed on generated plaintext.\")\n            if encrypt(ct_dec) != \"\".join(ch for ch in ct.upper() if 'A' <= ch <= 'Z'):\n                raise AssertionError(\"decrypt/encrypt inverse check failed on generated ciphertext.\")\n\n            answer = f\"[[{pt_enc}]]====[[{ct_dec}]]\"\n            explanation = (\n                explain_encrypt(pt, pt_enc) + \"\\n\\n\" + explain_decrypt(ct, ct_dec)\n            )\n\n            results.append({\n                \"problem\": problem,\n                \"answer\": answer,\n                \"explanation\": explanation\n            })\n            seen.add(key)\n        except Exception as e:\n            print(f\"[warn] generation attempt failed: {e}\", file=sys.stderr)\n            continue\n\n    if len(results) != count:\n        raise RuntimeError(f\"Unable to generate enough unique problems: got {len(results)} / {count}\")\n\n    json.dump(results, sys.stdout, ensure_ascii=False)\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 2063,
+      "prompt_tokens": 2240,
+      "total_tokens": 4303,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1408
+      },
+      "cost": 0.030584399999999998,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 10,
+        "engine_ttft_ms": 71,
+        "engine_ttlt_ms": 20630,
+        "pre_inference_ms": 199,
+        "service_tbt_ms": 10,
+        "service_ttft_ms": 874,
+        "service_ttlt_ms": 21428,
+        "user_visible_ttft_ms": 675
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261005123958-a6f2edc6-default-r2-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176499.6242182
+}

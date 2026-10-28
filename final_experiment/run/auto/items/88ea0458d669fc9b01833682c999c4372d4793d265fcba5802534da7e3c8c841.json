@@ -1,0 +1,45 @@
+{
+  "anon_id": "f356a09360c27703546f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[C I O 0 A, 0 O 0 0 C, B U 0 A Z, C 0 0 L 0]]",
+        "[[C I O 0 C, 0 O 0 0 A, B U 0 A Z, C 0 0 L 0]]"
+      ],
+      "certificate": "交叉约束强制：第1行前三格为 CIO；第3行前两格为 BU，后两格为 AZ；第4行第1格为 C、第4行第4格为 L。第5列纵向必须为 ACZ，但其前两格可分别取 A,C 或 C,A；横向单格词列表中恰有 A、C、C 可满足这两种排列。因此存在上述两个不同填法，题目没有唯一答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "矩阵中的横向槽位长度依次为3,1,1,1,2,2,1,1，正好对应给定横向单词；纵向槽位也可分别填入 C、BC、IOU、O、AL、ACZ。标准答案中的填法满足所有横纵交叉字母一致。第5列的 ACZ 允许前两格为 A,C 或 C,A，因此题目存在两个合法填法，但题目不要求唯一解，且尝试给出的两个填法均有效。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先按 X/0 矩阵识别横纵槽位并放置固定长度单词，再利用 CIO、BU、AZ 与 IOU、AL 的交叉约束确定多个格子，最后对第5列 ACZ 的前两格进行两种情况分配并由单格词补足。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确指出 CIO、BU、AZ、L 及相关交叉位置的强制取值，并准确识别第5列 ACZ 的 A/C 交换产生两个解；逐格检查可验证两个输出都满足全部横向、纵向单词及交叉一致性。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

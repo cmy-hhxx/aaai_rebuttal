@@ -1,0 +1,44 @@
+{
+  "anon_id": "fcbd11df131fc1625c58",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[BPGY%EAHM%IQQA%DGB%YNHO%DKNZ%SLVA%QGJS%VFOP%KHXR%BXVN%AVDW%%]]====[[DHYSWYGCYVMSWZFIGORLWJSRRESXRJGBPHDROGFFQDLXDSAEQ]]",
+      "certificate": "明文按12列分行得到4行（末行11字母），交替列读后，经右移4列及偶数组反转，列序为BPGY、EAHM、IQQA、DGB、YNHO、DKNZ、SLVA、QGJS、VFOP、KHXR、BXVN、AVDW，末尾追加%%即得加密结果。解密时去除末尾空段，偶数组反转后逆右移4列，再按交替列方向还原，得到行DHYSWYGCYVMS、WZFIGORLWJSR、RESXRJGBPHDR、OGFFQDLXDSAE、Q，拼接即为所示明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "解密所得密文分段总长度为49，因此按行宽12还原为5行，只有第1列包含5个字符。按分组反转、循环右移4列的逆变换及交替列方向还原，得到DHYSWYGCYVMSWZFIGORLWJSRRESXRJGBPHDROGFFQDLXDSAEQ，而非canonical_answer中的DHFFWYGCYVMSWZXSGORLWJSRREIFRJGBPHDROGSYQDLXDSAEQ。加密部分与规则一致，但规范答案的解密部分错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案未通过独立校验。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "由于整体判定为invalid，解释评分不适用；所给attempt的解密结果经独立按列长度和交替方向重建可核对，但规范答案与之不符。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

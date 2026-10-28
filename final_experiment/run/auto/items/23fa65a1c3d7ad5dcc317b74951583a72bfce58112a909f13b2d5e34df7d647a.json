@@ -1,0 +1,45 @@
+{
+  "anon_id": "a8a908d3b01ea758dcf0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "3 2 4 1 6 5; 5 6 3 2 1 4; 4 1 5 6 2 3; 6 4 2 5 3 1; 2 5 1 3 4 6; 1 3 6 4 5 2",
+      "certificate": "由第3行链及奇偶条件得 r3=(4,1,5,6,2,3)。由差值、和及第4行递减链得 r4c4=5、r4c5=3、r4c1=6；奇偶计数进一步得 r4c2=4、r4c6=1。第2行和链给出 r2c3=3、r2c4=2；第1行列及和约束给出 r1=(3,2,4,1,6,5)、r2=(5,6,3,2,1,4)。底部块、列唯一性及和约束给出 r5=(2,5,1,3,4,6)、r6=(1,3,6,4,5,2)。所得每行每列均为1..6；六个3×2子块也均含1..6。E/O、不等式、绝对差、全部和值、奇偶计数及六条单调链逐项代入均成立。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规范答案满足所有给定数字、每行和每列均为1..6、六个3×2子块均无重复，并逐项满足偶奇条件、不等式、绝对差、六组和值、三组奇偶计数及六条单调链。例如差值为 |r1c3-r4c5|=|4-3|=1，所有和值和链式关系也均可直接代入验证。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要综合拉丁行列与3×2子块唯一性、给定值、奇偶限制、不等式、绝对差、和值、奇偶计数及多条交叉单调链；这些约束跨越多行多列并相互依赖，不能由单一直接推断完成。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "all_different",
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 3,
+      "explanation_evidence": "证书给出的网格与规范答案一致，且其声称的行列、子块及附加约束均可逐项核验。证书概述了从第3行、第4行及第2行到其余行的主要推导，但没有完整展示每一步候选排除，因此为主线可检查但有细节缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,45 @@
+{
+  "anon_id": "da5e2a4121ab5f738e8c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无满足全部条件的配置。由各行加权和可得：第1行只能为{1,5}、{2,4}或{1,2,3}；第2行只能为{2,5}、{3,4}或{1,2,4}；第3行只能为{1,4,5}或{2,3,5}；第4行只能为{1,4}或{2,3}；第5行必为{2,3,4,5}。第5列列加权和要求其余各行在第5列的行号和为3，而第3行必选第5列，因此第1、2行不能选第5列，且第3行必须为{1,4,5}或{2,3,5}均贡献3。结合第4列所需的其余贡献7及第1列所需贡献4，唯一候选为第1行{2,4}、第2行{3,4}、第3行{2,3,5}、第4行{1,4}、第5行{2,3,4,5}。该候选仅选中12个单元格而非要求的13个；此外其黑格数为5、主对角线数为2、全局加权和为52而非97。因此问题无解，两个问题的答案均未定义。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "约束无解。由行和、列和可唯一得到配置：第1行{2,4}、第2行{3,4}、第3行{2,3,5}、第4行{1,4}、第5行{2,3,4,5}。该配置只有12个被选单元格，而题目要求13个，因此不满足全部条件。它的黑格数实际为6、主对角线数为3、全局加权和为97；供给的证明中将后两项及全局加权和计算错了，但不影响计数约束导致无解的结论。故canonical_answer不能作为满足全部约束的答案。",
+      "error_types": [
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目约束彼此不相容，无法对有效可解实例的必要推理深度评分。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：题目无解，且供给证明包含数值核算错误；只能确认其候选配置和计数矛盾，不能将其作为完整正确的标准解答。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

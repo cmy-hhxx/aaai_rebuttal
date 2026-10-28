@@ -1,0 +1,40 @@
+{
+  "anon_id": "eefbcc57593139a2b4a8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "{p: [6, 6], s: [11, 11], v: [15, 15], z: [8, 8]}",
+      "certificate": "逐项取最小值：min(p,6)=6且p∈[1,6]得p=6；min(z,8)=8得z≥8；min(14,s)=11且s∈[8,11]得s=11；min(v,17)=15得v=15。由z+s=19得z=8；p−s=−5成立；未知数和6+11+15+8=40为偶数。因此唯一解为(p,s,v,z)=(6,11,15,8)，各参数区间交集均为对应单点。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐项核验矩阵按位最小值：min(p,6)=6 且 p∈[1,6] 得 p=6；min(z,8)=8 得 z≥8；min(14,s)=11 且 s∈[8,11] 得 s=11；min(v,17)=15 且 v∈[13,17] 得 v=15。由 z+s=19 得 z=8；p−s=−5 成立，且 p+s+v+z=40 为偶数。因此唯一解及各参数取值区间均正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先从四个按位最小值约束确定或限制 p、s、v、z，再利用 z+s=19 将 z 的范围限制收紧为 8，并核验差约束与偶数约束；这些步骤结合了最小值比较、范围推理和算术约束。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐项列出了六个矩阵位置的最小值关系，正确使用了参数范围，随后明确验证了 z+s=19、p−s=−5 及总和为偶数，并正确推出唯一解和区间交集。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

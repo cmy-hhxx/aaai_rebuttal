@@ -1,0 +1,41 @@
+{
+  "anon_id": "56ced14520a00f8f2bbe",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "A,B,D,F",
+      "certificate": "A：任意数加0不变，故为真；B：直接为True；C：(-7≥-7)为真，与True作或运算后为真，not后为假；D：not(False)为真；E：前半部分与False相与必为假，且三角形内角和为180°而非360°，故整体为假；F：任意数大于等于自身加0，等号成立，故为真。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Direct evaluation confirms A, B, D, and F are true. C is false because (-7 ≥ -7) or True is True, and not True is False. E is false because its conjunction with False is False and the statement that a triangle's interior angles sum to 360 degrees is false; the sum is 180 degrees. Thus the canonical answer A,B,D,F is correct.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The evaluation requires nested Boolean dependencies: C uses comparison, or, and not; E combines inequality, conjunction with False, and disjunction with the triangle-angle proposition. A, B, D, and F follow directly.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "boolean"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate correctly checks each option: A uses x+0=x; B is directly True; C evaluates to False; D evaluates to True; E is False due to conjunction with False and the incorrect 360-degree claim; F uses x≥x+0 with equality. These deductions match the canonical answer.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

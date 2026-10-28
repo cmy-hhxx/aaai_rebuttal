@@ -1,0 +1,40 @@
+{
+  "anon_id": "8b23a03e94ed3c9daa8b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[XCOAIAZZA]]====[[KLRIYTDQZOE]]",
+      "certificate": "加密时按外盘位置查内盘：T→X、Y→C、L→O、A→A、K→I、A→A、R→Z、R→Z、A→A，得 XCOAIAZZA。解密前7个字符用初始内盘得到 I→K、O→L、Z→R、B→I、C→Y、X→T、D→D；处理7个字符后内盘右移3位，剩余 U→Q、G→Z、N→O、O→E，合为 KLRIYTDQZOE。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answer is correct. Encryption gives the first nine characters XCOAIAZZA, then after a right rotation of the inner disk by 5, S maps to V, yielding XCOAIAZZAV. Decryption gives KLRIYTD for the first seven characters; after rotating the inner disk right by 3, U,G,N,O map to Q,Z,S,E, yielding KLRIYTDQZSE. The supplied attempt omits the final encrypted character and incorrectly maps N to O instead of S.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires positional lookup on the disks, counting to the period boundary, applying the specified rotation, and then performing lookup under the rotated disk for the remaining characters.",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate correctly checks the initial encryption mappings and the first seven decryption mappings, but it omits the tenth encryption character and gives the wrong post-rotation mapping for N, so its evidence is only partly checkable.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

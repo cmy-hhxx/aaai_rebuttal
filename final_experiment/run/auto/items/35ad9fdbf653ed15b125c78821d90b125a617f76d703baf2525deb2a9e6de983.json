@@ -1,0 +1,48 @@
+{
+  "anon_id": "a531609270d14f1cd49a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "问题1": "[[C1A1912090B14090A140E611408691E07101C1207110A001E6A1D1E0C120A100E6F17121A1]]",
+        "问题2": "WTZYJ HTRRFSI XDXYJR YFWLJY STAJRGJW",
+        "问题3": 78,
+        "问题4": "C1A19120",
+        "问题5": "1C"
+      },
+      "certificate": "位移后的明文为 WTZYJ HTRRFSI XDXYJR YFWLJY STAJRGJW。掩码关键词首字母为 HN，对应 48 4E 循环异或；分成 4 字节块左旋后得到字节序列：1A 12 17 1F 6E 00 1A 02 1C 0E 1D 1A 6E 10 0A 01 17 02 1C 10 17 0E 19 68 04 11 6E 04 1A 09 04 1B 09 02 19 1A。按字节 XOR 校验为 1C，追加后整体字符逆序得到问题1密文。原始十六进制部分 36 字节加校验 1 字节共 74 个字符，双中括号使最终长度为 78。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按规则独立核验：字母后移5得到问题2；明文转ASCII十六进制后以HN对应的484E循环异或，再按4字节左旋，结果与证书列出的36字节序列一致。该序列按字节XOR得到1C，追加后整体字符逆序产生问题1密文。最终37字节即74个十六进制字符，加双中括号后长度为78，前8个字符为C1A19120；问题5为1C。所有答案均与canonical_answer一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次完成字母位移、ASCII十六进制编码与循环异或、按块旋转、校验计算以及整体逆序；这些步骤相互依赖并混合了字符处理、字节运算和长度计算。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出位移结果、HN掩码484E、旋转后的36字节序列、XOR校验1C以及长度计算74+4=78；这些数据可直接复算，并与最终密文及各问题答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

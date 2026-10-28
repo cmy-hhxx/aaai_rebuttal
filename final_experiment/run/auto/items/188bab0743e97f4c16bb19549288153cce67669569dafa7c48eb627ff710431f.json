@@ -1,0 +1,50 @@
+{
+  "anon_id": "ea585f472892e789998b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        5,
+        -6,
+        -7,
+        8,
+        45,
+        5,
+        9
+      ],
+      "certificate": "From b+f=-1 and f∈[4,6], b∈[-10,10], we have f∈{4,5,6}. The total sum and relations a+d=13, b+f=-1, c+g=2 imply e=45, so e=fq gives f=5,q=9 and hence b=-6. Since q+t=14, t=5. Using the weighted sum yields 8d+c=57. With d positive even and c∈[-11,11], candidates are (d,c)=(6,9),(8,-7). The main equation gives r=14+c; (6,9) fails r<d, while (8,-7) gives r=7<8. Thus a=13-d=5 and g=2-c=9. Verification: 5+(-6)(-7)=47=8·5+7; r+2q+g=7+18+9=34; total sum=59; weighted sum=672; congruence value is 4 mod 9; |b|+|c|+|g|=22; exactly two of b,c,f,g are nonnegative; all bounds and parity/positivity conditions hold."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied tuple [5, -6, -7, 8, 45, 5, 9] satisfies all stated constraints. The certificate's deductions are consistent: e=45, f=5, q=9, t=5, r=7; 5+(-6)(-7)=47=8·5+7; r+2q+g=7+18+9=34; the total is 59; the weighted sum is 672; the congruence is 4 mod 9; |b|+|c|+|g|=22; and exactly f,g are nonnegative among [b,c,f,g].",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "The solution requires chained substitutions from the pairwise sums and total sum, determining e; combining divisibility and q+t=14 to determine f,q,t; reducing the weighted equation to 8d+c=57; and branching over the resulting candidate pairs (d,c)=(6,9),(8,-7), with the division remainder condition rejecting the first and selecting the second.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate gives the key derivations, explicitly checks both candidate (d,c) cases using the remainder bounds, derives the remaining variables, and verifies the main equation, sums, congruence, absolute-value condition, cardinality condition, and bounds/parity/positivity requirements.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

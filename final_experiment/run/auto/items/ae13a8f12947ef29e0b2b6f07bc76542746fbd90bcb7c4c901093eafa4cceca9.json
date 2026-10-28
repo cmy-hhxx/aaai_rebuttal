@@ -1,0 +1,64 @@
+{
+  "anon_id": "64b0e3e9818c884b65d8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": [
+          2,
+          4
+        ],
+        "B": [
+          5,
+          3
+        ],
+        "C": [
+          3,
+          1
+        ],
+        "D": [
+          4,
+          5
+        ],
+        "E": [
+          1,
+          2
+        ]
+      },
+      "certificate": "各行列分别使用一次：列为2,4,1,5,3；区域标签依次为E,A,C,D,B，恰好覆盖A-E。相邻行星列差分别为2,3,4,2，均大于1，因此不相邻（含对角线）。按0-based行索引，下半区行索引>=2的星星位于第3、4、5行，共3颗。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical placement satisfies every stated constraint: one star in each row and column (columns 2,4,1,5,3), one in each region A–E, and consecutive-row column differences 2,3,4,2, so no stars are adjacent even diagonally. Interpreting the explicitly stated index condition as 0-based, rows with indices 2,3,4 contain exactly three stars. The supplied answer matches the canonical answer semantically.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Verification requires jointly checking row/column cardinalities, region coverage, diagonal-adjacency exclusion across consecutive rows, and the lower-half cardinality condition; these are distinct interacting constraints rather than a single direct lookup.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency",
+        "all_different"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly lists the used columns and region labels, checks the consecutive-row column differences for non-adjacency, and counts the three stars in 0-based lower-half rows. These checks cover all constraints and are correct.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

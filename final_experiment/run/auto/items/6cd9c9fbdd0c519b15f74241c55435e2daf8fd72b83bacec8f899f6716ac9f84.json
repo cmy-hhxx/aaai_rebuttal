@@ -1,0 +1,45 @@
+{
+  "anon_id": "5e13ffc452e79b73ddf0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目未指定第一阶段的密钥对齐方式，而“每组重置”和“全程连续”会产生不同结果。第一阶段若每组重置：明文 VIBIDGGDQDQ 经后移得到 YGXKTHGOZS，第二阶段前移得到 [[VKHQVFFLDC]]。若第一阶段全程连续：得到 YGXKTHXTBM，第二阶段得到 [[VKHQVFWQFW]]。因此最终密文无法唯一确定；第一阶段按字母计数与按全部字符计数在本题中无差别，因为明文全为字母。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第一阶段未指定密钥对齐方式；题目定义的“每组重置”和“全程连续”会产生不同结果，因此最终密文不唯一。并且即使采用“每组重置”，第一阶段密文为 YGXKTHJBMFG，按第二阶段密钥 XEKGCYZ、全程连续、仅按字母计数、前移计算应为 VKHQVFIZQPM，而给出的标准答案为 VKHQVFIYQPM，第8位不一致。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "题目存在未指定的第一阶段对齐约束，且标准答案的第二阶段逐字符计算可直接反驳；难度评分不适用于无效题目。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "题目无效且所给标准答案不正确，因此不进行解答说明质量评分。所给尝试指出了第一阶段对齐歧义，但其列出的若干具体密文也未完全符合逐字符计算；在无效判定下按要求不评价其正确性。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

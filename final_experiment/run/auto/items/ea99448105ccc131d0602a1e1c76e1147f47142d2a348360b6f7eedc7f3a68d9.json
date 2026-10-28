@@ -1,0 +1,41 @@
+{
+  "anon_id": "21a3af91c32b026f98ee",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[N=7,O=4,T=9,L=1,A=0,E=2]]",
+      "certificate": "按列进位：个位 3O=10c1+E；十位 2N+O+c1=10c2+T；百位 T+c2=10L+A。因 LATE 为四位数，L=1 且 T+c2≥10。故仅可能为 (c2,T,A)=(1,9,0) 或 (2,8,0)。逐一代入不同数字约束：第一种要求 2N+O+c1=19，唯一可行是 O=4,c1=1,E=2,N=7；第二种要求 2N+O+c1=28，无可行解。验证：74+74+944=1092。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐列验证可得：个位为 3O=10c1+E，十位为 2N+O+c1=10c2+T，百位为 T+c2=10L+A。由于 LATE 是四位数，L=1 且 T+c2≥10；在不同数字约束下，仅有 N=7,O=4,T=9,L=1,A=0,E=2。代入验证：74+74+944=1092。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要先建立三列进位方程，再由四位数条件分支讨论 c2=1 或 2，并结合不同数字约束与个位进位筛选候选；第二分支无解，第一分支唯一得到所给赋值。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确给出了三列进位方程、四位数条件导致的候选分支以及最终数值验证。对“第一种唯一可行”和“第二种无解”仅作了枚举结论，未逐项展示排除过程，因此存在小幅证明省略。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

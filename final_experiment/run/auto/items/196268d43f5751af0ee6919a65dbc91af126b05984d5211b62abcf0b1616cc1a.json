@@ -1,0 +1,76 @@
+{
+  "anon_id": "3e4fc3d99e7c74a52f5d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          8,
+          6,
+          5,
+          9,
+          28
+        ],
+        [
+          9,
+          3,
+          6,
+          4,
+          22
+        ],
+        [
+          9,
+          2,
+          1,
+          1,
+          13
+        ],
+        [
+          9,
+          5,
+          2,
+          1,
+          17
+        ],
+        [
+          35,
+          16,
+          14,
+          15,
+          80
+        ]
+      ],
+      "certificate": "X位置依次为(1,2)=6、(1,4)=9、(4,2)=5。验证：第1行8+6+5+9=28，第4行9+5+2+1=17；第2列6+3+2+5=16，第4列9+4+1+1=15。其余行列和也分别为22、13、35、14、80，且恰好使用[6,9,5]各一次。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "三个 X 的填充值满足所有对应行和列：第4行确定 (4,2)=5；第1行剩余两个位置之和为15，因此填入6和9；列和进一步确定 (1,2)=6、(1,4)=9。填充值恰好使用[6,9,5]各一次，完整矩阵与规范答案一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先由第4行的等式直接确定一个填充值为5，再由第1行确定另外两个填充值之和为15，并结合第2列和第4列的等式区分为6和9；最后核验所有行列和。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出三个X的位置和值，并核验第1行、第4行、第2列、第4列以及其余行列和，同时确认多重集中的每个数字恰好使用一次。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

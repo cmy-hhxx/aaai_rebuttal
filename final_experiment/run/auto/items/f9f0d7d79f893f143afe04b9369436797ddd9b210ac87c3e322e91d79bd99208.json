@@ -1,0 +1,69 @@
+{
+  "anon_id": "f775a1e755f19452a55e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": [
+          6,
+          5
+        ],
+        "B": [
+          2,
+          1
+        ],
+        "C": [
+          5,
+          2
+        ],
+        "D": [
+          3,
+          3
+        ],
+        "E": [
+          1,
+          4
+        ],
+        "F": [
+          4,
+          6
+        ]
+      },
+      "certificate": "按0-based行索引验证复合约束：D、E、A分别位于行索引2、0、5，和为7，为奇数；C、F、B、A中位于下半区（行索引>=3）的为F、C、A，共3个。各行列均恰有一颗星，所用列依次为4、1、3、6、2、5，互不重复；相邻行列差分别为3、2、3、4、3，故不存在横向、纵向或对角相邻。各区域A-F也各恰有一颗星。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规范答案满足全部约束：六颗星分别位于不同的行和列，区域A-F各恰有一颗；相邻行中的星星列差均大于1，因此不存在横向、纵向或对角相邻。0-based行索引下，D、E、A之和为2+0+5=7，为奇数；C、F、B、A中位于行索引至少3的有C、F、A，共3颗。给定尝试与规范答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要同时核对区域、行列唯一性、相邻禁配，以及基于0-based行索引的奇偶与下半区计数；这些约束相互作用，至少包含多步约束验证。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "adjacency",
+        "cardinality",
+        "other"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确计算了D、E、A的0-based行索引和，列出了下半区的三个区域，并检查了各行列、相邻性及区域计数；这些检查均与给定坐标一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

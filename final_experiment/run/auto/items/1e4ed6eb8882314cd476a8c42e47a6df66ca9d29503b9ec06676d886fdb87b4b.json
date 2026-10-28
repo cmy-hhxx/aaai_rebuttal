@@ -1,0 +1,84 @@
+{
+  "anon_id": "32dba4ee4c45e3c09fd3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "A",
+          5,
+          "A",
+          2,
+          2,
+          "A"
+        ],
+        [
+          "A",
+          5,
+          5,
+          "A",
+          "A",
+          "A"
+        ],
+        [
+          "A",
+          5,
+          5,
+          "A",
+          3,
+          "A"
+        ],
+        [
+          "A",
+          "A",
+          "A",
+          "A",
+          3,
+          3
+        ],
+        [
+          "A",
+          2,
+          2,
+          "A",
+          "A",
+          "A"
+        ]
+      ],
+      "certificate": "四个岛屿分别为：5岛={(1,2),(2,2),(2,3),(3,2),(3,3)}；上方2岛={(1,4),(1,5)}；3岛={(3,5),(4,5),(4,6)}；下方2岛={(5,2),(5,3)}。它们均四连通、大小分别为5、2、3、2，且每个恰含一个对应数字。所有非A区域彼此不共享边；逐一检查20个2×2窗口，每个窗口都至少含一个非A格，因此不存在2×2全A。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规范答案不满足规则。其非 A 格形成的连通分量包括：(1) (1,1),(1,2),(2,2)，大小为3且不含数字；(2) 包含(1,4)数字2的分量为(1,4),(1,5),(2,5)，大小为3而非2；(3) 一个分量同时包含(3,2)数字5和(5,3)数字2，且大小为7。因此规范答案错误。所给尝试的证书本身描述了一个有效网格，但与规范答案不一致；由于总体判定无效，按要求不对尝试答案作正确性评分。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案已被直接反例证明无效。",
+      "reasoning_type_tags": [
+        "spatial",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "graph",
+        "cardinality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为规范答案不满足题目约束；尝试证书虽可检查，但不能修复规范答案错误。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

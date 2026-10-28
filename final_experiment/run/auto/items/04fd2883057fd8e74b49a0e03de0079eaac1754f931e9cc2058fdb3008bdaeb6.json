@@ -1,0 +1,46 @@
+{
+  "anon_id": "428e4313b48647271f24",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "question1": "[[BGDHHIEADIBHDDBGFEHBA]]",
+        "question2": null
+      },
+      "certificate": "问题一：点划互换后的摩斯串按两字符分组得到单位序列 G,D,B,H,I,H,A,D,E,B,H,I,D,B,D,F,E,G,B,A,H；每三单位按[3,1,2]重排为 BGD、HHI、EAD、IBH、DDB、GFE、HBA，合并即 [[BGDHHIEADIBHDDBGFEHBA]]。问题二：密文分块为 AHH、HFI、AGD、IEG、GGF。按逆置换恢复单位序列 H,A,H,F,I,H,G,D,A,E,G,I,G,F,G，其中相邻单位 F、I 分别对应 -=、=.，连接后产生连续分隔符“==”，即空的摩斯字符。题面未定义空摩斯字符，因此无法还原为合法的大写明文，问题二无确定答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题面连接规则，明文共有8个分隔符；点划互换后的摩斯串长度为31+8=39，按2字符分组会剩下1个未定义字符，因此问题一无法严格完成。即使补充末尾分隔符，给出的标准化答案和证书中的单位序列也与逐字符计算不一致。问题二逆置换得到的单位序列确为 H,A,H,F,I,H,G,D,A,E,G,I,G,F,G，但映射并连接后包含空摩斯字符以及无效摩斯段，不能还原为[[UIBOCCC]]；故canonical_answer不匹配题面规则。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题面存在未定义的奇数长度分组余数，且解密结果包含无效摩斯段，无法形成有效的完整任务。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：所 supplied certificate 的问题一单位序列与逐字符分组不符；问题二虽正确给出了逆置换单位序列，但其后产生空段和无效摩斯段，不能作为正确答案证明。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

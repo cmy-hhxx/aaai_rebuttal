@@ -1,0 +1,44 @@
+{
+  "anon_id": "f3ee0ac917086152bd64",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[M1=1, M2=0, M3=1, M4=1, M5=0]]",
+      "certificate": "设 a=M1,b=M2,c=M3,d=M4,e=M5。数量相等给出 a+b=d+e；严格少于给出 b+e<a+d。由前式可得 (a+d)-(b+e)=2(a-e)，故必须 a=1,e=0。于是 d=1+b；因 d∈{0,1}，得 b=0,d=1。三元规则“恰好两个”为 c+d+b=2，故 c=1。验证：总真数为3（至少2且为奇数）；左半真数为1、右半为2，差为1；M5与M3不能同时真；M4或M3为真；两数量组分别为1和1、0和2；M2条件不触发，M3为真且 M2、M4 恰有一个为真。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The certificate correctly derives a+b=d+e and b+e<a+d, which imply 2(a-e)>0 and therefore a=1,e=0. Equality then gives b=0,d=1; the exact-two rule gives c=1. The resulting assignment satisfies every rule, including global count 3, left/right difference 1, both binary rules, both conditional XOR rules, and both quantity comparisons. It matches the canonical answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires dependent arithmetic deductions from the two quantity constraints, then substitution into the three-variable exact-cardinality rule, followed by checking the remaining global, balance, binary, and conditional constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "cardinality",
+        "implication",
+        "boolean"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly defines variables, shows the algebraic reduction, uses Boolean-domain consequences to determine all five values, and verifies each remaining rule numerically or logically.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

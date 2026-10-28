@@ -1,0 +1,42 @@
+{
+  "anon_id": "6db0d590e647a0e99ff6",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "item3,item17,item19,item4,item13,item8,item16,item20,item6,item10,item1,item12,item18,item9,item11,item7,item2,item15,item14,item5",
+      "certificate": "按自定义字母序 b<o<n<其余标准字母<z，ll/rr 为单单位，重音忽略，ñ 与 n 同主字母，并采用通常的区分大小写顺序（大写先）。首单位分组依次为：o（item3,item17）、n（item19,item4,item13）、a（item8）、e（item16,item20）、g（item6）、h（item10）、i（item1,item12,item18）、r（item9）、s（item11）、t（item7）、u（item2,item15）、w（item14）、z（item5）。组内按后续单位比较；第二阶段无分块调整，因此该序即最终序。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "规则未说明区分大小写时的大写与小写的先后顺序，因此 n 组中的 ñadóllvus/ÑAGOOD 以及 i 组中的 iopegñi/Ílo/IU 的相对顺序不唯一。另一个明确问题是请求要求输出 item 编号，但 canonical_answer 输出的是标题字符串而非 item1,item2 等编号。给定 attempt 采用大写优先，因而与 canonical 顺序不同，但该差异无法由现有规则唯一裁定。",
+      "error_types": [
+        "ambiguous",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目存在未规定的大小写排序规则，且 canonical_answer 与要求的答案格式不一致。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：整体判定不是有效题目；attempt 的分组和组间顺序可核查，但其采用的“大写先”并非题目明确规定，且没有解决输出格式与 canonical_answer 的冲突。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,47 @@
+{
+  "anon_id": "3020ff1aabe83ea9b7a5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[7]]",
+        "[[GWF,GWY,RWY,RWO,OWO,OWK,OQK,OQL]]",
+        "[[1]]",
+        "[[1]]"
+      ],
+      "certificate": "在词表中，与目标连通部分的唯一相邻边依次为 GWF-GWY、GWY-RWY、RWY-RWO、RWO-OWO、OWO-OWK、OWK-OQK、OQK-OQL。该链包含 7 条边，因此最短步数为 7，且路径唯一（从而也是字典序最小）。GWF 仅有合法一步邻词 GWY，所以数量为 1；唯一链也说明最短路径条数为 1。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐项核对词表可得唯一相关链 GWF-GWY-RWY-RWO-OWO-OWK-OQK-OQL。每条相邻边恰好只改变一个字母，且位置均属于允许的 1、2、3；链共有 7 条边。GWF 只有 GWY 一个合法一步邻词，因此最短路径条数为 1，给出的路径也是字典序最小路径。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先按单字母差异构造词表图，再连续确定从 GWF 到 OQL 的七条相邻边，并排除其他可形成更短路径的连接，最后进行边数、邻居数和路径条数统计。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "graph",
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出了完整路径中的每条边及其总边数，并给出 GWF 的唯一合法邻词 GWY；这些结论可直接由词表逐项比较验证，也支持唯一最短路径和路径计数结论。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

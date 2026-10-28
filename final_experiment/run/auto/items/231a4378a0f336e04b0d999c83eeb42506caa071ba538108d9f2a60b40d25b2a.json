@@ -1,0 +1,40 @@
+{
+  "anon_id": "61e688546e858ccc2454",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[青岛];[全对:A];[半对:B];[全错:C]]",
+      "certificate": "恰有一地为真时：若来自青岛(p真)，A的(p且非q)为全对，B的(p且r)恰对一句为半对，C的(q且r)全错；若来自杭州，A、B均全错；若来自南京，A、B、C均半对。因此唯一满足“一人全对、一人半对、一人全错”的情况是来自青岛，且A全对、B半对、C全错。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "在恰有一个地点为真的约束下逐一检验三种可能：p真时，A为全对、B为半对、C为全错；q真时，A和B均全错、C为半对；r真时，A、B、C均为半对。只有p真满足一人全对、一人半对、一人全错，因此王教授来自青岛，分配为A全对、B半对、C全错。规范答案与此一致。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要对p、q、r三个互斥情形进行分支检验，并分别计算三人的两句陈述的真假组合，再筛选满足全对/半对/全错各一人的情形。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "people",
+      "explanation_score": 4,
+      "explanation_evidence": "供给的证书完整列出了p真、q真、r真三种情形，并正确核对了每人的全对、半对、全错状态；结论唯一且与规范答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,38 @@
+{
+  "anon_id": "ff7709beb340374823a8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "{<[([])<{}>][({})<[]>](([]){})>}",
+      "certificate": "按栈匹配所有括号后，序列末尾仍开放的括号依次为 {、<；因此只能在末尾追加 >、}。追加后所有括号均正确闭合。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐项按栈检查，序列内部括号均已正确匹配；末尾栈中仅剩外层的“{”和“<”，因此只能依次追加“>”和“}”。给定规范答案与此结果一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要先完成内部括号的嵌套匹配，再根据末尾剩余的开放括号确定追加顺序“>}”。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确识别出末尾仍开放的括号为“{、<”，并正确推出追加顺序“>、}”；可直接由栈匹配验证。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

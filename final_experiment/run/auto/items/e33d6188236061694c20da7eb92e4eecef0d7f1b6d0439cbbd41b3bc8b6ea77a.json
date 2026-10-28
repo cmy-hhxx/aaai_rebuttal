@@ -1,0 +1,45 @@
+{
+  "anon_id": "6e17a5277f55afef5c0f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 17,
+      "certificate": "共有5座岛屿，规模总和为1+2+2+2+1=8。棋盘共25格，因此墙格（海洋）总数为25-8=17。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题面存在互相冲突的输出要求：前文要求输出完整棋盘矩阵，末尾又要求仅输出海洋墙格总数的纯整数。标准答案“[[...]]====17”既不是完整矩阵格式，也不是纯整数格式；虽然17的数值计算正确，但标准答案不匹配明确的纯整数答案类型。",
+      "error_types": [
+        "ambiguous",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为输出规范彼此冲突，无法确定应验证矩阵答案、整数答案还是两者组合。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency",
+        "graph"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释中的25-(1+2+2+2+1)=17计算可核查，但由于最终输出格式要求冲突，无法将其作为完整且符合题面的解答证明。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

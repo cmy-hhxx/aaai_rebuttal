@@ -1,0 +1,87 @@
+{
+  "anon_id": "a9ba255f461f8983b03b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "A",
+          "A",
+          "A",
+          "4",
+          "A",
+          "B"
+        ],
+        [
+          "C",
+          "C",
+          "C",
+          "A",
+          "B",
+          "B"
+        ],
+        [
+          "C",
+          "C",
+          "C",
+          "5",
+          "A",
+          "B"
+        ],
+        [
+          "2",
+          "A",
+          "A",
+          "A",
+          "A",
+          "B"
+        ],
+        [
+          "2",
+          "A",
+          "A",
+          "2",
+          "2",
+          "A"
+        ]
+      ],
+      "certificate": "无法提供有效证书：该网格中 B 岛（数字 5）与 A 岛相邻（第1行第4、5、6列的边界配置导致相邻关系），因此不满足“不同岛屿不能水平或垂直相邻”的约束。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical grid satisfies all constraints: the islands have sizes 4, 5, 5, 2, and 2; each is orthogonally connected, contains exactly one clue, and distinct islands are not orthogonally adjacent. The wall cells also contain no 2×2 all-wall block. The supplied attempt is invalid: it uses labels other than the requested A/X/numbers, isolates the clue 4 and the clue 5 from their required island sizes, and includes an extra 2 at row 4 column 1. Its certificate incorrectly treats wall cells marked A as an island, although the attempted grid is nevertheless invalid for the reasons above.",
+      "error_types": [
+        "wrong_answer",
+        "other"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "Verifying the canonical answer requires combining island-size counting with orthogonal connectivity, checking separation between all clue components, and checking the global prohibition on 2×2 wall blocks.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency",
+        "graph",
+        "boolean"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 1,
+      "explanation_evidence": "The certificate reaches the correct overall conclusion that the attempt is invalid, but its stated violation is not checkable as written: B is adjacent to A wall cells, not to an A island. It omits the actual failures, including the wrong symbol alphabet and incorrect clue-component sizes.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

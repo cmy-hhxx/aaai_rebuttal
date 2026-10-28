@@ -1,0 +1,41 @@
+{
+  "anon_id": "296e0591bed4b817495c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "32ad780f9e3b3bfe45af1e====ABABEvDIZ",
+      "certificate": "按字节循环异或。密钥前11字节为 73 ef 2a 4e dd 7a 7f bf 07 fd 5f；明文 ABRACADABRA 逐字节异或得到 32 ad 78 0f 9e 3b 3b fe 45 af 1e，即 32ad780f9e3b3bfe45af1e。密文 32 ad 6b 0c 98 0c 3b f6 5d 与密钥前9字节异或得到 ASCII ABABEvDIZ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按给定 SHA-256 密钥逐字节循环 XOR，明文“ABRACADABRA”得到 32ad780f9e3b3bfe45af1e；密文 32ad6b0c980c3bf65d 解密得到“ABABEvDIZ”。这与 canonical_answer 的两部分均不一致。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案与题目规则计算结果不一致。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为 invalid；不过所给 attempt 的逐字节 XOR 计算与题目数据一致。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,44 @@
+{
+  "anon_id": "00833a1b3bcaeff8f6a6",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[map][takeoff][avoid][map][avoid][hover]φ ∧ [map][takeoff][avoid][takeoff][hover]φ]",
+        "2": "2"
+      },
+      "certificate": "顺序展开公共前缀 map;takeoff;avoid，并将两个分支分别展开为 map;avoid;hover 与 takeoff;hover。按末端动作串字典序，map;avoid;hover 排在 takeoff;hover 之前，因此共有 2 个并列项。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目规定顺序展开 [α;β]φ 等价为 [α][β]φ，因此规范展开应将分支中的 map;avoid;hover 和 takeoff;hover 继续拆成独立方括号。给出的 canonical_answer 保留了 [map;avoid;hover] 和 [takeoff;hover]，与明确的完全展开规则冲突；attempt 的问题一格式和排序符合规则，问题二的数量 2 也正确。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为 canonical_answer 与题目明确的顺序展开约束不一致，无法将该题作为有效题目评分。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "abstract",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效：canonical_answer 未遵守完全顺序展开规则；attempt 的证书虽支持其自身答案，但不能修复 canonical_answer 的冲突。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

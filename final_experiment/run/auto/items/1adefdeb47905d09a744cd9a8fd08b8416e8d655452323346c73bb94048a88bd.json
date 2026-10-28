@@ -1,0 +1,41 @@
+{
+  "anon_id": "7a26defc8d0c18cf5006",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[(r0c1,r0c2),(r0c3,r0c4),(r1c0,r2c0),(r1c2,r1c3),(r2c1,r2c2),(r2c4,r3c4),(r3c1,r4c1),(r3c3,r4c3)]",
+      "certificate": "每个非空区域配额均为2，因此各区域恰放置一张骨牌。给定必覆盖线索分别唯一确定W、I、E、Q、U、Z、B、V区域的骨牌，且不触及禁覆盖边。共8张；横向数量奇偶分别满足各区域要求，按行计数均为偶数；触及外边界的为W、I、E、U、B、V共6张。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "每个非空区域有3个格子且配额为2，因此必须放置恰好一张骨牌；给出的必覆盖边分别唯一确定W、I、E、Q、U、Z、B、V区域的骨牌。所得8张骨牌不跨区域、不重叠且避开禁边；各区域横纵差值、横向奇偶、全局总数8、各行计数偶数及边界骨牌数6均满足。规范答案与此完整解一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先由每个区域的覆盖配额从3个格子推出恰好一张骨牌，再结合必覆盖相邻对确定各区域的唯一骨牌；随后检查奇偶、差值、行计数和边界计数约束。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确指出每个非空区域恰放置一张骨牌，并列明必覆盖线索依次确定W、I、E、Q、U、Z、B、V。逐项核验可得横纵差值分别为题定值，所有行计数为偶数，边界骨牌为6张，且没有触及禁覆盖边。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

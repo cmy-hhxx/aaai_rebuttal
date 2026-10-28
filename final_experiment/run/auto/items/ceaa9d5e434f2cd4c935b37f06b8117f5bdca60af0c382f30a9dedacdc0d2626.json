@@ -1,0 +1,41 @@
+{
+  "anon_id": "ad752b5d5f8b3fd0c7b1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[WINDOW BEACON MISSION-]]",
+      "certificate": "n=922^2+76=850160，密钥为 LINK-850160-UPLINK。将密文整体右移4字节得 71c3ac48dd28f863dc326e67ee1f382d17f72b3d2fa4722a086d3f47d627；与给定32字节摘要循环异或，得到明文及末尾校验：ASCII 明文为 WINDOW BEACON MISSION-，末8字节为 0fb823d1972c1863。去除校验段后即为所答明文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The arithmetic gives n=922^2+76=850160, hence key LINK-850160-UPLINK. Rotating the 30-byte ciphertext right by 4 bytes produces the stated sequence; XORing it with the supplied 32-byte digest yields ASCII plaintext WINDOW BEACON MISSION- followed by checksum 0fb823d1972c1863. Removing the required 8-byte checksum matches the canonical answer exactly.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires dependent arithmetic for the identifier, construction/use of the key digest, inverse byte rotation, XOR decoding, and removal of the appended 8-byte verification value.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate provides the computed identifier and key, the exact inverse rotation, the resulting XOR-decoded text and checksum, and the required checksum removal; these steps are directly checkable and agree with the canonical answer.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

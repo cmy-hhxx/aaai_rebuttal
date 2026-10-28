@@ -1,0 +1,51 @@
+### 模型输出 begin
+#### final yaml begin
+custom_operator:
+  # pf_op：在 pf_operation_22_0.py 中实现自定义运算 f■g
+  # sx_to_latex：将 sympy 表达式转为 LaTeX 字符串
+  pf_op: pf_operation_22_0.py
+  sx_to_latex: pf_operation_22_0.py
+
+variables:
+  # 题目中的函数定义（用字符串保存，交给 sympy 解析）
+  f_expr:
+    formula: "'x/y'"
+  g_expr:
+    formula: "'x**3 + y**3'"
+
+symbols: {}
+conditions: {}
+calc_solution: false  # 本题为符号计算，不需要Z3求解
+
+queries:
+  q1:
+    desc: "1: f(x,y)=x/y,g(x,y)=x^3+y^3, compute f■g. Please provide your answer in LaTeX format. Wrap the final answer in double square brackets, like this: [[your answer]]."
+    # pf_op 按规则计算：∂f/∂x + ∂g/∂x，返回 sympy 表达式
+    ans_formula: pf_op(f_expr, g_expr)
+    # 转 LaTeX 并按要求包裹 [[...]]
+    ans_text: "'[[' + sx_to_latex(_ans) + ']]'"
+    ans_assertion: 'True'
+
+desc: "{q1}"
+#### final yaml end
+#### final code begin
+# pf_operation_22_0.py
+import sympy as sp
+
+x, y = sp.symbols('x y')
+
+def pf_op(f_expr: str, g_expr: str):
+    """
+    自定义运算：f■g = ∂f/∂x + ∂g/∂x
+    输入为可被 sympy.sympify 解析的字符串表达式。
+    返回 sympy 表达式。
+    """
+    f = sp.sympify(f_expr)
+    g = sp.sympify(g_expr)
+    return sp.diff(f, x) + sp.diff(g, x)
+
+def sx_to_latex(expr):
+    """将 sympy 表达式转为 LaTeX 字符串（不带 $ 符号）。"""
+    return sp.latex(sp.simplify(expr))
+#### final code end
+### 模型输出 end

@@ -1,0 +1,43 @@
+{
+  "anon_id": "2dee91aff9602110a227",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "63012.74",
+      "certificate": "各列按索引从底部删除0至9个元素后均剩9项。按timestamp去重保留每个重复时间的首条记录，得到7行；筛选zone∈{A,B,C}且weekday∈{Fri,Wed}后仅剩两行：2026-01-28 06:51（B, Wed）与2026-01-28 07:54（A, Wed）。soil分区中位数为B=32.87、A=32.42，筛选值中心化为1.77、-0.03，方差为0.81。light分区中位数为B=15882.31、A=15475.43，筛选值中心化为553.96、51.91，方差为63013.550625。IQR处理不剔除这两行（全体light中的另一异常值不在筛选子集）。方差绝对差=63013.550625-0.81=63012.740625，ROUND_HALF_UP保留两位为63012.74。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "严格按列索引从底部剔除后各列均剩9项，按timestamp去重得到7行。筛选后的两行为2026-01-28 06:51（B, Wed）和2026-01-28 07:54（A, Wed）。soil_moisture_pct方差为0.81；light_lux中心化后两值为553.96和51.91，方差为63013.550625。IQR处理不删除这两行，因此绝对差为63012.740625，ROUND_HALF_UP后应为63012.74，而非canonical_answer中的63014.00。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于canonical_answer与按规则复算的结果不一致，难度评分不适用。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "题目无效，解释评分不适用；所供attempt的数值推导与独立复算一致，但其答案与canonical_answer不一致。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,84 @@
+{
+  "anon_id": "1c70994092e83cdbf3f1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          4
+        ],
+        [
+          "A",
+          3,
+          "A",
+          4,
+          4,
+          4
+        ],
+        [
+          "A",
+          3,
+          "A",
+          "A",
+          "A",
+          "A"
+        ],
+        [
+          "A",
+          3,
+          "A",
+          2,
+          2,
+          "A"
+        ],
+        [
+          "A",
+          "A",
+          "A",
+          "A",
+          "A",
+          "A"
+        ]
+      ],
+      "certificate": "将重复的数字视为同一岛屿的标记：4岛为(1,6),(2,4),(2,5),(2,6)，3岛为(2,2),(3,2),(4,2)，2岛为(4,4),(4,5)。三岛分别四连通、大小恰为4、3、2，且彼此不共享边。逐个检查20个2×2区域，每个都至少含一个非A格，因此不存在2×2全A。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "标准答案不满足岛屿规则。按非“A”格四连通计算，(3,2)的数字3通过(3,3)、(3,4)与(4,4)的数字2连成同一岛屿，导致一个岛屿包含两个数字；此外，数字4所在连通块仅包含(1,4)、(1,5)、(1,6)，大小为3而不是4。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为给出的标准答案已被直接反例判定为无效。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency",
+        "graph"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为标准答案本身不满足题目约束；尽管所给尝试的证书看起来可核查，但不能修正标准答案错误。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,40 @@
+{
+  "anon_id": "6472c283c4e77e8aa4dc",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 3,
+      "certificate": "按计数集合逐字符编号：第1步为“)”；第2步为反引号，切换进入代码片段；第3步为“[”，属于代码片段内禁用集合，因此首次违规步骤编号为3。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The input begins with an ignored underscore, then ')' as step 1, '`' as step 2 which toggles into code, and '[' as step 3. Since '[' is forbidden inside code, the first violation is step 3, matching the canonical answer and the supplied attempt.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Requires counting the first counted characters, applying the backtick state transition, and then testing the next character against the in-code forbidden set.",
+      "reasoning_type_tags": [
+        "counting",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly identifies steps 1–3, the state transition at the backtick, and the forbidden '[' at step 3; all claims are directly checkable.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

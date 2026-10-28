@@ -1,0 +1,55 @@
+{
+  "anon_id": "e95f9715e8613b00aaac",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          0.97,
+          0.97,
+          0.13,
+          0.13
+        ],
+        [
+          0.13,
+          0.13,
+          0.85,
+          0.85
+        ]
+      ],
+      "certificate": "行均值阈值为1.0505和1.5105，因此掩码M=[[0,1,1,0],[0,1,0,0]]。加法激活后为[[0.57,1.66,1.68,0.55],[0.64,2.60,0.37,0.21]]。逐列归一化得[[0,0,1,1],[1,1,0,0]]，反转后为[[1,1,0,0],[0,0,1,1]]。按行权重[1.23,0.85]后截断至[0.13,0.97]并保留三位小数，得到所示矩阵。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目规则计算，掩码为[[0,1,1,0],[0,1,0,0]]，加法激活后为[[0.57,1.66,1.68,0.55],[0.64,2.60,0.37,0.21]]。逐列归一化并反转得到[[1,1,0,0],[0,0,1,1]]；乘以行权重并截断后应为[[0.970,0.970,0.130,0.130],[0.130,0.130,0.850,0.850]]，与给定规范答案的第一行第三个元素不同。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案与题目规则计算结果不一致。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用；所给尝试的证书推导实际上支持另一结果，而非给定规范答案。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,42 @@
+{
+  "anon_id": "a5d4e8f87c98280dafe1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[(1, 1), (1, 5), (3, 3), (3, 4), (4, 2), (5, 1)]",
+      "certificate": "行权重使用列平方[1,4,9,16,25]：第1行只能为列1、5；第2行为全白；第4行为列2；第5行为列1。第3行的25可由列5或列3、4组成，但全局黑格数为6，故取列3、4。所得列权重为[1+125,64,27,27,1]=[126,64,27,27,1]，并满足副对角线4个黑格、各项奇偶条件及右下子矩形中2个黑格。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的坐标满足所有行列加权和及附加条件。行1为列1、5（1+25=26），行2为空，行4为列2（4），行5为列1（1）；行3的25只能由列5或列3、4构成，全局黑格数为6迫使其取列3、4。由此列加权和为[1+125,64,27,27,1]=[126,64,27,27,1]。副对角线黑格为(1,5)、(3,3)、(4,2)、(5,1)，数量为4，其余奇偶及子矩形条件也均满足。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先将各行加权和反解为列集合，再对第3行的两种平方和分解结合全局黑格总数作选择，最后依次核验列加权和、对角线、奇偶和子矩形条件。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出各行的平方和分解、利用总黑格数排除第3行单格方案，并逐项计算列权重；给出的坐标还可直接核验所有附加条件。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

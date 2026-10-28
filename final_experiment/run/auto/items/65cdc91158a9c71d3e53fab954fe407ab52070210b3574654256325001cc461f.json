@@ -1,0 +1,41 @@
+{
+  "anon_id": "461eac2779f0bd55c340",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "ZWVQZVDZFVECRHHHUXSAOOKZMVLWDGBFQLCXOJCIXKESU|VLWDG|45",
+      "certificate": "有效序列为 [4,1,2,0,3]，其逆序列为 [3,1,2,4,0]。A 分块逆置换得到 XKESU、BFQLC、OOKZM；B 补 Z 后正置换得到 XOJCI、VLWDG、HUXSA、ECRHH、VDZFV、ZWVQZ。交替合并后整体逆序，最终行依次为 ZWVQZ、VDZFV、ECRHH、HUXSA、OOKZM、VLWDG、BFQLC、XOJCI、XKESU；第6行为 VLWDG，总长度为 9×5=45。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "核验通过：有效序列为 [4,1,2,0,3]，逆序列为 [3,1,2,4,0]。A 的三块逆置换结果为 XKESU、BFQLC、OOKZM；B 补齐为六块后正置换结果为 XOJCI、VLWDG、HUXSA、ECRHH、VDZFV、ZWVQZ。按 A 起始交替合并并整体逆序后得到 ZWVQZVDZFVECRHHHUXSAOOKZMVLWDGBFQLCXOJCIXKESU，第6行为 VLWDG，总长度为45，均与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次计算两次置换的复合序列及其逆序列，逐块执行A/B的不同置换与补齐，再进行交替合并和整体逆序；这些步骤相互依赖且包含多种操作。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出有效序列、逆序列、各分块置换结果、交替合并后的行序列、整体逆序结果、第6行和总长度；逐项计算均与规则及标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

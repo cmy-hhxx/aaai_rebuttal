@@ -1,0 +1,48 @@
+{
+  "anon_id": "c84f077933b87f02da1b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "Neptunian",
+        "Venusian"
+      ],
+      "certificate": "Plutonian在最右侧且Neptunian在1号位；Orange在1号、Blue在3号、Jovian=Blue，因此Jovian在3号并携带Bio-samples。Crystals在2号，Ore使用Antimatter且Antimatter在4号，故Ore在4号；Medicine须与4号相邻且剩余货物约束确定在5号。Venusian须位于Blue与Green之间，结合Green=Fusion且Fusion在5号，故Green=5、Venusian=4。Omega使用Plasma，剩余燃料及Hydrogen在Bio-samples左侧的约束确定Plasma在1号。因此1号使用Plasma的国籍是Neptunian，4号携带Ore的国籍是Venusian。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "约束可满足且答案与问题类型一致。由Plutonian在5号、Neptunian在1号、Orange在1号、Blue/Jovian在3号、Green/Fusion在5号、Crystals在2号、Antimatter/Ore在4号及Venusian位于Blue与Green之间，可得Venusian在4号；因此Ore对应Venusian。机器人约束进一步确定Omega在1号，故1号使用Plasma，而1号国籍为Neptunian。canonical_answer与该两问的答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要串联多个依赖：固定国籍、船体和燃料位置；由Jovian=Blue推出Bio-samples在3号；由Antimatter在4号推出Ore在4号，再由Venusian位于Blue与Green之间推出Venusian在4号；最后结合Alpha/Jovian、Delta/Green、Beta在2号及机器人一一对应确定Omega在1号，从而确定Plasma使用者。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "ordering",
+        "adjacency",
+        "cardinality",
+        "boolean",
+        "other"
+      ],
+      "scenario": "objects",
+      "explanation_score": 2,
+      "explanation_evidence": "证书正确说明了主要位置链：Ore在4号、Medicine在5号、Venusian在4号，并正确给出两个答案。但它没有展示从Alpha与Jovian同船、Delta在Green、Beta在2号以及Alpha邻接Black等约束推出Omega在1号的必要机器人分配；且仅凭燃料和Hydrogen约束并不能单独推出Plasma在1号。因此证书结论可核查但存在一个重要的未展开推导。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

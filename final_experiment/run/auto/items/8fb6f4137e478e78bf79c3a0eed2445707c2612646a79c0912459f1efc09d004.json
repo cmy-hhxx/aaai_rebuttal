@@ -1,0 +1,50 @@
+{
+  "anon_id": "abc88e67b966a81a0a80",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[paired conjunctive terms:m2∨m5];[denoted:Σm(2,5)]]",
+        "[[paired disjunctive terms:M3∧M5∧M6];[denoted:ΠM(3,5,6)]]",
+        "[[A];[ΠM(0,1,2,4)]]",
+        "[[28]]",
+        "[[Σm(5,6,12)];[E]]"
+      ],
+      "certificate": "1) ¬p∧q∧¬r corresponds to 010₂=2, and p∧¬q∧r to 101₂=5. 2) The three clauses are false respectively at 011₂=3, 101₂=5, and 110₂=6. 3) The four clauses are the distinct maxterms M0,M1,M2,M4, so the formula is a principal CNF. 4) With 3 variables there are 8 assignments; choosing exactly 2 true rows gives C(8,2)=28, an even number. 5) The valid selections are WX=1100₂=12, XY=0110₂=6, and XZ=0101₂=5. Thus the PDNF is Σm(5,6,12), with 3 true rows, so it is a full odd formula (E)."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第5问的标准答案错误。满足条件且恰好选2人的方案有 WX、XY、XZ，分别对应二进制 1100、0110、0101，即 m12、m6、m5，因此主析取范式为 m5∨m6∨m12，含3个最小项，属于全奇公式 E，而不是仅 m6 且属于全偶公式 D。其余各问的核心计算与给出的解答一致，但整体 canonical_answer 不正确。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "由于第5问的 canonical_answer 被反例直接否定，整体题目答案判定为无效，难度评分不适用。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "implication",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "people",
+      "explanation_score": null,
+      "explanation_evidence": "标准解答第5问遗漏了 WX 和 XZ：WX 满足 W→X、¬X→Y（前件为假）及 Y 与 Z 不同时选；XZ 同样满足全部条件。故所给证明结论明确错误，且非有效答案整体不进行解释质量评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

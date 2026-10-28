@@ -1,0 +1,42 @@
+{
+  "anon_id": "20cfcd847367c1045b45",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[XMEFVJFEDQ]]",
+        "2": "[[YOIPJSTYBOWSI]]"
+      },
+      "certificate": "按给定字母表编号：加密使用 y=(3x+5) mod 26。NAOVTLVOXP 的编号依次得到输出 X,M,E,F,V,J,F,E,D,Q，即 [[XMEFVJFEDQ]]。解密使用 x=9(y-5) mod 26；HELQTNVHSECNL 逐字得到 Y,O,I,P,J,S,T,Y,B,O,W,S,I，即 [[YOIPJSTYBOWSI]]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按给定字母表逐字编号计算，明文加密结果为 [[XMEFVJFEDQ]]；密文解密结果为 [[YOIPJSTYBOWSI]]，与 canonical_answer 完全一致。参数满足 3×9 mod 26=1，因此 A_inv=9 正确。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "每个字符仅需一次字母表位置查找、一次仿射公式计算和一次结果位置映射；无分支或跨字符依赖。",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出两条公式、字母表编号方法及两组逐字输出；可复核得到 XMEFVJFEDQ 和 YOIPJSTYBOWSI，均与标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

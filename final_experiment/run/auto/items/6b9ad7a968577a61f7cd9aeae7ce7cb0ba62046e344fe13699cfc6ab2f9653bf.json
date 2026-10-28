@@ -1,0 +1,63 @@
+{
+  "anon_id": "252ba057029473b73615",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "X",
+          "C",
+          "X"
+        ],
+        [
+          "X",
+          "T",
+          "X"
+        ],
+        [
+          "X",
+          "T",
+          "C"
+        ],
+        [
+          "X",
+          "X",
+          "X"
+        ]
+      ],
+      "certificate": "两棵树位于第2行第2列和第3行第2列，因此帐篷总数为2。第1行必须放1顶且只能放在第1行第2列（与第2行第2列的树正交相邻）；第3行必须放1顶且第3列约束为1，只能放在第3行第3列（与第3行第2列的树正交相邻）。列计数分别为[0,1,1]，帐篷位置不相互接触，所有规则均满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "最终网格满足所有规则：帐篷位于(1,2)和(3,3)，分别与树(2,2)和(3,2)正交相邻；两顶帐篷不接触；行计数为[1,0,1,0]，列计数为[0,1,1]；帐篷数和树数均为2。标准答案与此一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "先由树的数量确定需要放置2顶帐篷，再结合行约束、列约束和树的正交邻接候选位置确定(1,2)与(3,3)，最后检查帐篷不接触及全部计数。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确识别两棵树和两顶帐篷，并核对行列计数、邻接关系及不接触条件；关于第3列位置的“只能”结论略微省略了对其他候选行受行约束排除的明确说明，但结论可直接验证。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

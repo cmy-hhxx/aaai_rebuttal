@@ -1,0 +1,41 @@
+{
+  "anon_id": "ce162e4e93108be5e382",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "15,40",
+      "certificate": "Thought 15错误：此前栈为((，读入(后应为(((，而写成([。Thought 40读入)时栈顶为[，括号不匹配，该步按规则判错；栈应保持为[，其后Thought 41、42后最终栈为[，因此最后“非空”声明正确。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "逐步核对可得错误步骤为15和40。Thought 15中，栈从((读入(后应为(((，却写成([；Thought 40中栈顶为[而读入)，不匹配，但栈仍应保持为[。Thought 42结束后最终栈为[，因此Thought 43的“最终栈是非空的”声明正确。故canonical_answer多报了43，应为15,40。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目提供的canonical_answer与逐步核验结果不一致。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为invalid；提供的attempt答案15,40本身与核验结果一致，但按要求非valid时solver_correct必须置为null。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

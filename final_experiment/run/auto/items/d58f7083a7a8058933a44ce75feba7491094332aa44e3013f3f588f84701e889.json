@@ -1,0 +1,42 @@
+{
+  "anon_id": "d2bbf933b8dcb24cc81a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "80,1",
+      "certificate": "按5分钟离散。摄影与灯光同时可用的场景区间为：外景10:15–10:55、15:45–16:20、16:35–16:50；内景13:40–15:20、17:00–17:20。内景13:40–15:20期间导演均忙碌，但可用35分钟取消额度覆盖其中连续7格，因此从14:00开始可召开至15:20，共80分钟。其他允许的整点起始时刻（10:00、11:00、12:00、13:00、15:00、16:00、17:00、18:00）均因摄影/灯光不可用或可连续会议时长更短；场景切换无法跨越资源空档，且摄影拼接次数为0。因此最长时长为80分钟，达到该时长的起始时刻只有14:00，答案为80,1。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "在10:00开始、选择外景时，导演空闲至10:45，摄影空闲至10:55，灯光自10:15至11:20可用。将导演10:00–10:15的忙碌计入不超过35分钟的取消额度后，可连续召开10:00–10:45，共45分钟。因此最长时长至少为45分钟，canonical_answer为40,1错误。 supplied attempt声称内景14:00–15:20的80分钟均可通过35分钟取消额度覆盖，也直接违反取消额度上限。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目及标准答案已被可行的45分钟反例否定。",
+      "reasoning_type_tags": [
+        "deduction",
+        "temporal"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "inequality"
+      ],
+      "scenario": "people",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用： supplied certificate包含明显错误，称35分钟额度可以覆盖80分钟导演忙碌时段，无法作为正确证明。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

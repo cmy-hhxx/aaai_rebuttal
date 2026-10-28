@@ -1,0 +1,40 @@
+{
+  "anon_id": "913ac886c69b6a7a8d01",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[QRXOITRBIQQZYYJRPWTLRHZHH]]",
+      "certificate": "分隔后列串为 PLR,JHO,YHT,BQ,WTQ,RRX,YZI,ZHR,IQ。各列向上环移2位后为 RPL,OJH,TYH,BQ,QWT,XRR,IYZ,RZH,IQ；按P=(2,4,6,8,1,3,5,7,9)回填，自然列1至9为 QWT,RPL,XRR,OJH,IYZ,TYH,RZH,BQ,IQ。网格各行为 QRXOITRBI、WPRJYYZQQ、TLRHZHH；按蛇形行读取得到 QRXOITRBIQQZYYJRPWTLRHZHH。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The nine cipher segments are correctly split, rotated upward by 2 positions, placed into natural columns according to P=(2,4,6,8,1,3,5,7,9), and read from the resulting top-aligned grid in alternating row directions. This yields [[QRXOITRBIQQZYYJRPWTLRHZHH]], matching the canonical answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires dependent execution of segment rotation, column permutation and grid reconstruction, followed by alternating-direction row traversal while skipping empty cells.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate lists all nine split segments, gives the correct rotated forms, places them in the correct natural columns, shows the three grid rows, and verifies the final snake-order concatenation.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

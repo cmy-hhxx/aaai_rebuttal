@@ -1,0 +1,41 @@
+{
+  "anon_id": "fd2238ef0b447633b813",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "小问一 [[SHLPBESKHNIZTEEDFBGLLSSQMR]] 小问二 [[11]] 小问三 [[5]]",
+      "certificate": "将每行末字母视为加密后的校验字母。若数据字母数为n、其密文数值和为S、末字母为C，则C≡S−(n−1)k (mod 26)。第3行给出15≡22−3k，故k=11；第6行同样验证k=11。第6行末尾W后缺少@，所以缺失行索引为5。左移11后，各行去除校验字母得到SHLPB、ESKHN、IZTE、EDF、BGLLS、SQMR，拼接即SHLPBESKHNIZTEEDFBGLLSSQMR；其校验字母依次解密为A、A、E、M、V、L，分别等于对应数据和模26。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The checksum equations consistently give k=11: for example, row index 2 has data sum 22 and checksum 15, so 15 ≡ 22−3k (mod 26), yielding k=11; the other rows also verify this value. Row index 5 is the only row lacking a trailing @. Left-shifting each non-checksum letter by 11 produces SHLPB, ESKHN, IZTE, EDF, BGLLS, and SQMR, whose concatenation matches the canonical answer.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires identifying checksum positions and the malformed row, solving a modular checksum equation for k, independently validating k across rows, and then applying the shift and concatenating the decoded sequences.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate states the checksum congruence, derives k=11 from row 3, confirms it with row 6, identifies the missing delimiter at index 5, and lists all decoded row sequences and checksum validations. These claims are directly checkable and correct.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

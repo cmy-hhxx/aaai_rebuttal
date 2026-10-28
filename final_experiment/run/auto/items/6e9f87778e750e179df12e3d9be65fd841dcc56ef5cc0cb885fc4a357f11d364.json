@@ -1,0 +1,96 @@
+{
+  "anon_id": "16aa4ceed06e984a3eaf",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          14,
+          15,
+          18,
+          19,
+          24,
+          25
+        ],
+        [
+          13,
+          16,
+          17,
+          20,
+          23,
+          26
+        ],
+        [
+          12,
+          11,
+          10,
+          21,
+          22,
+          27
+        ],
+        [
+          3,
+          4,
+          9,
+          8,
+          29,
+          28
+        ],
+        [
+          2,
+          5,
+          6,
+          7,
+          30,
+          31
+        ],
+        [
+          1,
+          36,
+          35,
+          34,
+          33,
+          32
+        ]
+      ],
+      "certificate": "该网格包含1..36各一次，且连续数字均正交相邻。固定线索全部匹配：1=(5,0)、2=(4,0)、4=(3,1)、9=(3,2)、17=(1,2)、18=(0,2)、22=(2,4)、23=(1,4)、28=(3,5)、33=(5,4)、36=(5,1)。方向线索为8→9向左、31→32向下、17→18向上、21→22向右；25→26→27均竖直。第1、5行和分别为115、171；第0行严格递增，第0列严格递减。区域和分别为85、118、66。拐点10、32、8均发生方向改变；以(5,0)为起点的棋盘双色奇偶性也满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Canonical grid satisfies all stated constraints: it contains each integer 1..36 exactly once; every consecutive pair is orthogonally adjacent; all 11 fixed clues match; directional clues 8→9 left, 31→32 down, 17→18 up, and 21→22 right hold; row sums are row 1=115 and row 5=171; row 0 is strictly increasing and column 0 strictly decreasing; the 25..27 segment is vertical; all three region sums are 85, 118, and 66; 8, 10, and 32 are turns; and the checkerboard parity condition holds from (5,0).",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Verification requires checking a Hamiltonian orthogonal path through all 36 cells together with fixed placements, directional restrictions, monotonicity, multiple sums, segment orientation, turn conditions, and parity; these are interacting multi-constraint dependencies rather than a single direct inference.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "adjacency",
+        "ordering",
+        "inequality",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate's claims are checkable directly from the grid: all values and consecutive adjacencies can be enumerated, each clue coordinate matches, the stated directions and segment orientation match, row and region sums calculate correctly, the monotonic sequences are strict, the listed values are turns, and parity alternates along the path.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

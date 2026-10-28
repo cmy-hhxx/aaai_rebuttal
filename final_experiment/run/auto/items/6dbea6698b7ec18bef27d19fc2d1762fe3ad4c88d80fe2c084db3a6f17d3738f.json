@@ -1,0 +1,41 @@
+{
+  "anon_id": "b74b555d99302a10405f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[KHGEBBGBGHKIKIBBWEKTWIBTKI]]",
+        "2": "[[HMQFDLHRWVOXBFLX]]"
+      },
+      "certificate": "加密逐字得到：L→KH，O→GE，B→BB，G→GB，X→GH，Q→KI，Q→KI，B→BB，Y→WE，N→KT，C→WI，T→BT，Q→KI，连接为 KHGEBBGBGHKIKIBBWEKTWIBTKI。解密密文分组为 BH MB KI KE MH KH BH WT WB WH GE GH BB KE KH GH，按行首与列底交叉得到 H M Q F D L H R W V O X B F L X。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "两部分答案均与给定5×5表及行首、列底标识一致。加密逐字查表并连接得到 KHGEBBGBGHKIKIBBWEKTWIBTKI；密文按两字母分组后交叉查表得到 HMQFDLHRWVOXBFLX，与 canonical_answer 完全匹配。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "每个明文字母或密文二元组只需进行一次表格位置查找，随后执行直接连接；不存在需要分支或多步依赖的推理。",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": " supplied certificate 逐项列出了13个加密字符的映射，并列出17个解密分组及其交叉结果；这些结果均可由表格直接复核，且最终字符串与标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

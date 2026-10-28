@@ -1,0 +1,43 @@
+{
+  "anon_id": "8c960f15a10ce41e14f4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[PVMCAFFEBBPHEHHTRP]]====[[EQWXVAKBQNFNVEN#OOU#RTX#BYO#DAF#MUO#]]====[[0]]====[[6]]",
+      "certificate": "第一段长度18，无填充，按两行9列填入后依序读取列8至列0：PV、MC、AF、FE、BB、PH、EH、HT、RP，得PVMCAFFEBBPHEHHTRP。第二段长度30，补6个#至36；基础序列[8,7,6,5,4,3,2,1,0]取排列逆仍为自身，再逐项取反(x→8−x)得[0,1,2,3,4,5,6,7,8]。按四行读取各列得EQWX、VAKB、QNFN、VEN#、OOU#、RTX#、BYO#、DAF#、MUO#，拼接即第二段密文。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "第一段长度为18，按两行九列填入并按列8至0读取，得到PVMCAFFEBBPHEHHTRP。第二段长度为30，补6个#至36；列序列[8,7,6,5,4,3,2,1,0]取逆后为自身，再逐项取反得到[0,1,2,3,4,5,6,7,8]。按四行九列逐列读取得到EQWXVAKBQNFNVEN#OOU#RTX#BYO#DAF#MUO#，填充数分别为0和6，均与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次确定两段长度与填充数、对第二段列序列执行取逆和逐项取反、构造栅格并按所得列序列读取；这些步骤相互依赖且包含字符串分块与排列变换。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "spatial",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确核对了第一段的两行九列及九个列块、第二段的补6个#、列序列变换以及九个四字符列块；各拼接结果均可逐项复算并与标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

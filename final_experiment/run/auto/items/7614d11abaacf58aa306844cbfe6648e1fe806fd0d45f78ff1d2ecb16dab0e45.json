@@ -1,0 +1,80 @@
+{
+  "anon_id": "294f0aab9a5d052b86c8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "T",
+          "C",
+          "X",
+          "X"
+        ],
+        [
+          "X",
+          "X",
+          "X",
+          "X"
+        ],
+        [
+          "X",
+          "X",
+          "T",
+          "C"
+        ],
+        [
+          "C",
+          "X",
+          "X",
+          "X"
+        ],
+        [
+          "T",
+          "X",
+          "X",
+          "C"
+        ],
+        [
+          "T",
+          "C",
+          "X",
+          "T"
+        ]
+      ],
+      "certificate": "帐篷位置为 (0,1),(2,3),(3,0),(4,3),(5,1)。行数为 [1,0,1,1,1,1]，列数为 [1,2,0,2]；区域 (4,2)-(5,3) 含 (4,3) 一顶，区域 (0,3)-(3,3) 含零顶，不满足区域约束？"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied grid satisfies all stated constraints under the standard orthogonal tree-tent adjacency: it has the required row counts [1,0,1,1,1,1] and column counts [1,2,0,2]; tents are at (0,1),(2,3),(3,0),(4,3),(5,1); the two specified regions each contain exactly one tent; and the parity condition gives four tents on cells where i+j+1 is even. Each tree is paired with exactly one orthogonally adjacent tent, and no tents are 8-neighbor adjacent. However, the certificate incorrectly claims that region (0,3)-(3,3) contains zero tents; it contains the tent at (2,3).",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Verification requires combining regional cardinality with row/column counts, checking the one-to-one tree-tent pairing, and then checking 8-neighbor exclusion and parity arithmetic.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 0,
+      "explanation_evidence": "The certificate correctly lists the tent coordinates and row/column totals, but its region check is demonstrably false: (2,3) lies inside (0,3)-(3,3), so that region contains one tent, not zero. The stated conclusion that the answer violates the region constraint is therefore wrong.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

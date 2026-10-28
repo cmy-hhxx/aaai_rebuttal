@@ -1,0 +1,49 @@
+{
+  "anon_id": "82c8a31d378e51ff99fd",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[!(c&!a)|(b|!c)]]",
+        "[[A]]",
+        "[[(!c&!a)|!b];[c&a&b]]",
+        "[[A];[A]]",
+        "[[c&!a];[!c&a];[!b&!c]]",
+        "[[丢失];[EC:L1];[PC:L3];[EI:L2]]"
+      ],
+      "certificate": "(1) P>Q等价于!P|Q，因此得到!(c&!a)|(b|!c)。(2) !c|(a&b)与(!c|a)&(!c|b)等价，故A。(3) 德摩根律给出!((c|a)&b)=(!c&!a)|!b；两次NAND/NOR化简为(c&a)&(a&b)=c&a&b。(4) (!c|a)&(!c|!a)=!c，且c=!a与!c=a等价，故均为A。(5) 直接按定义得到三式。(6) 恰一真时，c真对应丢失：L1两句真为EC，L3仅!b真为PC，L2两句假为EI；a真或b真均不满足公开数量约束。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "所有六问的答案均与题面一致：蕴涵消去、蕴涵对合取的分配、德摩根律及NAND/NOR化简、两项有效性判断、代理符号化均正确。恰好一个命题为真时逐一检验三种状态，只有 c 真（对应丢失）满足一位完全正确、一位部分正确、一位完全错误，分类为 EC:L1、PC:L3、EI:L2。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要先进行多项命题逻辑等价变形，再对恰好一个命题为真的三种状态进行分支检验，并结合三位代理的两个分句分别统计完全正确、部分正确和完全错误，才能确定唯一状态及分类。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "boolean",
+        "implication"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证明逐项给出蕴涵等价式、分配律、德摩根律、NAND/NOR定义和有效性化简；第六问明确检验 c、a、b 分别为真时的代理分句真值，并说明只有 c 真满足公开数量约束。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

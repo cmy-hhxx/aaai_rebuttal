@@ -1,0 +1,40 @@
+{
+  "anon_id": "cf78db2161c6ab427499",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "{r: [11, 11], u: [15, 15], y: [14, 14]}",
+      "certificate": "由第2行第2列有 min(12,r)=11，结合 10≤r≤12，得 r=11；由范围得 u=15；第3行第4列 min(14,y)=14，得 y≥14。约束 r+y=25 进一步得 y=14；r−u=−4 得 11−15=−4；未知数和为 11+15+14=40，为偶数。代回逐项取最小值可得到给定矩阵 T，因此唯一可行解为 r=11,u=15,y=14。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The stated minimum constraints and parameter ranges are consistent: min(12,r)=11 gives r=11; u=15 from its range; r+y=25 then gives y=14, which satisfies min(14,y)=14 and the range 11–15. The difference constraint gives 11−15=−4, and the total 11+15+14=40 is even. Substitution reproduces every entry of T, and the canonical answer matches.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The solution requires deriving r from a matrix minimum, deriving y through the sum constraint, and checking u, the difference constraint, parity, and all matrix entries.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly derives r=11 from min(12,r)=11, u=15 from its range, y=14 from r+y=25, and verifies the difference, parity, and matrix substitution.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,50 @@
+# =========================
+# 修复点：
+# - 之前 queries.desc 中包含未转义的英文双引号，翻译器会将 desc 包进 Python f-string，
+#   导致生成的 output.py 出现字符串提前闭合（SyntaxError: unterminated string literal）。
+# - 解决：desc 全部改为 YAML 的单引号字符串，并把内部的双引号改为单引号或去掉引号。
+# =========================
+
+custom_operator:
+  get_modal_quiz_answer: pf_logic_11_0.py
+
+variables:
+  sep:
+    formula: "'===='"
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: '1: Symbolise the following modal propositions: Science cannot be a one-man endeavour. Use p to denote Science is a human endeavour. Please give your answer in [[]] format.'
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[0]
+    ans_assertion: 'True'
+
+  q2:
+    desc: '2: Symbolise the following modal propositions: (1) There must be either life or no life in a fire. Use p to denote there is life on Mars. (2) If Li Ming plays well, then it is possible for him to win the championship. Use p to indicate that Li Ming plays well and q to indicate that he wins the championship. First symbolize the propositions, then enclose them in parentheses, and finally add modal symbols around them. Please give your answer in [[];[]] format.'
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[1]
+    ans_assertion: 'True'
+
+  q3:
+    desc: '3: What is the relationship between each of the following sentences? (1) The Chinese women''s volleyball team is definitely victorious AND The Chinese women''s volleyball team may not win. (2) This project will definitely be completed ahead of schedule AND This project will definitely not be completed ahead of schedule. Options: A. * relationship B. x relationship C. @ relationship D. % relationship. Please answer in the format of [[A/B/C/D];[A/B/C/D]].'
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[2]
+    ans_assertion: 'True'
+
+  q4:
+    desc: '4: Arrogance necessarily results in falling behind can infer Arrogance cannot possibly not result in falling behind. Which truth-value modal reasoning formula corresponds to this? Please answer in the format of [[number]].'
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[3]
+    ans_assertion: 'True'
+
+  q5:
+    desc: '5: According to the truth modal reasoning formula 9, what can be inferred from Xiao Lin will necessarily win the championship? A. Xiao Lin will possibly win the championship. B. Xiao Lin will certainly win the championship. C. Xiao Lin cannot win the championship. D. Xiao Lin will never win the championship. Please answer in the format of [[A/B/C/D]].'
+    ans_formula: get_modal_quiz_answer()
+    ans_text: _ans.split(sep)[4]
+    ans_assertion: 'True'
+
+desc: 'Modal logic quiz with fixed rule set and fixed answers. {queries}'

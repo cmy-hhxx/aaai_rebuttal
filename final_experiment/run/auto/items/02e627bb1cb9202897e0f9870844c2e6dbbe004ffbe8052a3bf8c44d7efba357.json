@@ -1,0 +1,45 @@
+{
+  "anon_id": "d31966c945ad45bb5876",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "无解（按规则中通常隐含的“岛必须上下左右连通”理解）。右下角 2×2 方块 (4,4),(4,5),(5,4),(5,5) 不能全为 A，因此至少有一个格子必须属于岛。距离该区域最近的提示为 (3,5)=1；该岛只有提示格，不能覆盖右下角。其余提示岛的大小分别为 2、3、2，距右下角区域均不足以在规定大小内连通到该区域。因此右下角 2×2 必然全为墙，违反规则 6。若允许 X 表示未归属任何岛的空白格，则题目约束不足且有多解。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "在通常要求岛块上下左右连通的解释下，右下角 2×2 区域的四格都不可能属于任何提示岛：提示 1 的岛只能包含其自身，提示 2 无法在大小 2 内到达该区域，提示 3 及另一提示 2 的最短距离也超过其允许大小。因此四格都必须是 A，直接违反规则 6。给出的 canonical_answer 本身也不满足岛大小：例如 (1,3)=2 四周均为 A，无法形成大小为 2 的连通岛；(3,1)=3 也被 A 包围而孤立。若不把连通性视为隐含规则，则题目没有规定非墙 X 如何归属各岛，存在缺失约束和歧义。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable",
+        "missing_constraint",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目在通常连通性解释下不可满足，且形式规则遗漏了岛连通性约束。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为 verdict 不是 valid；所给 certificate 的右下角区域反证在采用连通岛解释时可核查，但它也明确暴露了原题未明示连通性的问题。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

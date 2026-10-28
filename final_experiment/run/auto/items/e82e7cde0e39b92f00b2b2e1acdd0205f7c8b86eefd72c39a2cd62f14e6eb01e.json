@@ -1,0 +1,79 @@
+{
+  "anon_id": "1ecd256e21cd7c757a07",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "↑",
+          "↘",
+          "↑",
+          "2",
+          "←"
+        ],
+        [
+          "↑",
+          "→",
+          "3",
+          "↑",
+          "→"
+        ],
+        [
+          "↘",
+          "↑",
+          "↑",
+          "↑",
+          "2"
+        ],
+        [
+          "↓",
+          "3",
+          "←",
+          "↗",
+          "↑"
+        ],
+        [
+          "2",
+          "←",
+          "↖",
+          "↑",
+          "←"
+        ]
+      ],
+      "certificate": "验证： (1,4) 的有效射线为向右1、向下1，共2；(2,3) 为向下1、向左1、向左上1，共3；(3,5) 为向下1、向左下1，共2；(4,2) 为向右1、向左上1、向右下1，共3；(5,1) 为向上1、向右1，共2。其余射线均被首个方向不符的箭头截断。该题不唯一：例如(5,4)位于若干已被更近箭头截断的射线上，改为任意其他箭头仍满足全部数字。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "给出的 canonical_answer 不满足数字约束。例如数字格 (2,3) 的有效射线只有向上 1 格：其余方向的首个箭头均不等于该方向的反方向，因此总和为 1 而不是 3。另一个反例是 (1,4)：向下连续遇到 (2,4)、(3,4)、(4,4) 的三个 ↑，总和为 3 而不是 2。所附 attempt 的证书也错误地将 (1,4) 的向下长度记为 1，实际为 2。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为给出的标准答案已被直接反例否定。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目附带的答案和证书均未通过直接约束检查；证书对 (1,4) 的向下射线长度存在可核查错误。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

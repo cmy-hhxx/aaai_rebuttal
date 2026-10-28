@@ -1,0 +1,44 @@
+{
+  "anon_id": "ea27c96b365585b8f181",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "ciphertext": "[[FUXZDXJEXLBJPKHQD]]",
+        "midstring": "[[DKXHJQEDXFLUBXJZP]]"
+      },
+      "certificate": "逐段变换后：BRAVO→DKXHJ，SIGNAL→UBXJZP，VECTOR→QEDXFL；按1、3、2重排并拼接得DKXHJQEDXFLUBXJZP。整体右移8位得FLUBXJZPDKXHJQEDX，再按奇位先取、偶位后取得FUXZDXJEXLBJPKHQD。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐段变换结果分别为 BRAVO→DKXHJ、SIGNAL→UBXJZP、VECTOR→QEDXFL；按1、3、2重排后中间串为 DKXHJQEDXFLUBXJZP。整体右移8位并进行奇位先取、偶位后取后得到 FUXZDXJEXLBJPKHQD，与 canonical_answer 完全一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次执行段内两类移位、逆序与右移，随后进行段重排和拼接，再依赖中间串执行整体右移及交错重排；这些步骤存在多层顺序依赖并涉及字符位置计算。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "供应的证书正确列出三个段的段内变换结果、1-3-2重排后的中间串、整体右移结果及最终交错重排结果；各结果均可逐步复核且与标准答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,43 @@
+{
+  "anon_id": "d4d7d66c1a26785eb039",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "1 [[70]]; 2 [[62]]; 3 [[[1, 1, 0, 2]]]",
+      "certificate": "区间[61,79]中满足规则一的数为62,64,66,68,70,72,74,76,78，满足规则二的数为61,67,73,79，二者不重合；总和910、个数13，平均值为70。要使[61,X]平均值为61.5，唯一可行的是X=62，此时数集为{61,62}，且62仅满足规则一。故A=1（62），B=1（61），C=0，D=2。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The rule sets are the even integers and integers congruent to 1 modulo 6; they do not overlap. In [61,79], their union has 13 elements with sum 910, so the mean is 70. In [61,69], the eligible endpoints are 61, 62, 64, 66, 67, and 68; only X=62 gives mean 61.5 while satisfying exactly one rule. On [61,62], each rule contributes one number, with no overlap.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires identifying the union of two congruence classes and computing its mean, testing eligible endpoints against a prefix-mean condition to determine X, then using X to count the three membership categories.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate explicitly checks the numbers, total, count, and mean for part 1, and the membership counts for part 3. For part 2 it verifies the result at X=62 but asserts uniqueness without showing why the other eligible endpoints fail; that claim is independently checkable but is a substantive gap in the certificate.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

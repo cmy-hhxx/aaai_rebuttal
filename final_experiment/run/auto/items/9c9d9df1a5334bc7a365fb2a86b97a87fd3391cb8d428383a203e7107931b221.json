@@ -1,0 +1,43 @@
+{
+  "anon_id": "be808fb07793ae3f783e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "136; 175/214; (175, 39)",
+      "certificate": "局部规则后：服装为上衣125、裤装58、鞋64，共247；车辆为厢式车14、SUV11、轿车14，共39。车辆损失12达到阈值，可能调回上衣，但调回量不影响后续仓储封顶结果；服装损失4未达41，不调回厢式车；安全复核未触发。服装总数247超过175，按先鞋、再上衣、再裤装扣减至175。因此差值|175-39|=136，占比175/(175+39)=175/214，数量为(175, 39)。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "局部规则后服装为125+58+64=247件，车辆为14+11+14=39辆。车辆损失12达到阈值，可能的上衣调回不会改变服装总量超过175这一事实；服装损失4未达到41，因此不调回厢式车。安全复核未触发。按先扣鞋、再扣上衣、再扣裤装，服装最终封顶为175件。因此差值为|175-39|=136，占比为175/(175+39)=175/214，元组为(175, 39)。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次应用局部扣减、车辆损失阈值判断、安全复核条件判断、服装仓储上限及指定扣减顺序，最后进行差值和最简分数计算。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "implication",
+        "ordering",
+        "cardinality"
+      ],
+      "scenario": "objects",
+      "explanation_score": 4,
+      "explanation_evidence": "供应的证书正确计算裤装可用量58、车辆可用量39，并识别车辆损失达到10而服装损失未达到41；其说明上衣调回不影响最终仓储封顶，随后正确得到175、39、136和175/214。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

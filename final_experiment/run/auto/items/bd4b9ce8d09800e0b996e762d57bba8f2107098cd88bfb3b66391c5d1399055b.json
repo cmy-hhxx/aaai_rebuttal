@@ -1,0 +1,38 @@
+{
+  "anon_id": "23c85e8a507bc62ba5ba",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[9 5 8 1 7 3 4 6 2,6 1 7 5 2 4 9 3 8,2 4 3 9 8 6 5 1 7,8 6 1 4 3 2 7 5 9,7 2 9 6 1 5 3 8 4,4 3 5 7 9 8 6 2 1,1 9 6 2 5 7 8 4 3,3 7 4 8 6 1 2 9 5,5 8 2 3 4 9 1 7 6]]",
+      "certificate": "逐步排除得到关键确定值：r3c3=3，r3c6=6，r1c4=1，r1c7=4；随后中宫确定 r4c4=4、r5c4=6、r5c6=5、r6c5=9、r6c6=8。底部宫确定 r7c4=2、r8c5=6、r9c6=9，并完成其余空格。所得每行、每列及每个3×3宫均恰好包含1至9一次。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的答案与题面所有已知数字一致，且每一行、每一列及每个3×3宫都恰好包含1至9一次。输出格式也符合双层方括号、行内空格和行间逗号的要求。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "求解至少依赖跨行、列和宫的连续排除：例如先确定r3c3=3、r3c6=6，再确定r1c4=1及后续宫内和底部宫的数字，最终完成剩余空格。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 2,
+      "explanation_evidence": "证书列出的关键数值与最终网格一致，且最终网格的行、列、宫约束可直接核验；但证书没有给出各步候选集合或剩余空格的完整排除链，因此只能部分核查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

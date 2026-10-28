@@ -1,0 +1,40 @@
+{
+  "anon_id": "e9e38e2a9c997d0d2ef1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "((24 - 7) × 24) - 17 = 391",
+      "certificate": "按结构 ((a op1 b) op2 c) op3 d：a=24，b=7，c=24，d=17；A=24-7=17，B=17×24=408，C=408-17=391。使用每个给定数字恰好一次，运算符为减、乘、减，减法出现2次，且B为整数。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical expression matches the required structure and target: A = 24 - 7 = 17, B = 17 × 24 = 408, and the final result is 408 - 17 = 391. All four supplied numbers are used exactly once, subtraction appears twice, B is an integer, and there is no division by zero.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The result requires two dependent arithmetic steps: first compute the parenthesized difference 24 - 7, then multiply by 24 and finally subtract 17 to reach 391; the operator-count and integer constraints also check successfully.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly maps a, b, c, d, computes A, B, and C, verifies exact use of the numbers, verifies two subtraction operators, and verifies that B is an integer.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

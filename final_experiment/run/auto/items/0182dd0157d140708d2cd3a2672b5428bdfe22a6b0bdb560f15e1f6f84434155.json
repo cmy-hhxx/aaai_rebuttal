@@ -1,0 +1,43 @@
+{
+  "anon_id": "b481ef1399aa5750ca1c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[1 2 3 4 5 6 7 8 9],[18 17 16 15 14 13 12 11 10],[19 20 21 22 23 24 25 26 27],[36 35 34 33 32 31 30 29 28],[37 38 39 40 41 42 43 44 45],[54 53 52 51 50 49 48 47 46],[55 56 57 58 59 60 61 62 63],[72 71 70 69 68 67 66 65 64],[73 74 75 76 77 78 79 80 81]]",
+      "certificate": "Each consecutive pair is orthogonally adjacent. The fixed clues force the first row 1–9, the reverse second row 18–10, and similarly each subsequent clue interval forces the alternating serpentine rows: 19–27, 36–28, 37–45, 54–46, 55–63, 72–64, and 73–81. All numbers 1 through 81 occur exactly once, and every supplied clue matches."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical matrix satisfies all clues, contains each number 1 through 81 exactly once, and every consecutive pair is orthogonally adjacent. The supplied attempt has the correct matrix content but adds brackets around each row, which violates the explicitly requested output format; this is a rendering error.",
+      "error_types": [
+        "rendering"
+      ],
+      "depth_score": 4,
+      "depth_evidence": "Deriving the full path requires chaining the fixed-position intervals, using orthogonal adjacency and uniqueness across all nine rows to establish the alternating serpentine placement.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly identifies adjacency, uniqueness, and clue agreement, and its claimed serpentine structure is checkable from the matrix. It does not fully demonstrate every interval-forcing step, so it has a minor proof gap.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

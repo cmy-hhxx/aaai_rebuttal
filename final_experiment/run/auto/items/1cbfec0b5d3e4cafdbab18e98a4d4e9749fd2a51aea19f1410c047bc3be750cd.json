@@ -1,0 +1,43 @@
+{
+  "anon_id": "419bc92093da637bd55a",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[(1,1)(2,1),(1,3)(1,4),(1,6)(2,6),(3,2)(3,3),(4,1)(5,1),(4,5)(4,6),(5,3)(5,4),(6,5)(6,6)]]",
+      "certificate": "共8块骨牌，覆盖16格。各区域覆盖数：A为(2,6),(5,3)；B为(1,1),(6,5)；C为(1,6),(6,6)；D为(4,1),(4,5)；E为(5,1),(5,4)；F为(2,1),(3,2)；G为(3,3),(4,6)；H为(1,3),(1,4)，均恰为2格。每对端点均上下左右相邻；不同骨牌之间没有上下左右相邻格，仅可能对角接触。骨牌按较小端点从上到下、从左到右排列。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的8块骨牌覆盖16个格子；A至H每个区域恰好覆盖2格。每块骨牌的两个端点均上下或左右相邻，且不同骨牌之间没有上下左右相邻格。骨牌按各自较小端点依次为(1,1)、(1,3)、(1,6)、(3,2)、(4,1)、(4,5)、(5,3)、(6,5)，符合指定排序；答案与规范答案一致。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要同时满足区域覆盖计数、相邻端点配对、不同骨牌不接触以及全局排序；候选位置之间存在相互排斥和跨区域配对关系，需进行多约束组合验证。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "adjacency",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确列出8块骨牌及16个覆盖格，逐区域核对A至H均为2格，并说明端点相邻、骨牌间无正交接触及排序；这些断言均可直接由给定网格逐项验证。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

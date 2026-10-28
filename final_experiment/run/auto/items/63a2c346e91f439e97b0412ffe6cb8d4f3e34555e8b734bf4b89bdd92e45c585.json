@@ -1,0 +1,65 @@
+{
+  "anon_id": "4f56af5bf51452226246",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          4,
+          2,
+          3,
+          1
+        ],
+        [
+          2,
+          3,
+          1,
+          4
+        ],
+        [
+          1,
+          4,
+          2,
+          3
+        ],
+        [
+          3,
+          1,
+          4,
+          2
+        ]
+      ],
+      "certificate": "无不等式约束。第4列已有1、4，故第3行第4列=3、第4行第4列=2。第3列已有2、4，结合第2行剩余数字得第2行第3列=1、第1行第3列=3。随后各行列唯一确定为上述网格。每行每列均恰含1到4，且满足所有预填数字。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied grid satisfies all fixed entries and has 1 through 4 exactly once in every row and column. With no inequality constraints, the clues uniquely determine this grid. However, the certificate incorrectly claims that the third- and fourth-row fourth-column values follow directly from the fourth column containing 1 and 4; those values require further row and column deductions.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "A valid derivation requires chained deductions: row 2 and column 3 determine r2c3=1 and r1c3=3; row 1 and column 1 then determine r1c1=4 and r1c2=2; subsequent column and row completion determines the remaining entries.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 1,
+      "explanation_evidence": "The final grid is checkable and correct, but the certificate contains a major unsupported inference: the fourth column alone does not imply r3c4=3 and r4c4=2. The omitted dependent deductions are necessary.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,43 @@
+{
+  "anon_id": "f024f0196e82b02cf365",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[29812591272021813F9C9986938C9784]]====[[SIZFPMJANI]]",
+      "certificate": "加密：对明文 NVMYAHIWC\\x00\\x00\\x00\\x00\\x00\\x00\\x00 分组，依次执行 XOR KEY、S_BOX、左旋1位、XOR KEY，得到 2981259127202181 和 3F9C9986938C9784。解密给定密文时按 XOR KEY、右旋1位、INV_S_BOX、XOR KEY 逆运算，得到 ASCII 字节 SIZFPMJANI\\x00\\x00\\x00\\x00\\x00\\x00，去除末尾空字节后为 SIZFPMJANI。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按最自然的规则将 16 字节 KEY 循环使用于每个 8 字节分组时，给定密文解密结果为 ASCII “SIZFPMJGN” 后接填充零，而不是规范答案中的 “SIZFPMJGNI”，也不是尝试答案中的 “SIZFPMJANI”。此外，KEY 长度为 16 字节而分组长度为 8 字节，未明确说明截取或循环方式，存在歧义。",
+      "error_types": [
+        "wrong_answer",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目及规范答案未通过直接的逐字节逆运算验证。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：尝试中的解密结论可由逐字节计算反驳；第一组确实解出 SIZFPMJG，但第二组解出 N 后为填充零，而非其声称的 ANI。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

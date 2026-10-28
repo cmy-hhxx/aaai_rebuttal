@@ -1,0 +1,41 @@
+{
+  "anon_id": "8abfe75d226de5f28e01",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[A=5,C=9,D=1,E=4,G=7,N=8,O=2,R=6,S=3]]",
+      "certificate": "按列进位：2S=R+10c1；S+D+c1=E+10c2；O+A+c2=G+10c3；R+O+c3=N+10c4；C+R+c4=A+10D。最高位进位必为1，因此D=1。逐一检查S的可行值（2,3,4,5,6,7,8）及各进位、互异数字和首位非零约束，只有S=3成立，继而R=6、E=4、C=9、A=5、O=2、G=7、N=8。验证：96233+62513=158746，即CROSS+ROADS=DANGER。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied assignment matches the canonical answer up to ordering and assigns all nine distinct letters. It satisfies the alphametic: 96233 + 62513 = 158746, corresponding to CROSS + ROADS = DANGER. Leading digits are nonzero, and the column-carry equations in the certificate are correct.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Verification requires column-wise arithmetic with carries, forcing the highest carry and D=1, followed by branching over feasible values of S and propagation through the remaining columns while enforcing distinctness and leading-digit constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate gives correct carry equations, identifies the forced highest carry and D=1, states the feasible-case check for S, and provides a complete numerical verification. The exhaustive elimination of the other S cases is asserted rather than shown in detail, so there is a minor evidentiary gap.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

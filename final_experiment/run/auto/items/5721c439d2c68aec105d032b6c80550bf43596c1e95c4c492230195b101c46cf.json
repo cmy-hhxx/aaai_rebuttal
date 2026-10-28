@@ -1,0 +1,42 @@
+{
+  "anon_id": "a322f83377c9ae1db974",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[4 5 1 6 7 9 8 3 2,6 9 3 1 8 2 4 5 7,2 7 8 3 5 4 1 9 6,1 2 4 7 9 5 3 6 8,3 8 7 2 1 6 9 4 5,9 6 5 4 3 8 7 2 1,7 3 2 9 6 1 5 8 4,8 4 9 5 2 7 6 1 3,5 1 6 8 4 3 2 7 9]]",
+      "certificate": "完成网格每行、每列及每个3×3宫均为1到9各一次。笼和验证：笼1=9+3+7=19，笼2=7+2=9，笼3=5+1+8+6=20，笼4=3+6=9，笼5=2+8=10，笼6=5+2+8=15。偶数提示位置分别为2、4、8、4、2、4，均为偶数。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的完整网格满足所有已给定数字。每行、每列及每个3×3宫均恰好包含1到9；六个杀手笼分别验证为19、9、20、9、10、15，且笼内数字不重复；六个偶数提示位置的值分别为2、4、8、4、2、4。答案格式也符合要求。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "需要同时满足九宫数独的行、列、宫不重复约束，以及杀手笼和、笼内互异、偶数提示等交互约束；完成整个网格通常涉及多步依赖和较长的约束传播。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书明确给出了六个笼和的逐项计算及全部偶数提示的具体值，并声称行、列、宫均满足数独条件；这些结论可由网格直接核验，但未逐项列出所有行、列和宫的检查过程。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

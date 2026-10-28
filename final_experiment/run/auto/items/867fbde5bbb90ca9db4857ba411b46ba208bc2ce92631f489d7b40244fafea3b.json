@@ -1,0 +1,40 @@
+{
+  "anon_id": "a4ea791b5049925a8d35",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "OLERE ELOO L A",
+      "certificate": "删除 % 后得到 46252042640601。按映射替换为 OLERE OELO L A；第 2 个词循环左移一位，得到 ELOO，第 4 个词单字母不变。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "删除所有 % 后得到 46252042640601；按数字映射得到“OLERE OELO L A”。偶数位第二个词 OELO 循环左移一位为 ELOO，其余词不变，最终结果与 canonical_answer 一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需依次清除噪声、按令牌映射字符并形成词，再按词的位置奇偶执行逆向循环移位；这些步骤互相依赖。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书给出的清洗结果、替换结果和第二词逆向循环移位均正确；第四词是单字母，保持不变，最终得到 canonical_answer。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,44 @@
+{
+  "anon_id": "16fdd787d2aabd9a1a8d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[40\\sqrt{61}]]",
+        "2": "[[942]]",
+        "3": "[[46]]"
+      },
+      "certificate": "由①得 X①b=√(X+19)+b²，③得 y③d=y+2d，②得 a②y=σ√a·y。1) 2285①14=48+196=244，6③7=20，故 244②20=√244·20=40√61。2) 196②((X①3)③3)=2·14·(√(X+19)+9+6)=1288，因此 √(X+19)=31，X=942。3) (942①3)③3=√961+9+6=46。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按定义逐项核验：①为√(X+19)+b²，③为y+2d，②为σ√a·y。问题1中2285①14=48+196=244，6③7=20，且√244=2√61，故结果为40√61。问题2中196②((X①3)③3)=2√196·(√(X+19)+15)=28(√(X+19)+15)=1288，得到√(X+19)=31，X=942。问题3结果为√961+15=46。与标准答案完全一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次应用三个自定义算子、进行平方根化简与代数求解，并将问题2所得X继续代入问题3；这些是相互依赖的多步算术和代数推导。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "供给的证明明确写出三个算子的具体形式，并逐步核验问题1的中间值244和20、问题2的方程28(√(X+19)+15)=1288及X=942、问题3的最终值46；各步骤可独立复算且无实质缺口。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,41 @@
+{
+  "anon_id": "47ba9358713b88a49416",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[(2,1),(2,2),(3,2)]",
+      "certificate": "(3,0) 的数字为 1，唯一相邻未揭示格是 (2,1)，因此 (2,1) 必为地雷。(3,1) 的数字为 3，三个相邻未揭示格为 (2,1)、(2,2)、(3,2)，数量恰为 3，因此三者都必为地雷。其他数字格周围的未揭示格数量均不等于其数字要求的地雷数，故不能根据一步逻辑确定更多地雷。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The grid and rule are consistent. Cell (3,0) has exactly one unrevealed neighbor, (2,1), so (2,1) is a mine. Cell (3,1) is 3 and has exactly three unrevealed neighbors, (2,1), (2,2), and (3,2), so all three are mines. No other numbered cell has an unrevealed-neighbor count equal to its number under the stated one-step rule. The canonical answer and supplied attempt are correct.",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "The result follows from direct local cardinality checks at (3,0) and (3,1); no branching or multi-step dependency is required.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly identifies the unique unrevealed neighbor of (3,0), the three unrevealed neighbors of (3,1), and correctly states that the remaining numbered cells do not satisfy the one-step equality condition.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

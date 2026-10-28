@@ -1,0 +1,44 @@
+{
+  "anon_id": "271347d7a224cb3abea7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "2,2,3,3,2",
+      "certificate": "各方向可见格数：第1格(上,右,下,左)=(1,0,3,2)，因3+故方向为2；第2格=(1,2,2,0)，结合2-、偶数及候选{0,2,3}，方向为2；第3格=(1,1,5,3)，结合3-及候选{1,3}，方向为3；第4格=(3,0,1,5)，因5=方向必为3；第5格=(1,0,1,0)，结合1-及奇数方向为0或2。可见数依次为3,2,3,5,1，满足差值线索和总数14。方向和为12且第2、3格方向不同，推出第5格为2；最终方向序列为2,2,3,3,2。编码0或2共有3个，满足聚合线索。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The visibility counts are correctly computed as (1,0,3,2), (1,2,2,0), (1,1,5,3), (3,0,1,5), and (1,0,1,0). The constraints force visible counts 3,2,3,5,1; directions 2,2,3,3,2 satisfy all local clues, pairwise difference, direction sum 12, exactly three directions in {0,2}, and total visibility 14. The canonical answer matches. The supplied certificate has a minor explanatory gap: the local clues for digit 2 also permit direction 3, and digit 3 locally permits direction 1; the global sum/distinctness/aggregate constraints are needed to eliminate those cases.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "Solving requires computing directional visibility, deriving the visible-count relations, restricting candidate directions, and performing case analysis on the alternatives for directions 2, 3, and 5 using the direction sum and distinctness/aggregate constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "cardinality",
+        "other"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly lists all visibility counts and gives the correct final sequence, but it asserts direction 2=2 from local parity and bound clues even though direction 2=3 also locally satisfies them, and similarly treats direction 3=3 as locally forced although direction 3=1 is possible. The later global constraints do eliminate these alternatives, but that elimination is not explicitly shown.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

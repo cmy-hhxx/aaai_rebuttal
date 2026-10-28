@@ -1,0 +1,59 @@
+{
+  "anon_id": "b3992cb665235b9b3c85",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "first": -12240,
+        "second": [
+          [
+            -3,
+            4
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "third": [
+          [
+            -3,
+            4
+          ]
+        ]
+      },
+      "certificate": "C(-11,7)=7^4-(-11)^4=2401-14641=-12240. For C(a,b)=175, b^4-|a|^4=175; the only solution with integers a<b is |a|=3,b=4, giving (-3,4) and (3,4). The negative-positive subset contains only (-3,4), so the third answer is [(-3,4)]."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "独立验证得 C(-11,7)=7^4-(-11)^4=2401-14641=-12240。对第二问，b^4-a^4=175=(b^2-a^2)(b^2+a^2)，可行的平方因子组合仅产生 b=4、|a|=3；施加 a<b 后得到 (-3,4) 和 (3,4)。第三问的负正子集仅含 (-3,4)，因此给定标准答案正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "第二问需要将四次方差分解为两个因子，枚举 175 的因子对并检验所得 b^2 与 a^2 是否为平方数，最后应用 a<b 筛选符号；这些是多个相互依赖的算术与代数推理。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确计算了第一问并正确给出 |a|=3、b=4 及两个满足 a<b 的有序对，第三问筛选也正确。其主要缺口是未展开证明为何不存在其他整数解，因此完整性虽可核查但说明略有省略。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

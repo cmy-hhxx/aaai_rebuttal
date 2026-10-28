@@ -1,0 +1,40 @@
+{
+  "anon_id": "f59e94e354ac6be72fa8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[4,3,2,9],[3,4,4,11],[5,4,2,11],[12,11,8,31]]",
+      "certificate": "设五个X依次为r1c2=a、r1c3=b、r2c1=c、r3c1=d、r3c3=e。行和给出a+b=5、c=3、d+e=7；列和给出c+d=8、a=3、b+e=4。因此d=5、e=2、b=2，且a=3。主对角线4+4+2=10，副对角线2+4+5=11，指定四格3+2+4+4=13；所用数字为[3,2,3,5,2]，恰好是给定列表。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The row and column sum constraints uniquely determine the X entries: r1c2=3, r2c1=3, r3c1=5, r1c3=2, and r3c3=2. These use the multiset [3,2,2,5,3] exactly, and the diagonal and four-cell conditions evaluate to 10, 11, and 13 respectively. The supplied answer matches the resulting matrix.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Several dependent arithmetic deductions are required: column 2 determines r1c2, row 2 determines r2c1, column 1 then determines r3c1, row 1 determines r1c3, and column 3 determines r3c3; the extra constraints and resource multiset provide consistency checks.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly translates each relevant row and column into equations, solves all five X values, verifies all three additional sum conditions, and checks exact use of the supplied multiset.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

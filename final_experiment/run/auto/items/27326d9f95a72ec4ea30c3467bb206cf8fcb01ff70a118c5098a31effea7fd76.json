@@ -1,0 +1,42 @@
+{
+  "anon_id": "a142abacccb5bb750bb8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "TNFTNBKJJG",
+      "certificate": "忽略“?”和“4”后，字母位置为1–10。各段转盘号为[21,22,23,24]、[4,5,6,7]、[8,9]；镜像位移为[24,23,22,21]、[7,6,5,4]、[8,9]（末段越界回落）。偶数转盘号与素数位置各翻转一次，得到加密方向符号[+,+,-,-,+,+,-,+,-,+]。按A=0并用P=C−方向×位移解密：R,K,J,Y,U,H,F,N,B,P→T,N,F,T,N,B,K,J,J,G。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按“每处理完4个字母后，下一个字母从转盘4继续递进”处理，三段转盘号应为[21,22,23,24]、[4,5,6,7]、[4,5]。镜像位移为[24,23,22,21]、[7,6,5,4]、[4,5]；翻转合并后的方向为[+,+,-,-,+,+,+,+,-,+]。对RKJYUH FNBP按A=0解密得到TNFTNBAJFK，与canonical_answer一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须先忽略非字母并重新编号，再按每4个字母重置转盘段，计算镜像位移，合并偶数转盘号与素数位置的翻转，最后进行模26逆位移。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "boolean",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 0,
+      "explanation_evidence": " supplied attempt错误地将第三段写为[8,9]而不是按题面重置后的[4,5]，且位置7的两次翻转应抵消为正方向而非负方向；其答案和证书因此均不正确。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

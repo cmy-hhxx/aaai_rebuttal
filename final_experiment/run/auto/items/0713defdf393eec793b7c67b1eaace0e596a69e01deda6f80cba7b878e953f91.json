@@ -1,0 +1,42 @@
+{
+  "anon_id": "fdad98fc4ffaa0bea6ae",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "0 + 1 - (((((2 * 2) % 6 + (5 * 8) % 9) % 4))) = 1",
+      "certificate": "由 p2-p3=-1、p3+p6=7 且 p3 为偶数，并结合数字互异及 p3<p6，得 p3=2、p2=1、p6=5；严格递增关系要求 p1=0。固定数字为 6、3、9、4，故八位数字互不相同。模4条件为 4·0+3·1+2·2+5=12≡0。表达式中 (2·2)%6=4，(5·8)%9=4，(4+4)%4=0，因此 0+1-0=1。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The clues force p2=p3-1 and p6=7-p3. Since p3 is an even digit, p3<p6, and p2 must be a valid digit, p3=2, giving p2=1 and p6=5. Strict ordering then forces p1=0. These digits are distinct from each other and from the fixed digits 6,3,9,4; p6 is nonzero. The congruence gives 0+3+4+5=12≡0 (mod 4). The expression evaluates as (2*2)%6=4, (5*8)%9=4, (4+4)%4=0, so 0+1-0=1. The submitted answer exactly matches the canonical answer and required format.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires combining the two linear clue equations with the parity and strict-order constraints to determine p3,p2,p6, then using strict ordering to determine p1, followed by modular evaluation of the expression and verification of distinctness and the congruence.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "all_different"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly derives all four unknown digits, checks the fixed-digit distinctness condition, verifies the mod-4 clue, evaluates both inner remainders, and confirms the final equality.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

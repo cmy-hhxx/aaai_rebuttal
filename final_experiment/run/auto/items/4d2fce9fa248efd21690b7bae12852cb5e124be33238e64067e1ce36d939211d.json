@@ -1,0 +1,41 @@
+{
+  "anon_id": "17a556ae207cb430a566",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[X X X 1,1 1 1 X,X X X 1,X 1 X X]]",
+      "certificate": "列1约束为2，故仅第2行第1列为1；列3约束为2，故仅第2行第3列为1。第2行权重需为6，只能取列1、2、3，因此(2,2)=1且(2,4)=X。第4行只能取第2列，故(4,2)=1；列2此时权重2+4=6，其他为X。第1、3行的约束4在列1已为X、列2为X、列3为X后，只能取列4。列4权重1+3=4，满足约束。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "4×4 网格的行列加权约束均满足。答案中各行权重分别为 4、6、4、2，各列权重分别为 2、6、2、4；证书中的推导也正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "先由第1列和第3列约束唯一确定第2行对应两格为1；再由第2行约束确定第2列为1。第4行约束确定其第2列为1，随后第2列约束排除其他行的第2列，最终第1、3行只能在第4列取1，并核验第4列权重为4。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "boolean",
+        "cardinality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐步说明了第1、3列的唯一取法、第2行和第4行的取法、第2列的剩余约束，以及第1、3行和第4列的最终核验，所有步骤均可直接由题目约束检查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

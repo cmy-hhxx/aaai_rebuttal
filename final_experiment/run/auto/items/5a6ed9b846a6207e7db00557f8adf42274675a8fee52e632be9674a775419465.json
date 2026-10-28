@@ -1,0 +1,44 @@
+{
+  "anon_id": "99a5ccf6b8b398410d30",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[P1=0, P2=1, P3=1, P4=0, P5=0]]",
+      "certificate": "设 a,b,c,d,e 分别表示 P1 至 P5。由左右平衡得 a+b=c+d+e，且总真数为偶数且至少为2。二元异或给出 d≠b。若 a=1，则蕴含规则给出 b=1，进而 d=0；条件异或给出 e≠b，即 e=0。或规则使 c=1，但三元奇数规则中 a+c+e=2，矛盾，故 a=0。此时三元奇数规则给出 c≠e。若 b=0，则 d=1，右半真数至少为1，无法与左半真数0平衡，故 b=1，因而 d=0。平衡式变为 c+e=1。数量比较 e< b+c 排除 (c,e)=(0,1)，故 c=1,e=0。代回可验证所有规则成立。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied assignment satisfies every rule: total true count is 2 (at least 2 and even); left count P1+P2=1 equals right count P3+P4+P5=1; P4 and P2 are XOR; P3 or P5 is true; P1 implies P2; P3+P5+P1 has odd count 1; and count(P5,P1)=0 is strictly less than count(P2,P3)=2. The certificate's case analysis correctly derives P1=0, P2=1, P4=0, then P3=1 and P5=0. It matches the canonical answer and requested format.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "The derivation requires branching on P1, using implication and conditional XOR to derive a contradiction in the true case, then branching on P2 and using the balance equality to exclude P2=0, followed by balance and the quantity inequality to determine P3 and P5.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality",
+        "implication",
+        "boolean",
+        "cardinality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly defines variables, derives contradictions for P1=1 and P2=0, applies the balance equation and quantity comparison to resolve the remaining variables, and states that all rules are verified by substitution.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

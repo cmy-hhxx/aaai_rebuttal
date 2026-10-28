@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"You are an intelligent assistant specializing in evaluating custom operations. Below is a specific rule defined for a custom operation. Your task is to apply this rule accurately to the provided question.\\n\\n### Instructions:\\n\\n1. Carefully read and understand the definitions of the new operations in the rule.\\n2. If the question does not specifically ask for it, your answer should be a number or a group of numbers.\\n3. Double-check your final answer to ensure it follows the rule accurately.\\n\\n### Operation Rule:\\n\\na%b=a^b+\\\\sqrt{ab}.\\na and b are positive integers.\\n\\n### Question:\\n1: Compute 7%2.\\nIf the answer contains a root sign, write it in the form \\\\sqrt{x} (x is the number under the root sign).\\nPlease wrap the answer in double square brackets, like this: [[your answer]].\\n2: If X%1=12, find X.\\nThe answer should only be given as a number.\\nPlease wrap the answer in double square brackets, like this: [[your answer]].\\n\\n### Answer:\\n\", \"seed_answer\": \"[[49+\\\\sqrt{14}]]====[[9]]\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/operation_12/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtRLk8fE4QscpBcvUwNjJPKvS7i8",
+    "created": 1793176611,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, math, random, re\nfrom fractions import Fraction\nimport sympy as sp\n\n# ---------------------------\n# Utility: formatting and validation\n# ---------------------------\n\ndef is_pos_int(x: int) -> bool:\n    return isinstance(x, int) and x > 0\n\ndef fmt_sqrt_int(n: int) -> str:\n    return f\"\\\\sqrt{{{n}}}\"\n\ndef fmt_sympy_expr(expr: sp.Expr) -> str:\n    \"\"\"Format sympy expression to required LaTeX-like string:\n       - powers as a^b\n       - sqrt as \\sqrt{...}\n       - keep as simplified as possible but do NOT expand into decimals\n    \"\"\"\n    expr = sp.simplify(expr)\n\n    # Convert to a string with sqrt\n    # sympy's sstr prints sqrt(n) as sqrt(n); we need \\sqrt{n}\n    s = sp.sstr(expr)\n\n    # Replace sqrt(...)\n    def repl_sqrt(m):\n        inside = m.group(1)\n        return f\"\\\\sqrt{{{inside}}}\"\n    s = re.sub(r\"sqrt\\(([^()]+)\\)\", repl_sqrt, s)\n\n    # Replace ** with ^\n    s = s.replace(\"**\", \"^\")\n\n    # sympy prints Rational as e.g. 3/2; that's ok.\n    return s\n\ndef op_expr(a: int, b: int) -> sp.Expr:\n    \"\"\"a % b = a^b + sqrt(a*b), with a,b positive integers.\"\"\"\n    assert is_pos_int(a) and is_pos_int(b)\n    return sp.Integer(a) ** sp.Integer(b) + sp.sqrt(sp.Integer(a) * sp.Integer(b))\n\ndef op_value_as_string(a: int, b: int) -> str:\n    return fmt_sympy_expr(op_expr(a, b))\n\ndef unique_solution_check_integer(eq_expr: sp.Eq, var: sp.Symbol, domain_min=1, domain_max=200):\n    \"\"\"Check integer solutions in a bounded positive range. Return list of solutions.\"\"\"\n    sols = []\n    for x in range(domain_min, domain_max + 1):\n        if sp.simplify(eq_expr.lhs.subs(var, x) - eq_expr.rhs) == 0:\n            sols.append(x)\n    return sols\n\n# ---------------------------\n# Problem families\n# ---------------------------\n\ndef gen_family_compute(rng: random.Random):\n    \"\"\"\n    Family A: compute a%b directly.\n    \"\"\"\n    a = rng.randint(2, 20)\n    b = rng.randint(2, 7)\n    # avoid too trivial duplicates\n    expr = op_expr(a, b)\n    ans = f\"[[{fmt_sympy_expr(expr)}]]\"\n\n    problem = (\n        \"定义新的运算：\\n\"\n        \"对正整数 a,b，规定 a%b = a^b + \\\\sqrt{ab}。\\n\\n\"\n        f\"计算：{a}%{b}。\\n\"\n        \"若答案含根号，请写成 \\\\sqrt{x} 的形式（x 为根号内的数）。\\n\"\n        \"请将答案用双中括号包裹，如 [[你的答案]]。\"\n    )\n    explanation = (\n        f\"按定义：{a}%{b} = {a}^{b} + \\\\sqrt{{{a}·{b}}}。\\n\"\n        f\"其中 {a}^{b} = {a**b}，且 \\\\sqrt{{{a}·{b}}} = \\\\sqrt{{{a*b}}}。\\n\"\n        f\"所以答案为 [[{fmt_sympy_expr(expr)}]]。\"\n    )\n    return problem, ans, explanation\n\ndef gen_family_solve_x_percent_1(rng: random.Random):\n    \"\"\"\n    Family B: given X%1 = N, solve X (unique positive integer).\n    Since X%1 = X^1 + sqrt(X*1) = X + sqrt(X).\n    We construct N by choosing t so that X=t^2 gives N=t^2 + t.\n    \"\"\"\n    t = rng.randint(2, 25)\n    x = t * t\n    n = x + t  # t^2 + t\n    var = sp.Symbol('X', integer=True, positive=True)\n    eq = sp.Eq(var + sp.sqrt(var), n)\n\n    # Verify uniqueness in reasonable range\n    sols = unique_solution_check_integer(eq, var, 1, 2000)\n    if sols != [x]:\n        # Fallback: enforce by resampling upstream; here raise to trigger retry\n        raise ValueError(f\"Non-unique or missing solution for X%1={n}, sols={sols}\")\n\n    problem = (\n        \"定义新的运算：\\n\"\n        \"对正整数 a,b，规定 a%b = a^b + \\\\sqrt{ab}。\\n\\n\"\n        f\"若 X%1 = {n}，求正整数 X。\\n\"\n        \"答案只需给出数字，并用双中括号包裹，如 [[你的答案]]。\"\n    )\n    ans = f\"[[{x}]]\"\n    explanation = (\n        \"由定义：X%1 = X^1 + \\\\sqrt{X·1} = X + \\\\sqrt{X}。\\n\"\n        f\"因此方程为 X + \\\\sqrt{{X}} = {n}。\\n\"\n        f\"注意到 {n} = {t}^2 + {t}，令 \\\\sqrt{{X}} = {t} 可得 X = {t}^2 = {x}，代回：{x}+\\\\sqrt{{{x}}}={x}+{t}={n} 成立。\\n\"\n        f\"且在正整数范围内该解唯一，所以 X = {x}。\"\n    )\n    return problem, ans, explanation\n\ndef gen_family_solve_x_percent_b(rng: random.Random):\n    \"\"\"\n    Family C: given X%b = N, solve X (unique positive integer) by construction.\n    For b=1 or 2 only, we can ensure uniqueness by choosing X to make sqrt term integer\n    and keep search range small.\n    We'll use b=2: X%2 = X^2 + sqrt(2X). Choose X=2t^2 => sqrt(2X)=sqrt(4t^2)=2t.\n    Then N = (2t^2)^2 + 2t = 4t^4 + 2t.\n    \"\"\"\n    b = 2\n    t = rng.randint(2, 12)\n    x = 2 * t * t\n    n = x * x + 2 * t\n\n    var = sp.Symbol('X', integer=True, positive=True)\n    eq = sp.Eq(var**2 + sp.sqrt(2*var), n)\n    sols = unique_solution_check_integer(eq, var, 1, 5000)\n    if sols != [x]:\n        raise ValueError(f\"Non-unique or missing solution for X%2={n}, sols={sols}\")\n\n    problem = (\n        \"定义新的运算：\\n\"\n        \"对正整数 a,b，规定 a%b = a^b + \\\\sqrt{ab}。\\n\\n\"\n        f\"若 X%2 = {n}，求正整数 X。\\n\"\n        \"答案只需给出数字，并用双中括号包裹，如 [[你的答案]]。\"\n    )\n    ans = f\"[[{x}]]\"\n    explanation = (\n        \"由定义：X%2 = X^2 + \\\\sqrt{2X}。\\n\"\n        f\"方程为 X^2 + \\\\sqrt{{2X}} = {n}。\\n\"\n        f\"构造验证：取 X={x} 时，X^2={x}^2={x*x}，且 2X=2·{x}={2*x}，\\\\sqrt{{2X}}=\\\\sqrt{{{2*x}}}={2*t}。\\n\"\n        f\"因此左边 = {x*x} + {2*t} = {n}，成立。\\n\"\n        \"再在正整数范围内枚举核验仅此一解，所以 X 为该值。\"\n    )\n    return problem, ans, explanation\n\ndef gen_family_compare(rng: random.Random):\n    \"\"\"\n    Family D: compare two custom-operation results.\n    Ask which is larger, output one of: \"A\", \"B\", or \"=\" wrapped.\n    \"\"\"\n    a1 = rng.randint(2, 12)\n    b1 = rng.randint(2, 6)\n    a2 = rng.randint(2, 12)\n    b2 = rng.randint(2, 6)\n\n    e1 = sp.N(op_expr(a1, b1), 30)\n    e2 = sp.N(op_expr(a2, b2), 30)\n    if abs(float(e1 - e2)) < 1e-12:\n        comp = \"=\"\n    elif e1 > e2:\n        comp = \"A\"\n    else:\n        comp = \"B\"\n\n    problem = (\n        \"定义新的运算：\\n\"\n        \"对正整数 a,b，规定 a%b = a^b + \\\\sqrt{ab}。\\n\\n\"\n        f\"比较下列两式大小：\\n\"\n        f\"A = {a1}%{b1}，B = {a2}%{b2}。\\n\"\n        \"若 A>B 输出 A；若 A<B 输出 B；若相等输出 =。\\n\"\n        \"请将输出用双中括号包裹，如 [[A]]。\"\n    )\n\n    ans = f\"[[{comp}]]\"\n    explanation = (\n        f\"A = {a1}^{b1} + \\\\sqrt{{{a1*b1}}} = {a1**b1} + {fmt_sqrt_int(a1*b1)}。\\n\"\n        f\"B = {a2}^{b2} + \\\\sqrt{{{a2*b2}}} = {a2**b2} + {fmt_sqrt_int(a2*b2)}。\\n\"\n        \"比较两者数值大小可得结论（幂项增长很快，必要时再比较根号项），因此输出为 \"\n        f\"[[{comp}]]。\"\n    )\n    return problem, ans, explanation\n\n# ---------------------------\n# Main generator with retries, dedup, self-check\n# ---------------------------\n\ndef generate_one(rng: random.Random):\n    families = [\n        gen_family_compute,\n        gen_family_solve_x_percent_1,\n        gen_family_solve_x_percent_b,\n        gen_family_compare,\n    ]\n    # Weighted choice\n    weights = [0.45, 0.25, 0.20, 0.10]\n    r = rng.random() * sum(weights)\n    acc = 0.0\n    for f, w in zip(families, weights):\n        acc += w\n        if r <= acc:\n            return f(rng)\n    return families[-1](rng)\n\ndef main():\n    data = json.load(sys.stdin)\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n    rng = random.Random(seed)\n\n    out = []\n    seen = set()\n    max_attempts = 2000\n    attempts = 0\n\n    while len(out) < count and attempts < max_attempts:\n        attempts += 1\n        try:\n            problem, answer, explanation = generate_one(rng)\n        except Exception as e:\n            print(f\"[stderr] generation attempt failed: {e}\", file=sys.stderr)\n            continue\n\n        if not problem or not isinstance(problem, str):\n            continue\n        if not explanation or not isinstance(explanation, str):\n            continue\n        if not answer or not isinstance(answer, str):\n            continue\n        # basic answer format check: must be [[...]]\n        if not (answer.startswith(\"[[\") and answer.endswith(\"]]\")):\n            continue\n\n        key = problem.strip()\n        if key in seen:\n            continue\n        seen.add(key)\n\n        out.append({\n            \"problem\": problem,\n            \"answer\": answer,\n            \"explanation\": explanation\n        })\n\n    if len(out) < count:\n        print(f\"[stderr] Could only generate {len(out)}/{count} items after {attempts} attempts.\", file=sys.stderr)\n        # Fail hard to avoid returning insufficient count\n        raise SystemExit(1)\n\n    json.dump(out, sys.stdout, ensure_ascii=False)\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 2673,
+      "prompt_tokens": 1668,
+      "total_tokens": 4341,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1280
+      },
+      "cost": 0.038325,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 11,
+        "engine_ttft_ms": 62,
+        "engine_ttlt_ms": 30528,
+        "pre_inference_ms": 208,
+        "service_tbt_ms": 11,
+        "service_ttft_ms": 908,
+        "service_ttlt_ms": 31338,
+        "user_visible_ttft_ms": 700
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261005123958-a6f2edc6-default-r2-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176643.061333
+}

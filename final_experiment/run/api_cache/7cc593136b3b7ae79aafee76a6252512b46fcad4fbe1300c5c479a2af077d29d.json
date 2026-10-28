@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"You are an intelligent assistant specializing in evaluating custom operations. Below is a specific rule defined for a custom operation. Your task is to apply this rule accurately to the provided question.\\n\\n### Instructions:\\n\\n1. Carefully read and understand the definitions of the new operations in the rule.\\n2. If the question does not specifically ask for it, your answer should be a number or a group of numbers.\\n3. Double-check your final answer to ensure it follows the rule accurately.\\n\\n### Operation Rule:\\n\\na∞b=a^2+b^2.\\na and b are positive integers.\\n\\n### Question:\\n1: Compute 5∞8.\\nPlease ensure the answer is a single number and wrap it in double square brackets, like this: [[your answer]].\\n2: If X∞6=45, find X.\\nThe answer should only be given as a number.\\nPlease wrap the answer in double square brackets, like this: [[your answer]].\\n\\n### Answer:\\n\", \"seed_answer\": \"[[89]]====[[3]]\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/operation_5/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtR8s8lyLj654uM2G05LUMZrWqKv",
+    "created": 1793176598,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, random, math\nfrom typing import List, Dict, Any, Tuple\n\n# We generate problems about custom operation(s), primarily based on:\n# a ∞ b = a^2 + b^2 (positive integers).\n# To add diversity while staying in-domain (custom operation evaluation / inverse),\n# we sometimes introduce one extra operation with explicit definition, but always\n# keep the core task as evaluating / solving equations under the custom rule(s).\n\ndef is_square(n: int) -> bool:\n    if n < 0:\n        return False\n    r = int(math.isqrt(n))\n    return r * r == n\n\ndef fmt_op(sym: str) -> str:\n    # render operator symbol as plain text; keep consistent\n    return sym\n\ndef solve_in_positive_integers_for_infty_eq(n: int, b: int) -> List[int]:\n    # Solve x^2 + b^2 = n, x positive integer\n    rem = n - b*b\n    if rem <= 0:\n        return []\n    if is_square(rem):\n        x = int(math.isqrt(rem))\n        if x > 0:\n            return [x]\n    return []\n\ndef solve_pair_sum_squares(n: int, require_distinct: bool = False, limit: int = 1000) -> List[Tuple[int,int]]:\n    # Find all positive integer (a,b) such that a^2 + b^2 = n\n    sols = []\n    # a and b can be up to sqrt(n-1)\n    m = int(math.isqrt(n-1))\n    for a in range(1, m+1):\n        rem = n - a*a\n        if rem <= 0:\n            continue\n        if is_square(rem):\n            b = int(math.isqrt(rem))\n            if b <= 0:\n                continue\n            if require_distinct and a == b:\n                continue\n            sols.append((a,b))\n    return sols\n\ndef make_problem_type1(rng: random.Random) -> Tuple[str, Any, str]:\n    # Compute a∞b = a^2 + b^2\n    a = rng.randint(2, 30)\n    b = rng.randint(2, 30)\n    ans = a*a + b*b\n    problem = (\n        \"定义自定义运算：\\n\"\n        f\"{a} {fmt_op('∞')} {b} 表示 {a}^2 + {b}^2（a、b 为正整数）。\\n\\n\"\n        f\"计算：{a}{fmt_op('∞')}{b} 的值。\\n\"\n        \"请只输出一个数字。\"\n    )\n    explanation = f\"按定义：{a}∞{b} = {a}^2 + {b}^2 = {a*a} + {b*b} = {ans}。\"\n    return problem, ans, explanation\n\ndef make_problem_type2(rng: random.Random) -> Tuple[str, Any, str]:\n    # Solve X∞b = n (unique)\n    x = rng.randint(2, 40)\n    b = rng.randint(2, 30)\n    n = x*x + b*b\n    # ask for X given X∞b = n\n    problem = (\n        \"定义自定义运算：x∞y = x^2 + y^2（x、y 为正整数）。\\n\\n\"\n        f\"若 X∞{b} = {n}，求 X。\\n\"\n        \"请只输出 X 的值。\"\n    )\n    explanation = (\n        f\"由定义：X∞{b} = X^2 + {b}^2 = {n}。\\n\"\n        f\"因此 X^2 = {n} - {b*b} = {x*x}，所以 X = {x}（正整数）。\"\n    )\n    return problem, x, explanation\n\ndef make_problem_type3(rng: random.Random) -> Tuple[str, Any, str]:\n    # Two-step: compute (a∞b) - (c∞d) or compare\n    a = rng.randint(2, 25)\n    b = rng.randint(2, 25)\n    c = rng.randint(2, 25)\n    d = rng.randint(2, 25)\n    val1 = a*a + b*b\n    val2 = c*c + d*d\n    op_choice = rng.choice([\"+\", \"-\", \"×\"])\n    if op_choice == \"+\":\n        ans = val1 + val2\n        expr = f\"({a}∞{b}) + ({c}∞{d})\"\n        expl = f\"({a}∞{b})={val1}，({c}∞{d})={val2}，相加得 {ans}。\"\n    elif op_choice == \"-\":\n        # ensure nonnegative by ordering\n        if val1 < val2:\n            a,b,c,d,val1,val2 = c,d,a,b,val2,val1\n        ans = val1 - val2\n        expr = f\"({a}∞{b}) - ({c}∞{d})\"\n        expl = f\"({a}∞{b})={val1}，({c}∞{d})={val2}，相减得 {ans}。\"\n    else:\n        # multiplication, keep numbers moderate\n        ans = val1 * val2\n        expr = f\"({a}∞{b}) × ({c}∞{d})\"\n        expl = f\"({a}∞{b})={val1}，({c}∞{d})={val2}，相乘得 {ans}。\"\n    problem = (\n        \"定义自定义运算：x∞y = x^2 + y^2（x、y 为正整数）。\\n\\n\"\n        f\"计算表达式：{expr}。\\n\"\n        \"请只输出一个数字。\"\n    )\n    explanation = expl\n    return problem, ans, explanation\n\ndef make_problem_type4(rng: random.Random) -> Tuple[str, Any, str]:\n    # Find all positive integer pairs (a,b) such that a∞b = N, with controlled small number of solutions.\n    # We'll craft N as sum of squares that yields exactly 2 ordered solutions (a,b) in positive ints.\n    # Example: 25 = 3^2+4^2 and 4^2+3^2 => 2 ordered solutions.\n    # We ensure N has exactly 2 ordered solutions by choosing a!=b and N not having other representations.\n    # We'll search with bound.\n    for _ in range(2000):\n        a = rng.randint(2, 25)\n        b = rng.randint(2, 25)\n        if a == b:\n            continue\n        N = a*a + b*b\n        sols = solve_pair_sum_squares(N, require_distinct=False)\n        # Count ordered solutions; solve_pair_sum_squares returns (a,b) by scanning a\n        # It will include both (a,b) and (b,a) if both appear during scan.\n        # We want exactly 2 solutions (a,b) and (b,a), meaning exactly one unordered pair with a!=b.\n        if len(sols) == 2:\n            # ensure they are swaps\n            sset = set(sols)\n            if (a,b) in sset and (b,a) in sset:\n                # ask for number of solutions, or list them sorted\n                ask = rng.choice([\"count\", \"list\"])\n                if ask == \"count\":\n                    ans = 2\n                    problem = (\n                        \"定义自定义运算：x∞y = x^2 + y^2（x、y 为正整数）。\\n\\n\"\n                        f\"方程 x∞y = {N} 有多少组正整数有序解 (x,y)？\\n\"\n                        \"请只输出解的组数。\"\n                    )\n                    explanation = (\n                        f\"x∞y={N} 等价于 x^2+y^2={N}。\\n\"\n                        f\"可验证 {a}^2+{b}^2={N}，且交换仍成立：{b}^2+{a}^2={N}。\\n\"\n                        \"并且该 N 只有这一对不同的平方和表示，因此有序解恰为 2 组。\"\n                    )\n                    return problem, ans, explanation\n                else:\n                    # list ordered pairs in lexicographic order\n                    sols_sorted = sorted(sols)\n                    ans = sols_sorted\n                    problem = (\n                        \"定义自定义运算：x∞y = x^2 + y^2（x、y 为正整数）。\\n\\n\"\n                        f\"求所有满足 x∞y = {N} 的正整数有序对 (x,y)，并按字典序从小到大列出。\\n\"\n                        \"答案用 JSON 数组表示，例如 [[1,2],[2,1]]。\"\n                    )\n                    explanation = (\n                        f\"x∞y={N} 等价于 x^2+y^2={N}。\\n\"\n                        f\"可得两组解：({a},{b}) 与 ({b},{a})。按字典序排序为 {sols_sorted}。\"\n                    )\n                    return problem, ans, explanation\n    raise RuntimeError(\"Failed to generate type4 problem with desired uniqueness of representations.\")\n\ndef make_problem_type5(rng: random.Random) -> Tuple[str, Any, str]:\n    # Introduce a second operation explicitly, still in same skill: evaluate custom op and solve.\n    # Define: a ⊙ b = a∞b + a + b, where ∞ is as defined. Then compute or invert.\n    a = rng.randint(2, 20)\n    b = rng.randint(2, 20)\n    base = a*a + b*b\n    val = base + a + b\n    mode = rng.choice([\"compute\", \"solve\"])\n    if mode == \"compute\":\n        problem = (\n            \"给定正整数 a,b，定义运算：\\n\"\n            \"1) a∞b = a^2 + b^2；\\n\"\n            \"2) a⊙b = (a∞b) + a + b。\\n\\n\"\n            f\"计算：{a}⊙{b} 的值。\\n\"\n            \"请只输出一个数字。\"\n        )\n        explanation = f\"{a}∞{b}={a*a}+{b*b}={base}；所以 {a}⊙{b}={base}+{a}+{b}={val}。\"\n        return problem, val, explanation\n    else:\n        # Solve X⊙b = val for X (unique by construction)\n        x = rng.randint(2, 25)\n        b = rng.randint(2, 20)\n        base = x*x + b*b\n        val = base + x + b\n        # equation: X^2 + b^2 + X + b = val => X^2 + X + (b^2+b-val)=0\n        # but we keep constructed so solution is X=x.\n        problem = (\n            \"给定正整数 x,y，定义运算：\\n\"\n            \"1) x∞y = x^2 + y^2；\\n\"\n            \"2) x⊙y = (x∞y) + x + y。\\n\\n\"\n            f\"若 X⊙{b} = {val}，求 X。\\n\"\n            \"请只输出 X 的值。\"\n        )\n        explanation = (\n            f\"由定义：X⊙{b} = (X^2+{b}^2)+X+{b} = {val}。\\n\"\n            f\"移项得：X^2+X + ({b*b}+{b}-{val})=0。\\n\"\n            f\"代入构造可知 X={x} 满足：{x*x}+{x}+({b*b}+{b}-{val})=0，因此 X={x}。\"\n        )\n        return problem, x, explanation\n\ndef canonical_signature(problem: str, answer: Any) -> str:\n    # prevent duplicates across generated set\n    return problem.strip() + \"\\nANS=\" + json.dumps(answer, ensure_ascii=False, sort_keys=True)\n\ndef generate_one(rng: random.Random) -> Dict[str, Any]:\n    makers = [make_problem_type1, make_problem_type2, make_problem_type3, make_problem_type4, make_problem_type5]\n    # weights encourage variety\n    weights = [3, 3, 3, 2, 3]\n    maker = rng.choices(makers, weights=weights, k=1)[0]\n    p, a, e = maker(rng)\n    if not isinstance(p, str) or not p.strip():\n        raise AssertionError(\"Empty problem.\")\n    if not isinstance(e, str):\n        raise AssertionError(\"Explanation must be a string.\")\n    return {\"problem\": p, \"answer\": a, \"explanation\": e}\n\ndef main():\n    data = sys.stdin.read()\n    try:\n        req = json.loads(data)\n        seed = int(req[\"seed\"])\n        count = int(req[\"count\"])\n        if count <= 0:\n            raise ValueError(\"count must be positive\")\n    except Exception as ex:\n        sys.stderr.write(f\"Invalid input JSON. Expect {{'seed': int, 'count': int}}. Error: {ex}\\n\")\n        sys.exit(1)\n\n    rng = random.Random(seed)\n    out: List[Dict[str, Any]] = []\n    seen = set()\n\n    max_attempts = 20000\n    attempts = 0\n    while len(out) < count and attempts < max_attempts:\n        attempts += 1\n        try:\n            item = generate_one(rng)\n            sig = canonical_signature(item[\"problem\"], item[\"answer\"])\n            if sig in seen:\n                continue\n            # basic self-check: if answer is list of pairs, ensure matches equation when relevant\n            # For type4 list-mode: answer is list of [x,y]\n            if isinstance(item[\"answer\"], list) and item[\"answer\"] and isinstance(item[\"answer\"][0], list):\n                # try to parse N from problem string \"... = N\"\n                # lightweight validation: compute x^2+y^2 consistent across all pairs\n                pairs = item[\"answer\"]\n                Ns = set()\n                for xy in pairs:\n                    x, y = int(xy[0]), int(xy[1])\n                    if x <= 0 or y <= 0:\n                        raise AssertionError(\"Non-positive pair in answer.\")\n                    Ns.add(x*x + y*y)\n                if len(Ns) != 1:\n                    raise AssertionError(\"Inconsistent pairs for sum of squares.\")\n            seen.add(sig)\n            out.append(item)\n        except Exception as ex:\n            # resample on generation failure\n            continue\n\n    if len(out) < count:\n        sys.stderr.write(f\"Generation failed: produced {len(out)}/{count} after {attempts} attempts.\\n\")\n        sys.exit(2)\n\n    sys.stdout.write(json.dumps(out, ensure_ascii=False))\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 3258,
+      "prompt_tokens": 1639,
+      "total_tokens": 4897,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1280
+      },
+      "cost": 0.04646425,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 11,
+        "engine_ttft_ms": 68,
+        "engine_ttlt_ms": 34902,
+        "pre_inference_ms": 261,
+        "service_tbt_ms": 11,
+        "service_ttft_ms": 992,
+        "service_ttlt_ms": 35789,
+        "user_visible_ttft_ms": 731
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261005123958-a6f2edc6-default-r2-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176634.928084
+}

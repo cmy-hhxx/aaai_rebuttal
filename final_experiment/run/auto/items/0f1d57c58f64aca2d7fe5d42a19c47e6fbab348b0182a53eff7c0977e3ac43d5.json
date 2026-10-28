@@ -1,0 +1,40 @@
+{
+  "anon_id": "3b2394bc67021e81d7e8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[(0,2),(1,1),(2,1)]",
+      "certificate": "按一步逻辑检查：数字(0,0)=1邻接的唯一X是(1,1)，故(1,1)为雷；数字(0,1)=2邻接的X恰为(0,2)、(1,1)，故两者为雷；数字(1,0)=2邻接的X恰为(1,1)、(2,1)，故(2,1)为雷。其余数字格邻接的X数量均不等于对应数字，因此不能依据指定规则新增必雷格。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The three listed cells are exactly those identified by the specified one-step rule: (0,0)=1 has the sole unrevealed neighbor (1,1); (0,1)=2 has exactly (0,2) and (1,1); and (1,0)=2 has exactly (1,1) and (2,1). Every other numbered cell has an unrevealed-neighbor count different from its displayed number, so it yields no additional cell under the stated rule.",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "The result follows from independent direct cardinality checks of numbered cells; no inference depends on chaining previously inferred mines.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly checks all three productive numbered cells and states that all remaining numbered cells fail the exact-count condition. These checks match the grid.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

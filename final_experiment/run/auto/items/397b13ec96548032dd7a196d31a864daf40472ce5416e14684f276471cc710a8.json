@@ -1,0 +1,42 @@
+{
+  "anon_id": "0c2e638fbc803c6d4365",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "diff=-880;ratio=23/903;approx=0.0255",
+      "certificate": "服装抽检前数量为上衣63、长裤68、鞋224双、袜子153双。暂扣分别为4、4、15、10，返还分别为1、1、4、3，故抽检后为上衣60、长裤65、鞋213双、袜子146双。可组成min(60,65,213,146)=60套，按每3套赠3件上衣，赠60件，最终上衣120件；服装总件数=120+65+2×213+2×146=903。车辆最终为巴士5辆、面包车3辆、轿车15辆，均未超上限，总数23。故diff=23-903=-880，ratio=23/903（互质），23/903≈0.0255。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All calculations in the supplied answer are consistent. Post-adjustment clothing inventories are 60 tops, 65 trousers, 213 pairs of shoes, and 146 pairs of socks: the 7% holds and floored 31% returns give the stated values. Socks are included in complete-set formation, so 60 complete sets yield 60 promotional tops. Final clothing count is 120+65+2×213+2×146=903. Vehicle snapshots are 5 buses, 3 vans, and 15 cars, totaling 23, within all caps. Thus diff=23−903=−880, ratio=23/903, and the four-decimal approximation is 0.0255.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The result requires sequential inventory updates, floor-based percentage withholding and return calculations, complete-set minimization with a promotion calculation, unit conversion from pairs to individual items, and separate vehicle snapshot/net-balance calculations followed by aggregation and fraction reduction.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "inequality",
+        "implication"
+      ],
+      "scenario": "objects",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly shows each clothing inventory update, each floored withholding and return, the complete-set minimum, the promotional-top calculation, the pair-to-item conversion, each vehicle final count, and the final subtraction, fraction, and decimal approximation. These steps reproduce the canonical answer.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

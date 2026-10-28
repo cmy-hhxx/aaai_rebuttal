@@ -1,0 +1,43 @@
+{
+  "anon_id": "3c7fcc16527a873ff470",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "C: C6CEE2AA74C2D29EAACC86D8-T: EC",
+      "certificate": "将四轮的异或、置换、左旋及奇数轮半字节交换合并后，最终输出位依次取明文位 [1,2,7,4,6,3,5,0]，并异或常量 0x36。对明文 ikxZ2yqCZoIw 逐字节计算得到密文字节：C6 CE E2 AA 74 C2 D2 9E AA CC 86 D8，即密文 C6CEE2AA74C2D29EAACC86D8。密文字节和为 2202 ≡ 0x9A (mod 256)，明文字节异或为 0x52，因此标签为 (0x9A+0x52) mod 256 = 0xEC。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目规则独立计算明文第5个字节“2”(0x32)：四轮完整变换依次得到 0xAE、0x73、0x67、0x30，因此该位置密文应为 30。canonical_answer 在该位置给出 7A， supplied attempt 给出 74，二者均与规则不符。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案与规则的直接逐字节计算结果不一致。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度和解释评分不适用；所给证书的合并映射未通过逐轮验证，具体反例是输入字节 0x32 的实际输出为 0x30 而非其声称的 0x74。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

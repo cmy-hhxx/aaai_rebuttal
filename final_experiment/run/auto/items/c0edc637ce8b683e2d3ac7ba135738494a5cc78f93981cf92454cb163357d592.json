@@ -1,0 +1,49 @@
+{
+  "anon_id": "9d00cb8d57a421365553",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "35557573533737535575553755375R",
+        "57573533737535575553755375355R",
+        "偶",
+        "29",
+        "[5,3,7]",
+        "dash"
+      ],
+      "certificate": "由校准串左旋3位的逆变换得到ZETA标准前缀为33557575375，对应莫尔斯可确定划=3、点=5、分隔符=7；CODE校验划数为6偶，因此统计口径为dash。BEYTLVUE的莫尔斯序列按该映射生成标准前缀35557573533737535575553755375，长度29；划数为8偶，标签为R。左旋3位且偶数不交换，得到最终串57573533737535575553755375355R。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied six answers exactly match the canonical answer. Independently, the calibration prefixes decode with point=5, dash=3, separator=7; CODE has six dashes, establishing the dash parity rule. BEYTLVUE produces the stated 29-digit standard prefix, has eight dashes (even), and left rotation by 3 yields the stated final transmission string.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires inverse rotation of calibration data, matching Morse segment structure to determine the three-digit mapping, comparing parity candidates to select dash, encoding eight letters, counting the 29-digit prefix, and applying the final rotation and parity-dependent mask.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate correctly identifies the mapping, dash-based parity, target encoding, length, and rotation result. However, its stated inverse ZETA prefix (33557575375) is a transcription/calculation error; the actual inverse-rotated prefix is 33557573753. This does not affect the supplied final answers, which are correct.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,49 @@
+{
+  "anon_id": "951156c16ca7ddb5a885",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "turn_matrix": "0 5 0 0 0 0\n0 0 0 0 0 0\n0 0 0 0 0 0\n4 3 0 0 0 0\n0 0 0 2 1 0\n0 0 0 0 0 0",
+        "total_turns": 5,
+        "marked_sequence": "S,K1,L1,G3,P,E",
+        "gates": "G3@3",
+        "parity": "P@4"
+      },
+      "certificate": "合法路径为(6,6)S→(6,5)→(5,5)→(5,4)K1→(5,3)→(5,2)→(4,2)L1→(4,1)G3→(3,1)P→(2,1)→(1,1)→(1,2)→(1,3)→(1,4)E。方向改变依次发生在(5,5)、(5,4)、(4,2)、(4,1)、(1,2)，编号为1至5。进入G3前已有3次拐点，进入P前已有4次且为偶数；K1先于L1取得，所有锁均经过。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按箭头从S可行进至E：S→(6,5)↑(5,5)←K1←(5,3)←(5,2)↑L1←G3↑P↑(2,1)↑(1,1)→(1,2)→(1,3)→E。方向改变位置依次为(5,5)、(5,4)、(4,2)、(4,1)、(3,1)、(1,2)，共6次；G3进入前有3次拐点，P进入前有4次且为偶数，且K1先于L1。因此canonical_answer正确。 supplied attempt遗漏了(3,1)处的第5次拐点，并将(1,2)误编号为5而非6。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须依次跟随网格箭头确定路径，结合移动方向变化计数并定位拐点，再验证K1/L1先后、G3进入前至少3次以及P进入前拐点数为偶数。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "ordering",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 2,
+      "explanation_evidence": "attempt的路径坐标、标记顺序和门控计数均可核对且正确，但证书列举方向改变时漏掉了(4,1)G3到(3,1)P之间的转向，导致总数和矩阵均错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,46 @@
+{
+  "anon_id": "9b616a382be67538347b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "无法确定====无法确定",
+      "certificate": "题目未明确起始方向、行列尺寸及不完整列的处理方式，且给定数据彼此不一致。按最自然解释“5行、首列向下、随后上下交替、逐行输出并每行加*”，PATTERNFINDING应排成列：第1列 PATTE（下），第2列 RNFIN（上），第3列 DING（下），得到密文 PND*AII*TFN*TNG*ER*。该密文各行长度为3、3、3、3、2；而待解密串按*分行长度为4、5、1、1、1，无法由同一规则产生。因此两问没有可唯一验证的答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题面最自然的解释：固定5行，按列依次向下、向上交替填入明文，再逐行读取。PATTERNFINDING（14个字符）形成的行分别为 PND、AII、TFN、TNG、ER，因此密文应为 PND*AII*TFN*TNG*ER*，与给定 canonical_answer 的第一问不符。给定待解密串按星号分行长度为4、5、1、1、1，而同一规则对14个字符应产生行长3、3、3、3、2；题面也未定义“#”是填充符、空位还是普通字符，因此第二问无法由该规则确定。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous",
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题面规则与给定答案/密文不一致，且“#”及不完整列的处理方式未定义，无法对一个有效、完整的谜题进行依赖深度评估。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用：唯一 supplied attempt 指出规则和数据不一致，其自然解释下的行列计算可核查，但由于题面本身缺少“#”处理约束，不能将其作为有效题目的完整证明。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

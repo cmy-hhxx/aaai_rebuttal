@@ -1,0 +1,41 @@
+{
+  "anon_id": "e9f62f76b3bf140f16c6",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "12368",
+      "certificate": "按列相加：个位 2G=D+10c1，十位 D+Y+c1=Z+10c2，百位 Q+D+c2=J+10c3，千位 C+G+c3=C+10c4。由千位得 G+c3=10c4；因进位总数为4，四次进位均为1，故 G=9、c3=c4=1。个位得D=8；百位得J=Q-1。Q为平方数且未占用，只能Q=4、J=3。偶数位置和给出 C+9+1+Y=19，即C+Y=9；C为素数且数字互异，得C=2、Y=7，进而Z=6。加法为 2489+8479=12368，且权重和为82、奇数位置和为21，全部条件满足。因此最大值为12368。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The constraints force all four carries to be 1, hence G=9, D=8, K=1, and J=Q-1. The aggregate constraints eliminate Q=1 and force Q=4, J=3, Z=6; the remaining distinctness and sum constraints force C=2 and Y=7. Thus CQDG=2489, GDYG=9879, and KCJZD=12368, satisfying 2489+9879=12368 and the weighted sum 82. The supplied certificate contains a typo (it writes GDYG as 8479) and does not explicitly eliminate Q=1 or the C=7 branch, but its stated answer is correct.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires chained column-carry deductions, applying digit-set restrictions, using the even/odd aggregate sums, and eliminating remaining candidate branches via distinctness and arithmetic consistency.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 2,
+      "explanation_evidence": "The carry equations and most deductions are checkable, but the certificate incorrectly displays the second addend as 8479 instead of 9879, and its claim that Q=4 is the only possibility omits the elimination of Q=1 and the alternative C=7 branch.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

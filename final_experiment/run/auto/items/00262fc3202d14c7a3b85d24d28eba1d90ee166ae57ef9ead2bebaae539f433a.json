@@ -1,0 +1,39 @@
+{
+  "anon_id": "f1fbae11c99d1d31bdb9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "11,12",
+      "certificate": "Thought 10 后栈为 [{]，下一字符应为 } 而不是 ]；因此 Thought 11 的字符和栈状态均错误。随后应处理 } 后栈为 [，再处理 ] 才清空，因此 Thought 12 也错误。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "括号序列在 Thought 10 后栈为 [{，下一字符应为 }；Thought 11 却处理 ]，因此该步错误。正确处理 } 后栈应为 [，再处理 ] 才清空，所以 Thought 12 的字符和栈状态也错误。其余步骤正确，canonical_answer 与此一致。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要先由 Thought 10 的栈状态 [{ 推出下一括号必须是 }，再根据修正后的栈 [ 判断后续 ] 才能清空，形成两步依赖。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确检查了 Thought 10 后的栈、Thought 11 的类型不匹配，以及修正后 Thought 12 的正确栈变化；这些结论均可由逐字符栈规则直接验证。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

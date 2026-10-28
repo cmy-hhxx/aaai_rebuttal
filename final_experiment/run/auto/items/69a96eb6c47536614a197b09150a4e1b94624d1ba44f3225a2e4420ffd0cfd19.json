@@ -1,0 +1,40 @@
+{
+  "anon_id": "b3050e762785121b772b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[ RYOCPDBI UY UVC]]",
+      "certificate": "Using KEY bytes 31 32 33 34 35 36 37 38, the first ciphertext block decrypts to 20 52 59 4F 43 50 44 42 (\" RYOCPDB\"). The second decrypts to 49 20 55 59 55 56 43 00 (\"I UY UVC\" plus trailing NUL). Removing the trailing NUL yields the stated ASCII plaintext."
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按给定规则计算，第一组解密为字节 20 52 59 4F 43 50 44 42，即“ RYOCPDB”；第二组为 49 20 55 59 55 56 43 00，即“I UYUVC”并去除末尾 NUL。因此规范答案 [[ RYOCPDBI UYUVC]] 正确。 supplied attempt 多了一个空格，写成了“UY UVC”，与其证书给出的字节不一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "每个字节需要依次执行分组异或、循环右移、逐半字节逆代换和再次异或，随后还需拼接分组、ASCII 解码并移除填充；这些是至少三层依赖的连续变换。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "证书中的两组解密字节可直接复核，且与规范答案完全对应；但证书最后声称的“stated ASCII plaintext”与 supplied attempt 的额外空格不一致，因此存在一个轻微表述/答案抄写缺口。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

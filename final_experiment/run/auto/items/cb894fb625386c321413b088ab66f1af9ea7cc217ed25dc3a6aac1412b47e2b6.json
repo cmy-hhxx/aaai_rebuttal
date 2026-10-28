@@ -1,0 +1,44 @@
+{
+  "anon_id": "509eba02c1a5cb49950e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目条件不足，无法唯一确定答案：算法没有明确说明“下移”到牌堆底部时的绕回规则、三切和计数切的精确定义，以及非鬼牌输出值如何转换为0–25的密钥流值。此外，所谓54张牌的初始牌堆含有两个9且缺少19，并非标准的1–54排列。不同的合理约定会产生不同结果，因此不能在不猜测缺失约束的情况下给出两问答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按通常纸牌算法解释（A下移1、B下移2、三切、底牌计数切，牌值按 mod 26 作为密钥流）运行第一个输出时，处理后牌堆顶牌为29，因此首个密钥流值为29 mod 26=3。明文首字母 E 的索引为13，加密后应为索引16，即 U；但给出的密文首字母为 D（索引1）。要得到 D，首个密钥流值必须为14。因此 canonical_answer 与算法不匹配。此外，题目未明确说明非鬼牌如何转换为0–25，也构成缺失约束；重复的9和缺少19本身并不妨碍按数值执行算法。",
+      "error_types": [
+        "wrong_answer",
+        "missing_constraint"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：canonical_answer 已可由首个密钥流值直接反例否定。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：该题的标准答案已被首轮计算反驳；所 supplied attempt 只是指出歧义，未提供可验证的完整计算证书。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

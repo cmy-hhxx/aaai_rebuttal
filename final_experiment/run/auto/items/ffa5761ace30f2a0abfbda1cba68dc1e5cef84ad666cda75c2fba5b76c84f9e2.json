@@ -1,0 +1,39 @@
+{
+  "anon_id": "053ef129c72df8da47e6",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[3fb7720c9a3432f441a51829]]====[[TRPUGELY]]",
+      "certificate": "逐字节 XOR：LXXBGNMKFXGF 与密钥前12字节异或得到 3f b7 72 0c 9a 34 32 f4 41 a5 18 29；密文 27 bd 7a 1b 9a 3f 33 e6 与密钥前8字节异或得到 ASCII 明文 TRPUGELY。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "两项均按给定密钥前缀逐字节 XOR 验证正确：明文 LXXBGNMKFXGF 产生十六进制密文 3fb7720c9a3432f441a51829；密文 27bd7a1b9a3f33e6 解密为 ASCII 明文 TRPUGELY。输出格式也符合要求。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "每一项只需将输入的每个字节与循环密钥对应字节直接进行一次 XOR，并转换为指定表示。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐字节列出了第一项的 12 个 XOR 结果及第二项的 8 个 XOR 结果；关键字节如 4c XOR 73=3f、27 XOR 73=54(T) 均可核对，完整支持两项答案。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

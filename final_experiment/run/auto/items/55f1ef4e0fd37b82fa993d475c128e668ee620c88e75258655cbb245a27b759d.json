@@ -1,0 +1,45 @@
+{
+  "anon_id": "ab592cc16b9f3a65f3e6",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "0.6246",
+        "252.0000",
+        "4",
+        "-2"
+      ],
+      "certificate": "令 θ=6x+φ，则 f=6e^{-2x}cosθ，g=7e^{-2x}sinθ。直接计算得 W(f,g)=6·7·6e^{-4x}=252e^{-4x}。在 x0=3/2 时 W=252e^{-6}=0.6246455…，故为 0.6246；除以 e^{2·(-2)·(3/2)}=e^{-6} 得 252.0000。因 W(f,κg)=κW(f,g)，κ=4，第三问为 4。对 h=-2f+g、k=2f，双线性给出 W(h,k)=((-2)·0-1·2)W(f,g)=-2W(f,g)。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The stated functions give W(f,g)=A_f A_g·6·e^{-4x}=252e^{-4x}. At x0=3/2 this is 252e^{-6}=0.6246455..., rounding to 0.6246. The normalized value is 252. Scaling g by κ=4 scales the Wronskian by 4. For h=-2f+g and k=2f, bilinearity gives W(h,k)=((-2)·0-1·2)W(f,g)=-2W(f,g). The canonical answer matches all four results.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Requires differentiating both exponentially damped trigonometric functions and canceling terms, evaluating and rounding an exponential expression, applying Wronskian scaling, and applying bilinearity with the coefficient determinant.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate explicitly defines the phase, computes W(f,g)=252e^{-4x}, verifies the numerical evaluation and normalization, and correctly derives the scaling and linear-combination ratios.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

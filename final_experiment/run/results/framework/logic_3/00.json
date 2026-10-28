@@ -1,0 +1,467 @@
+[
+  {
+    "id": "framework/logic_3/00",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 0,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "1：按题干所述“配对合取项/mi”的规则，求公式 (¬p∧q∧¬r∧¬s) ∨ (p∧¬q∧¬r∧¬s) ∨ (p∧¬q∧r∧s) 的配对合取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired conjunctive terms:...]; [denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired conjunctive terms:¬p∧q∧¬r∧¬s,p∧¬q∧¬r∧¬s,p∧¬q∧r∧s"
+      ],
+      [
+        "denoted:m4∨m8∨mB"
+      ]
+    ],
+    "explanation": "该式本身就是若干个配对合取项的析取。以变量顺序 p,q,r,s 为准，每个真赋值对应二进制并转为十六进制得到 mi：¬p∧q∧¬r∧¬s 对应 i=4(0x4)；p∧¬q∧¬r∧¬s 对应 i=8(0x8)；p∧¬q∧r∧s 对应 i=11(0xB)。故记作 m4∨m8∨mB。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/01",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 1,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "1：按题干所述“配对合取项/mi”的规则，求公式 (¬p∧q∧r) ∨ (p∧¬q∧¬r) 的配对合取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired conjunctive terms:...]; [denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired conjunctive terms:¬p∧q∧r,p∧¬q∧¬r"
+      ],
+      [
+        "denoted:m3∨m4"
+      ]
+    ],
+    "explanation": "该式本身就是若干个配对合取项的析取。以变量顺序 p,q,r 为准，每个真赋值对应二进制并转为十六进制得到 mi：¬p∧q∧r 对应 i=3(0x3)；p∧¬q∧¬r 对应 i=4(0x4)。故记作 m3∨m4。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/02",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 2,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "7：某研究所需从三名骨干研究员 B,C,A 中选派 1-2 人出国。设\np：B 去；q：C 去；r：A 去。\n除“恰选 1-2 人”外，还需满足：\n1. 若 B 去，则 A 必须去。\n2. 若 A 不去，则 B 或 C 至少去一个。\n3. 若 C 去，则 B 必须去。\n(1) 写出满足条件的可行方案对应的主析取范式记号（用 mi 的析取表示）。\n(2) 判定该公式属于下列哪几类（多选）：\nA. 永真式  B. 矛盾式  C. 基本公式  D. 全偶公式  E. 全奇公式  F. 以上都不是。\n答案格式：[[denoted expression];[options]]",
+    "answer": [
+      [
+        "m1∨m5"
+      ],
+      [
+        "E"
+      ]
+    ],
+    "explanation": "把条件写成公式：A := (至少选1人且至多选2人) ∧ (p→r) ∧ (¬r→(p∨q)) ∧ (q→p)。其中“至少选1人且至多选2人”等价于 (p∨q∨r)∧¬(p∧q∧r)。\n对 (p,q,r) 的 8 个赋值逐一检验，满足者对应主析取范式中的 mi。满足的赋值为：(p,q,r)=001 -> m1；(p,q,r)=101 -> m5。因此记作 m1∨m5。选项判定：包含 m0 则为基本公式；索引全偶/全奇则为全偶/全奇；全包含/全不包含则为永真/矛盾。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/03",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 3,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "2：按题干所述“配对析取项/Mi”的规则，求公式 (p∨q∨r∨s) ∧ (¬p∨q∨r∨¬s) ∧ (¬p∨q∨¬r∨s) 的配对析取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired disjunctive terms:...];[denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired disjunctive terms:p∨q∨r∨s,¬p∨q∨r∨¬s,¬p∨q∨¬r∨s"
+      ],
+      [
+        "denoted:M0∧M9∧MA"
+      ]
+    ],
+    "explanation": "该式是若干配对析取项的合取。以变量顺序 p,q,r,s 为准，每个配对析取项的“假赋值”给出二进制并转十六进制得到 Mi：p∨q∨r∨s 的假赋值索引 i=0(0x0)；¬p∨q∨r∨¬s 的假赋值索引 i=9(0x9)；¬p∨q∨¬r∨s 的假赋值索引 i=10(0xA)。故记作 M0∧M9∧MA。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/04",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 4,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "2：按题干所述“配对析取项/Mi”的规则，求公式 (¬p∨q∨r) ∧ (¬p∨¬q∨r) 的配对析取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired disjunctive terms:...];[denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired disjunctive terms:¬p∨q∨r,¬p∨¬q∨r"
+      ],
+      [
+        "denoted:M4∧M6"
+      ]
+    ],
+    "explanation": "该式是若干配对析取项的合取。以变量顺序 p,q,r 为准，每个配对析取项的“假赋值”给出二进制并转十六进制得到 Mi：¬p∨q∨r 的假赋值索引 i=4(0x4)；¬p∨¬q∨r 的假赋值索引 i=6(0x6)。故记作 M4∧M6。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/05",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 5,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "1：按题干所述“配对合取项/mi”的规则，求公式 (¬p∧q∧¬r∧s) ∨ (¬p∧q∧r∧¬s) ∨ (¬p∧q∧r∧s) ∨ (p∧q∧¬r∧¬s) 的配对合取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired conjunctive terms:...]; [denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired conjunctive terms:¬p∧q∧¬r∧s,¬p∧q∧r∧¬s,¬p∧q∧r∧s,p∧q∧¬r∧¬s"
+      ],
+      [
+        "denoted:m5∨m6∨m7∨mC"
+      ]
+    ],
+    "explanation": "该式本身就是若干个配对合取项的析取。以变量顺序 p,q,r,s 为准，每个真赋值对应二进制并转为十六进制得到 mi：¬p∧q∧¬r∧s 对应 i=5(0x5)；¬p∧q∧r∧¬s 对应 i=6(0x6)；¬p∧q∧r∧s 对应 i=7(0x7)；p∧q∧¬r∧¬s 对应 i=12(0xC)。故记作 m5∨m6∨m7∨mC。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/06",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 6,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "7：某研究所需从三名骨干研究员 A,B,C 中选派 1-2 人出国。设\np：A 去；q：B 去；r：C 去。\n除“恰选 1-2 人”外，还需满足：\n1. 若 B 去，则 C 不能去。\n2. 若 B 去，则 A 必须去。\n3. 若 C 去，则 A 必须去。\n(1) 写出满足条件的可行方案对应的主析取范式记号（用 mi 的析取表示）。\n(2) 判定该公式属于下列哪几类（多选）：\nA. 永真式  B. 矛盾式  C. 基本公式  D. 全偶公式  E. 全奇公式  F. 以上都不是。\n答案格式：[[denoted expression];[options]]",
+    "answer": [
+      [
+        "m4∨m5∨m6"
+      ],
+      [
+        "F"
+      ]
+    ],
+    "explanation": "把条件写成公式：A := (至少选1人且至多选2人) ∧ (q→¬r) ∧ (q→p) ∧ (r→p)。其中“至少选1人且至多选2人”等价于 (p∨q∨r)∧¬(p∧q∧r)。\n对 (p,q,r) 的 8 个赋值逐一检验，满足者对应主析取范式中的 mi。满足的赋值为：(p,q,r)=100 -> m4；(p,q,r)=101 -> m5；(p,q,r)=110 -> m6。因此记作 m4∨m5∨m6。选项判定：包含 m0 则为基本公式；索引全偶/全奇则为全偶/全奇；全包含/全不包含则为永真/矛盾。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/07",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 7,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "2：按题干所述“配对析取项/Mi”的规则，求公式 (p∨¬q∨r) ∧ (p∨¬q∨¬r) ∧ (¬p∨q∨¬r) ∧ (¬p∨¬q∨¬r) 的配对析取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired disjunctive terms:...];[denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired disjunctive terms:p∨¬q∨r,p∨¬q∨¬r,¬p∨q∨¬r,¬p∨¬q∨¬r"
+      ],
+      [
+        "denoted:M2∧M3∧M5∧M7"
+      ]
+    ],
+    "explanation": "该式是若干配对析取项的合取。以变量顺序 p,q,r 为准，每个配对析取项的“假赋值”给出二进制并转十六进制得到 Mi：p∨¬q∨r 的假赋值索引 i=2(0x2)；p∨¬q∨¬r 的假赋值索引 i=3(0x3)；¬p∨q∨¬r 的假赋值索引 i=5(0x5)；¬p∨¬q∨¬r 的假赋值索引 i=7(0x7)。故记作 M2∧M3∧M5∧M7。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/08",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 8,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "2：按题干所述“配对析取项/Mi”的规则，求公式 (p∨q∨¬r) ∧ (p∨¬q∨¬r) 的配对析取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired disjunctive terms:...];[denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired disjunctive terms:p∨q∨¬r,p∨¬q∨¬r"
+      ],
+      [
+        "denoted:M1∧M3"
+      ]
+    ],
+    "explanation": "该式是若干配对析取项的合取。以变量顺序 p,q,r 为准，每个配对析取项的“假赋值”给出二进制并转十六进制得到 Mi：p∨q∨¬r 的假赋值索引 i=1(0x1)；p∨¬q∨¬r 的假赋值索引 i=3(0x3)。故记作 M1∧M3。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/09",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 9,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "4：判断下式是否符合“主析取范式”或“主合取范式”的形式；若符合，写出其记号。\n公式：(p∧q∧¬r∧¬s) ∨ (p∧q∧r)\n答案格式：若符合，[[A];[denoted expression]]；若不符合，[[B]]。",
+    "answer": [
+      [
+        "B"
+      ]
+    ],
+    "explanation": "主析取范式要求每个析取项都是配对合取项：每个变量或其否定必须“恰好出现一次”。但项 (p∧q∧r) 缺少变量 s（没有出现 s 或 ¬s），因此不符合。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/10",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 10,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "3：将公式 ¬p∧¬q∧r∧¬s 识别为（多选）：\nA. 永真式  B. 矛盾式  C. 基本公式(其主析取范式含 m0)  D. 全偶公式  E. 全奇公式  F. 以上都不是。\n答案格式 [[AB...]]。",
+    "answer": [
+      [
+        "D"
+      ]
+    ],
+    "explanation": "¬p∧¬q∧r∧¬s 本身就是一个配对合取项，对应索引 i=2(0x2)。它不是永真也不是矛盾；因为 i≠0 所以不包含 m0，不是基本公式；且索引为偶数，故为全偶公式。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/11",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 11,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "1：按题干所述“配对合取项/mi”的规则，求公式 (p∧¬q∧r∧s) ∨ (p∧q∧¬r∧s) ∨ (p∧q∧r∧¬s) ∨ (p∧q∧r∧s) 的配对合取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired conjunctive terms:...]; [denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired conjunctive terms:p∧¬q∧r∧s,p∧q∧¬r∧s,p∧q∧r∧¬s,p∧q∧r∧s"
+      ],
+      [
+        "denoted:mB∨mD∨mE∨mF"
+      ]
+    ],
+    "explanation": "该式本身就是若干个配对合取项的析取。以变量顺序 p,q,r,s 为准，每个真赋值对应二进制并转为十六进制得到 mi：p∧¬q∧r∧s 对应 i=11(0xB)；p∧q∧¬r∧s 对应 i=13(0xD)；p∧q∧r∧¬s 对应 i=14(0xE)；p∧q∧r∧s 对应 i=15(0xF)。故记作 mB∨mD∨mE∨mF。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/12",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 12,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "3：将公式 p∧q∧r 识别为（多选）：\nA. 永真式  B. 矛盾式  C. 基本公式(其主析取范式含 m0)  D. 全偶公式  E. 全奇公式  F. 以上都不是。\n答案格式 [[AB...]]。",
+    "answer": [
+      [
+        "E"
+      ]
+    ],
+    "explanation": "p∧q∧r 本身就是一个配对合取项，对应索引 i=7(0x7)。它不是永真也不是矛盾；因为 i≠0 所以不包含 m0，不是基本公式；且索引为奇数，故为全奇公式。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/13",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 13,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "6：已知公式 A 含 6 个命题变元。问：有多少个公式同时满足“基本公式(主析取范式含 m0)”且“全偶公式(出现的 mi 的 i 全为偶数)”？\n答案为单个整数，格式 [[]]。",
+    "answer": [
+      [
+        2147483648
+      ]
+    ],
+    "explanation": "6 个变元共有 2^6 个 mi。偶数索引共有 2^5 个。要全偶，则只能从这些偶数索引中选取出现在主析取范式的 mi；要基本，则必须选中 m0。于是其余 (2^5-1) 个偶索引可自由选/不选，共有 2^(2^5-1) = 2147483648 种。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/14",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 14,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "1：按题干所述“配对合取项/mi”的规则，求公式 (¬p∧q∧¬r) ∨ (p∧¬q∧r) 的配对合取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired conjunctive terms:...]; [denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired conjunctive terms:¬p∧q∧¬r,p∧¬q∧r"
+      ],
+      [
+        "denoted:m2∨m5"
+      ]
+    ],
+    "explanation": "该式本身就是若干个配对合取项的析取。以变量顺序 p,q,r 为准，每个真赋值对应二进制并转为十六进制得到 mi：¬p∧q∧¬r 对应 i=2(0x2)；p∧¬q∧r 对应 i=5(0x5)。故记作 m2∨m5。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/15",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 15,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "1：按题干所述“配对合取项/mi”的规则，求公式 (¬p∧¬q∧¬r) ∨ (¬p∧¬q∧r) ∨ (p∧¬q∧¬r) ∨ (p∧¬q∧r) 的配对合取项有哪些？并写出它可记作什么？\n要求：答案格式为 [[paired conjunctive terms:...]; [denoted:...]]，多项用逗号分隔。",
+    "answer": [
+      [
+        "paired conjunctive terms:¬p∧¬q∧¬r,¬p∧¬q∧r,p∧¬q∧¬r,p∧¬q∧r"
+      ],
+      [
+        "denoted:m0∨m1∨m4∨m5"
+      ]
+    ],
+    "explanation": "该式本身就是若干个配对合取项的析取。以变量顺序 p,q,r 为准，每个真赋值对应二进制并转为十六进制得到 mi：¬p∧¬q∧¬r 对应 i=0(0x0)；¬p∧¬q∧r 对应 i=1(0x1)；p∧¬q∧¬r 对应 i=4(0x4)；p∧¬q∧r 对应 i=5(0x5)。故记作 m0∨m1∨m4∨m5。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/16",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 16,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "4：判断下式是否符合“主析取范式”或“主合取范式”的形式；若符合，写出其记号。\n公式：(¬p∧¬q∧¬r) ∨ (¬p∧q∧¬r) ∨ (p∧¬q∧¬r) ∨ (p∧¬q∧r) ∨ (p∧q∧¬r) ∨ (p∧q∧r)\n答案格式：若符合，[[A];[denoted expression]]；若不符合，[[B]]。",
+    "answer": [
+      [
+        "A"
+      ],
+      [
+        "m0∨m2∨m4∨m5∨m6∨m7"
+      ]
+    ],
+    "explanation": "该式是若干“配对合取项”按变量顺序 p,q,r 的析取，每项每个变量或其否定恰好出现一次，因此符合主析取范式的构成形式。对应记号为 m0∨m2∨m4∨m5∨m6∨m7。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/17",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 17,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "4：判断下式是否符合“主析取范式”或“主合取范式”的形式；若符合，写出其记号。\n公式：(p∧¬q∧r∧¬s) ∨ (p∧¬q∧r∧s)\n答案格式：若符合，[[A];[denoted expression]]；若不符合，[[B]]。",
+    "answer": [
+      [
+        "A"
+      ],
+      [
+        "mA∨mB"
+      ]
+    ],
+    "explanation": "该式是若干“配对合取项”按变量顺序 p,q,r,s 的析取，每项每个变量或其否定恰好出现一次，因此符合主析取范式的构成形式。对应记号为 mA∨mB。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/18",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 18,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "4：判断下式是否符合“主析取范式”或“主合取范式”的形式；若符合，写出其记号。\n公式：(¬p∧¬q∧¬r) ∨ (¬p∧q∧r)\n答案格式：若符合，[[A];[denoted expression]]；若不符合，[[B]]。",
+    "answer": [
+      [
+        "A"
+      ],
+      [
+        "m0∨m3"
+      ]
+    ],
+    "explanation": "该式是若干“配对合取项”按变量顺序 p,q,r 的析取，每项每个变量或其否定恰好出现一次，因此符合主析取范式的构成形式。对应记号为 m0∨m3。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  },
+  {
+    "id": "framework/logic_3/19",
+    "method": "framework",
+    "seed_id": "logic_3",
+    "slot": 19,
+    "cohort": "extra",
+    "status": "ok",
+    "problem": "3：将公式 ¬p∧¬q∧¬r 识别为（多选）：\nA. 永真式  B. 矛盾式  C. 基本公式(其主析取范式含 m0)  D. 全偶公式  E. 全奇公式  F. 以上都不是。\n答案格式 [[AB...]]。",
+    "answer": [
+      [
+        "CD"
+      ]
+    ],
+    "explanation": "¬p∧¬q∧¬r 本身就是一个配对合取项，对应索引 i=0(0x0)。它不是永真也不是矛盾；因为 i=0 所以主析取范式包含 m0，属于基本公式；且索引为偶数，故为全偶公式。",
+    "request_tag": "framework/logic_3/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": "logic_3/attempt-0"
+  }
+]

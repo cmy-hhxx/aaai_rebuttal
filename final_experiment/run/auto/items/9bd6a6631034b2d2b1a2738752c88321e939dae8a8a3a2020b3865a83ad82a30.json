@@ -1,0 +1,43 @@
+{
+  "anon_id": "a9d071f495e224f9a2d5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": null,
+      "certificate": "题目无解。由第1行约束，(1,3)(1,4)的2÷只能取{1,2}、{2,4}或{3,6}；(1,5)(1,6)的5+只能取{1,4}或{2,3}。由于第1行数字不得重复，前两种2÷组合均与两种5+组合相交，唯一可能是(1,3)(1,4)={3,6}且(1,5)(1,6)={1,4}。因此(1,1)(1,2)必为{2,5}。其9+笼要求(1,1)+(1,2)+(2,1)=9，故(2,1)=2；但该笼中已有数字2，违反笼内数字不得重复。因此不存在满足所给规则的完整6×6解。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目本身无解，且给出的 canonical_answer 不满足约束。例如第(1,3)(1,4)笼中数字为3和2，不能满足“2÷”；第(1,1)(1,2)(2,1)笼中数字1、6、4之和为11而非9。无解证明中的关键枚举也成立：首行的2÷笼只能取{1,2}、{2,4}或{3,6}，5+笼只能取{1,4}或{2,3}；结合首行不重复后只能取前者{3,6}和后者{1,4}，于是9+笼的前两格为{2,5}，第三格必须为2，导致笼内重复，矛盾。",
+      "error_types": [
+        "unsatisfiable",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目无解且 canonical_answer 错误。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定不是 valid；不过所给无解证书的枚举和矛盾步骤可直接核查。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,44 @@
+{
+  "anon_id": "fad01f2468b473f69fbf",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "ciphertext": "[[QBTHHQHCHSOCIGO]]",
+        "midstring": "[[OHCHIQGHOCQHBST]]"
+      },
+      "certificate": "逐段计算：MARS经移位与交替移位后为COHG，逆序得GHOC；AURORA得OHCHIQ；DELTA得QHBST。按2、1、3重排并拼接得中间串OHCHIQGHOCQHBST。整体右移6位得CQHBSTOHCHIQGHO；偶位先取为QBTHHQH，奇位后取为CHSOCIGO，最终密文为QBTHHQHCHSOCIGO。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐段校验结果为 MARS→GHOC、AURORA→OHCHIQ、DELTA→QHBST；按2、1、3重排并拼接得到 OHCHIQGHOCQHBST。整体右移6位得到 CQHBSTOHCHIQGHO，再按偶位先取、奇位后取得到 QBTHHQHCHSOCIGO。与标准答案完全一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "必须依次完成每段凯撒移位与交替移位、段内逆序、段重排拼接、整体右环移和交错重排；后续结果依赖前一步字符串，且包含算术移位与位置重排。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "供应的逐段计算、重排拼接、整体右移和交错抽取均可逐项复核，且中间串与最终密文都与独立计算一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

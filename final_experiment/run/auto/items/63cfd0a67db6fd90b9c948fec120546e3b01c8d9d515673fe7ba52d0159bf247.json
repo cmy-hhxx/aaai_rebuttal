@@ -1,0 +1,42 @@
+{
+  "anon_id": "dc1d93925ce0a0489383",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[YLXJBLYMJJZJZJK]]====[[FCGSWL]]",
+      "certificate": "以 0 起始索引，inner_disk 初始序列为 J,K,L,Z,X,C,V,B,N,M,A,S,D,F,G,H,J,Q,W,E,R,T,Y,U,I,O。第1问每3字母后的右旋量依次为 0,1,2,3,4；按 outer 索引查 inner 得 YLX、JBL、YMJ、JZJ、ZJK，合并为 YLXJBLYMJJZJZJK。第2问每2字母后的右旋量依次为 0,5,10；在当前 inner 中定位密文字母并查 outer，得到 FC、GS、WL，合并为 FCGSWL。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题目规定，inner_disk 每个完整分组后向右旋转。第1问分组为 NETWORK、SEC、URI、TY，累计右旋量分别为 0、1、2、3，对应密文为 YLX、AKW、XKC、KL，合并为 [[YLXAKWXKCKL]]，不是 canonical_answer 的 [[VFTLCIGNVJTTCZZT]]。第2问按规则解密得到 [[FCGSWL]]，不是 [[GADGET]]。因此 canonical answer 错误；所给 attempt 的第2问正确，但第1问也错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的 canonical answer 与规则直接计算结果不一致，整体判定为无效。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为 supplied attempt 和 canonical answer 均未正确完成第1问，且 canonical answer 的两部分都与规则计算不符。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

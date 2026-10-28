@@ -1,0 +1,41 @@
+{
+  "anon_id": "b2eb6df67fbcef66b3f0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[B=1,C=0,E=4,H=6,I=9,L=5]]",
+      "certificate": "按个位：H+E=C+10k1。千位与万位得B=k4=1，且I+k3=C+10；因此k3=1、I=9、C=0。个位故H+E=10、k1=1。十位：E+B+k1=H+10k2，即E+2=H+10k2；结合H+E=10，得k2=0、E=4、H=6。百位：H+L+k2=B+10k3，即6+L=11，得L=5。验证：646+9514=10160。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给定映射满足所有约束：HEH=646，ILBE=9514，BCBHC=10160，且646+9514=10160；字母对应数字互不相同，首字母H、I、B均非零。列式进位推导也成立。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次利用个位、十位和千位进位确定C、B、I，再通过方程H+E=10与E+2=H+10k2确定E=4、H=6，并由百位确定L=5。k2=1的代数分支会导致E=9、H=1，与已确定的I=9、B=1冲突。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "algebra"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书明确给出了各列关系、关键进位和最终数值验证。小缺口是未显式说明十位方程的另一分支k2=1为何因与I、B重复而被排除，但该排除可直接检查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,41 @@
+{
+  "anon_id": "4c57f0ea797858e78a71",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "16",
+      "certificate": "逐字符扫描均匹配正确。第16步读取 >，应弹出栈顶 <，因此栈应变为空，但记录为“栈: <”。其余步骤的栈内容和匹配均正确；第17步最终为空虽正确，不能纠正第16步记录错误。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第16步读取“>”时，栈顶“<”应被弹出，因此记录“栈: <”错误；但第17步“最终栈为空”是正确的，因为按实际栈状态第16步后栈确实为空。因此规范答案不应包含17，canonical_answer“16,17”错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案本身错误；实际只需检查第16步弹栈后的状态。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为该样例的canonical_answer错误；所供attempt的结论16正确，但按要求非valid时不评定solver_correct。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

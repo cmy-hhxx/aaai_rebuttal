@@ -1,0 +1,40 @@
+{
+  "anon_id": "9474fc1a5d58698bba63",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[$!u]]====[[[#(p-!p)];[[$v]]]====[[B];[A]]====[[5]]====[[A]]",
+      "certificate": "Q1：可能非u为$!u。Q2：必然排中律为#(p-!p)，可能v为$v。Q3：#p与#!p矛盾（规则3），$p与$!p相容（规则1）。Q4：由#(p>v)与#p推出#v，使用规则5。Q5：先由规则5得#v，再由#(v>u)与#v得#u，最后由规则9得$u，因此选A。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "题目规则、问题和标准答案一致且可推导。供给的作答语义上正确，但Q2格式有渲染错误：应为[[[#(p-!p)]];[[$v]]]，实际为[[[#(p-!p)];[[$v]]]，第一条公式少一个右方括号。",
+      "error_types": [
+        "rendering"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "Q5需要依次由规则5从#(p>v)和#p推出#v，再由规则5从#(v>u)和#v推出#u，最后由规则9推出$u。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "implication"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "证书逐项正确说明了Q1的$!u、Q2的两个公式、Q3中规则3和规则1的关系、Q4使用规则5，以及Q5的三步推导；仅最终字符串的Q2括号格式不符合要求。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

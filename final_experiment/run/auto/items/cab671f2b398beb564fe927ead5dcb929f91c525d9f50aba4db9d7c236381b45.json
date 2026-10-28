@@ -1,0 +1,43 @@
+{
+  "anon_id": "61794f30081258ed8b36",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[p;q]θ]]====[[r]θ]]====[[predict(q)]θ]]====[[p+q]θ]]",
+      "certificate": "按“[]出现次数最少”严格取最简式：第1问保留[p;q]θ（1个[]，少于[p][q]θ的2个）；第2问保留[r]θ（少于[p][r]θ）；第3问[predict(q)]θ与[q]θ均为1个[]，任选前者；第4问保留[p+q]θ（1个[]，少于[p]θ∨[q]θ的2个）。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical answer correctly applies each rule and minimizes the number of modal brackets: [p;q]θ, [p][r]θ as the rule-expanded form for dependency, [predict(q)]θ for prediction, and [p+q]θ for choice. The supplied attempt omits the opening modal bracket inside each [[...]] wrapper, so its literal output does not match the required expressions.",
+      "error_types": [
+        "rendering"
+      ],
+      "depth_score": 1,
+      "depth_evidence": "Each item requires a direct rule application or direct comparison of bracket counts; no interacting multi-step derivation is necessary.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly compares bracket counts and identifies the intended minimal forms. It does not address the malformed literal output, whose wrappers contain p;q, r, predict(q), and p+q without the required opening modal bracket.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,148 @@
+### 模型输出 begin
+#### final yaml begin
+# 4x4 不等式数独（Futoshiki）规格文件
+# - 使用 Z3 变量表示每个格子的数字（1~n）
+# - 行、列均为 1..n 的排列（Distinct + 范围约束）
+# - 通过 post_generation 固定一个可解的“题面实例”（给定数字 + 不等式约束）
+# - 查询输出完整解矩阵
+
+custom_operator:
+  # 下面两个函数定义在 pf_futoshiki_0.py 中
+  to_grid: pf_futoshiki_0.py
+  format_grid: pf_futoshiki_0.py
+
+variables:
+  # 棋盘阶数（本题为 4x4）
+  n:
+    type: int
+    domain: "[4, 4]"
+    diff_factor: 0
+
+  # 位置索引 0..n-1
+  rows:
+    formula: list(range(n))
+  cols:
+    formula: list(range(n))
+
+  # =========================
+  # 固定题面：预填数字（0 表示空）
+  # 题面（1-based）：
+  # X X X X
+  # 2 X X X
+  # 1 X X X
+  # X X X X
+  # =========================
+  givens:
+    formula: "[[0,0,0,0],[2,0,0,0],[1,0,0,0],[0,0,0,0]]"
+    diff_factor: 0
+
+  # =========================
+  # 固定题面：不等式约束（用 0-based 坐标）
+  # (3,3) > (3,4)  -> (2,2) > (2,3)
+  # (3,1) > (4,1)  -> (2,0) > (3,0)
+  # (1,2) < (2,2)  -> (0,1) < (1,1)
+  # (2,1) > (2,2)  -> (1,0) > (1,1)
+  # 每条记录格式：[r1,c1,op,r2,c2]，其中 op ∈ ['<','>']
+  # =========================
+  ineqs:
+    formula: "[[2,2,'>',2,3],[2,0,'>',3,0],[0,1,'<',1,1],[1,0,'>',1,1]]"
+    diff_factor: 0
+
+symbols:
+  # 为每个格子创建一个整数符号，键为 (r,c)
+  cell:
+    source:
+    - rows
+    - cols
+    type: int
+    desc: "格子({_rows+1},{_cols+1})的数字"
+
+conditions:
+  # 每个格子取值范围 1..n
+  domain_each_cell:
+    formula: And([And(cell[(r,c)] >= 1, cell[(r,c)] <= n) for r in rows for c in cols])
+    desc: 每个格子填入1到{n}的整数
+
+  # 每一行互不相同（4x4 时即为 1..4 的一个排列）
+  row_distinct:
+    formula: And([Distinct([cell[(r,c)] for c in cols]) for r in rows])
+    desc: 每一行数字不重复
+
+  # 每一列互不相同
+  col_distinct:
+    formula: And([Distinct([cell[(r,c)] for r in rows]) for c in cols])
+    desc: 每一列数字不重复
+
+  # 先放一个“占位”的不等式条件（用于求解阶段1产生可用 _sol）
+  # 在 post_generation 中会用固定题面的 ineqs 重新加约束
+  ineq_placeholder:
+    formula: "True"
+    desc: 不等式关系见题面（将在生成后固定）
+
+post_generation:
+  # 将题面（givens/ineqs）固定到符号系统上，确保最终题目就是用户给定的这个实例
+  post_gen_conditions:
+    # 固定预填数字（givens 中非 0 的位置必须等于该数字）
+    lock_givens:
+      formula: And([cell[(r,c)] == givens[r][c] for r in rows for c in cols if givens[r][c] != 0])
+
+    # 固定不等式：逐条翻译成 Z3 约束
+    lock_inequalities:
+      formula: And([
+        (cell[(a[0],a[1])] > cell[(a[3],a[4])]) if a[2] == '>' else (cell[(a[0],a[1])] < cell[(a[3],a[4])])
+        for a in ineqs
+      ])
+
+# 为保证该实例答案唯一，可将 max_solution 设为 1
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请输出该4x4不等式数独的完整解矩阵（用嵌套列表表示）。"
+    # 从唯一解中取出每个格子的值，转为二维列表
+    ans_formula: to_grid(n, rows, cols, cell, _solutions[0])
+    ans_text: format_grid(_ans)
+    ans_assertion: len(_solutions) == 1
+
+# 题面描述（保留题面矩阵与不等式列表；求解输出由 q1 给出）
+desc: >
+  这是一个{n}x{n}的不等式数独。题面如下（0/空表示未知）：
+  {givens}
+  不等式约束（用0-based坐标表示）：
+  {ineqs}
+  {q1}
+#### final yaml end
+#### final code begin
+# pf_futoshiki_0.py
+# 工具函数：将 Z3 解模型中的 cell[(r,c)] 提取为二维矩阵，并格式化输出
+
+from typing import List, Any
+
+def to_grid(n: int, rows: List[int], cols: List[int], cell: Any, model: Any):
+    """
+    将 Z3 model 中的 cell[(r,c)] 提取为二维 Python 列表
+    参数:
+      - n: 阶数
+      - rows/cols: 索引列表
+      - cell: CustomSym 字典式符号容器（keys: (r,c)）
+      - model: Z3 Model (PuzzleClone 中的 _solutions[0])
+    返回:
+      - grid: List[List[int]]
+    """
+    grid = []
+    for r in rows:
+        row = []
+        for c in cols:
+            v = model.evaluate(cell[(r, c)], model_completion=True)
+            row.append(int(str(v)))
+        grid.append(row)
+    return grid
+
+def format_grid(grid):
+    """
+    按题目要求输出嵌套列表的字符串形式，如：
+    [[4, 3, 2, 1],[2, 1, 4, 3],[1, 4, 3, 2],[3, 2, 1, 4]]
+    """
+    return "[" + ",".join(["[" + ", ".join(str(x) for x in row) + "]" for row in grid]) + "]"
+#### final code end
+### 模型输出 end

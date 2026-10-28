@@ -1,0 +1,44 @@
+{
+  "anon_id": "0843d9af14a383bfe96b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "expr": "((1+7)*(7-4))"
+      },
+      "certificate": "枚举四个数字构成的所有二叉四则运算表达式并按去空格后的字符串排序。字典序最小的可行前缀为 (1+7)，其值为 8；剩余数字可组成 (7-4)=3，使用乘法得到 8×3=24。表达式使用 1、4、7、7 各一次，且无更小字典序的可行表达式。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "提供的 canonical_answer 不是去掉空格后的字典序最小解。尝试中的 \"((1+7)*(7-4))\" 使用 1、4、7、7 各一次且结果为 24；其去空格字符串以 \"((1\" 开头，而 canonical_answer \"(7-1)*4-7\" 以 \"(7\" 开头，因此前者字典序更小。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为规范答案已被一个可验证的更小字典序解反驳。",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体 verdict 不是 valid；但该尝试的算术值和数字使用次数均可直接核验。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

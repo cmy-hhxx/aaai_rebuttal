@@ -1,0 +1,38 @@
+{
+  "anon_id": "29ffe091571de7a9f9e3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 20,
+      "certificate": "前19个字符均可按栈匹配：第13、14、15、16、17位依次打开[、<、[、(、[，第18位(在第19位)闭合。第20位为>，此时栈顶仍是[，应为]，发生闭合类型不匹配，因此首个错误位置为20。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐字符检查可知前18位均合法：第13至17位依次为[、<、[、(、(，第18位)闭合第17位的(。因此第19位>到来时栈顶仍为第16位的(，发生类型不匹配，首个错误位置确为19。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要连续维护第13至18位形成的栈状态，并依据第18位的闭合操作确定第19位比较的栈顶类型。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 0,
+      "explanation_evidence": "供给的证明错误地将第17位记为[，而实际第17位是(；也将第18位描述为(并称其在第19位闭合，实际第18位是)。因此其关于第20位才首次出错的结论不成立。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

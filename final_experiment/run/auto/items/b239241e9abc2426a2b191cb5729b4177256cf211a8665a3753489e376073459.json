@@ -1,0 +1,41 @@
+{
+  "anon_id": "cfcbf3c04c50bbdabbb1",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[45555515141215661513]]\n[[DHDTWMKZC]]\n[[ENAPYPCWQR]]",
+      "certificate": "方格坐标为：L=45、P=55、W=15、M=14、J=12、O=66、Z=13，因此第一段为[[45555515141215661513]]。密文按两位分组为32、51、32、24、15、14、53、13、42，分别解得D、H、D、T、W、M、K、Z、C，即[[DHDTWMKZC]]。第三段先将奇数编号组（从0开始）交换两位，再整体反转分组，得到54、44、11、55、23、55、42、15、31、33，解得E、N、A、P、Y、P、C、W、Q、R，即[[ENAPYPCWQR]]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All three outputs match the stated rules. The first plaintext maps L=45, P=55, P=55, W=15, M=14, J=12, W=15, O=66, W=15, Z=13, yielding [[45555515141215661513]]. The second ciphertext decodes as 32=D, 51=H, 32=D, 24=T, 15=W, 14=M, 53=K, 13=Z, 42=C, yielding [[DHDTWMKZC]]. For the third, reversing the transformed pair order and then undoing swaps at original zero-based odd-index positions gives 54,44,11,55,23,55,42,15,31,33, which decodes to [[ENAPYPCWQR]].",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires coordinate lookup and concatenation for the first item, pairwise coordinate decoding for the second, and two dependent inverse transformations—pair-order reversal and position-dependent pair swapping—before decoding the third item.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly lists the relevant grid coordinates, decodes every pair in the second ciphertext, and shows the exact intermediate pairs and decoded letters for the inverse transformation in the third ciphertext.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

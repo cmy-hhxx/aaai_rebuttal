@@ -1,0 +1,39 @@
+{
+  "anon_id": "21c8b53e31f152f6e33e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "1) [[KHPLRZFESALHMXBIQALWJN$H$$$$]]\n2) [[RXZTCUWGTQ]]",
+      "certificate": "按每行7列写入明文，并将原列索引按[1,4,0,6,5,2,3]输出。第一题四行分别得到KHPLRZF、ESALHMX、BIQALWJ、N$H$$$$，拼接即所得密文。第二题逐行逆置：XCRWUZT还原为RXZTCUW，T$G$$Q$还原为GTQ$$$$；拼接并去除末尾补齐$，得到RXZTCUWGTQ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The encryption matches the specified permutation: each 7-character row is output in source-column order [1,4,0,6,5,2,3], with the final short row padded by $. The first plaintext produces KHPLRZF, ESALHMX, BIQALWJ, and N$H$$$$. Applying the inverse permutation to the two ciphertext rows yields RXZTCUW and GTQ$$$$; removing trailing padding gives RXZTCUWGTQ. Both the canonical answer and supplied attempt match.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "The solution requires two necessary operations: applying the stated column permutation with padding for encryption, and deriving/applying its inverse permutation while removing trailing padding for decryption.",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly lists every transformed row for both questions and correctly explains the inverse row reconstruction and removal of trailing padding.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

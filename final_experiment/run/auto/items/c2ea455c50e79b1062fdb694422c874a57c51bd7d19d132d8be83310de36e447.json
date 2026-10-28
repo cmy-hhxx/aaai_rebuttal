@@ -1,0 +1,44 @@
+{
+  "anon_id": "9c0d722fa82dfe599604",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "matrix": "[[0 0 0 0 0 0, 0 0 0 0 0 0, 0 0 0 0 0 0, 0 0 0 0 3 0, 0 0 0 0 0 0, 0 0 0 0 0 0, 0 0 0 1 2 0]]",
+        "total": 3
+      },
+      "certificate": "路径为(5,4)↓→(6,4)↓→(7,4)，在(7,4)由↓转为→，标1；进入(7,5)后由→转为↑，标2；到达(4,5)后由↑转为←，标3；随后经(4,4)、(3,4)到达E(2,4)，终点不判定拐点。总拐点数为3，满足[3,6]。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "沿路径从(5,4)↓出发：在(7,4)标1，在(7,5)标2，在(4,5)标3；随后进入(4,4)时方向由←变为↑，还应标4。之后到达E(2,4)，总拐点数为4。因此该尝试漏标(4,4)，并错误输出总数3。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为提交答案与可验证的路径追踪结果不一致。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "other"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释中已正确描述主要路径，但遗漏了从(4,5)进入(4,4)时由←转为↑的第4次拐点，因此其结论不可接受；解释评分不适用。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,43 @@
+{
+  "anon_id": "d0cd83392af0fc8fb0a3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "ambiguous",
+      "certificate": "按题面明确列出的规则，至少存在两个不同解，因此“唯一解”与规则不一致。两个均满足所有行列数量、帐篷与树正交相邻、帐篷间不正交/对角相邻：解1=[[C T X X X X X T X],[X X X C X C X C X],[X C X T X T X X X],[X T X X C T X T C],[T X X T X X C T X],[C X X C X X X T C]]；解2=[[X T X X X X X T C],[X C X C X C X X X],[X X X T X T X C X],[C T X X C T X T X],[T X X T X X C T X],[C X X C X X X T C]]。若还需规定每棵树恰好对应一顶帐篷，题面必须明确补充该约束。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "题目声称有唯一解，但 supplied attempt 给出的两个不同矩阵都满足所有行列帐篷数量、每顶帐篷与树正交相邻以及帐篷之间不正交/对角相邻的规则。例如解1与解2的列计数均为 [2,1,0,2,1,1,1,1,2]，且各自的帐篷位置均可逐一验证满足相邻条件。因此规则与唯一解保证不一致。canonical_answer 是其中一个有效解，但不是唯一解。",
+      "error_types": [
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目存在已验证的多个解，唯一性约束已失败。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体题目无效；不过 supplied attempt 的两个具体矩阵可直接检查并构成多个解的反例。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

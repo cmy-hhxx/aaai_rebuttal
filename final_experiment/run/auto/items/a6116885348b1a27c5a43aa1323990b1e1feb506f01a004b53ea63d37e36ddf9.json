@@ -1,0 +1,40 @@
+{
+  "anon_id": "4323f8ae1f4330633073",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[U V Y # B Q,# # Z # O X,E R G B J Y,W M D H R M]]",
+      "certificate": "按横纵段方向建立交叉变量。由列6得 r2c6=24(X)，列1得 r3c1=5(E)，列4得 r3c4=2(B)。行2和列3分别得 r2c3=26(Z)、r4c3=4(D)；于是列4、行4得 r3c4=2且 r4c5=18(R)，行1得 r1c3=25(Y)。设 r1c2=x，则列2给出 r3c2=40-x，行1与列5联立得 r1c5=24-x、r3c5=x-12；第1行最小值为2，故 r1c5=2(B)，从而 x=22(V)，r3c2=18(R)，r3c5=10(J)。其余交叉字母由遮罩直接给出。行列和分别验证为(87,65,67,79)和(49,53,62,10,45,79)，最小值分别为(2,15,2,4)和(5,13,4,2,2,13)。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给定答案满足全部网格、遮罩、交叉一致性、行列和及最小值约束，并与 canonical_answer 完全一致。横向和纵向遮罩逐段核对均匹配，例如第1行横段为 YVU、Q? 的相应方向字符，第3行横段为 YJBGRE，纵向各段也均一致。行和为 87,65,67,79，列和为 49,53,62,10,45,79，行最小值为 2,15,2,4，列最小值为 5,13,4,2,2,13。证书中的个别表述略有简略，但其结论可由这些约束复核。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先由已知纵向段和行列和确定若干交叉字母，再联立第1行、第2行、第3列和第5列等约束逐步确定未知量。例如列6确定 r2c6，列1确定 r3c1，行4确定 r4c3，随后列2、列5和第1行联立确定 r1c2、r1c3、r1c5，并继续得到 r2c3 和其余字母。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "证书给出的关键数值可复核：r2c6=24、r3c1=5、r3c4=2、r4c3=4、r1c3=25、r1c5=2、r1c2=22、r3c2=18、r3c5=10，且最终行列和及最小值均正确。证书对部分中间步骤（尤其行2与列3如何分别推出相应字母）的说明较简略，但没有造成结论错误。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

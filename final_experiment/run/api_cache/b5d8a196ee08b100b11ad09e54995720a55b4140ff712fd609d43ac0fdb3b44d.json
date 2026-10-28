@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"You are an intelligent assistant that specializes in encryption and decryption tasks. Below are the rules for a specific cipher. When responding, please ensure that your output adheres to the specified encryption and decryption rules and format.\\n\\n### Instructions:\\n\\n1. Identify the relevant properties and objects specified in the rule, including the plaintext, keyword, and ciphertext.\\n2. Follow the specified encryption or decryption operations precisely as described in the rules.\\n3. Ensure your output is formatted according to the specified notation and symbols.\\n\\n### Cipher Rule:\\n\\n**Encryption Rules:**\\n\\n- Input:\\n    - Plaintext: Uppercase letters string without punctuation and spaces.\\n- Output:\\n    - Ciphertext:  A string without punctuation and spaces.\\n- Preparation:\\n    - Maximum number of characters per line: 5\\n- Encryption Steps:\\n    - Lines are counted from 1.\\n    - The plaintext is arranged in a special way: an odd number of lines are written from left to right, and an even number of lines are written from right to left, with a maximum of five letters per line.\\n        - For example, for the plaintext \\\"LIDAHELLOWORLD\\\", first write the first line, from left to right as LIDAH, and then write the second line, from right to left as WOLLE, and then write the third line, from left to right as ORLD, the entire content of the finished writing is expressed as follows\\n        LIDAH\\n        WOLLE\\n        ORLD\\n    - Then read by column, each column is read from the top down, each read a column plus a \\\"#\\\", read out the contents of the final ciphertext.\\n        - For example, the above written content is read as LWO#IOR#DLL#ALD#HE# by column.\\n\\n **Decryption Rules:**\\n\\n- Input:\\n    - Ciphertext: A string without punctuation and spaces.\\n- Output:\\n    - Plaintext: Uppercase letters string without punctuation and spaces.\\n- Preparation:\\n    - Number of lines: 5\\n- Decryption Steps (exact opposite of encryption steps):\\n    - For each character in the ciphertext, it is written from top to bottom; if it encounters #, it switches to the next column and continues writing until the entire ciphertext has been written.\\n        - For example, for the ciphertext LWO#IOR#DLL#ALD#HE#,it is written as\\n        LIDAH\\n        WOLLE\\n        ORLD\\n    - Then according to the odd-numbered rows from left to right read, the even number of rows from right to left read the order of sequential reading, the final result is the decrypted plaintext.\\n        - For example, for the above written content, the first line, read from left to right as LIDAH, the second line, read from right to left as ELLOW, the third line, read from left to right as ORLD, and ultimately the entire content connected, decrypted plaintext as LIDAHELLOWORLD.\\n\\n### Question:\\n1: Plaintext: \\\"TPEGOCAUXSHOCNCWILXOUZOFOYYISYPFFND\\\"\\n\\nPlease provide the encrypted answer, encapsulated in double square brackets. For example, the format should be: [[encrypted answer]].\\n2: Ciphertext: \\\"VHFFCEC#FAYNWUC#CLWSLWC#EFUCVGK#DBKFCNC#\\\"\\n\\nPlease provide the decrypted answer, encapsulated in double square brackets. For example, the format should be: [[decrypted answer]].\\n\\n### Answer:\\n\", \"seed_answer\": \"[[TSHOUYP#PXOXZSF#EUCLOIF#GANIFYN#OCCWOYD#]]====[[VFCEDBFLAHFYWUKFCSNFCWLVCNGWUECCCKC]]\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/cipher_17/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtPFu3JNV609O0NF5BUlmTfeO403",
+    "created": 1793176481,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, math, random, string\nfrom typing import List, Tuple, Dict, Any, Optional\n\nALPHABET = string.ascii_uppercase\n\ndef _chunks(s: str, n: int) -> List[str]:\n    return [s[i:i+n] for i in range(0, len(s), n)]\n\ndef encrypt_boustro_columns(plaintext: str, width: int = 5) -> str:\n    \"\"\"\n    加密：\n    1) 按每行最多 width 个字符分行。\n    2) 奇数行左->右写；偶数行右->左写（即把该行字符串反转后写入）。\n    3) 按列自上而下读，每读一列追加一个 '#'\n    注：最后一行可能不足 width，列读时对缺位不输出字符。\n    \"\"\"\n    if not plaintext or any(c not in ALPHABET for c in plaintext):\n        raise ValueError(\"plaintext 必须为仅含大写字母且非空的字符串\")\n    if width <= 0:\n        raise ValueError(\"width 必须为正整数\")\n\n    raw_rows = _chunks(plaintext, width)\n    rows = []\n    for i, r in enumerate(raw_rows, start=1):\n        rows.append(r if i % 2 == 1 else r[::-1])\n\n    maxlen = max(len(r) for r in rows)\n    out = []\n    for col in range(maxlen):\n        for r in rows:\n            if col < len(r):\n                out.append(r[col])\n        out.append('#')\n    return ''.join(out)\n\ndef decrypt_boustro_columns(ciphertext: str, width: int = 5) -> str:\n    \"\"\"\n    解密（严格按题面“加密反操作”）：\n    - 题面固定“行数=5”。但为了生成器更通用，这里允许任意 width，\n      并由密文中 '#' 的数量决定列数；行数固定为 width（与种子一致=5）。\n    过程：\n    1) 逐字符自上而下写入当前列，遇到 '#' 切到下一列。\n       写入时行号从 1..width 循环；若列未满遇到 '#', 则该列剩余行为空。\n    2) 得到 width 行的网格后：奇数行按左->右读，偶数行按右->左读，拼接即明文。\n    \"\"\"\n    if not ciphertext or any((c not in ALPHABET and c != '#') for c in ciphertext):\n        raise ValueError(\"ciphertext 必须为仅含大写字母与 # 且非空的字符串\")\n    if width <= 0:\n        raise ValueError(\"width 必须为正整数\")\n    if '#' not in ciphertext:\n        raise ValueError(\"ciphertext 必须包含分隔符 #\")\n\n    # 解析列：遇到 # 结束一列\n    cols: List[List[Optional[str]]] = []\n    cur: List[Optional[str]] = [None] * width\n    row = 0\n    for ch in ciphertext:\n        if ch == '#':\n            cols.append(cur)\n            cur = [None] * width\n            row = 0\n        else:\n            if row >= width:\n                # 这一列字符数超过行数，题面规则下不应发生\n                raise ValueError(\"ciphertext 某列字符数超过行数(width)，不符合规则\")\n            cur[row] = ch\n            row += 1\n    # 题面样例密文一般以 # 结尾；若未以 # 结尾，则 cur 未入列\n    # 为了稳健，若 cur 有内容则也入列\n    if any(x is not None for x in cur):\n        cols.append(cur)\n\n    # 将列转为行字符串\n    rows: List[List[str]] = [[] for _ in range(width)]\n    for col in cols:\n        for r in range(width):\n            if col[r] is not None:\n                rows[r].append(col[r])\n            else:\n                # 缺位：该行该列无字符\n                pass\n\n    # 还原“写入后的行内容”(即加密时的 rows：奇数行正向，偶数行反向)\n    written_rows = [''.join(rows[r]) for r in range(width)]\n\n    # 按 boustrophedon 阅读还原明文：奇数行正读，偶数行反读\n    pt_parts = []\n    for i, wr in enumerate(written_rows, start=1):\n        pt_parts.append(wr if i % 2 == 1 else wr[::-1])\n    return ''.join(pt_parts)\n\ndef _random_plaintext(rng: random.Random, n: int) -> str:\n    return ''.join(rng.choice(ALPHABET) for _ in range(n))\n\ndef _validate_encrypt_decrypt_consistency(pt: str, width: int = 5) -> Tuple[str, str]:\n    ct = encrypt_boustro_columns(pt, width=width)\n    # 解密固定行数=width\n    recovered = decrypt_boustro_columns(ct, width=width)\n    if recovered != pt:\n        raise AssertionError(\"自检失败：解密未能还原明文\")\n    return ct, recovered\n\ndef _validate_decrypt_encrypt_consistency(ct: str, width: int = 5) -> Tuple[str, str]:\n    pt = decrypt_boustro_columns(ct, width=width)\n    ct2 = encrypt_boustro_columns(pt, width=width)\n    if ct2 != ct:\n        raise AssertionError(\"自检失败：加密未能还原密文\")\n    return pt, ct2\n\ndef _make_problem_encrypt(pt: str, ct: str, width: int = 5, variant: int = 0) -> Dict[str, Any]:\n    # 题面中文且自包含，给出规则与任务\n    rule = (\n        \"加密规则：\\n\"\n        f\"- 每行最多 {width} 个字母；从第1行起计数。\\n\"\n        \"- 先把明文分行书写：奇数行从左到右写；偶数行从右到左写（等价于该行字符串反转后写入）。\\n\"\n        \"- 再按“列”读取：从第1列开始，每列自上而下读取所有存在的字母，读完该列后追加一个“#”。\\n\"\n        \"- 直到所有列读完，得到密文。\\n\"\n    )\n    if variant == 0:\n        ask = f\"请对明文进行加密，输出形如 [[密文]]。\\n明文：\\\"{pt}\\\"\\n\"\n    else:\n        ask = f\"按上述规则加密下列明文，并用双中括号输出：[[...]]。\\n明文为：{pt}\\n\"\n    explanation = (\n        \"校验要点：\\n\"\n        f\"- 明文长度={len(pt)}，每行最多{width}个字母。\\n\"\n        f\"- 生成的密文按列读取，并以“#”分隔每一列。\\n\"\n        f\"- 结果密文为：{ct}\\n\"\n    )\n    return {\n        \"problem\": rule + \"\\n任务：\\n\" + ask,\n        \"answer\": f\"[[{ct}]]\",\n        \"explanation\": explanation\n    }\n\ndef _make_problem_decrypt(ct: str, pt: str, width: int = 5, variant: int = 0) -> Dict[str, Any]:\n    rule = (\n        \"解密规则（为加密的反过程，行数固定为 5 行）：\\n\"\n        f\"- 将密文从左到右读取，按“列”自上而下依次写入 5 行；遇到“#”则切换到下一列继续写。\\n\"\n        \"- 写完后得到一个5行的字母表格（某些列可能不满5个字母）。\\n\"\n        \"- 最后按行读出明文：奇数行从左到右读；偶数行从右到左读；依次拼接得到明文。\\n\"\n        \"注意：密文仅包含大写字母与分隔符“#”。\\n\"\n    )\n    if width != 5:\n        # 题面强调5行，这里保持一致；width 在本生成器中固定用5\n        raise ValueError(\"本题面解密固定为5行，width必须为5\")\n\n    if variant == 0:\n        ask = f\"请解密下列密文，输出形如 [[明文]]。\\n密文：\\\"{ct}\\\"\\n\"\n    else:\n        ask = f\"根据上述规则还原明文，并用双中括号输出：[[...]]。\\n给定密文：{ct}\\n\"\n\n    explanation = (\n        \"校验要点：\\n\"\n        f\"- 将密文按“#”切分为若干列，每列从上到下填入5行。\\n\"\n        f\"- 得到行内容后，按“奇行正读、偶行反读”拼接。\\n\"\n        f\"- 解得明文为：{pt}\\n\"\n    )\n    return {\n        \"problem\": rule + \"\\n任务：\\n\" + ask,\n        \"answer\": f\"[[{pt}]]\",\n        \"explanation\": explanation\n    }\n\ndef generate_one(rng: random.Random, seen: set) -> Dict[str, Any]:\n    width = 5  # 与种子一致：最大每行5，加密；解密固定5行\n    # 两个题型：加密 or 解密\n    mode = rng.choice([\"enc\", \"dec\"])\n\n    # 控制规模：行数不固定（由长度决定），长度尽量让列数>=2 且不太短\n    if mode == \"enc\":\n        n = rng.randint(18, 45)\n        pt = _random_plaintext(rng, n)\n        ct, _ = _validate_encrypt_decrypt_consistency(pt, width=width)\n        key = (\"enc\", pt)\n        if key in seen:\n            raise ValueError(\"重复实例\")\n        seen.add(key)\n        return _make_problem_encrypt(pt, ct, width=width, variant=rng.randint(0, 1))\n\n    else:\n        # 生成一个明文 -> 密文，然后出密文让解密\n        n = rng.randint(15, 40)\n        pt = _random_plaintext(rng, n)\n        ct, _ = _validate_encrypt_decrypt_consistency(pt, width=width)\n\n        # 为了多样性，偶尔裁剪掉末尾最后一列后的 #？不允许：题面允许不以#结尾但更易歧义；\n        # 这里保持标准：总是以#结尾。\n        if not ct.endswith('#'):\n            ct += '#'\n\n        # 再做逆向一致性校验（独立路径：先解密再加密比对）\n        pt2, ct2 = _validate_decrypt_encrypt_consistency(ct, width=width)\n        if pt2 != pt or ct2 != ct:\n            raise AssertionError(\"交叉核验失败\")\n\n        key = (\"dec\", ct)\n        if key in seen:\n            raise ValueError(\"重复实例\")\n        seen.add(key)\n        return _make_problem_decrypt(ct, pt, width=width, variant=rng.randint(0, 1))\n\ndef main():\n    data = json.load(sys.stdin)\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n    rng = random.Random(seed)\n\n    results = []\n    seen = set()\n    max_tries = 20000\n    tries = 0\n    while len(results) < count and tries < max_tries:\n        tries += 1\n        try:\n            item = generate_one(rng, seen)\n            # 基本非空检查\n            if not item[\"problem\"] or \"answer\" not in item or item[\"explanation\"] is None:\n                raise AssertionError(\"渲染结果缺字段或为空\")\n            results.append(item)\n        except Exception as e:\n            # 失败重采样；真实错误信息写stderr但不中断，除非超限\n            print(f\"[warn] resample due to: {type(e).__name__}: {e}\", file=sys.stderr)\n\n    if len(results) != count:\n        raise RuntimeError(f\"生成失败：仅生成 {len(results)}/{count} 题（尝试次数={tries}）\")\n\n    json.dump(results, sys.stdout, ensure_ascii=False)\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 2769,
+      "prompt_tokens": 2242,
+      "total_tokens": 5011,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1408
+      },
+      "cost": 0.040471900000000005,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 12,
+        "engine_ttft_ms": 65,
+        "engine_ttlt_ms": 32759,
+        "pre_inference_ms": 327,
+        "service_tbt_ms": 12,
+        "service_ttft_ms": 1016,
+        "service_ttlt_ms": 33707,
+        "user_visible_ttft_ms": 688
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261006051512-7603861f-default-r0-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176515.6119208
+}

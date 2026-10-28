@@ -1,0 +1,43 @@
+{
+  "anon_id": "632e7a8deae5d971bd1e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[KNXI$RIGCKSLRXXHTO$IKFA$TNOW$OVLA$]]",
+        "2": "[[TWDTGVYQHWOGESEQQKYKO]]"
+      },
+      "certificate": "按每7字符分行，补齐$后按列序[1,4,0,6,5,2,3]依次读取。明文分行：KKTORIX / SNNVIKH / LXOLGFT / RIWACAO / X$$$$$$；各列依次读取为KNXI$、RIGC$、KSLRX、XHTO$、IKFA$、TNOW$、OVLA$，得到第1问。第2问密文分成7个长度为3的列块：WQH、GGY、TQE、YSO、VEK、DWQ、TOK；按给定顺序还原列后逐行读取，得到TWDTGVYQHWOGESEQQKYKO。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "The stated canonical answer is incorrect. Applying the specified row-wise padding and column order gives encryption [[KNXI$RIGC$KSLRXXHTO$IKFA$TNOW$OVLA$]], not the canonical first answer. Decrypting the second ciphertext by splitting it into chunks WQH, GGY, TQE, YSO, VEK, DWQ, TOK and restoring columns gives [[TWDTGVYQQWOGESEHQKYKO]], not the canonical second answer. The supplied attempt also omits the $ after RIGC in answer 1 and reconstructs answer 2 incorrectly.",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the canonical answer is demonstrably wrong and the supplied result is invalid.",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the puzzle package fails the canonical-answer check; the certificate's listed column chunks do not match its submitted answer 1, and its row reconstruction for answer 2 is incorrect.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

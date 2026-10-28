@@ -1,0 +1,38 @@
+{
+  "anon_id": "c30f5638cc4635becb4d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[514987814959535961598788]]====[[MSBPFURL]]",
+      "certificate": "加密后的摩斯串为 ../-.-./-.-/-./-.-./.../..../..../--/-.../-.-/-.-.。按每2字符分组得到 '..','/-','.-','./','-.','-/','-.','/-','.-','./','..','./','..','/.','..','./','--','/-','..','./','-.','-/','-.','-.'，映射为 514987814959535961598788。解密时，数字对应的二字符拼接并按“/”分割，得到 -- / ... / -... / .--. / ..-. / ..- / .-. / .-..，还原为 MSBPFURL。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "规则完整且可逆。第1问按给定摩斯串分组并映射后得到5149878149595535961598788；第2问将密文数字逆映射、拼接摩斯串并按斜杠切分，得到MSBPFURL，均与canonical_answer一致。供给的attempt第1问密文缺少一位，因此整体答案错误。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次进行逐字母摩斯转换、拼接分隔符、按两个字符分组、查表映射；解密还需逆映射、重建摩斯串、按斜杠切分并逐段查表还原，包含至少三步相互依赖的推理。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "attempt中的明文摩斯串及解密结果MSBPFURL基本正确，但加密分组列表和密文少了一位，未完整证明第1问，因此解释部分可部分核查但结论整体错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

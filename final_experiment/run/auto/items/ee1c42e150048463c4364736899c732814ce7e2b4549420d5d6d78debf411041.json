@@ -1,0 +1,76 @@
+{
+  "anon_id": "575fb3059331add99033",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          2,
+          1,
+          9,
+          4,
+          16
+        ],
+        [
+          3,
+          6,
+          7,
+          2,
+          18
+        ],
+        [
+          7,
+          5,
+          4,
+          9,
+          25
+        ],
+        [
+          1,
+          4,
+          3,
+          7,
+          15
+        ],
+        [
+          13,
+          16,
+          23,
+          22,
+          74
+        ]
+      ],
+      "certificate": "第一行要求 X=16-(2+1+9)=4；第二行要求 X=18-(3+7+2)=6。填入后列和分别为 13、16、23、22，且总和为 74，所有约束均满足。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "两个 X 分别由行和确定：第一行 X=16-(2+1+9)=4，第二行 X=18-(3+7+2)=6，恰好使用多重集 [4,6] 各一次。填入后各列和为 13、16、23、22，总和为 74，且完整矩阵与规范答案一致。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "每个未知数都可通过其所在行的直接等式独立求出，随后进行列和核验；无需分支或复杂推理。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确展示了两个行和计算，并核验了填入后的列和与总和，所有数值均可直接复算。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

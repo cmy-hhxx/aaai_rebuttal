@@ -1,0 +1,40 @@
+{
+  "anon_id": "7f0764bc58a255e4a2e4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[#s]]====[[[$!q]];[[$q]]]====[[B];[A]]====[[1]]====[[A]]",
+      "certificate": "Q1：必然 s 为 #s。Q2：可能非 q 为 $!q，可能 q 为 $q。Q3：由规则(6)，#q 与 $!q 矛盾，选 B；$s 与 $!s 可相容，选 A。Q4：由 #(s>q) 和 #s 推出 #q，使用规则(1)。Q5：先由规则(1)得 #q，再由规则(3)得 $q，因此选 A。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "题面规则足以确定各问答案。第5问由 #(s>q) 与 #s 用规则(1)推出 #q，再由 #(q>r) 与 #q 再次用规则(1)推出 #r，因此应选 D；标准答案正确，但所给尝试错误地在推出 #q 后选择了 A（$q），未完成题目要求的两步推演。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 2,
+      "depth_evidence": "第5问需要先由 #(s>q) 和 #s 推出 #q，再依赖该结论与 #(q>r) 推出 #r，两个连续的蕴含推演是确定答案 D 的必要步骤。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "implication"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 2,
+      "explanation_evidence": "尝试对Q1至Q4的符号化、相容性判断和规则编号说明均可核对；Q5虽正确完成了第一步推出 #q，但错误选择 A，且没有执行第二步推出 #r，因此证书只能部分成立。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

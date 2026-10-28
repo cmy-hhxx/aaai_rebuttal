@@ -1,0 +1,38 @@
+{
+  "anon_id": "fdd4814d17e4c3f85030",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 7,
+      "certificate": "第6位是未闭合的左括号“(”；第7位出现右括号“>”，与最近未闭合左括号类型不匹配，因此首个错误位置为7。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The sequence has 24 characters. Positions 1–5, `()[]<`, leave `<` unmatched; position 6 adds `(`, so the most recent unmatched opener at position 7 is `(`. The `>` at position 7 mismatches it, making 7 the first error. The canonical answer and supplied attempt are correct.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Track the unmatched opener through the valid prefix to position 6, then compare that opener's type with the character at position 7.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate correctly identifies the unmatched `(` at position 6 and the mismatching `>` at position 7. It does not explicitly verify that positions 1–6 contain no earlier error, a minor omission.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

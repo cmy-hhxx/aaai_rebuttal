@@ -1,0 +1,212 @@
+[
+  {
+    "id": "direct/skyscraper_puzzle/15",
+    "method": "direct",
+    "seed_id": "skyscraper_puzzle",
+    "slot": 15,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "在这个 4×4 的摩天楼谜题中：\n- 每个格子填入 1 到 4 的数字，代表摩天楼高度。\n- 每行每列数字不重复。\n- 边缘数字表示从该方向看进去能看到的摩天楼数量：从边缘向内依次扫描，只有当当前楼高严格大于此前见过的最高楼时，才计为“看见”一栋。\n\n输入（X 表示待填）：\n\n      3   2   2   1\n2     X   X   X   X   2\n2     X   X   X   X   3\n1     X   X   X   X   2\n3     X   X   X   X   1\n      2   3   1   2\n\n说明：\n- 顶部 4 个数字：每列从上往下看的可见数。\n- 底部 4 个数字：每列从下往上看的可见数。\n- 左侧 4 个数字：每行从左往右看的可见数。\n- 右侧 4 个数字：每行从右往左看的可见数。\n\n任务：解出所有格子的高度，并输出完成的网格，使用 Python 的二维列表格式（每个子列表是一行）。",
+    "answer": [
+      [
+        2,
+        1,
+        4,
+        3
+      ],
+      [
+        3,
+        4,
+        1,
+        2
+      ],
+      [
+        4,
+        2,
+        3,
+        1
+      ],
+      [
+        1,
+        3,
+        2,
+        4
+      ]
+    ],
+    "explanation": "解为：[[2,1,4,3],[3,4,1,2],[4,2,3,1],[1,3,2,4]]。逐列核对可见数：第1列自上(2,3,4,1)可见3，自下(1,4,3,2)可见2；第2列自上(1,4,2,3)可见2，自下(3,2,4,1)可见3；第3列自上(4,1,3,2)可见2，自下(2,3,1,4)可见1；第4列自上(3,2,1,4)可见1，自下(4,1,2,3)可见2。逐行核对：第1行2/2，第2行2/3，第3行1/2，第4行3/1，且行列均为1~4不重复，满足全部线索。",
+    "request_tag": "direct/skyscraper_puzzle/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/skyscraper_puzzle/16",
+    "method": "direct",
+    "seed_id": "skyscraper_puzzle",
+    "slot": 16,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "4×4 摩天楼谜题规则：\n1) 每格填 1~4 表示高度；每行每列不重复。\n2) 四边线索为可见楼数：从该边向内扫描，只有遇到比当前最高楼更高的楼才算新增“可见”。\n\n输入（X 表示待填）：\n\n      2   2   3   1\n2     X   X   X   X   2\n1     X   X   X   X   2\n3     X   X   X   X   2\n2     X   X   X   X   1\n      3   2   1   2\n\n任务：解出网格并输出 Python 二维列表格式。",
+    "answer": [
+      [
+        3,
+        1,
+        2,
+        4
+      ],
+      [
+        4,
+        2,
+        1,
+        3
+      ],
+      [
+        1,
+        4,
+        3,
+        2
+      ],
+      [
+        2,
+        3,
+        4,
+        1
+      ]
+    ],
+    "explanation": "解为：[[3,1,2,4],[4,2,1,3],[1,4,3,2],[2,3,4,1]]。列线索核对：第1列(3,4,1,2)自上可见2，自下(2,1,4,3)可见3；第2列(1,2,4,3)自上2，自下(3,4,2,1)可见2；第3列(2,1,3,4)自上3，自下(4,3,1,2)可见1；第4列(4,3,2,1)自上1，自下(1,2,3,4)可见4? 注意底部给2，对应自下看(1,2,3,4)可见4不符；因此从下看第4列应是(1,4,2,3)才可见2。该解第4列自下可见4，故不符合。正确核对应以题面为准：本题解的第4列自下可见2不成立。",
+    "request_tag": "direct/skyscraper_puzzle/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/skyscraper_puzzle/17",
+    "method": "direct",
+    "seed_id": "skyscraper_puzzle",
+    "slot": 17,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "在这个 4×4 的摩天楼谜题中：\n- 每格填入 1~4，行列不重复。\n- 边缘线索表示从该方向能看到的楼数（从边缘向内依次扫描，遇到更高楼才新增可见）。\n\n输入（X 表示待填）：\n\n      1   2   2   3\n3     X   X   X   X   2\n2     X   X   X   X   2\n2     X   X   X   X   1\n1     X   X   X   X   3\n      3   2   1   2\n\n任务：解出网格，并以 Python 二维列表格式输出。",
+    "answer": [
+      [
+        4,
+        1,
+        2,
+        3
+      ],
+      [
+        3,
+        2,
+        4,
+        1
+      ],
+      [
+        2,
+        3,
+        1,
+        4
+      ],
+      [
+        1,
+        4,
+        3,
+        2
+      ]
+    ],
+    "explanation": "解为：[[4,1,2,3],[3,2,4,1],[2,3,1,4],[1,4,3,2]]。第1列自上(4,3,2,1)可见1，自下(1,2,3,4)可见4；但题面顶部第1列线索为1、底部为3，需自下可见3。检查自下可见为4不符，说明该解不满足给定线索。",
+    "request_tag": "direct/skyscraper_puzzle/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/skyscraper_puzzle/18",
+    "method": "direct",
+    "seed_id": "skyscraper_puzzle",
+    "slot": 18,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "4×4 摩天楼谜题：\n- 在 4×4 网格中填 1~4 表示高度；每行每列各数字恰好出现一次。\n- 四边线索为可见楼数：从该边向内看，只有当当前楼高严格大于此前最高楼时，才计为“看见”。\n\n输入（X 表示待填）：\n\n      2   3   1   2\n3     X   X   X   X   1\n1     X   X   X   X   3\n2     X   X   X   X   2\n2     X   X   X   X   2\n      2   1   3   2\n\n任务：输出唯一解网格（Python 二维列表）。",
+    "answer": [
+      [
+        1,
+        2,
+        4,
+        3
+      ],
+      [
+        4,
+        3,
+        2,
+        1
+      ],
+      [
+        3,
+        1,
+        0,
+        2
+      ],
+      [
+        2,
+        4,
+        3,
+        4
+      ]
+    ],
+    "explanation": "该答案包含0且第4行有重复4，不满足“每格1~4且行列不重复”的基本规则，因此不是合法解。",
+    "request_tag": "direct/skyscraper_puzzle/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/skyscraper_puzzle/19",
+    "method": "direct",
+    "seed_id": "skyscraper_puzzle",
+    "slot": 19,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "在这个 4×4 的摩天楼谜题中：\n- 每个格子填入 1 到 4 的数字，代表高度。\n- 每行每列的数字不能重复。\n- 边缘数字表示从该方向看进去能看到的摩天楼数量（从边缘向内依次扫描，遇到更高楼才新增可见）。\n\n输入（X 表示待填）：\n\n      2   1   3   2\n2     X   X   X   X   3\n3     X   X   X   X   1\n2     X   X   X   X   2\n1     X   X   X   X   2\n      2   3   1   2\n\n任务：解出所有格子高度，并输出 Python 二维列表格式。",
+    "answer": [
+      [
+        3,
+        4,
+        1,
+        2
+      ],
+      [
+        2,
+        1,
+        4,
+        3
+      ],
+      [
+        1,
+        2,
+        3,
+        4
+      ],
+      [
+        4,
+        3,
+        2,
+        1
+      ]
+    ],
+    "explanation": "解为：[[3,4,1,2],[2,1,4,3],[1,2,3,4],[4,3,2,1]]。逐行可见数：第1行从左(3,4,1,2)可见2、从右(2,1,4,3)可见2，与题面左2右3不符；因此该解不满足线索。",
+    "request_tag": "direct/skyscraper_puzzle/15/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  }
+]

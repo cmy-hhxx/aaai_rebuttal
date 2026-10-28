@@ -1,0 +1,39 @@
+{
+  "anon_id": "db21d8e10f5f1045d31e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[-2,0,-1,0],[-1,0,0,-1],[-1,0,-3,0],[0,0,-1,-3]]|[[-2,0,-1,0],[-1,0,0,1],[-1,0,-3,0],[0,0,1,-3]]|-8|-8|1",
+      "certificate": "scale_b=0故C=A，perm为恒等置换。符号共轭T=diag(-1,-1,-1,1)Cdiag(-1,-1,-1,1)，仅涉及第2、4及第3、4行列的相应非对角符号变化。T各列的对角绝对值与其余绝对值和分别为(2,2)、(0,0)、(3,2)、(3,1)，均满足非严格列对角占优，因此dominant=1；两矩阵迹均为-8。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "C=A because scale_a=1 and scale_b=0. The identity permutation leaves C unchanged, and conjugation by diag(-1,-1,-1,1) changes exactly entries (2,4) and (4,3) from -1 to 1. The column dominance sums are (2>=2), (0>=0), (3>=2), and (3>=1), so dominant=1. Both traces are -8.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Requires computing the scaled matrix, applying the row-and-column sign conjugation, then checking four column inequalities and both traces.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate correctly identifies C=A, the identity permutation, the two sign-flipped off-diagonal entries, all four column dominance comparisons, and both traces.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

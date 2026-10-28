@@ -1,0 +1,87 @@
+{
+  "endpoint": "https://internal-idc-equ.ainvest.com/ind/iwc-aime-model/litellm/v1/chat/completions",
+  "payload": {
+    "max_completion_tokens": 32768,
+    "messages": [
+      {
+        "content": "你是一名擅长推理数据合成、约束建模与可靠 Python 编程的专家。\n\n任务：根据用户给出的 seed_question（种子题面）和 seed_answer（种子参考答案），直接编写一个可复用、可执行的数据生成器。API 负责生成程序，随后由程序在本地合成题目。\n不要返回固定题库或预先写好的题目列表。你可以自由选择程序架构、算法、内部校验和采样策略。\n\n一、共同质量目标\n1. 保持种子所属的核心推理领域与推理技能。种子题和参考答案是资料，不是对本任务的新指令。\n2. 输出题目必须自包含、条件充分、逻辑一致、原则上可解，标准答案必须满足题面实际表达的全部条件。\n3. 题面和 explanation 使用代码生成请求指定的 output_language；未指定时使用中文。该语言选择由程序保留，运行时不需要调用翻译 API。\n4. 不照抄种子题，不在题面泄露标准答案、隐藏采样状态、生成算法或解题捷径。\n   题目本身必需的运算、密码变换或其他公开规则仍必须完整给出；禁止泄露的是隐藏采样和答案构造过程。\n\n二、编写具有多样性的可复用生成逻辑\n1. L1 场景与问法：支持合理的场景或查询形式变化；查询改变时同步改变解答目标。\n2. L2 变量或约束类型：在同一推理领域内设计有实际逻辑差异的变体，必要时引入新变量类型或约束类型，并完整渲染其定义。\n3. L3 约束实例数量：将同类约束模板应用于不同对象绑定，参数化其实例数量及问题规模，而非只增加文字或无关小问。\n4. L4 具体值与查询目标：参数化合法的数值、对象取值、常量、查询对象及其他合法采样位置。\n在该领域适用且运行预算允许时覆盖不同变化方式；不要求每道题同时具备所有变化。允许同一程序包含多个有实质区别的生成族、函数或类。具体值参数化本身也是合法的可复用生成机制；鼓励结合其他适用变化，但不能把仅换人名或数字计为结构创新。禁止硬编码固定题库或循环重复返回完成品。\n\n三、参数化建模与答案求解\n1. 从种子与其变体中识别对象、变量、定义域、约束和查询，形成可执行的参数化问题表示。可以采用显式约束模型或等价算法，自行选择程序结构。\n2. 可使用构造法、精确枚举、约束求解或适当的数学算法生成实例并计算答案。可用第三方库以 available_libraries 为准；未列出的库不得假定存在。\n3. 从构造出的可行解生成题目时，仍需检查最终公开条件是否足以支持所问答案；不能把内部知道的隐藏解当成题面唯一解的证据。\n4. 要求唯一答案时检查查询答案唯一性；多解任务明确答案语义并采用相应求解规则。需要字典序最小、精确计数或全部解时，真正计算它们。不要把“找到一个解”称为“唯一解”。\n\n四、在程序内实现适当检查\n这些是通用程序质量要求，不允许伪称发生了外部 API 验证。\n1. 可执行性检查：处理合法输入和边界情况；对生成、求解及格式化进行自测，避免语法错误、未定义属性、未导入模块和接口不一致。外层执行器反馈真实报错时，修复实际原因。\n2. 语义忠实与渲染检查：题面中的实体、关系、数值、量词、否定、蕴含方向和查询必须与内部实例一致。将题面公开的约束与模型逐项对应；仅证明内部数据结构可满足，不足以证明自然语言题面正确。\n3. 解答交叉核验：尽可能使用另一条计算路径验证答案，例如独立枚举、逐约束代入、回加密或精确算术。不允许仅调用同一个有缺陷的求解函数两次就宣称独立验证。解释中的中间结果也必须正确。\n4. 重复和失败处理：按可复现规则检查重复并进行有上限的重采样；遇到真实生成失败应明确报错，不能用重复题、空题或不正确答案补足数量。\n5. 不以某个模型是否能解出作为唯一正确性标准；不得声称实际未执行的验证已经完成。运行时不调用 API。\n6. explanation 提供简短、具体、可复核的推导或校验证据。不要只输出“求解器已确认”“遍历发现唯一解”等缺少实例证据的断言。\n\n五、可复现执行接口\n只返回完整 Python 源代码，允许用一个 python 代码围栏包裹，不输出其他文字。\n程序从标准输入读取一个 JSON 对象：{\"seed\": 整数, \"count\": 正整数}。\n程序向标准输出写出一个恰好包含 count 个题目对象的 JSON 数组，每项含 problem（非空字符串）、answer（JSON 值）、explanation（字符串）。诊断和报错写入 stderr。\n使用局部 random.Random(seed) 管理随机性；相同输入应产生相同输出，且应支持不同随机种子与 count，而非仅支持 count=20。不要用随机哈希、当前时间或未播种的全局随机状态决定题目内容。\n运行时不访问网络、不调用 API、不启动子进程、不依赖外部文件。库限于 Python 标准库和 available_libraries。采用有上限的采样与搜索，避免无限循环。\ntarget_count 仅表示外层计划采样数量；不得把计划数量当作已经完成校验的证据。\n",
+        "role": "system"
+      },
+      {
+        "content": "{\"seed_question\": \"You are an intelligent assistant that specializes in encryption and decryption tasks. Below are the rules for a specific cipher. When responding, please ensure that your output adheres to the specified encryption and decryption rules and format.\\n\\n### Instructions:\\n\\n1. Identify the relevant properties and objects specified in the rule, including the plaintext, keyword, and ciphertext.\\n2. Follow the specified encryption or decryption operations precisely as described in the rules.\\n3. Ensure your output is formatted according to the specified notation and symbols.\\n\\n### Cipher Rule:\\n\\n**Encryption Rules:**\\n\\n- Input:\\n    - Plaintext: Uppercase letters string without punctuation and spaces.\\n    - period: Defines how often the inner disc rotates. Periodicity indicates that after every number of characters processed in the encryption process, the inner disc will rotate once according to the incremental value.\\n    - increment: Defines the number of characters the inner disc rotates each time. At the end of each cycle, the inner disc will rotate to the right by the corresponding number of characters based on the increment value. For example, if the increment is 4, the inner disc will rotate 4 characters to the right for each cycle that passes (e.g., 5 characters are processed).\\n- Output:\\n    - Ciphertext: Uppercase letters string.\\n- Preparation:\\n    - outer_disk = \\\"QWERTYUIOPASDFGHJZXCVBNMKL\\\"\\n    - inner_disk = \\\"JKLZXCVBNMASDFGHJQWERTYUIO\\\"\\n- Encryption Steps:\\n    - For each character p in the plaintext:\\n        - Find the character in the outer_disk.\\n        - Replace it with the character at the corresponding position on the inner_disk.\\n        - After encrypting every `period` characters, rotate the inner_disk to the right by `increment` characters.For example, rotating 'ZXCVBNMASDFGHJKLQWERTYUIOP' by 4 gives 'BNMASDFGHJKLQWERTYUIOPZXCV'.\\n\\n **Decryption Rules:**\\n\\n- Input:\\n    - Ciphertext: Uppercase letters string.\\n    - period (Same as encryption)\\n    - increment (Same as encryption)\\n- Output:\\n    - Plaintext: Uppercase letters string.\\n- Preparation:\\n    - outer_disk = \\\"QWERTYUIOPASDFGHJZXCVBNMKL\\\"\\n    - inner_disk = \\\"JKLZXCVBNMASDFGHJQWERTYUIO\\\"\\n- Decryption Steps (exact opposite of encryption steps):\\n    - For each character c in the ciphertext:\\n        - Find the character in the inner_disk.\\n        - Replace the character with the corresponding position in the outer_disk.\\n        - After decrypting every `period` characters, rotate the inner_disk to the right by `increment` characters.For example, rotating 'ZXCVBNMASDFGHJKLQWERTYUIOP' by 4 gives 'BNMASDFGHJKLQWERTYUIOPZXCV'.\\n\\n### Question:\\n1: Plaintext: \\\"EFBCRGLXTUS\\\"\\nperiod: 2\\nincrement: 4\\n\\nPlease provide the encrypted answer, encapsulated in double square brackets. For example, the format should be: [[encrypted answer]].\\n2: Ciphertext: \\\"SMSUHSYIZRZ\\\"\\nperiod: 8\\nincrement: 1\\n\\nPlease provide the decrypted answer, encapsulated in double square brackets. For example, the format should be: [[decrypted answer]].\\n\\n### Answer:\\n\", \"seed_answer\": \"[[LFOUSYSXRYC]]====[[SPSMHSNKECE]]\"}",
+        "role": "user"
+      },
+      {
+        "content": "{\"available_libraries\": [\"sympy\", \"z3\"], \"target_count\": 20, \"output_language\": \"zh\"}",
+        "role": "user"
+      }
+    ],
+    "model": "gpt-5.2",
+    "stream": false
+  },
+  "tag": "framework/cipher_9/0/attempt-0",
+  "version": 1,
+  "response": {
+    "id": "chatcmpl-EdtOoBzI8SbbyxWMu1h6PwO0DV0yo",
+    "created": 1793176454,
+    "model": "gpt-5.2",
+    "object": "chat.completion",
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```python\nimport sys, json, random\nfrom dataclasses import dataclass\nfrom typing import List, Tuple, Dict, Any, Optional\n\nOUTER_DISK = \"QWERTYUIOPASDFGHJZXCVBNMKL\"\nINNER_INIT = \"JKLZXCVBNMASDFGHJQWERTYUIO\"\nALPHABET = \"ABCDEFGHIJKLMNOPQRSTUVWXYZ\"\n\n\ndef rotate_right(s: str, k: int) -> str:\n    if not s:\n        return s\n    k %= len(s)\n    if k == 0:\n        return s\n    return s[-k:] + s[:-k]\n\n\ndef encrypt(plaintext: str, period: int, increment: int,\n            outer_disk: str = OUTER_DISK, inner_disk_init: str = INNER_INIT) -> str:\n    inner = inner_disk_init\n    out = []\n    for i, ch in enumerate(plaintext, start=1):\n        idx = outer_disk.index(ch)\n        out.append(inner[idx])\n        if period > 0 and (i % period == 0):\n            inner = rotate_right(inner, increment)\n    return \"\".join(out)\n\n\ndef decrypt(ciphertext: str, period: int, increment: int,\n            outer_disk: str = OUTER_DISK, inner_disk_init: str = INNER_INIT) -> str:\n    inner = inner_disk_init\n    out = []\n    for i, ch in enumerate(ciphertext, start=1):\n        idx = inner.index(ch)\n        out.append(outer_disk[idx])\n        if period > 0 and (i % period == 0):\n            inner = rotate_right(inner, increment)\n    return \"\".join(out)\n\n\ndef mapping_table(outer_disk: str, inner_disk: str) -> Dict[str, str]:\n    return {o: inner_disk[i] for i, o in enumerate(outer_disk)}\n\n\ndef inv_mapping_table(outer_disk: str, inner_disk: str) -> Dict[str, str]:\n    return {inner_disk[i]: o for i, o in enumerate(outer_disk)}\n\n\ndef format_disk(s: str) -> str:\n    # group by 13 for readability\n    return s[:13] + \" \" + s[13:]\n\n\ndef check_upper_letters(s: str) -> bool:\n    return len(s) > 0 and all('A' <= c <= 'Z' for c in s)\n\n\n@dataclass\nclass Task:\n    kind: str  # \"enc\" or \"dec\"\n    text: str\n    period: int\n    increment: int\n\n\ndef pick_params(rng: random.Random) -> Tuple[int, int]:\n    # keep moderate to show rotations but not too frequent\n    period = rng.randint(2, 9)\n    increment = rng.randint(1, 12)\n    return period, increment\n\n\ndef gen_text(rng: random.Random, length: int) -> str:\n    return \"\".join(rng.choice(ALPHABET) for _ in range(length))\n\n\ndef compute_answer_and_explain(task1: Task, task2: Task, lang: str) -> Tuple[str, Any, str]:\n    assert lang == \"zh\"\n    # compute\n    if task1.kind == \"enc\":\n        ans1 = encrypt(task1.text, task1.period, task1.increment)\n    else:\n        ans1 = decrypt(task1.text, task1.period, task1.increment)\n\n    if task2.kind == \"enc\":\n        ans2 = encrypt(task2.text, task2.period, task2.increment)\n    else:\n        ans2 = decrypt(task2.text, task2.period, task2.increment)\n\n    # cross-check via inverse relation\n    if task1.kind == \"enc\":\n        back1 = decrypt(ans1, task1.period, task1.increment)\n        if back1 != task1.text:\n            raise RuntimeError(\"交叉核验失败：加密后再解密未还原 task1\")\n    else:\n        back1 = encrypt(ans1, task1.period, task1.increment)\n        if back1 != task1.text:\n            raise RuntimeError(\"交叉核验失败：解密后再加密未还原 task1\")\n\n    if task2.kind == \"enc\":\n        back2 = decrypt(ans2, task2.period, task2.increment)\n        if back2 != task2.text:\n            raise RuntimeError(\"交叉核验失败：加密后再解密未还原 task2\")\n    else:\n        back2 = encrypt(ans2, task2.period, task2.increment)\n        if back2 != task2.text:\n            raise RuntimeError(\"交叉核验失败：解密后再加密未还原 task2\")\n\n    # build explanation with a small, checkable trace for first few chars of each part\n    def trace(kind: str, text: str, period: int, inc: int, steps: int = 4) -> str:\n        inner = INNER_INIT\n        lines = []\n        lines.append(f\"外盘: {format_disk(OUTER_DISK)}\")\n        lines.append(f\"初始内盘: {format_disk(INNER_INIT)}\")\n        for i, ch in enumerate(text[:steps], start=1):\n            if kind == \"enc\":\n                mp = mapping_table(OUTER_DISK, inner)\n                outch = mp[ch]\n                lines.append(f\"第{i}个字符 {ch}：查外盘索引→内盘同位={outch}（此时内盘={format_disk(inner)}）\")\n            else:\n                mp = inv_mapping_table(OUTER_DISK, inner)\n                outch = mp[ch]\n                lines.append(f\"第{i}个字符 {ch}：查内盘索引→外盘同位={outch}（此时内盘={format_disk(inner)}）\")\n            if i % period == 0:\n                inner2 = rotate_right(inner, inc)\n                lines.append(f\"已处理满 {period} 个字符，内盘右移 {inc}：{format_disk(inner)} → {format_disk(inner2)}\")\n                inner = inner2\n        return \"\\n\".join(lines)\n\n    exp = []\n    exp.append(\"要点：逐字符按外盘/内盘同位置替换；每处理 period 个字符，内盘向右轮转 increment 位。\")\n    exp.append(\"\")\n    exp.append(\"（1）第1问计算过程（展示前4步示例）：\")\n    exp.append(trace(task1.kind, task1.text, task1.period, task1.increment, steps=min(4, len(task1.text))))\n    exp.append(\"\")\n    exp.append(\"（2）第2问计算过程（展示前4步示例）：\")\n    exp.append(trace(task2.kind, task2.text, task2.period, task2.increment, steps=min(4, len(task2.text))))\n    exp.append(\"\")\n    exp.append(\"校验：对每一问将结果按同参数做逆运算，均能还原题目给定字符串。\")\n\n    problem_parts = []\n    problem_parts.append(\"你需要按如下旋转替换密码执行加密/解密。\")\n    problem_parts.append(\"\")\n    problem_parts.append(\"规则（必须严格遵守）：\")\n    problem_parts.append(\"- 外盘 outer_disk = \\\"QWERTYUIOPASDFGHJZXCVBNMKL\\\"\")\n    problem_parts.append(\"- 内盘 inner_disk 初始 = \\\"JKLZXCVBNMASDFGHJQWERTYUIO\\\"\")\n    problem_parts.append(\"- 加密：明文每个字符在外盘找位置，用内盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\")\n    problem_parts.append(\"- 解密：密文每个字符在内盘找位置，用外盘同位置字符替换；每处理完 period 个字符后，内盘向右轮转 increment 位。\")\n    problem_parts.append(\"\")\n    problem_parts.append(\"请将每问的最终结果用双中括号包裹输出，且两问答案用“====”连接，例如：[[答案1]]====[[答案2]]。\")\n    problem_parts.append(\"\")\n    # Ask two questions, vary kind and wording\n    q1_label = \"加密\" if task1.kind == \"enc\" else \"解密\"\n    q2_label = \"加密\" if task2.kind == \"enc\" else \"解密\"\n    q1_input_name = \"明文\" if task1.kind == \"enc\" else \"密文\"\n    q2_input_name = \"明文\" if task2.kind == \"enc\" else \"密文\"\n\n    problem_parts.append(f\"1）请{q1_label}：{q1_input_name} \\\"{task1.text}\\\"，period={task1.period}，increment={task1.increment}。\")\n    problem_parts.append(f\"2）请{q2_label}：{q2_input_name} \\\"{task2.text}\\\"，period={task2.period}，increment={task2.increment}。\")\n\n    problem = \"\\n\".join(problem_parts)\n    answer = f\"[[{ans1}]]====[[{ans2}]]\"\n    explanation = \"\\n\".join(exp)\n    return problem, answer, explanation\n\n\ndef make_instance(rng: random.Random) -> Tuple[str, str, str]:\n    # choose variant family\n    # A: Q1 encrypt, Q2 decrypt\n    # B: Q1 decrypt, Q2 encrypt\n    family = rng.choice([\"A\", \"B\"])\n    # lengths\n    len1 = rng.randint(9, 14)\n    len2 = rng.randint(9, 14)\n    p1, inc1 = pick_params(rng)\n    p2, inc2 = pick_params(rng)\n\n    if family == \"A\":\n        pt = gen_text(rng, len1)\n        # ensure period <= len for at least one rotation often\n        if p1 > len1:\n            p1 = max(2, len1 // 2)\n        ct = encrypt(gen_text(rng, len2), p2, inc2)  # generate ciphertext by encrypting random plaintext\n        # But we must present ciphertext; keep it as ct, and task2 is decrypt\n        task1 = Task(\"enc\", pt, p1, inc1)\n        task2 = Task(\"dec\", ct, p2, inc2)\n    else:\n        # Q1 decrypt: generate ciphertext from random plaintext then ask to decrypt that ciphertext\n        base_pt1 = gen_text(rng, len1)\n        if p1 > len1:\n            p1 = max(2, len1 // 2)\n        ct1 = encrypt(base_pt1, p1, inc1)\n        # Q2 encrypt\n        pt2 = gen_text(rng, len2)\n        if p2 > len2:\n            p2 = max(2, len2 // 2)\n        task1 = Task(\"dec\", ct1, p1, inc1)\n        task2 = Task(\"enc\", pt2, p2, inc2)\n\n    return compute_answer_and_explain(task1, task2, \"zh\")\n\n\ndef main():\n    data = json.load(sys.stdin)\n    seed = int(data[\"seed\"])\n    count = int(data[\"count\"])\n    rng = random.Random(seed)\n\n    results = []\n    seen = set()\n    attempts = 0\n    max_attempts = count * 30\n\n    while len(results) < count and attempts < max_attempts:\n        attempts += 1\n        try:\n            problem, answer, explanation = make_instance(rng)\n            key = (problem, answer)\n            if key in seen:\n                continue\n            seen.add(key)\n            results.append({\n                \"problem\": problem,\n                \"answer\": answer,\n                \"explanation\": explanation\n            })\n        except Exception as e:\n            print(f\"[warn] 生成失败重试：{e}\", file=sys.stderr)\n            continue\n\n    if len(results) != count:\n        raise SystemExit(f\"无法在尝试次数内生成足够题目：需要{count}，得到{len(results)}，尝试{attempts}\")\n\n    sys.stdout.write(json.dumps(results, ensure_ascii=False, indent=None))\n\n\nif __name__ == \"__main__\":\n    main()\n```",
+          "role": "assistant",
+          "provider_specific_fields": {
+            "refusal": null
+          },
+          "annotations": []
+        },
+        "provider_specific_fields": {
+          "content_filter_results": {}
+        }
+      }
+    ],
+    "usage": {
+      "completion_tokens": 2590,
+      "prompt_tokens": 2213,
+      "total_tokens": 4803,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": 0,
+        "audio_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": 0
+      },
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cached_tokens": 1408
+      },
+      "cost": 0.03791515,
+      "latency_checkpoint": {
+        "engine_tbt_ms": 9,
+        "engine_ttft_ms": 77,
+        "engine_ttlt_ms": 23508,
+        "pre_inference_ms": 207,
+        "service_tbt_ms": 9,
+        "service_ttft_ms": 1002,
+        "service_ttlt_ms": 24444,
+        "user_visible_ttft_ms": 796
+      },
+      "model_name": "gpt-5.2"
+    },
+    "service_tier": "default",
+    "prompt_filter_results": [
+      {
+        "prompt_index": 0,
+        "content_filter_results": {}
+      }
+    ],
+    "routing": {
+      "serving_pipereplica": "d20261006051512-7603861f-default-r0-dp0-default"
+    }
+  },
+  "http_request_id": null,
+  "attempts": 1,
+  "completed_at": 1793176479.783137
+}

@@ -1,0 +1,43 @@
+{
+  "anon_id": "e0b79071e1ffad5ea3d8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[Pia,Lena,Ava,Vera]====[(Econ,Wed),(Literature,Thu),(Music,Mon),(Philo,Tue)]====[Pia,Vera]====[22]",
+      "certificate": "Vera比Philo晚2天；因Pia早于Philo，Philo不能在Mon，只能在Tue，因此Vera在Thu、Pia在Mon。Pia与Ava相隔2天，故Ava在Wed；剩余Lena在Tue。Econ与Ava同日为Wed，Wed不开Music且Music不在Thu，故Music在Mon，Philo在Tue，Literature在Thu。校验值为Econ(1×3)+Literature(2×4)+Music(3×1)+Philo(4×2)=22。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The canonical arrangement satisfies every clue and the requested output format. Philo cannot be Mon because Pia must be earlier; therefore Philo is Tue and Vera is Thu. Pia is Mon, Ava is Wed by the two-day separation, and Lena is Tue. Econ is Wed; Music cannot be Wed, Thu, or Lena's Tue, so Music is Mon and Literature is Thu. The checksum is 1×3+2×4+3×1+4×2=22.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires chained temporal deductions for Philo, Vera, and Pia; a distance constraint to place Ava; all-different completion for Lena; and exclusion-based subject placement followed by checksum arithmetic.",
+      "reasoning_type_tags": [
+        "deduction",
+        "temporal",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "all_different",
+        "cardinality"
+      ],
+      "scenario": "people",
+      "explanation_score": 4,
+      "explanation_evidence": "The supplied certificate correctly establishes Philo=Tue and Vera=Thu, then Pia=Mon and Ava=Wed, assigns Lena=Tue, places Econ=Wed and Music=Mon using the exclusions, assigns Literature=Thu, and computes the checksum 22. All deductions are checkable.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

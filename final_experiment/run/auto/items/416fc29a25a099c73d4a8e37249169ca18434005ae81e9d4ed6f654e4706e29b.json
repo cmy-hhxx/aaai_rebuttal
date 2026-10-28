@@ -1,0 +1,40 @@
+{
+  "anon_id": "fa0b0eebddc09de4090b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "0,0",
+      "certificate": "按从左到右扫描，遇到左括号入栈，右括号必须与栈顶类型匹配；整段序列扫描过程中无类型不匹配、无栈空时的多余右括号，扫描结束栈为空。因此序列合法，错误类型为0；合法时位置记为0。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "括号序列可完整匹配，扫描结束时栈为空且未出现类型不匹配或栈空时的右括号，因此错误类型为0；无错误时首个错误位置应记为-1。该尝试给出0,0，位置编码与规范答案不符。",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "需要按序扫描并维护括号栈，逐步检查右括号与栈顶类型相等，最后再检查栈是否为空。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "证书正确说明了栈扫描、类型匹配和最终为空，但没有提供可核查的逐步扫描记录，且将合法位置断言为0；规范答案采用-1。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

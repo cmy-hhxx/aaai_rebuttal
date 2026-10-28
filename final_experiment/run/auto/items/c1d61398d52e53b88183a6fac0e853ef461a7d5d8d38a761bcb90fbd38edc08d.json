@@ -1,0 +1,64 @@
+{
+  "anon_id": "a0acde8d466fa6c56638",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": [
+          1,
+          2
+        ],
+        "B": [
+          5,
+          5
+        ],
+        "C": [
+          2,
+          4
+        ],
+        "D": [
+          3,
+          1
+        ],
+        "E": [
+          4,
+          3
+        ]
+      },
+      "certificate": "按行得到列序列 (2,4,1,3,5)。列各不相同；相邻行的列差分别为 2、3、2、2，因此不存在横向、纵向或对角相邻。对应区域依次为 A、C、D、E、B，恰好各一次。枚举满足前两行列差至少为 2 且区域不同的列对：(1,3),(1,4),(1,5),(2,4),(2,5),(3,1),(3,5),(4,1),(4,2),(5,1),(5,2),(5,3)，对剩余三行施加列唯一、区域各一次及相邻列差约束后，仅 (2,4,1,3,5) 可行。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "标准答案不满足相邻约束：D 位于 (4,1)，E 位于 (3,2)，两颗星在相邻行且列差为 1，属于对角相邻。虽然该布局满足行、列和区域各一次，但违反了第 4 条约束。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为标准答案已被直接反例证明无效。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "all_different",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效；所给尝试本身看起来满足约束，但不能挽救错误的标准答案。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

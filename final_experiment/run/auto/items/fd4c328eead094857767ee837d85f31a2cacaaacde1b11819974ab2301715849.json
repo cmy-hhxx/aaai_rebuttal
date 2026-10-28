@@ -1,0 +1,41 @@
+{
+  "anon_id": "5e9c2e99e55169d3775b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[WREUZZPV]]",
+        "2": "[[EFKEHXDWF]]"
+      },
+      "certificate": "按密钥循环分组逐位查表。加密：A(IJ)→W，H(GH)→R，P(EF)→E，M(KL)→U，N(AB)→Z，B(EF)→Z，G(IJ)→P，L(GH)→V，得 WREUZZPV。解密：W(QR)→E，V(UV)→F，N(UV)→K，T(WX)→E，P(KL)→H，F(QR)→X，T(UV)→D，G(UV)→W，U(WX)→F，得 EFKEHXDWF。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Both requested results follow the specified position-wise substitution tables. Encryption gives A→W, H→R, P→E, M→U, N→A, B→Z, G→P, L→V, hence [[WREUAZPV]]; decryption gives [[EFKEHXDWF]]. The supplied attempt is wrong on item 1 because it maps N under the AB table to Z instead of A, although item 2 is correct.",
+      "error_types": [],
+      "depth_score": 0,
+      "depth_evidence": "Each character is obtained by a direct lookup in the table selected by the corresponding repeated key letter; no dependent inference or branching is necessary.",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate provides checkable position-wise table lookups and correctly derives the second answer, but its first derivation contains a demonstrable lookup error: N under AB maps to A, not Z. Therefore it is only partly checkable.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

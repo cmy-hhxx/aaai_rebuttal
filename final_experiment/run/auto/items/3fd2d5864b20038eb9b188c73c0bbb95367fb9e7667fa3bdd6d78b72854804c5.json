@@ -1,0 +1,48 @@
+{
+  "anon_id": "03c918f6746edf975cd0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "1": "[[8^3:9^2:8^3:5^3:7^2:7^4:8^1:4^2:7^3:8^1:2^2:7^3:8^3]]",
+        "2": "[[EXJHIDFBLYT]]",
+        "3": "[[EXJHIDFBLYT]]",
+        "4": "[[13, 0]]",
+        "5": "[[VXJBDFGHLYE]]"
+      },
+      "certificate": "1) 逐字按表编码：V=8^3,E=9^2,V=8^3,L=5^3,X=7^2,Z=7^4,T=8^1,N=4^2,Y=7^3,T=8^1,Q=2^2,Y=7^3,V=8^3。2) 逐组解码得到 E X J H I D F B L Y T。3) 校验段数字和为88，指数和为32，总和120，故 r=0，偏移后密文不变，解码仍为 EXJHIDFBLYT。4) 共有13组，校验和120 mod 10=0。5) 逆序并镜像后依次解码为 V X J B D F G H L Y E。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "The explicit table defines A=6^1, but the subsequent example states that A may correspond to 2^1. This is an unresolved contradiction in the encoding specification, even though the supplied subquestions do not use A and their canonical outputs otherwise compute correctly.",
+      "error_types": [
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "Difficulty scoring is not applicable because the encoding specification is internally inconsistent.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "ordering"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "Explanation scoring is not applicable because the puzzle is invalid due to the conflicting A encoding.",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

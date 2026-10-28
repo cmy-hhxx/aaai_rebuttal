@@ -1,0 +1,38 @@
+{
+  "anon_id": "d27e014a598350e81be7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[RBPFCJWVBVZT]] [[TNYHITOJU]]",
+      "certificate": "按密钥循环分组逐位查表：加密的密钥分组为 YZ, CD, IJ, YZ, MN, AB, EF, YZ, CD, IJ, YZ, MN，对应明文 DNGTWWLHNMLM 得 RBPFCJWVBVZT。解密的密钥分组为 MN, WX, WX, IJ, MN, WX, WX, IJ, MN；在对应替换表中反查密文 MLJWPEMSA，得到 TNYHITOJU。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The substitution tables and key cycling define both computations consistently. The first result RBPFCJWVBVZT checks out. For the second, decrypting W with the IJ table gives A, so the result is TNYAITOJU; the supplied attempt instead has H at that position and is wrong.",
+      "error_types": [],
+      "depth_score": 0,
+      "depth_evidence": "Each character is obtained by selecting the key-group table and performing one direct table lookup or inverse lookup; no chained inference or branching is required.",
+      "reasoning_type_tags": [
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "The certificate correctly describes the table-lookup procedure and gets the first computation right, but its second claimed inverse lookup is incorrect: W in the IJ table corresponds to plaintext A, not H.",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

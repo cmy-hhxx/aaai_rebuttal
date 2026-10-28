@@ -1,0 +1,43 @@
+{
+  "anon_id": "1efdfb777d05755d0297",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[A A 1 A A,2 A A X A,X A X 3 A,A A A A X,A 1 A X 2]]",
+      "certificate": "两个 1 提示格的四邻格必须为墙：固定得到 (1,2),(1,4),(2,3),(4,2),(5,1),(5,3) 为 A。结合右上角 2×2、左下区域的 2×2 约束，2号岛被迫扩展到 (3,1)，3号岛被迫包含 (2,4),(3,3)，2号岛（提示 5,5）被迫扩展到 (5,4)。其余非数字格均为墙。最终各岛大小分别为 1、2、3、1、2；不同岛不四邻相接，且逐一检查 16 个 2×2 小块均不全为 A。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "标准答案直接违反规则：其右上角 2×2 区域 (第1-2行、第4-5列) 的四格均为 A，违反“任意 2×2 小方块不能全部是墙”。此外，标准答案中提示 3 位于 (3,4)，其相邻非墙格不足以形成大小为 3 的岛。所给尝试答案也不成立：提示 2 位于 (5,5) 的岛包含 (4,5)、(5,4) 及提示格本身，共 3 格而不是 2 格。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为标准答案存在直接可验证的规则违反，无法作为有效解进行依赖深度评估。",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "adjacency",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目及标准答案已被直接反例判定为无效；尝试答案的证明还错误地忽略了 (4,5) 与 (5,5) 相连的非墙格。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

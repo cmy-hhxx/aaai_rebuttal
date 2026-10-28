@@ -1,0 +1,61 @@
+{
+  "anon_id": "2841d40a91365cce091e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          "A"
+        ],
+        [
+          "k∨n∨v∨y"
+        ],
+        [
+          "¬n∨n∨¬t",
+          "¬i∨i∨¬t"
+        ],
+        [
+          "∅",
+          "{i, k∨¬n∨t, ¬v∨y, n}",
+          "∅",
+          "{k∨t}"
+        ],
+        [
+          "Plausible",
+          2
+        ]
+      ],
+      "certificate": "1. C1与C2中不存在互补文字，故不可归结，选A。2. 仅可用¬i与i归结，结果为n∨v∨k∨n∨v∨y，去重得k∨n∨v∨y。3. 可分别以i和n为归结文字，得到¬n∨n∨¬t与¬i∨i∨¬t。4. 初始S0=∅，S1为四个给定子句，S2=∅；第一轮唯一归结是(k∨¬n∨t)与(n)，得到k∨t。5. 第二轮中k∨t与已有子句均无互补文字，S2为空，因此输出Plausible，共2轮。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "题面定义完整且各问可按归结规则确定。标准答案与题目一致：第1题无互补文字应选B；第2题由¬i与i归结得k∨n∨v∨y；第3题可分别由i/¬i和n/¬n归结得到两个结果；第4题首次归结仅产生k∨t；第5题第二轮无新归结，因此输出Plausible，共2轮。所给attempt第1题选A虽其说明称不可归结，选项与说明矛盾，故该attempt整体错误。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次检查互补文字、执行两次不同归结并去重、构造初始子句集合、计算首轮新子句，再将其带入第二轮判断无新结果并确定终止输出。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "boolean"
+      ],
+      "scenario": "language",
+      "explanation_score": 3,
+      "explanation_evidence": "attempt对第2至第5题的归结和轮数说明基本可核查且正确；第1题明确说不存在互补文字，却错误选择了表示“是”的A，存在选项与解释的直接矛盾。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

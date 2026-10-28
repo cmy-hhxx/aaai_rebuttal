@@ -1,0 +1,39 @@
+{
+  "anon_id": "c5196821abbafff1ffd0",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": -1,
+      "certificate": "从左到右扫描，所有右括号均与栈顶左括号匹配；扫描结束时栈为空，因此序列完全合法，输出 -1。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按栈扫描，位置1至8的<[{()}]>合法；位置9至17的{[<>()]}>也合法。所有右括号均匹配当前栈顶，扫描结束时栈为空，因此规范答案为-1。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次验证两段嵌套结构中的多个匹配关系，并确认第二段中<>与()为同层顺序结构，最终还需检查栈为空。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "尝试说明了逐字符栈匹配和结束时栈为空；这与序列的实际扫描结果一致，结论-1可复核。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

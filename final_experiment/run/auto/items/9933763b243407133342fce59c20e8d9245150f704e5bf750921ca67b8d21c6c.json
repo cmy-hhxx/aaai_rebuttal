@@ -1,0 +1,43 @@
+{
+  "anon_id": "ee3a8509739999379f8c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "24443.75",
+      "certificate": "解析前8个完整数据行，筛选条件 num_tasks_completed > 3 且 num_emails != 3 后，sleep_minutes 有效值为 [259,469,565]，样本方差为 24492.00；num_calls 有效值为 [8,17,8,0]，样本方差为 48.25。绝对差为 |24492.00−48.25|=24443.75。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "解析前8个完整数据行后，筛选 num_tasks_completed > 3 且 num_emails != 3，sleep_minutes 的有效值为 [259, 469, 565]，样本方差为 24492.00；num_calls 的有效值为 [8, 17, 8, 0]，样本方差为 48.25；绝对差为 24443.75，而非 canonical_answer 1398043.00。所给 attempt 的计算与题意一致，但 canonical answer 错误。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的规范答案与可复核计算结果不一致。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "inequality",
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体 verdict 为 invalid；不过 supplied certificate 中列出的筛选值、样本方差和差值均可直接复核。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

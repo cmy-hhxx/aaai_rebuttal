@@ -1,0 +1,85 @@
+### 模型输出 begin
+#### final yaml begin
+# ================================================================
+# 题型：按“自定义字母表顺序”对单词降序排序
+# 规则：将字母 x、l、g 移到字母表开头（保持这三者在最前的相对次序为 x < l < g），
+#      其余字母按正常 a~z 顺序接在后面；然后按该字母表对给定单词做降序排序。
+# 说明：本题无需SMT求解，直接用自定义函数计算答案。
+# ================================================================
+custom_operator:
+  # pf_word_sorting_0.py 中的函数
+  build_custom_alphabet: pf_word_sorting_0.py
+  sort_words_by_custom_alphabet: pf_word_sorting_0.py
+
+variables:
+  # 需要被移动到字母表开头的字母集合（固定为题干给定的 x,l,g）
+  moved_letters:
+    formula: "['x','l','g']"
+
+  # 单词列表（固定为题干给定的7个单词）
+  words:
+    formula: "['yangtze','dearly','helminthagogic','hover','cariniform','zinky','fistulatome']"
+
+  # 生成自定义字母表（用于展示/计算）
+  custom_alphabet:
+    formula: build_custom_alphabet(moved_letters)
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: 将字母x，l和g移到字母表的开头后，按降序排序这些单词: {', '.join(words)}。
+    ans_formula: sort_words_by_custom_alphabet(words, moved_letters, reverse=True)
+    ans_text: "', '.join(_ans)"
+    ans_assertion: "len(_ans) == len(words)"
+
+desc: "{q1}"
+#### final yaml end
+#### final code begin
+# pf_word_sorting_0.py
+from functools import cmp_to_key
+
+def build_custom_alphabet(moved_letters):
+    """
+    构造自定义字母表顺序：
+    - moved_letters 依次放到最前（如 ['x','l','g'] 表示 x 最小，其次 l，其次 g）
+    - 其余字母按 a~z 顺序接在后面
+    返回：dict {char: rank}，rank越小表示越靠前。
+    """
+    moved = [c.lower() for c in moved_letters]
+    base = [chr(ord('a') + i) for i in range(26)]
+    rest = [c for c in base if c not in moved]
+    alphabet = moved + rest
+    return {c: i for i, c in enumerate(alphabet)}
+
+def _cmp_words(a, b, rank):
+    """
+    比较两个单词 a,b 在给定 rank 下的字典序（升序）：
+    - 逐字符比较
+    - 若前缀相同，短者更小
+    """
+    a = a.lower()
+    b = b.lower()
+    n = min(len(a), len(b))
+    for i in range(n):
+        ra = rank.get(a[i], 10**9)
+        rb = rank.get(b[i], 10**9)
+        if ra != rb:
+            return -1 if ra < rb else 1
+    if len(a) == len(b):
+        return 0
+    return -1 if len(a) < len(b) else 1
+
+def sort_words_by_custom_alphabet(words, moved_letters, reverse=True):
+    """
+    按“将 moved_letters 移到字母表开头”的自定义字母表进行排序。
+    reverse=True 表示降序（题目要求）。
+    返回：排序后的单词列表。
+    """
+    rank = build_custom_alphabet(moved_letters)
+    key = cmp_to_key(lambda x, y: _cmp_words(x, y, rank))
+    return sorted(list(words), key=key, reverse=bool(reverse))
+#### final code end
+### 模型输出 end

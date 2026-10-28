@@ -1,0 +1,42 @@
+{
+  "anon_id": "6ab032ac2c50d308f322",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[TZHPLKXQF]]====[[QAZRMTYVJHNKLP]]",
+      "certificate": "按题面逐轮执行两次独立的纸牌流生成。字母位置映射下，第一问前3个密钥流值为50、29、51，对应明文字母A、F、N分别得到T、Z、H；第二问前2个密钥流值为50、29，对应密文字母C、Q分别解得Q、A。继续执行至所需长度后得到上述两段结果。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "按题面算法逐步执行首轮：两张 Joker 移动并三切后，底牌为26，计数切牌后顶牌为29，因此取第30张得到密钥流值14。第一问 A 的位置6加14得20，对应 B；第二问 C 的位置7减14得19，对应 V，均与标准答案首字符一致。题面算法对给定牌堆是可执行的；所给尝试首轮声称密钥流为50、29，与实际首值14不符，且其输出也不正确。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "每个字符都依赖前一字符留下的牌堆状态；每轮还包含两次 Joker 移动、三切、计数切牌以及可能重复的 Joker 输出丢弃，因此需要长序列的状态迭代和多约束操作，而非独立字符计算。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality",
+        "other"
+      ],
+      "scenario": "objects",
+      "explanation_score": 0,
+      "explanation_evidence": "所给尝试的证书可被首轮反驳：按初始牌堆执行首轮后密钥流值为14而不是其声称的50；因此其证书和答案均不成立。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

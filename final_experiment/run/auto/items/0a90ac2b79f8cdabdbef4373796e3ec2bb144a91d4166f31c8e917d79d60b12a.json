@@ -1,0 +1,45 @@
+{
+  "anon_id": "00352c90f1d93361fd63",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "一": "[1, 1, 0, 1, 1, 1]",
+        "二": "[]",
+        "三": "[0, 1]"
+      },
+      "certificate": "按计划 BMBIB：B 后为 [0, 0, 0, 1, 1, 1]；M 在掩码位置 0、1 保持不变，在其余位置翻转，得 [0, 0, 1, 0, 0, 0]；B 不变；I 全部翻转，得 [1, 1, 0, 1, 1, 1]；末级 B 不变。该结果正好等于观测，因此最小故障数为 0，故障集合为 []。输入与观测仅在索引 0、1 处不同。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按计划 BMBIB 顺序计算：B 保持输入 [0, 0, 0, 1, 1, 1]；M 在非掩码位置翻转，得到 [0, 0, 1, 0, 0, 0]；随后 B 保持不变；I 全部翻转，得到 [1, 1, 0, 1, 1, 1]；末级 B 保持不变。因此第一问应为 [1, 1, 0, 1, 1, 1]，而 canonical_answer 的第一部分错误地使用了 M 级后的中间结果。canonical_answer 的第二部分 [0] 也错误，因为无故障已经与观测一致，且故障集合 [0] 会改变最终结果。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为 canonical_answer 与题目推演结果不一致。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "objects",
+      "explanation_score": null,
+      "explanation_evidence": "难度评分不适用；提供的 solver certificate 的逐级推演是可核查且正确的，但其答案与 canonical_answer 不一致，故不能据此给出有效解释评分。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

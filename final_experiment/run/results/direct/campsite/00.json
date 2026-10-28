@@ -1,0 +1,245 @@
+[
+  {
+    "id": "direct/campsite/00",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 0,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 4×4 的营地谜题：\n- 树木用 'T' 表示。\n- 可放置帐篷的空地用 'X' 表示。\n- 需要放置帐篷用 'C' 表示（你来填）。\n\n规则：\n1) 每个帐篷(C)必须放在某棵树(T)的正交相邻（上下左右）位置。\n2) 任意两顶帐篷之间不能相互接触（包括对角线接触也不行）。\n3) 每行帐篷数量必须等于 row_constraints 对应数。\n4) 每列帐篷数量必须等于 col_constraints 对应数。\n5) 帐篷总数必须等于树木总数。\n\n输入网格（4 行，每行 4 列）：\nT X X X\nX X T X\nX X X X\nX T X X\n\nrow_constraints = [1, 1, 0, 1]\ncol_constraints = [1, 1, 0, 1]\n\n任务：按所有规则放置帐篷，输出完成后的二维列表（4×4）。",
+    "answer": [
+      [
+        "T",
+        "C",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "T",
+        "C"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "C",
+        "T",
+        "X",
+        "X"
+      ]
+    ],
+    "explanation": "共有 3 棵树(1,1)(2,3)(4,2)，因此需放 3 顶帐篷且满足行列约束[1,1,0,1]/[1,1,0,1]。按答案放置 C 在(1,2)(2,4)(4,1)：分别正交相邻对应树(1,1)(2,3)(4,2)；任意两 C 之间既不正交也不对角相邻；各行帐篷数为1,1,0,1；各列帐篷数为1,1,0,1，全部满足。",
+    "request_tag": "direct/campsite/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/01",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 1,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 5×4 的营地谜题：\n- 树木用 'T' 表示。\n- 空地用 'X' 表示。\n- 需要放置的帐篷用 'C' 表示（你来填）。\n\n规则：\n1) 每个帐篷(C)必须放在某棵树(T)的正交相邻格。\n2) 任意两顶帐篷不能接触（包含对角线）。\n3) 每行帐篷数满足 row_constraints。\n4) 每列帐篷数满足 col_constraints。\n5) 帐篷总数 = 树木总数。\n\n输入网格（5 行×4 列）：\nT X X X\nX X X T\nX X X X\nX T X X\nX X X X\n\nrow_constraints = [1, 1, 0, 1, 0]\ncol_constraints = [1, 1, 0, 1]\n\n任务：输出完成放置后的二维列表（5×4）。",
+    "answer": [
+      [
+        "T",
+        "C",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "C",
+        "T"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "T",
+        "X",
+        "C"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X"
+      ]
+    ],
+    "explanation": "树位于(1,1)(2,4)(4,2)共3棵，所以要放3个帐篷且满足行列约束。答案中 C 在(1,2)(2,3)(4,4)：分别与对应树(1,1)(2,4)(4,2)正交相邻；任意两 C 不相邻（含对角）；各行帐篷数为[1,1,0,1,0]，各列为[1,1,0,1]，并且帐篷数=树数=3。",
+    "request_tag": "direct/campsite/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/02",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 2,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 4×5 的营地谜题：\n- 'T' 表示树。\n- 'X' 表示空地。\n- 'C' 表示帐篷（你来填）。\n\n规则：\n1) 每个帐篷必须在某棵树的正交相邻位置。\n2) 帐篷之间不能接触（包括对角线）。\n3) 每行帐篷数量符合 row_constraints。\n4) 每列帐篷数量符合 col_constraints。\n5) 帐篷总数等于树木总数。\n\n输入网格（4 行×5 列）：\nX T X X X\nX X X T X\nT X X X X\nX X X X X\n\nrow_constraints = [1, 1, 1, 0]\ncol_constraints = [1, 0, 1, 0, 1]\n\n任务：输出填好帐篷后的二维列表（4×5）。",
+    "answer": [
+      [
+        "C",
+        "T",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "T",
+        "C"
+      ],
+      [
+        "T",
+        "X",
+        "C",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X",
+        "X"
+      ]
+    ],
+    "explanation": "树在(1,2)(2,4)(3,1)共3棵，因此放3个帐篷。答案中 C 在(1,1)(2,5)(3,3)：分别与树(1,2)(2,4)(3,1)正交相邻；C 之间互不相邻（含对角）；行帐篷数为[1,1,1,0]，列帐篷数为[1,0,1,0,1]，满足所有条件。",
+    "request_tag": "direct/campsite/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/03",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 3,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 5×5 的营地谜题：\n- 树木 'T'\n- 空地 'X'\n- 帐篷 'C'（你来填）\n\n规则：\n1) 每个帐篷(C)必须放在一棵树(T)的上下左右相邻格。\n2) 帐篷之间不能接触（包括斜对角）。\n3) 每行帐篷数必须等于 row_constraints。\n4) 每列帐篷数必须等于 col_constraints。\n5) 帐篷总数必须等于树木总数。\n\n输入网格（5×5）：\nT X X X X\nX X X T X\nX X X X X\nX T X X X\nX X X X T\n\nrow_constraints = [1, 1, 0, 1, 1]\ncol_constraints = [1, 1, 0, 1, 1]\n\n任务：输出完成网格二维列表（5×5）。",
+    "answer": [
+      [
+        "T",
+        "C",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "C",
+        "T",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "C",
+        "T",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "C",
+        "T"
+      ]
+    ],
+    "explanation": "树在(1,1)(2,4)(4,2)(5,5)共4棵，所以放4个帐篷。答案 C 位于(1,2)(2,3)(4,1)(5,4)：分别正交相邻对应树(1,1)(2,4)(4,2)(5,5)；任意两 C 不相邻（含对角）；行帐篷数[1,1,0,1,1]与列帐篷数[1,1,0,1,1]均满足；且帐篷数=树数=4。",
+    "request_tag": "direct/campsite/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  },
+  {
+    "id": "direct/campsite/04",
+    "method": "direct",
+    "seed_id": "campsite",
+    "slot": 4,
+    "cohort": "matched",
+    "status": "ok",
+    "problem": "给你一个 6×4 的营地谜题：\n- 'T' 表示树。\n- 'X' 表示空地。\n- 'C' 表示帐篷（你来填）。\n\n规则：\n1) 每个帐篷必须与某棵树正交相邻。\n2) 帐篷之间不能接触（包括对角线）。\n3) 每行帐篷数满足 row_constraints。\n4) 每列帐篷数满足 col_constraints。\n5) 帐篷总数=树木总数。\n\n输入网格（6 行×4 列）：\nT X X X\nX X T X\nX X X X\nX T X X\nX X X X\nX X X T\n\nrow_constraints = [1, 1, 0, 1, 0, 1]\ncol_constraints = [1, 1, 1, 1]\n\n任务：输出填好帐篷后的二维列表（6×4）。",
+    "answer": [
+      [
+        "T",
+        "C",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "T",
+        "C"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "C",
+        "T",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "X",
+        "X",
+        "X"
+      ],
+      [
+        "X",
+        "C",
+        "X",
+        "T"
+      ]
+    ],
+    "explanation": "树在(1,1)(2,3)(4,2)(6,4)共4棵，因此放4个帐篷且列约束为每列1个。答案中 C 在(1,2)(2,4)(4,1)(6,2)：分别与树(1,1)(2,3)(4,2)(6,4)正交相邻；C 两两不接触（含对角）；行帐篷数为[1,1,0,1,0,1]，列帐篷数为[1,1,1,1]，满足全部规则。",
+    "request_tag": "direct/campsite/0/attempt-0",
+    "attempts": 1,
+    "failure": null,
+    "model_requested": "gpt-5.2",
+    "model_returned": "gpt-5.2",
+    "generator_id": null
+  }
+]

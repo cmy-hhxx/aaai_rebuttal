@@ -1,0 +1,44 @@
+{
+  "anon_id": "9c7d7b5c1ec30a0d56d5",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "59497.27",
+      "certificate": "按列索引从底部剔除后各列均保留前14项；按 timestamp 去重并保留后出现记录，得到10行，且 weekday 全为 Wed。两指标滚动中位数（窗口3、边界可用样本）分别为 light=[15502.84,14880.72,14880.72,14826.72,14826.72,14826.72,14691.35,15060.68,14691.35,15128.94]，soil=[30.11,30.83,33.68,34.29,33.68,32.89,32.29,30.88,29.78,30.33]。所有值均通过2.5σ筛选。样本方差分别为59500.1020933和2.8360044，绝对差为59497.2660889，按ROUND_HALF_UP保留两位得59497.27。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题面明确的剔除规则，各列均保留前14项；去重后保留10行。按窗口3的居中滚动中位数计算，light_lux样本方差为59500.1020933，soil_moisture_pct样本方差为2.8360044，均通过2.5σ筛选，方差绝对差为59497.2660889，ROUND_HALF_UP后应为59497.27，而非canonical_answer 59501.27。另有处理顺序中“先不做中心化”与补充说明中的“中心化→滚动中位数”表述冲突。",
+      "error_types": [
+        "wrong_answer",
+        "ambiguous"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：canonical答案与按规则复算结果不一致，且处理顺序存在中心化表述冲突。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "cardinality",
+        "equality"
+      ],
+      "scenario": "temporal",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：该任务判定为无效，且canonical答案错误； supplied attempt的计算结果与其列出的中间方差一致，但不匹配canonical答案。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,82 @@
+{
+  "anon_id": "abc6fff21f4ac2350539",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          13,
+          12,
+          9,
+          8,
+          7
+        ],
+        [
+          14,
+          11,
+          10,
+          25,
+          6
+        ],
+        [
+          15,
+          16,
+          23,
+          24,
+          5
+        ],
+        [
+          18,
+          17,
+          22,
+          3,
+          4
+        ],
+        [
+          19,
+          20,
+          21,
+          2,
+          1
+        ]
+      ],
+      "certificate": "固定线索与相邻规则先确定 17=(3,1)、20=(4,1)、22=(3,2)、24=(2,3)。由 3 到 7 的最短路径及已占格确定 4=(3,4)、5=(2,4)、6=(1,4)，故列 4 严格递减；由 1、3 确定 2=(4,3)。随后 8=(0,3)、9=(0,2)、11=(1,1)。12 到 15 的最短路径确定 13=(0,0)、14=(1,0)。最终网格使用 1..25 各一次，所有连续数正交相邻；23 向右到 24，4..6 竖直，区域和分别为 82 与 10，拐点为 10 和 21，且满足棋盘奇偶约束。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied grid uses every integer 1..25 exactly once, satisfies all fixed clues, and each consecutive pair is orthogonally adjacent. The direction clue 23→24 is rightward; column 4 is 7,6,5,4,1 and strictly decreasing; 4..6 are vertically aligned; the two region sums are 10+25+23+24=82 and 3+4+2+1=10; 10 and 21 are direction-change points; and the checkerboard parity condition is satisfied.",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "The solution requires chaining fixed positions with consecutive-adjacency paths, resolving multiple intermediate values, enforcing monotonicity and segment orientation, checking region arithmetic, identifying turns, and maintaining global uniqueness and parity across the path.",
+      "reasoning_type_tags": [
+        "deduction",
+        "spatial",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "all_different",
+        "adjacency",
+        "ordering",
+        "cardinality",
+        "graph"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "The certificate's stated placements and final checks are independently verifiable from the grid, including the shortest-path placements, adjacency, direction, segment, sums, turns, and parity. It omits detailed justification that each claimed placement is forced, so it is checkable but not a complete derivation.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

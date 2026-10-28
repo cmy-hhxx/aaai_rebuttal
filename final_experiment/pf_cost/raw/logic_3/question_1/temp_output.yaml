@@ -1,0 +1,91 @@
+custom_operator:
+  # 逻辑表达式解析与编号/分类工具函数（见 pf_logic_3_0.py）
+  parse_term: pf_logic_3_0.py
+  mi_index_of_conj_term: pf_logic_3_0.py
+  Mi_index_of_disj_term: pf_logic_3_0.py
+  denote_m_terms: pf_logic_3_0.py
+  denote_M_terms: pf_logic_3_0.py
+  classify_by_m_indices: pf_logic_3_0.py
+  is_pdnf_text: pf_logic_3_0.py
+
+variables:
+  # 关键修复：所有逻辑表达式必须作为“字符串”存储在变量中，
+  # 否则 translator 生成 output.py 时会把 (~p&...) 当作 Python 表达式执行，导致 NameError: p 未定义
+  vars3:
+    formula: "['p','q','r']"
+  vars4:
+    formula: "['p','q','r','s']"
+
+  expr_q1_ascii:
+    formula: "'(~p&~q&r)|(~p&q&r)'"
+  expr_q2_ascii:
+    formula: "'(p|~q|r)&(~p|~q|r)'"
+  term_q3_ascii:
+    formula: "'~p&~q&~r'"
+  expr_q4_ascii:
+    formula: "'(~p&~q&~r)|(~p&~q&r)|(~p&q&r)|(p&~q&r)|(p&q&r)'"
+  expr_q7_pdnf_ascii:
+    formula: "'(~p&~q&r)|(~p&q&~r)|(p&~q&r)'"
+
+  tautology_dnf_4:
+    formula: denote_m_terms(list(range(2**len(vars4))))
+  count_basic_and_all_even_4:
+    formula: 2**(2**(len(vars4)-1) - 1)
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "1: According to the above rules, what are the paired conjunctive terms of (¬p^¬q^r)∨(¬p^q^r)? How can this expression be denoted?"
+    ans_formula: "(lambda terms: [terms, denote_m_terms([mi_index_of_conj_term(t, vars3) for t in terms], joiner='∨')])(parse_term(expr_q1_ascii, kind='dnf'))"
+    ans_text: "'[[pairedconjunctiveterms:' + ','.join(_ans[0]) + '];[denoted:' + _ans[1] + ']]'"
+    ans_assertion: "True"
+
+  q2:
+    desc: "2: According to the rules above, what are the paired disjunctive terms of (p∨¬q∨r)^(¬p∨¬q∨r)? How can this expression be denoted?"
+    ans_formula: "(lambda terms: [terms, denote_M_terms([Mi_index_of_disj_term(t, vars3) for t in terms], joiner='^')])(parse_term(expr_q2_ascii, kind='cnf'))"
+    ans_text: "'[[paireddisjunctiveterms:' + ','.join(_ans[0]) + '];[denoted:' + _ans[1] + ']]'"
+    ans_assertion: "True"
+
+  q3:
+    desc: "3: Identify ¬p∧¬q∧¬r as: (select all that apply)"
+    ans_formula: "classify_by_m_indices([mi_index_of_conj_term(term_q3_ascii, vars3)], n=len(vars3))"
+    ans_text: "'[[' + ''.join(_ans) + ']]'"
+    ans_assertion: "True"
+
+  q4:
+    desc: "4: Determine whether (...) conforms to the principal disjunctive normal form or principal conjunctive normal form? If yes, how can it be denoted?"
+    ans_formula: "is_pdnf_text(expr_q4_ascii, vars3)"
+    ans_text: "(('[[' + _ans[0] + '];[' + _ans[1] + ']]') if _ans[0] == 'A' else '[[B]]')"
+    ans_assertion: "True"
+
+  q5:
+    desc: "5: Given that formula A contains 4 propositional variables, what should it be denoted as if it is both a tautology and a basic form?"
+    ans_formula: "tautology_dnf_4"
+    ans_text: "'[[' + _ans + ']]'"
+    ans_assertion: "True"
+
+  q6:
+    desc: "6: Given that formula A contains 4 propositional variables, how many formulas satisfy the conditions of being both a basic form and an all-even form?"
+    ans_formula: "count_basic_and_all_even_4"
+    ans_text: "'[[' + str(_ans) + ']]'"
+    ans_assertion: "True"
+
+  q7:
+    desc: "7: ... The formula (...) is in principal disjunctive normal form and can be denoted as what? This formula belongs to: (multiple choice)"
+    ans_formula: "(lambda terms: (lambda idxs: [denote_m_terms(idxs, joiner='∨'), classify_by_m_indices(idxs, n=len(vars3))])([mi_index_of_conj_term(t, vars3) for t in terms]))(parse_term(expr_q7_pdnf_ascii, kind='dnf'))"
+    ans_text: "'[[' + _ans[0] + '];[' + ''.join(_ans[1]) + ']]'"
+    ans_assertion: "True"
+
+desc: |
+  You are an intelligent assistant that helps with various logical reasoning tasks.
+
+  (1) {q1}
+  (2) {q2}
+  (3) {q3}
+  (4) {q4}
+  (5) {q5}
+  (6) {q6}
+  (7) {q7}

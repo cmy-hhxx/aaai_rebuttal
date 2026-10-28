@@ -1,0 +1,42 @@
+custom_operator:
+  # pf_operation_5_0.py 中实现：op_inf(a,b)=a^2+b^2
+  op_inf: pf_operation_5_0.py
+  # pf_operation_5_0.py 中实现：solve_x_inf_6_eq_45() 返回满足 X∞6=45 的正整数 X
+  solve_x_inf_6_eq_45: pf_operation_5_0.py
+
+variables:
+  # 固定输入：第1问的 a
+  a1:
+    type: int
+    domain: "[5, 5]"
+  # 固定输入：第1问的 b
+  b1:
+    type: int
+    domain: "[8, 8]"
+  # 固定输入：第2问中的 b=6
+  b2:
+    type: int
+    domain: "[6, 6]"
+  # 固定输入：第2问中的结果 45
+  target2:
+    type: int
+    domain: "[45, 45]"
+
+# 本题不需要SMT符号求解
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "1: Compute {a1}∞{b1}."
+    ans_formula: op_inf(a1, b1)
+    ans_text: "'[[' + str(_ans) + ']]'"
+    ans_assertion: 'True'
+  q2:
+    desc: "2: If X∞{b2}={target2}, find X."
+    ans_formula: solve_x_inf_6_eq_45()
+    ans_text: "'[[' + str(_ans) + ']]'"
+    ans_assertion: 'True'
+
+desc: "已知自定义运算 a∞b=a^2+b^2（a,b为正整数）。{q1}\n{q2}\n"

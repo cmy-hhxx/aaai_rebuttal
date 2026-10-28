@@ -1,0 +1,46 @@
+{
+  "anon_id": "00084fb3e1fa901c46d8",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "plaintext": "[[WQXMAJTJJ]]",
+        "groups": "(AOH, TFN, PTE, NDL, NIG, IHQ, HSH, BAX, XLQ)",
+        "aggregates": "(4, 24, 5, 20, 8, 17, 1, 17, 17)"
+      },
+      "certificate": "清理非字母后得到 AOHTFNPTENDLNIGIHQHSHBAXXLQ，并分为上述9组。按权重[18,17,9]计算各组加权和并对26取模，得到聚合值(4,24,5,20,8,17,1,17,17)。各值减8后再对26取模，得到(22,16,23,12,0,9,19,9,9)，对应字母 WQXMAJTJJ。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "使用给定权重[18,17,9]计算第一组 AOH：0×18+14×17+7×9=238，238 mod 26=4，而标准答案给出15。其余各组与标准答案一致；因此标准明文首字母应为 W（4−8 mod 26=22），不是 H。供应的尝试答案实际上正确，但与错误的canonical_answer不一致。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为canonical_answer与题目明确给出的加权计算规则矛盾。",
+      "reasoning_type_tags": [
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目的标准答案本身错误；供应尝试的第一组计算可直接核验为4，但按规定非valid时不能评定解释分数。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

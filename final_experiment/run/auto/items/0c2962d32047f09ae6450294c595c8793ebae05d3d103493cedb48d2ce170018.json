@@ -1,0 +1,59 @@
+{
+  "anon_id": "4319eb793329c8e66d05",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "A": [
+          4,
+          2
+        ],
+        "B": [
+          3,
+          4
+        ],
+        "C": [
+          1,
+          3
+        ],
+        "D": [
+          2,
+          1
+        ]
+      },
+      "certificate": "每行每列各一颗星可表示为列序列(c1,c2,c3,c4)。相邻行不能相邻，故相邻列号之差至少为2。枚举4列排列后，仅有(2,4,1,3)和(3,1,4,2)满足行列及相邻约束；前者区域重复D且缺少A、B，后者对应(1,3)=C、(2,1)=D、(3,4)=B、(4,2)=A，四个区域各恰有一颗，且相邻列差分别为2、3、2，满足包括对角线在内的不相邻条件。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied assignment places one star in each row and column: columns 3,1,4,2. Its region labels are C,D,B,A respectively, so each of A,B,C,D occurs exactly once. Consecutive row columns differ by 2,3,2, preventing horizontal, vertical, and diagonal adjacency. The canonical answer is correct.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires representing row choices as a column permutation, filtering permutations by the non-adjacency constraint, and then checking the surviving candidates against the region cardinality constraints.",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "spatial"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "all_different",
+        "adjacency"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly identifies the two permutations satisfying row/column and adjacent-row separation, rejects (2,4,1,3) because its regions repeat D and omit A and B, and verifies that (3,1,4,2) gives C,D,B,A with column differences 2,3,2.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

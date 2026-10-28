@@ -1,0 +1,66 @@
+{
+  "anon_id": "b0d4a1c9b2faf0447e90",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          1,
+          2,
+          4,
+          3
+        ],
+        [
+          4,
+          3,
+          1,
+          2
+        ],
+        [
+          3,
+          1,
+          2,
+          4
+        ],
+        [
+          2,
+          4,
+          3,
+          1
+        ]
+      ],
+      "certificate": "各行从左/右观察数分别为：(3,2)、(1,3)、(2,1)、(2,3)。各列均为1到4各一次。自上观察各列可见数为(2,3,1,2)，自下观察为(3,1,2,2)，与所有线索一致。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给出的网格每行和每列都恰好包含1到4各一次；逐行可见数为(3,2)、(1,3)、(2,1)、(2,3)，逐列从上方可见数为(2,3,1,2)，从下方可见数为(3,1,2,2)，全部符合题目线索。",
+      "error_types": [],
+      "depth_score": 4,
+      "depth_evidence": "完整求解需要同时满足行列全异约束与四个方向的可见性约束，并通过多步相互依赖的候选排除或分支检验确定各格，属于交互的多约束搜索。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "ordering"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "证书明确给出了各行、各列的可见数以及行列包含1到4各一次的检查结论；这些结论可由网格直接复核，但未逐列展示每一步可见性计算，因此存在轻微的证明细节省略。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,42 @@
+{
+  "anon_id": "2c1dd3e4a003f00332c7",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[SYNC. CHANNEL. 163 HANDSHAKE]]",
+      "certificate": "编号 n=(865×42+86) mod 3364=2776，密钥为 TRACK-CENTER-2776。将密文循环右移5字节后，与给定SHA-256摘要循环异或，得到明文及校验段：ASCII 明文为“SYNC. CHANNEL. 163 HANDSHAKE”，后8字节为其SHA-256前8字节校验值 8d98a31d5675dc16；去除校验段后即为所示结果。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The identifier calculation is correct: (865×42+86) mod 3364 = 2776, giving TRACK-CENTER-2776. Rotating the ciphertext right by 5 bytes and XORing with the supplied digest repeated as a keystream yields the 28-byte ASCII plaintext \"SYNC. CHANNEL. 163 HANDSHAKE\" followed by the stated 8-byte checksum 8d98a31d5675dc16. Removing the checksum matches the canonical answer exactly.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires dependent arithmetic for the identifier, inverse byte rotation, repeated digest XOR decryption, and removal/validation of the appended checksum.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly checks the identifier arithmetic, constructs the key, applies the specified inverse rotation and XOR operation, identifies the plaintext and checksum, and removes the required checksum segment.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

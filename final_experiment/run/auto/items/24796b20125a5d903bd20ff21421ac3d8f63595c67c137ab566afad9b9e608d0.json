@@ -1,0 +1,45 @@
+{
+  "anon_id": "bd9d7012f087aef86038",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "task1": "[[464, 498, 86, 365, 86, 232]]",
+        "task2": "[[DDZPUWIOL]]"
+      },
+      "certificate": "保留字母后的明文为 VDHKHR，对应数值 [21,3,7,10,7,17]。用 e=349、n=644 加密后分别得到乘积模 n [245,403,511,270,511,137]，按偶数位加219、奇数位加95并模644，得 [464,498,86,365,86,232]。解密时忽略越界值697，剩余9个数；349在模644下的逆元为489。依次去除偏移后乘489并模26，得到 [3,3,25,15,20,23,8,14,11]，对应大写字母 DDZPUWIOL。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "任务一计算正确。任务二应忽略697后按剩余9个元素重新编号，解密得到数值[3,3,25,15,20,23,8,14,11]，对应[[DDZPUXIOL]]；尝试答案写成了[[DDZPUWIOL]]，其中第六个字符应为X而不是W。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": 3,
+      "depth_evidence": "需要先过滤非字母和越界密文，再进行模644乘法、按重新计数的奇偶位去除偏移、乘以模逆元并映射到模26字母空间。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "证书正确说明了明文过滤、任务一的模运算和任务二忽略697及逆元489，也列出了正确的数值序列；但其最终字母串把数值23错误映射为W而非X，且与证书自身列出的[...23...]不一致。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

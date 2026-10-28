@@ -1,0 +1,43 @@
+{
+  "anon_id": "7fae98b58a839b98bb05",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "111110101101111111011001111111101100101111111000====无有效明文",
+      "certificate": "按标准约定，置换后第i位取原第P_i位。VECTOR各字节加密后分别为11111010、11011111、11011001、11111110、11001011、11111000，拼接得到第一问结果。第二问分块为00111011、11101111、01111100；按P^-1置换并与10101010异或后分别得到11110111、00010101、01110000，即十六进制F7、15、70，不是仅含A-Z的大写字母。因此题目给出的第二密文不能按所述规则解出合法明文，故无有效的第二问答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按常见约定“置换后第i位取原第P_i位”，VECTOR的加密分块应为11111000、11011111、11011001、11111110、11100101、11111000，拼接为111110001101111111011001111111101110010111111000，不等于给出的canonical_answer。对密文00111011、11101111、01111100按P^-1解密并与K异或得到F5、15、70，均不是大写A-Z字符，因此第二问不可能得到OWL；给定密文与规则不一致。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用：题目及canonical answer已被直接计算反驳，无法对无效任务评定必要推理深度。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "other"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用：任务的canonical answer错误，且 supplied attempt 不能使题目整体有效；只能指出其计算结果与规则不一致。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

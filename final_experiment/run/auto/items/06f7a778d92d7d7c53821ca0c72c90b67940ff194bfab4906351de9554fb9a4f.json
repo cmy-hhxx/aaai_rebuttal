@@ -1,0 +1,95 @@
+{
+  "anon_id": "f2ce4aa6e32280544bae",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "grid": [
+          [
+            "1",
+            "X",
+            "1",
+            "X",
+            "X",
+            "X"
+          ],
+          [
+            "X",
+            "1",
+            "1",
+            "X",
+            "X",
+            "X"
+          ],
+          [
+            "1",
+            "X",
+            "X",
+            "1",
+            "1",
+            "1"
+          ],
+          [
+            "X",
+            "1",
+            "X",
+            "1",
+            "X",
+            "X"
+          ],
+          [
+            "X",
+            "1",
+            "X",
+            "X",
+            "1",
+            "1"
+          ],
+          [
+            "1",
+            "1",
+            "X",
+            "X",
+            "X",
+            "X"
+          ]
+        ],
+        "total": 15,
+        "row_index_3_count": 2
+      },
+      "certificate": "各行列加权和验证：行分别为10,9,24,8,18,7；列分别为10,17,3,7,8,8。固定格(1,2)=1，第三行（0基索引3）含2个1。全盘1的数量为2+2+4+2+3+2=15，为奇数。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The supplied 6x6 grid satisfies every row weighted sum (10, 9, 24, 8, 18, 7) and every column weighted sum (10, 17, 3, 7, 8, 8). It also has cell (1,2)=1, row index 3 contains 2 ones, and the total number of ones is 15, which is odd. The canonical answer matches these checks and the requested three-part output.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "Solving requires combining row subset-sum constraints with column weighted-sum constraints, then checking the fixed cell and cardinality conditions; these are multiple dependent arithmetic and deduction steps across the grid.",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality",
+        "boolean"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly verifies all six row sums, all six column sums, the fixed cell, the row-3 count, and the total count 15 being odd. The displayed grid is 6x6 and matches the canonical answer.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

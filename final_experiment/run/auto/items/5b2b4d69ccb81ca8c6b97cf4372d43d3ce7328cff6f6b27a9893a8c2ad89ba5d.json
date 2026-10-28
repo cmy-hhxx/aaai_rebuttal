@@ -1,0 +1,47 @@
+{
+  "anon_id": "a83478744cc064995308",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": {
+        "expr": null
+      },
+      "certificate": "题目没有唯一的字典序最小表达式。例：E=8*(9-3*2)=24，且使用全部数字各一次。对任意 n，给 E 添加 n 层整体括号仍是合法表达式；E_n='('*n+E+')'*n。按通常字符字典序，E_{n+1} 在前 n 个字符相同后多出一个 '('，而 E_n 此处是 '8'，所以 E_{n+1}<E_n。由此存在无限下降链，不存在字典序最小解；需禁止冗余括号或规定规范化表达式后才能确定答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "允许添加冗余括号时不存在字典序最小解。例如 E=8*(9-3*2)=24 合法；对任意 n，E_n='('*n+E+')'*n 仍合法。按通常字符字典序，E_{n+1} 比 E_n 更小，因此存在无限下降链。canonical_answer 虽然是合法表达式，但不能满足题目要求的全体可行表达式中字典序最小。",
+      "error_types": [
+        "missing_constraint",
+        "ambiguous",
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的最小性规范不成立，无法定义所要求的 canonical 解。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "cardinality",
+        "string",
+        "ordering"
+      ],
+      "scenario": "numbers",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为题目本身因冗余括号导致无字典序最小解；所给证书对无限下降链的反例是可核查的。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

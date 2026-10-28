@@ -1,0 +1,41 @@
+{
+  "anon_id": "8b1dd7011d3bd54e76b9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": 5,
+      "certificate": "合法变更必须恰好改变 2 个字母。起点到检查点的最短路径为 YIOOT→YXOBT→YXWBX，共 2 步。检查点到终点的最短路径为 YXWBX→YXOBT→YIOOT→YIOQF，共 3 步；不存在一步或两步到达终点的路径（检查点的合法邻点均不与终点相邻）。因此最少步数为 2+3=5。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "合法变更因同时满足改变1到2个字母且改变偶数个字母，必为恰好改变2个字母。YIOOT到YXWBX可经YXOBT用2步；YXWBX到YIOQF可经YXOBT、YIOOT用3步。起点与检查点的汉明距离为4，不能1步直达；检查点到终点不存在1步或2步路径，因此经过检查点的最少总步数为5。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先将变更条件化简为恰好改变2个字母，再检查词表中的合法邻接关系，分别证明起点到检查点为2步、检查点到终点为3步，并将两段最短路径相加。",
+      "reasoning_type_tags": [
+        "deduction",
+        "combinatorial_search",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "graph",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确给出两段路径，且每条边均连接词表中恰好相差2个字母的单词；给出的距离下界和不存在更短后半段路径的判断与词表逐项检查一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

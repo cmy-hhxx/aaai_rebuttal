@@ -1,0 +1,43 @@
+{
+  "anon_id": "09af2882fd6ce70d585f",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[12,11,55,66,35]]====[无法解密]",
+      "certificate": "加密：T=12、R=11、I=55、O=66、B=35，因此为[[12,11,55,66,35]]。解密密文分组为44、31、55、26、51、14，其中26表示第2行第6列，超出5×5方阵范围，且不等于66，故第二问按给定规则无法解密。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按方阵规则，TRIOB 应编码为 T=12、R=11、I=55、O=66、B=35，连续数字串为 1211556635，而 canonical_answer 给出 1215663565，编码错误。解密密文应分组为 44、31、55、26、51、14，其中 26 的列号为 6，超出 5×5 方阵且不是 66，因此该密文无法按给定规则完整解密；canonical_answer 的 YSHMNE 也不符合规则（44 应为 G）。",
+      "error_types": [
+        "wrong_answer",
+        "unsatisfiable"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目与 canonical_answer 不一致，且第二问输入包含规则外的坐标 26。",
+      "reasoning_type_tags": [
+        "cipher",
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体题目答案无效；所给 attempt 的坐标计算本身正确，并正确指出 26 越界，但其输出格式与 canonical_answer 不一致。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

@@ -1,0 +1,40 @@
+{
+  "anon_id": "0b92dd5a5a5338770ede",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[56====1====27====1====illegal]",
+      "certificate": "前55个字符由13个完整的“{}<>”（26对）加上“{}<”组成；第56位为非法字符“L”。因此错误位置为56，遇错前栈深为1，已匹配27对括号，最大深度为1，错误类型为illegal。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The sequence has 13 complete '{}<>' blocks followed by '{}<L', giving 56 characters total. The first 55 characters contain 27 matched pairs, leave one '<' open at depth 1, and never exceed depth 1; position 56 is the illegal character 'L'. The supplied answer and certificate match these results.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "First decompose the prefix into repeated balanced blocks plus the incomplete '{}<'; then count matched pairs and derive the remaining stack depth, maximum depth, and final error position/type.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "cardinality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly verifies the 55-character prefix decomposition, the 27 matched pairs, the residual stack depth of 1, and the illegal character at position 56; all claims are checkable.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

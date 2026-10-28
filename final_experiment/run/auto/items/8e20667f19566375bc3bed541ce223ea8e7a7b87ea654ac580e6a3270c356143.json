@@ -1,0 +1,41 @@
+{
+  "anon_id": "3a8213af46944d5a9ad9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[5 2 4 1 3,4 5 1 3 2,1 4 3 2 5,2 3 5 4 1,3 1 2 5 4]]",
+      "certificate": "单格笼先确定 r1c4=1、r1c5=3、r2c3=1、r2c4=3、r2c5=2、r5c3=2、r5c4=5、r5c5=4。由 r1c1*r2c1=20 得两格为4、5；40乘积笼必为2*4*5，因此结合行列得到 r1=(5,2,4,1,3)、r2=(4,5,1,3,2)。第3行的除法笼为{1,4}，差3笼为{2,5}，故 r3c3=3；列约束及差2笼给出 r4c3=5。随后列1、列2确定 r3=(1,4,3,2,5)、r4c1=2、r4c2=3、r5c1=3、r5c2=1；剩余差3笼确定 r4=(2,3,5,4,1)、r5=(3,1,2,5,4)。每行每列均为1至5各一次；各笼分别满足目标：20乘积、40乘积、两处商4、所有差/单格条件均成立。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "标准答案满足每行每列均为1至5且不重复；所有笼区也满足目标条件，例如20乘积笼为5×4、40乘积笼为2×4×5、除法笼为4÷1，所有差值和单格目标均正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先使用单格笼确定多个数字，再由20和40乘积笼结合行列不重复约束确定前两行；随后利用第3行的除法笼、差值笼和行约束确定r3c3，再结合第3列及差2笼确定r4c3，最后通过列约束和剩余差值笼完成后两行。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "all_different",
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书正确列出了单格笼、乘积笼、除法笼和差值笼的关键推导，并明确核验了行列及各笼条件；但从40乘积笼及行列约束直接跳到完整前两行，以及从列约束到部分后续数字的中间候选排除未完全展开。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

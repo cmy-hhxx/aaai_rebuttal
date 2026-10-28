@@ -1,0 +1,42 @@
+{
+  "anon_id": "1562b8ae3fb4d45b16f4",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "((3, 5, 6), (3, 9), 4)",
+      "certificate": "字符串外的方括号序列为 [ [ ] [ [ ] ] ]。逐步匹配令牌后，第3、5、6步不匹配。计数括号后的实际深度依次为 1,0,1,2,3,2,3,4；在检查点2、3、6、9中，目标分别为1、2、3、0，实际分别为1、0、3、4，因此未满足的是检查点3和9。全程最大深度为4。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "字符串外的方括号序列为 [ [ ] [ [ ] ] ]。令牌中的方括号序列为 [ ] [ [ [ [ ] [。按不匹配时不前进的规则，错误步骤为 3、5、6、7。计数深度依次为 1,0,1,2,3,4,3,4，最大深度为4。检查点对应计数序号1、2、5、8，目标深度分别为1、2、0、0（超出cp_targets长度时使用最后一个值），实际深度为1、0、3、4，因此未满足的检查点为3、6、9。规范答案正确。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要解析字符串外括号、提取方括号序列、执行不匹配不前进的顺序匹配，再累计令牌深度并将检查点映射到计数序号，最后比较目标并求最大值。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 2,
+      "explanation_evidence": "供给的证书正确给出了字符串外方括号序列、主要深度计算和最大深度，但漏判第7步；同时将检查点目标错误地按检查点位置直接对应，忽略了检查点9对应计数序号8以及超长时使用最后目标值的规则，因此漏掉第6步检查点。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

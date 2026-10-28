@@ -1,0 +1,46 @@
+{
+  "anon_id": "4e714f089be3dd1434fe",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[A]",
+        "[d∨l∨p∨w]",
+        "[¬a∨p∨l∨¬p;¬a∨¬g∨g]",
+        "[∅;{a∨d,l∨¬w,l,¬a∨d};∅;{d}]",
+        "[Plausible;2]"
+      ],
+      "certificate": "1. C1含¬g、C2含g，存在互补文字，故可归结。2. 以¬g与g归结，去重后得d∨l∨p∨w。3. 可分别以¬g/g归结得¬a∨p∨l∨¬p，以p/¬p归结得¬a∨¬g∨g。4. 初始S0=∅，S1为四个原始子句，S2=∅；第一轮只有(a∨d)与(¬a∨d)归结出d，因此第一轮后S2={d}。5. 第二轮用{d}与已有子句归结无新结果，S2为空，输出Plausible，共2轮。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "第3问的第二个归结结果错误：以 p 与 ¬p 归结时，应保留两边其余文字，结果为 ¬a∨¬g∨g∨l；该作答写成了 ¬a∨¬g∨g，遗漏了 l。因此该尝试并未完全匹配标准答案。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为该作答包含可直接验证的错误答案。",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "boolean"
+      ],
+      "scenario": "language",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为第3问的归结证书明确遗漏了必须保留的文字 l。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

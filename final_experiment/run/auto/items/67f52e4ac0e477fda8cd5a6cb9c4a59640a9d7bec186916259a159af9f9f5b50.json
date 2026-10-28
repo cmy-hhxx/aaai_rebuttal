@@ -1,0 +1,41 @@
+{
+  "anon_id": "1f77372567b002dcdb3d",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "A,C",
+      "certificate": "A：0<1为真，因此整体为真。B：7≤-180为假，但-13<-8为真，括号内为真，外层not后为假。C：-23≠-23为假，但最后的or True使整体为真。D：6/(-12)=(6/(-12))+0，≠为假，and后整体为假。因此真值选项为A、C。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "逐项核验结果与标准答案一致：A为真；B中7≤-180为假但-13<-8为真，故外层not使B为假；C因末项True而为真；D中6/(-12)等于其加0后的值，不等式为假，故D为假。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "B需要先计算嵌套算术值-180和-8，再判断两个不等式，最后依次应用or、not not和外层not；C、D还需核验数值相等性与布尔连接。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "equality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "给出的证书逐项说明了A的直接真值、B的算术与逻辑链、C的末项True支配作用，以及D的不等式失败导致and为假；这些结论均可独立复算。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

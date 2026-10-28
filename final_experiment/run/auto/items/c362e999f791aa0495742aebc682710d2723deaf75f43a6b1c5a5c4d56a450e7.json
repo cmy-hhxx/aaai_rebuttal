@@ -1,0 +1,40 @@
+{
+  "anon_id": "5cf8a804ea29bbed2c47",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "Pv2,tt1,Uhi2,xs4,Yl1,Qa2,Cm2,Djs3,gtl4,Lxx1,Zhqf3,Zhv4,zhwu3,Zhbp2,Zhe4,Zhf4,zhfx1,Zhlu3====Pv2:0/8/0|tt1:0/10/0|Uhi2:0/45/2",
+      "certificate": "按旋转字母序 o,p,q,r,s,t,u,v,w,x,y,z,a,b,c,d,e,f,g,h,i,j,k,l,m,n（取 o=0）比较；单字母主键先于词首 zh。非 zh 项依次为 Pv2、tt1、Uhi2、xs4、Yl1、Qa2、Cm2、Djs3、gtl4、Lxx1；zh 项按后续字母 q,v,w,b,e,f（短者先）、l 排列。前三项的特殊数量/旋转值总和/元音数分别为 Pv2=0/8/0、tt1=0/10/0、Uhi2=0/45/2。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "Canonical排序符合旋转字母表及词首 zh 分词规则：非 zh 项依次为 Pv2,Qa2,tt1,Uhi2,xs4,Yl1,Cm2,Djs3,gtl4,Lxx1，随后 zh 项按后续字母排序。前三项统计 Pv2=0/8/0、Qa2=0/14/1、tt1=0/10/0 也计算正确。 supplied attempt 错误地将 tt1 排在 Qa2 前；q 的旋转值为 2，t 为 5，因此 Qa2 必须先于 tt1。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先按词首特殊串 zh 与单字母进行分词和分组，再将单字母映射到从 o 开始的旋转顺序并进行主键排序，最后在必要时计算声调、长度及 SC/SR/VC 统计。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 1,
+      "explanation_evidence": "attempt 的若干统计值和 zh 项局部排序可核查，但其核心非 zh 排序与自身声称的旋转字母顺序矛盾：它把 tt1 放在 Qa2 前，却同时使用 q=2、t=5 的旋转顺序。因此说明包含重大排序错误。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

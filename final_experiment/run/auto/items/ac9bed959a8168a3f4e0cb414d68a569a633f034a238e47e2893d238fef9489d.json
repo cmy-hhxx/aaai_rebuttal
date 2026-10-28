@@ -1,0 +1,42 @@
+{
+  "anon_id": "794dd4c46eae5cd62906",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "condition_code=1; examples=[[4, 5, 8, 11], [4, 5, 8, 19], [4, 5, 8, 23], [4, 5, 8, 31]]",
+      "certificate": "字典序最小的首项为4，随后最小可行的交替奇偶项为5、8。前三项和为17，因此末项须满足 k4≡3 (mod 4)，且为大于8的奇数、非3的倍数。依次得到11、19、23、31；对应总和为28、36、40、48，均被4整除。所有元素均在[4,84]且与3互质，因此这四组即为最小的前4组。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "已核验：首项最小可取4；在严格递增和奇偶交替下，第二项最小为5，第三项最小为8。前三项和为17，因此末项需大于8、为奇数、与3互质且满足 k4≡3 (mod 4)。依次可取11、19、23、31；所有序列均满足区间、严格递增、互质、奇偶交替及总和被4整除，且按词典序确为前四组。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次确定前三个位置的最小可行值，再结合总和模4条件筛选末项，并排除3的倍数以得到末项的前四个词典序候选。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic",
+        "combinatorial_search"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "equality",
+        "other"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 4,
+      "explanation_evidence": "证书正确给出了首项、第二项和第三项的最小性，利用前三项和推出末项模4条件，并列出11、19、23、31；这些候选逐一满足范围、互质、奇偶和总和条件，且排除了更小的不合法候选。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

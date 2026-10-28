@@ -1,0 +1,42 @@
+{
+  "anon_id": "111d5f310b29628eacbd",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[LCCMU]]====[[DCIPE]]",
+      "certificate": "按题面算法从给定牌堆分别生成前5个有效密钥流值，得到 y=[24,6,5,33,38]。加密“JDWOT”的位置[0,1,2,3,4]加上y并模26，得到[24,7,7,10,16]，按 LETTERS 映射为“LCCMU”。解密“IETII”的位置[25,13,4,25,25]减去y并模26，得到[1,7,25,18,13]，映射为“DCIPE”。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "invalid",
+      "reason": "按题面算法，第一轮操作后：A Joker 从第14位移至第15位，B Joker 从第43位移至第45位；三切后底牌为26。计数切取顶部26张后，顶牌为29，从顶向下数30张得到牌值14，因此第一个有效密钥流值 y=14。加密明文首字符 J 的位置0应得到 LETTERS[14]='Z'，而非标准答案中的首字符 'U'。",
+      "error_types": [
+        "wrong_answer"
+      ],
+      "depth_score": null,
+      "depth_evidence": "难度评分不适用，因为题目的规范答案已可由第一轮可核查计算直接证伪。",
+      "reasoning_type_tags": [
+        "deduction",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "ordering",
+        "other"
+      ],
+      "scenario": "objects",
+      "explanation_score": null,
+      "explanation_evidence": "解释评分不适用，因为整体判定为无效；所供证书给出的首个密钥流值24与按题面逐步计算得到的14不符。",
+      "solver_correct": [
+        null
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

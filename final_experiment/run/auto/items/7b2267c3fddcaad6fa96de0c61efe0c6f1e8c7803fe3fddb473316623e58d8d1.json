@@ -1,0 +1,40 @@
+{
+  "anon_id": "e59fffa235b017df7908",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[(2,5),(3,5)]",
+      "certificate": "逐一检查数字格的相邻 X 单元格：只有数字 2 位于 (2,5) 时，其相邻未揭示单元格恰好为 (1,5) 和 (3,5)，数量为 2，与数字相等，因此二者必为地雷。其他数字格相邻 X 的数量均不等于其数字要求的地雷数。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "数字格 (2,5) 的相邻未揭示单元格正好是 (1,5) 和 (3,5)，数量为 2，等于该数字，因此这两个单元格必为地雷。其余数字格的相邻未揭示单元格数量均不满足一步逻辑推理条件。规范答案正确；尝试答案将 (1,5) 错写为 (2,5)，而 (2,5) 是数字格，不是 X。",
+      "error_types": [],
+      "depth_score": 1,
+      "depth_evidence": "只需检查数字格的相邻 X 数量，并从 (2,5) 的数量相等条件直接推出 (1,5) 和 (3,5) 为地雷。",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "cardinality"
+      ],
+      "scenario": "spatial",
+      "explanation_score": 3,
+      "explanation_evidence": "尝试的证书正确识别了 (2,5) 处数字产生的两个必雷单元格，并说明了其他数字格不满足条件；但其最终答案把 (1,5) 错写成了 (2,5)，因此证书与答案不一致。",
+      "solver_correct": [
+        false
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

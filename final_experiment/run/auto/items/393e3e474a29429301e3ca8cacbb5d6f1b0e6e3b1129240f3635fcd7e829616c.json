@@ -1,0 +1,39 @@
+{
+  "anon_id": "13bfb8cd4a462b3c51d9",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[QWKNSGFFARPJYYP AG MV]]",
+      "certificate": "按 KEY 前 8 字节 ASCII（31 32 33 34 35 36 37 38）逐字节执行 XOR、右旋 1 位、INV_S_BOX、再 XOR。三组解得字节分别为 51 57 4B 4E 53 47 46 46、41 52 50 4A 59 59 50 20、41 47 20 4D 56 00 00 00，对应 ASCII 为 QWKNSGFFARPJYYP AG MV，去除末尾三个 NUL 后即答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "密文长度为 48 个十六进制字符，即 24 字节，正好分为 3 组 8 字节。按每组先与 KEY 前 8 字节异或、循环右移 1 位、逐半字节应用 INV_S_BOX、再异或 KEY 的规则计算，得到字节序列：51 57 4B 4E 53 47 46 46 41 52 50 4A 59 59 50 20 41 47 20 4D 56 00 00 00。ASCII 解码并去除末尾 NUL 后为 [[QWKNSGFFARPJYYP AG MV]]，与标准答案一致。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "每个字节的结果依赖于连续的第一次异或、循环右移、逆 S 盒替换和第二次异或，涉及至少三步相互依赖的字节变换；全程无分支或多解搜索。",
+      "reasoning_type_tags": [
+        "cipher",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "给出的证书明确列出三组解码后的十六进制字节，并且这些字节逐项对应 ASCII 文本；末尾三个 00 按题意删除，步骤和最终答案均可核查。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

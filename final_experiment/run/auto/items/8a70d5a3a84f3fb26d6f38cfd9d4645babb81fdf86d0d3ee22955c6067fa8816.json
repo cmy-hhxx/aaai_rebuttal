@@ -1,0 +1,40 @@
+{
+  "anon_id": "366cc95067c37c5a710c",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "[[9694. 1593 SYNC.]]",
+      "certificate": "将密文整体右移6字节得到 9a21e637edbbf9e3a483596a5e03c4e192c1f73c。与循环使用的摘要 a317df03c39bc8d69db07939074d87cfce0e57b1 异或，得到 ASCII 明文及校验：\"9694. 1593 SYNC.\"||5ccfa08d。SHA-256(\"9694. 1593 SYNC.\") 的前4字节为 5ccfa08d，校验通过；去除校验段后即为答案。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "将20字节密文整体循环右移6字节得到 9a21e637edbbf9e3a483596a5e03c4e192c1f73c，再与给定摘要前20字节循环异或，得到 ASCII 字符串“9694. 1593 SYNC.”及校验字节 5ccfa08d。该校验值与明文 SHA-256 前4字节一致，去除校验段后与规范答案完全匹配。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要依次完成逆向循环移位、按摘要生成异或密钥流并逐字节解码、计算并核对校验值后移除校验段。",
+      "reasoning_type_tags": [
+        "deduction",
+        "cipher"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "string"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "证书明确给出了右移后的字节序列、摘要异或结果、校验值核对及去除末尾4字节的步骤；各字节操作与规范答案一致。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

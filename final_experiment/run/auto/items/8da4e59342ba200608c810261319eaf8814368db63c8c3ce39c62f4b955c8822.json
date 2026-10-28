@@ -1,0 +1,51 @@
+{
+  "anon_id": "2fc5dc8e0556d2bb376e",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        "[[pairedconjunctiveterms:r^q^p,r^q^¬p];[denoted:m7∨m6]]",
+        "[[paireddisjunctiveterms:¬r∨¬q∨p,¬r∨¬q∨¬p];[denoted:M6^M7]]",
+        "[[CE]]",
+        "[[PCNF];[M8^MC^MF]]",
+        "[[m0∨m1∨m2∨...∨mF]]",
+        "[[255]]",
+        "[[m3∨m5∨mB∨mD∨mE];[C]]",
+        "[[m0∨m1∨m2∨m3∨m4∨m5∨m6∨m7∨m9∨mA∨mB∨mD∨mE]]"
+      ],
+      "certificate": "按变量顺序从左到右编码。第1题的两项索引为111₂=7和110₂=6；第2题两析取项分别在110₂=6和111₂=7时为假。第3题是索引5的单个最小项，因此为基本式且为全奇式。第4题三个最大项分别在1000₂=8、1100₂=C、1111₂=F时为假，故为PCNF。第5题永真基本式包含全部16个最小项；第6题可从8个偶数索引最小项中选取任意非空子集，数量为2^8-1=255。第7题最小项索引为3,5,B,D,E，均为基本式但不全奇或全偶。第8题取第4题最大项索引8,C,F的补集，得到0–7、9、A、B、D、E。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "All eight canonical answers are consistent with the stated variable orders, minterm/maxterm encoding, pairing rule, classification rules, and exact requested answer types. The supplied attempt matches the canonical results, with the fifth answer using the explicitly illustrated ellipsis notation for all 16 minterms.",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "The solution requires binary-index evaluation for paired terms and maxterms, classification of a singleton minterm and a multi-minterm PDNF, recognition of the PCNF in question 4, complementing its maxterm indices to obtain the equivalent PDNF in question 8, and counting nonempty subsets of the eight even indices in question 6.",
+      "reasoning_type_tags": [
+        "deduction",
+        "counting",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "boolean",
+        "cardinality",
+        "ordering"
+      ],
+      "scenario": "abstract",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate explicitly verifies indices 7 and 6 for question 1, 6 and 7 for question 2, index 5 and its classifications for question 3, maxterm indices 8,C,F for question 4, all 16 minterms for question 5, 2^8-1 for question 6, indices 3,5,B,D,E and classification C for question 7, and the complement indices for question 8.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

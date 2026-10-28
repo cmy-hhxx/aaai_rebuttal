@@ -1,0 +1,57 @@
+{
+  "anon_id": "e59114782ed7775c864b",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": [
+        [
+          -7,
+          8,
+          -6
+        ],
+        [
+          0,
+          -6,
+          -5
+        ],
+        [
+          0,
+          0,
+          7
+        ]
+      ],
+      "certificate": "由 AX=F 得 X 的第一列为 (-7,0,0)，并由前两行的第二列方程解得 b=8、d=-6。再由 XB=G 得 c=-6、e=-5、f=7。代回可验证 AX=F、XB=G。所得 X 为上三角矩阵；对角线和为 -6，总和为 -9，第 3 行和为 7，第 1 行和为 -5，所有元素均在 [-9,9] 内。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "给定矩阵 X 直接验证满足 AX=F 和 XB=G：AX=[[56,-100,11],[56,-100,11],[-35,34,7]]=F，XB=[[-166,-106,3],[-3,-28,59],[63,56,-49]]=G。X 也是上三角矩阵，对角线和为 -6、全部元素和为 -9、第3行和为7、第1行和为-5，且所有元素均在[-9,9]内。",
+      "error_types": [],
+      "depth_score": 3,
+      "depth_evidence": "需要先利用 AX=F 的第一列确定第一列元素，再联立第二列方程确定上三角位置的元素，随后利用 XB=G 确定第三列剩余元素，最后进行矩阵乘法和数值约束核验。",
+      "reasoning_type_tags": [
+        "deduction",
+        "algebra",
+        "arithmetic"
+      ],
+      "constraint_type_tags": [
+        "equality",
+        "inequality"
+      ],
+      "scenario": "numbers",
+      "explanation_score": 3,
+      "explanation_evidence": "证书给出了由 AX=F 确定第一列和部分第二列、由 XB=G 确定其余元素的主要推导，并明确说明了两次乘法及全部结构和数值约束均可验证；但未逐项展示联立方程求解过程。",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}

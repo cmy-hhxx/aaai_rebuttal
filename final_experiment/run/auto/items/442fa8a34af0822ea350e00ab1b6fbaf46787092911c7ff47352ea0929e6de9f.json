@@ -1,0 +1,39 @@
+{
+  "anon_id": "b9865cbdd2d873dabba3",
+  "k": 1,
+  "models": [
+    "gpt-5.6-luna"
+  ],
+  "attempts": [
+    {
+      "panel": 0,
+      "sample": 0,
+      "answer": "([])(){[]<>}{{}}(<><<[]({})>>)",
+      "certificate": "逐项扫描后，前四段“([])”“()”“{[]<>}”“{{}}”均已匹配。最后一段中未闭合的栈为“( <<”，按后进先出顺序需追加“>>)”；追加后所有括号均正确闭合。"
+    }
+  ],
+  "judges": [
+    {
+      "verdict": "valid",
+      "reason": "The given sequence is properly matched except for the final unmatched stack consisting of '(' followed by two '<' brackets. Appending '>>)' closes them in reverse order, producing the canonical complete sequence.",
+      "error_types": [],
+      "depth_score": 2,
+      "depth_evidence": "Requires scanning the nested suffix to identify the unmatched opening brackets, then applying LIFO closure order to derive the required suffix '>>)'.",
+      "reasoning_type_tags": [
+        "deduction"
+      ],
+      "constraint_type_tags": [
+        "string",
+        "equality"
+      ],
+      "scenario": "language",
+      "explanation_score": 4,
+      "explanation_evidence": "The certificate correctly verifies the already matched segments, identifies the remaining stack as '( <<', and derives the required reverse-order closures '>>)', which matches the supplied canonical answer.",
+      "solver_correct": [
+        true
+      ]
+    }
+  ],
+  "status": "completed",
+  "assessment_status": "model_judgment"
+}
