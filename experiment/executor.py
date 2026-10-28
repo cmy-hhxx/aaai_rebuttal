@@ -24,6 +24,10 @@ def _profile(job: Path, python: Path) -> str:
         roots.update((sys.prefix, sys.base_prefix))
     roots.update((str(job), "/System", "/usr/lib", "/usr/share", "/Library/Apple"))
     reads = " ".join(f"(subpath {json.dumps(root)})" for root in sorted(roots))
+    # macOS checks directory metadata while resolving the interpreter; without this
+    # sandbox-exec denies execvp with EPERM although the executable itself is allowed.
+    lookup = sorted({str(python.parent.parent), str(python.resolve().parents[2])})
+    metadata = " ".join(f"(subpath {json.dumps(root)})" for root in lookup)
     # CPython's macOS startup needs the root directory itself, not its subtree.
     special = " ".join(
         f"(literal {json.dumps(path)})"
@@ -35,6 +39,7 @@ def _profile(job: Path, python: Path) -> str:
 (deny mach-lookup)
 (deny file-read*)
 (allow file-read* {reads} {special})
+(allow file-read-metadata {metadata})
 (deny file-write*)
 (allow file-write* (subpath {json.dumps(str(job))}) (literal "/dev/null"))
 (deny process-fork)

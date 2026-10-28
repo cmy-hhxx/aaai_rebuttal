@@ -22,7 +22,7 @@ AUDIT_FIELDS = ("anon_id", "reviewer", "valid", "depth", "explainability", "erro
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").split("\n") if line.strip()]
 
 
 def _write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:

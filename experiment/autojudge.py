@@ -30,24 +30,35 @@ Solver agreement is not proof. Use uncertain when verification is insufficient. 
 Return only JSON with these fields:
 verdict: "valid", "invalid" or "uncertain";
 reason: a concrete check, counterexample or unresolved issue;
-error_types: list from [missing_constraint,ambiguous,unsatisfiable,wrong_answer,rendering,other];
+error_types: subset of the closed list [missing_constraint, ambiguous, unsatisfiable, wrong_answer, rendering, other];
 depth_score: integer 0..4 or null, judging minimum necessary dependency, not text/token length:
 0=lookup/copy; 1=one direct inference; 2=two dependent necessary inferences;
 3=at least three dependent necessary inferences mixing operations;
 4=essential branching/case analysis or a long interacting multi-constraint proof;
 depth_evidence: essential dependencies supporting the score;
-reasoning_type_tags: list from [deduction,counting,arithmetic,algebra,combinatorial_search,
-spatial,temporal,cipher,causal,counterfactual,other];
-constraint_type_tags: list from [equality,inequality,all_different,ordering,adjacency,
-cardinality,implication,boolean,graph,string,other];
-scenario: one from [abstract,people,objects,numbers,spatial,temporal,language,other];
+reasoning_type_tags: nonempty subset of the closed list
+[deduction, counting, arithmetic, algebra, combinatorial_search, spatial, temporal, cipher, causal, counterfactual, other];
+constraint_type_tags: subset of the closed list
+[equality, inequality, all_different, ordering, adjacency, cardinality, implication, boolean, graph, string, other];
+scenario: exactly one of [abstract, people, objects, numbers, spatial, temporal, language, other];
 explanation_score: integer 0..4 or null assessing the supplied standardized solver certificates
 (not an original generator explanation): 0=wrong; 1=unsupported major leaps; 2=partly checkable;
 3=main deductions checkable with minor gaps; 4=complete correct checkable evidence;
 explanation_evidence: concrete certificate checks/gaps;
 solver_correct: list of true/false/null, one per supplied attempt in exactly the same order.
 null means you cannot independently check that answer. False if demonstrably wrong.
-If verdict is not valid, depth_score and explanation_score must be null and solver_correct all null.
+If verdict is not "valid", depth_score and explanation_score must be null and solver_correct must be
+a list of nulls with one entry per supplied attempt (never true/false). Even then, reason,
+depth_evidence and explanation_evidence must be nonempty strings: state that difficulty or
+explanation scoring is not applicable and why.
+
+Tag rule: the two lists are disjoint vocabularies. Never put a constraint label (ordering, adjacency,
+all_different, equality, inequality, cardinality, implication, boolean, graph, string) into
+reasoning_type_tags; never put a reasoning label (deduction, counting, arithmetic, algebra,
+combinatorial_search, spatial, temporal, cipher, causal, counterfactual) into constraint_type_tags.
+"other" is allowed in both. No duplicates inside a list.
+Before returning, re-read your JSON and check that every tag appears in its own closed list, that
+solver_correct has exactly one entry per attempt, and that it is all null when the verdict is not valid.
 These are model judgments, not certified truth. Do not reward difficulty caused by invalid wording."""
 
 
@@ -56,7 +67,7 @@ class EvaluationError(RuntimeError):
 
 
 def _read(path: Path) -> list[dict[str, Any]]:
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").split("\n") if line.strip()]
 
 
 def _save(path: Path, value: Any) -> None:
@@ -97,10 +108,21 @@ def _judge(value: dict[str, Any], count: int) -> dict[str, Any]:
         "constraint_type_tags": "equality inequality all_different ordering adjacency cardinality implication boolean graph string other",
     }
     for field, allowed in vocabularies.items():
-        if len(set(value[field])) != len(value[field]) or set(value[field]) - set(allowed.split()):
-            raise EvaluationError(f"Unfrozen/duplicate labels: {field}")
+        allowed_set = set(allowed.split())
+        values = value[field]
+        bad = sorted(set(values) - allowed_set)
+        duplicate = len(set(values)) != len(values)
+        if bad or duplicate:
+            problems = []
+            if bad:
+                problems.append("disallowed values " + ", ".join(bad))
+            if duplicate:
+                problems.append("duplicate values")
+            raise EvaluationError(f"Invalid {field} ({'; '.join(problems)}); "
+                                  f"allowed values are exactly: {allowed}")
     if value["scenario"] not in "abstract people objects numbers spatial temporal language other".split():
-        raise EvaluationError("Unfrozen scenario label")
+        raise EvaluationError("Unfrozen scenario label; allowed values are exactly: "
+                              "abstract people objects numbers spatial temporal language other")
     for field in ("depth_score", "explanation_score"):
         score = value.get(field)
         if score is not None and (type(score) is not int or not 0 <= score <= 4):
@@ -194,7 +216,7 @@ def _paired_proxy(rows: list[dict[str, Any]], key: list[dict[str, Any]], seed: i
                           {r["seed_id"] for r in key if r["method"] == baseline})
         differences: dict[str, list[float]] = {field: [] for field in ("lower_minus_lower", "upper_minus_upper", "difference_lower", "difference_upper")}
         for source in eligible:
-            groups = [[r for r in rows if r["status"] in ("completed", "unavailable")
+            groups = [[r for r in rows if r["status"] in ("completed", "unavailable", "execution_unknown")
                        and links.get(r["anon_id"], {}).get("method") == method
                        and links.get(r["anon_id"], {}).get("seed_id") == source]
                       for method in ("puzzleforge", baseline)]
@@ -216,14 +238,17 @@ def automatic_report(rows: list[dict[str, Any]], models: list[str], key: list[di
     links = {str(item["anon_id"]): item for item in key or []}
     if key and (len(links) != len(key) or any(str(r["anon_id"]) not in links for r in rows)):
         raise ValueError("Private key must uniquely cover every assessed anonymous ID")
-    processed = [r for r in rows if r["status"] in ("completed", "unavailable")]
+    processed = [r for r in rows if r["status"] in ("completed", "unavailable", "execution_unknown")]
     completed = [r for r in rows if r["status"] == "completed"]
+    unknown = [r for r in rows if r["status"] == "execution_unknown"]
+    unavailable = [r for r in rows if r["status"] == "unavailable"]
     requested = expected if expected is not None else max(len(rows), len(links))
     pending = requested - len(processed)
     if pending < 0 or len({r["anon_id"] for r in rows}) != len(rows):
         raise ValueError("Invalid requested count or duplicate anonymous result IDs")
     lines = ["# 自动模型初评（非人工复核）", "", f"已处理 {len(processed)}/{requested} 题；"
-             f"有完整模型评估 {len(completed)} 题；无输出槽位 {len(processed)-len(completed)}；待处理pending {pending}。", "",
+             f"模型判定 {len(completed)} 题；执行未决 {len(unknown)} 题；无输出槽位 {len(unavailable)} 题；"
+             f"待处理pending {pending}。", "",
              "模型共识仅是正确性代理，不是真值；同一模型解题和评判存在相关偏差。"
              "单个生成端点不能支持跨所有模型的泛化结论。历史PF数据与新生成基线也不构成同模型、同预算的因果比较。",
              "本报告不做比较显著性检验；组别均值为描述统计，人工独立复核以后补充。"
@@ -231,7 +256,7 @@ def automatic_report(rows: list[dict[str, Any]], models: list[str], key: list[di
              "这不是真实有效率的置信界。有pending的组不输出总体有效性范围。", ""]
     if len(models) == 1:
         lines.extend(["**仅单模型初评：重复请求不是独立模型面板，结论强度更弱。**", ""])
-    lines.extend(["| 组别 | 全部请求槽N | 完整评估 | 无输出 | pending | valid/N 下代理 | (valid+uncertain)/N 上代理 | uncertain | 深度代理均值(题n) | 统一证书均值(题n) |",
+    lines.extend(["| 组别 | 全部请求槽N | 模型判定 | 未决/无输出 | pending | valid/N 下代理 | (valid+uncertain+unknown)/N 上代理 | uncertain | 深度代理均值(题n) | 统一证书均值(题n) |",
                   "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"])
     groups = sorted({str(r.get("method", "overall")) for r in links.values()} |
                     {str(links.get(r["anon_id"], {}).get("method", "overall")) for r in rows})
@@ -243,12 +268,14 @@ def automatic_report(rows: list[dict[str, Any]], models: list[str], key: list[di
         group_pending = group_total - len(group_rows)
         valid = [r for r in subset if consensus(r) == "valid"]
         uncertain = sum(consensus(r) == "uncertain" for r in subset)
+        unknown = sum(r["status"] == "execution_unknown" for r in group_rows)
         def score(field: str) -> str:
             values = [statistics.mean(j[field] for j in r["judges"] if j.get(field) is not None)
                       for r in valid if any(j.get(field) is not None for j in r["judges"])]
             return f"{statistics.mean(values):.3f} ({len(values)}题)" if values else "NA (0)"
         lower = f"{len(valid)}/{group_total} ({len(valid)/group_total:.3f})" if group_total and not group_pending else "NA"
-        upper = f"{len(valid)+uncertain}/{group_total} ({(len(valid)+uncertain)/group_total:.3f})" if group_total and not group_pending else "NA"
+        upper_n = len(valid) + uncertain + unknown
+        upper = f"{upper_n}/{group_total} ({upper_n/group_total:.3f})" if group_total and not group_pending else "NA"
         lines.append(f"| {group} | {group_total} | {len(subset)} | {len(group_rows)-len(subset)} | {group_pending} | {lower} | "
                      f"{upper} | {uncertain} | {score('depth_score')} | {score('explanation_score')} |")
         for index, model in enumerate(models):
@@ -273,7 +300,7 @@ def automatic_report(rows: list[dict[str, Any]], models: list[str], key: list[di
             details.append(f"\n{group} / {field}：标签熵 {_entropy(values):.3f} bits；分布 {dict(sorted(Counter(values).items()))}。")
         structures = {tuple(sorted(j["reasoning_type_tags"])) + ("|",) + tuple(sorted(j["constraint_type_tags"])) for j in tagged}
         details.append(f"\n{group}：观测结构标签组合数 {len(structures)}。标签多样性是judge代理，不是语义嵌入或真实生成结构证明。\n")
-    lines.extend(["", "## 按seed配对比较", "", "仅双方每seed各至少2个已处理槽（完整评估或unavailable）进入比较；"
+    lines.extend(["", "## 按seed配对比较", "", "仅双方每seed各至少2个已处理槽（模型判定、执行未决或unavailable）进入比较；"
                   "其他seed仍在覆盖分母。按seed宏平均，配对bootstrap 2000次、固定随机种子20261028。"
                   "只描述已覆盖seed子集；95%统计区间不代表真值保证，也不作显著性断言。", "",
                   "lower−lower及upper−upper是相同敏感性设定的差；真正不确定项最不利分配下的差界为"
@@ -366,22 +393,29 @@ def run_audit(items: list[dict[str, Any]], out_dir: Path, endpoint: str, models:
         if not str(item.get("problem", "")).strip():
             row["status"] = "unavailable"
         else:
-            for panel, model in enumerate(models):
-                for repetition in range(k):
-                    messages = [{"role": "system", "content": SOLVE_SYSTEM},
-                                {"role": "user", "content": json.dumps({"problem": item["problem"]}, ensure_ascii=False)}]
-                    solved = _assessment(request, model, messages,
-                                         f"{VERSION}:{item['anon_id']}:solve:{panel}:{repetition}", _solution)
-                    row["attempts"].append({"panel": panel, "sample": repetition,
-                                             "answer": solved["answer"], "certificate": solved["certificate"]})
-            judge_input = {"problem": item["problem"], "canonical_answer": item["answer"], "attempts": row["attempts"]}
-            for panel, model in enumerate(models):
-                messages = [{"role": "system", "content": JUDGE_SYSTEM},
-                            {"role": "user", "content": json.dumps(judge_input, ensure_ascii=False)}]
-                value = _assessment(request, model, messages, f"{VERSION}:{item['anon_id']}:judge:{panel}",
-                                    lambda value: _judge(value, len(row["attempts"])))
-                row["judges"].append(value)
-            row["status"] = "completed"
+            try:
+                for panel, model in enumerate(models):
+                    for repetition in range(k):
+                        messages = [{"role": "system", "content": SOLVE_SYSTEM},
+                                    {"role": "user", "content": json.dumps({"problem": item["problem"]}, ensure_ascii=False)}]
+                        solved = _assessment(request, model, messages,
+                                             f"{VERSION}:{item['anon_id']}:solve:{panel}:{repetition}", _solution)
+                        row["attempts"].append({"panel": panel, "sample": repetition,
+                                                 "answer": solved["answer"], "certificate": solved["certificate"]})
+                judge_input = {"problem": item["problem"], "canonical_answer": item["answer"], "attempts": row["attempts"]}
+                for panel, model in enumerate(models):
+                    messages = [{"role": "system", "content": JUDGE_SYSTEM},
+                                {"role": "user", "content": json.dumps(judge_input, ensure_ascii=False)}]
+                    value = _assessment(request, model, messages, f"{VERSION}:{item['anon_id']}:judge:{panel}",
+                                        lambda value: _judge(value, len(row["attempts"])))
+                    row["judges"].append(value)
+            except EvaluationError as exc:
+                # Protocol: three failed schema repairs are execution-unknown, not a label.
+                # Partial judges are dropped so no fake consensus can form.
+                row.update(status="execution_unknown", assessment_status="execution_unknown", judges=[],
+                           execution_error={"type": type(exc).__name__, "message": str(exc)})
+            else:
+                row.update(status="completed", assessment_status="model_judgment")
         _save(state, row)
         return row
 

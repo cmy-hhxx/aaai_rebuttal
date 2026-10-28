@@ -84,9 +84,11 @@ class AutomaticJudgeTest(unittest.TestCase):
                 run_audit(self.items(), out, "http://localhost", ["m"],
                           request_fn=lambda *args: (_ for _ in ()).throw(APIError("call_budget_exhausted")))
             self.assertFalse((out / "model_labels.jsonl").exists())
-            with self.assertRaises(EvaluationError):
-                run_audit(self.items(), out, "http://localhost", ["m"], request_fn=lambda *args: response({"answer": "x"}))
-            self.assertFalse((out / "model_labels.jsonl").exists())
+            rows = run_audit(self.items(), out, "http://localhost", ["m"],
+                             request_fn=lambda *args: response({"answer": "x"}))
+            self.assertEqual([row["status"] for row in rows], ["execution_unknown"] * len(rows))
+            labels = [json.loads(line) for line in (out / "model_labels.jsonl").read_text().splitlines() if line]
+            self.assertTrue(labels and all(label["judges"] == [] for label in labels))
 
     def test_malformed_solver_and_judge_outputs_recover_with_fixed_tags(self):
         calls = []
@@ -151,12 +153,16 @@ class AutomaticJudgeTest(unittest.TestCase):
             return response({"answer": "A"})
         with tempfile.TemporaryDirectory() as folder:
             out = Path(folder)
-            with self.assertRaisesRegex(EvaluationError, "after 3 format attempts"):
-                run_audit(self.items(), out, "http://localhost", ["m"], k=1, request_fn=fake)
+            rows = run_audit(self.items(), out, "http://localhost", ["m"], k=1, request_fn=fake)
             self.assertEqual(len(tags), 3)
             self.assertEqual([tag.rsplit(":", 1)[1] for tag in tags],
                              ["format-attempt-0", "format-attempt-1", "format-attempt-2"])
-            self.assertFalse((out / "model_labels.jsonl").exists())
+            # Exhausted schema repair is execution-unknown, never a fabricated label.
+            self.assertEqual(rows[0]["status"], "execution_unknown")
+            self.assertEqual(rows[0]["judges"], [])
+            self.assertEqual(consensus(rows[0]), "uncertain")
+            labels = [json.loads(line) for line in (out / "model_labels.jsonl").read_text().splitlines() if line]
+            self.assertTrue(labels and all(label["judges"] == [] for label in labels))
 
     def test_shared_cap_is_passed_to_fresh_client_every_request(self):
         class FakeClient:
