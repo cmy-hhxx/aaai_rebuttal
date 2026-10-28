@@ -83,6 +83,13 @@ class EvaluationTest(unittest.TestCase):
             with self.assertRaises(ValueError):
                 prepare_audit(rows + [rows[0]], Path(folder))
 
+    def test_min_count_fails_before_writing_audit_files(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            with self.assertRaisesRegex(ValueError, "below required"):
+                prepare_audit(corpus(), root, per_seed=1, min_count=20)
+            self.assertFalse((root / "audit_blind.jsonl").exists())
+
     def test_nonfinite_scores_and_false_valid_failures_are_rejected(self):
         records = corpus()[:1]
         key = [{"anon_id": "a", "id": records[0]["id"]}]

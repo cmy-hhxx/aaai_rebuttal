@@ -34,15 +34,15 @@ def _normalized(text: str) -> str:
 
 
 def prepare_audit(records: list[dict[str, Any]], out_dir: Path, seed: int = 20261028,
-                  per_seed: int = 2) -> None:
+                  per_seed: int = 2, min_count: int = 0) -> None:
     """Deterministically sample matched slots, including failures; preserve labels.
 
     Run records must contain every requested slot, including generation failures.
     No label file is overwritten on resume. Changing the sample creates a fresh
     output directory; a stale label file with a different sample is rejected.
     """
-    if per_seed < 1:
-        raise ValueError("per_seed must be positive")
+    if per_seed < 1 or min_count < 0:
+        raise ValueError("per_seed must be positive and min_count nonnegative")
     ids = [str(row["id"]) for row in records]
     if len(ids) != len(set(ids)):
         raise ValueError("Duplicate record IDs")
@@ -57,6 +57,8 @@ def prepare_audit(records: list[dict[str, Any]], out_dir: Path, seed: int = 2026
         salt = f"{seed}|{key[0]}|{key[1]}"
         ordered = sorted(rows, key=lambda row: hashlib.sha256(f"{salt}|{row['id']}".encode()).hexdigest())
         chosen.extend(ordered[:per_seed])
+    if len(chosen) < min_count:
+        raise ValueError(f"Blind sample has {len(chosen)} items, below required {min_count}; raise per_seed")
     random.Random(seed).shuffle(chosen)
     blind, private, native = [], [], []
     for row in chosen:
@@ -225,9 +227,11 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--labels", type=Path)
     parser.add_argument("--seed", type=int, default=20261028)
+    parser.add_argument("--per-seed", type=int, default=2, help="Blind items per seed per method")
+    parser.add_argument("--min-audit", type=int, default=0, help="Fail before writing if the sample is smaller")
     args = parser.parse_args()
     records = _jsonl(args.data)
-    prepare_audit(records, args.out, args.seed)
+    prepare_audit(records, args.out, seed=args.seed, per_seed=args.per_seed, min_count=args.min_audit)
     labels = []
     if args.labels:
         with args.labels.open(encoding="utf-8", newline="") as handle:

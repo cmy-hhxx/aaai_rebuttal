@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from experiment.api import ChatClient
+from experiment.costs import summarize_costs
 from experiment.evaluation import _paired_interval
 
 VERSION = "automatic-panel-v2"
@@ -315,13 +316,13 @@ def run_audit(items: list[dict[str, Any]], out_dir: Path, endpoint: str, models:
               key: list[dict[str, Any]] | None = None, k: int = 4, max_calls: int = 10000,
               api_key_env: str = "OPENAI_API_KEY", parameters: dict[str, Any] | None = None,
               allow_insecure_http: bool = False,
-              workers: int = 1,
+              workers: int = 1, timeout: float = 120, retries: int = 3,
               request_fn: Callable[[str, list[dict[str, Any]], str], dict[str, Any]] | None = None) -> list[dict[str, Any]]:
     """Resume by exact input/config identity. API/format failures stop, never label bad."""
     if not models or any(not m for m in models) or len(models) != len(set(models)):
         raise ValueError("Provide distinct model IDs; repeats are not independent models")
-    if k < 1 or max_calls < 0 or workers < 1:
-        raise ValueError("k/workers must be positive and max_calls nonnegative")
+    if k < 1 or max_calls < 0 or workers < 1 or timeout <= 0 or retries < 0:
+        raise ValueError("k/workers/timeout must be positive; max_calls/retries nonnegative")
     if workers > 1 and len(models) != 1:
         raise ValueError("Concurrent automatic assessment currently supports one model only")
     if len({r["anon_id"] for r in items}) != len(items):
@@ -329,7 +330,8 @@ def run_audit(items: list[dict[str, Any]], out_dir: Path, endpoint: str, models:
     out_dir.mkdir(parents=True, exist_ok=True)
     manifest = {"version": VERSION, "endpoint": endpoint, "models": models, "k": k,
                 "parameters": parameters or {}, "input_hash": _digest(items),
-                "prompt_hash": _digest([SOLVE_SYSTEM, JUDGE_SYSTEM]), "workers": workers}
+                "prompt_hash": _digest([SOLVE_SYSTEM, JUDGE_SYSTEM]), "workers": workers,
+                "timeout": timeout, "retries": retries}
     path = out_dir / "manifest.json"
     if path.exists() and json.loads(path.read_text(encoding="utf-8")) != manifest:
         raise ValueError("Output directory belongs to a different automatic evaluation; use a new directory")
@@ -339,7 +341,8 @@ def run_audit(items: list[dict[str, Any]], out_dir: Path, endpoint: str, models:
     state_dir.mkdir(exist_ok=True)
     stop = threading.Event()
     shared_client = (ChatClient(endpoint, models[0], cache, api_key_env, parameters=parameters,
-                                max_calls=max_calls, allow_insecure_http=allow_insecure_http)
+                                max_calls=max_calls, timeout=timeout, retries=retries,
+                                allow_insecure_http=allow_insecure_http)
                      if workers > 1 and request_fn is None else None)
     def request(model: str, messages: list[dict[str, Any]], tag: str) -> dict[str, Any]:
         if stop.is_set():
@@ -350,7 +353,8 @@ def run_audit(items: list[dict[str, Any]], out_dir: Path, endpoint: str, models:
             return shared_client.complete(messages, tag)
         # Reload shared attempt log for every call: the cap covers all models/retries/resumes.
         client = ChatClient(endpoint, model, cache, api_key_env, parameters=parameters,
-                            max_calls=max_calls, allow_insecure_http=allow_insecure_http)
+                            max_calls=max_calls, timeout=timeout, retries=retries,
+                            allow_insecure_http=allow_insecure_http)
         return client.complete(messages, tag)
     def process(item: dict[str, Any]) -> dict[str, Any]:
         if stop.is_set():
@@ -451,13 +455,19 @@ def main() -> None:
     parser.add_argument("--max-calls", type=int, default=10000)
     parser.add_argument("--k", type=int, default=4)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--timeout", type=float, default=120)
+    parser.add_argument("--http-retries", type=int, default=3)
     parser.add_argument("--parameters", type=Path, help="Exact additional ChatCompletion parameters as JSON")
     parser.add_argument("--allow-insecure-http", action="store_true")
     args = parser.parse_args()
     run_audit(_read(args.audit), args.out, args.endpoint, args.models, key=_read(args.key) if args.key else None,
               k=args.k, max_calls=args.max_calls, api_key_env=args.api_key_env,
               parameters=json.loads(args.parameters.read_text()) if args.parameters else None,
-              allow_insecure_http=args.allow_insecure_http, workers=args.workers)
+              allow_insecure_http=args.allow_insecure_http, workers=args.workers,
+              timeout=args.timeout, retries=args.http_retries)
+    costs = summarize_costs(args.out / "api_cache/requests.jsonl")
+    (args.out / "evaluation_costs.json").write_text(
+        json.dumps(costs, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(args.out / "auto_report.md")
 
 

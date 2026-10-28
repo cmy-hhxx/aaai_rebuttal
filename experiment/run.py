@@ -17,6 +17,7 @@ import sys
 from typing import Any
 
 from .api import ChatClient
+from .costs import summarize_costs
 from .executor import GeneratorError, run_generator
 from .env import load_env
 
@@ -220,6 +221,8 @@ def generate(manifest: dict[str, Any], out: Path, method: str, seed_ids: set[str
                     if method == "direct":
                         rows = parse_rows(answer, count)
                     else:
+                        # C is model-authored: the API response is the generator. This repo
+                        # only provides the prompt, sandbox, probe, and repair loop.
                         code = re.sub(r"^```(?:python)?\s*|\s*```$", "", answer.strip())
                         code_dir = out / "programs" / sid
                         code_dir.mkdir(parents=True, exist_ok=True)
@@ -256,11 +259,15 @@ def generate(manifest: dict[str, Any], out: Path, method: str, seed_ids: set[str
         list(pool.map(generate_seed, seeds))
 
 
-def export(out: Path) -> Path:
+def export(out: Path, seed_ids: set[str] | None = None, filename: str = "records.jsonl") -> Path:
+    if Path(filename).name != filename:
+        raise ValueError("filename must be a plain file name inside the run directory")
     records = json.loads((out / "reference.json").read_text())
     for p in sorted((out / "results").glob("*/*/*.json")):
         records.extend(json.loads(p.read_text()))
-    path = out / "records.jsonl"
+    if seed_ids is not None:
+        records = [r for r in records if r["seed_id"] in seed_ids]
+    path = out / filename
     path.write_text("".join(json.dumps(r, ensure_ascii=False, allow_nan=False) + "\n" for r in records), encoding="utf-8")
     return path
 
@@ -273,15 +280,23 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=ROOT / "runs/plan")
     parser.add_argument("--method", choices=["direct", "framework", "both"], default="both")
     parser.add_argument("--seed-ids", nargs="+", help="Run selected seeds first without changing frozen inputs; omit to resume all")
+    parser.add_argument("--seed-file", type=Path, help="Whitespace/newline separated seed IDs to add to --seed-ids")
+    parser.add_argument("--filename", default="records.jsonl", help="Export file name inside --out (export action only)")
     args = parser.parse_args()
     out = args.out.resolve()
+    selected: set[str] | None = set(args.seed_ids or [])
+    if args.seed_file:
+        selected = (selected or set()) | set(args.seed_file.read_text(encoding="utf-8").split())
+    if not selected:
+        selected = None
     if args.action == "export":
-        print(export(out))
+        print(export(out, selected, args.filename))
         return
     manifest = prepare(args.config.resolve(), out)
     if args.action == "generate":
         for method in (["direct", "framework"] if args.method == "both" else [args.method]):
-            generate(manifest, out, method, set(args.seed_ids) if args.seed_ids else None)
+            generate(manifest, out, method, selected)
+        write_json(out / "generation_costs.json", summarize_costs(out / "api_cache/requests.jsonl"))
     print(json.dumps(manifest["counts"]))
     print(export(out))
 

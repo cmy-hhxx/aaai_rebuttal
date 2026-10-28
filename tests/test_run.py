@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from experiment.run import ROOT, generate, parse_rows, prepare, prompt_paths, seed_for
+from experiment.run import ROOT, export, generate, parse_rows, prepare, prompt_paths, seed_for
 from experiment.executor import GeneratorError
 
 
@@ -211,6 +211,25 @@ class RunTests(unittest.TestCase):
                             generate(m, out, method)
                         client.assert_not_called()
                         executor.assert_not_called()
+
+    def test_export_filters_selected_seeds_to_named_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = Path(tmp)
+            rows = [{"id": f"puzzleforge/{seed}/{slot}", "method": "puzzleforge", "seed_id": seed,
+                     "slot": slot, "status": "ok", "cohort": "matched"}
+                    for seed in ("s1", "s2") for slot in range(2)]
+            (out / "reference.json").write_text(json.dumps(rows))
+            (out / "results/direct/s1").mkdir(parents=True)
+            (out / "results/direct/s1/00.json").write_text(json.dumps([
+                {"id": "direct/s1/0", "method": "direct", "seed_id": "s1", "slot": 0,
+                 "status": "ok", "cohort": "matched"}]))
+            path = export(out, {"s1"}, "records_selected.jsonl")
+            exported = [json.loads(line) for line in path.read_text().splitlines()]
+            self.assertEqual(path.name, "records_selected.jsonl")
+            self.assertEqual({row["seed_id"] for row in exported}, {"s1"})
+            self.assertEqual(len(exported), 3)
+            with self.assertRaisesRegex(ValueError, "plain file name"):
+                export(out, None, "../escape.jsonl")
 
 
 if __name__ == "__main__":

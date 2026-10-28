@@ -1,6 +1,6 @@
 # 依据论文方法修订的中英文提示词 v2
 
-这四份是**依据论文方法重新编写的 baseline 提示词**，不是论文原作者的 agent prompt 原文。投稿附件没有原始五 agent prompts。本版本已接入运行器，并用于 `runs/minimax_flash_v2_20261028/` 新实验，未改写上一轮试验。
+这四份是**依据论文方法重新编写的 baseline 提示词**，不是论文原作者的 agent prompt 原文。投稿附件没有原始五 agent prompts。本版本已接入运行器；当前 GPT-5.2 对比使用 [configs/gpt52_paper_v2_20261028.json](../../../configs/gpt52_paper_v2_20261028.json)。提示词本身不绑定具体生成模型。注意：这四份 `.txt` 是 system prompt，不是生成器；C 组的 Python 生成器由模型在运行时现场返回。
 
 **发送边界：**四份 `.txt` 正文只使用通用任务、质量及接口要求，保留 L1–L4 标签及含义，但不包含论文／框架／数据集名称、专用 DSL 名称或 agent 名称。方法来源与论文对应关系只保留在这份内部说明中；本 README 不得拼接到发送给模型的 system 或 user 消息中。
 
@@ -55,6 +55,6 @@ L4 参数化本身也能构成合法可复用生成器，是论文中大量实�
 
 源码修复仍使用真实报错，不把独立评测标签反馈给生成器。涉及“多解、蕴含方向、校验路径、中间计算”的具体提醒是质量要求；不将本次已发现的错误题、金标或核验结果放进提示词。下一轮若评估修订后的方法，应使用未用于调提示词的验证种子，不能把旧试跑同时当开发集和最终验证集。
 
-## 与旧实验的关系
+## 与 legacy 提示词的关系
 
-旧版 `experiment/prompts/quality.txt`、`direct.txt`、`framework.txt` 保持原样，旧实验的 snapshot 和 traces 也不修改。**省略 `prompt_variant` 仍加载旧版；`prompt_variant=paper_v2` 只加载新版完整单文件。**通过 `prompt_language=zh/en` 选择指令语言，`output_language=zh/en` 单独控制产物语言；两者默认zh。新配置为 `configs/minimax_flash_v2_20261028.json`。运行器把实际提示词复制到snapshot并冻结hash，生成时要求副本存在且hash一致。采用v2须使用新run目录，不能把旧结果标成v2结果。
+旧版 `experiment/prompts/quality.txt`、`direct.txt`、`framework.txt` 保持原样。**省略 `prompt_variant` 仍加载 legacy；`prompt_variant=paper_v2` 只加载新版完整单文件。**通过 `prompt_language=zh/en` 选择指令语言，`output_language=zh/en` 单独控制产物语言；两者默认 zh。GPT-5.2 配置为 `configs/gpt52_paper_v2_20261028.json`。运行器把实际提示词复制到 snapshot 并冻结 hash，生成时要求副本存在且 hash 一致。采用 v2 须使用新 run 目录，不能把旧结果标成 v2 结果。
