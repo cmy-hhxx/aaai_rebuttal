@@ -1,0 +1,74 @@
+custom_operator:
+  # 在 word_sorting_0.py 中实现的五个自定义函数：
+  # 1) build_custom_alphabet: 构造自定义字母顺序映射，将 special_letters 依序置于最前，后接 a-z 原序
+  # 2) sort_words: 基于自定义字母顺序对单词进行升/降序排序（词典序比较）
+  # 3) pick_words: 随机选取不重复的英文小写单词，保证首字母分布具备一定区分度
+  # 4) pick_special_letters: 随机生成置前字母，至少有两个来自 words 的首字母，且不重复
+  # 5) make_prefix_chain: 生成“x < l < g”这种前缀顺序说明文本
+  build_custom_alphabet: word_sorting_0.py
+  sort_words: word_sorting_0.py
+  pick_words: word_sorting_0.py
+  pick_special_letters: word_sorting_0.py
+  make_prefix_chain: word_sorting_0.py
+
+variables:
+  # 随机种子，提升可复现性
+  seed:
+    type: int
+    domain: "[1, 1000000]"
+
+  # 单词数量范围（增强规模与难度）
+  word_num:
+    type: int
+    domain: "[6, 10]"
+    diff_factor: 1
+
+  # 排序方向：True 为降序，False 为升序（增强题目多样性）
+  is_desc:
+    type: bool
+    domain: "[False, True]"
+
+  # 随机生成待排序的单词列表（全部小写、互不重复、首字母分布合理）
+  words:
+    formula: pick_words(word_num, seed)
+
+  # 置前字母数量（2 到 4 个）
+  special_letters_count:
+    type: int
+    domain: "[2, 4]"
+
+  # 随机生成需要置前的字母列表：
+  # 至少包含两个真实出现在 words 的首字母，且保持所给顺序与不重复
+  special_letters:
+    formula: pick_special_letters(special_letters_count, words, seed)
+
+  # 根据 special_letters 构造自定义字母顺序映射（字符 -> 序位）
+  custom_order_map:
+    formula: build_custom_alphabet(special_letters)
+
+  # 前缀顺序说明文本，例如：“x < l < g”
+  prefix_chain:
+    formula: make_prefix_chain(special_letters)
+
+symbols: {}
+conditions: {}
+# 启用自动求解流程（尽管本题为纯计算，但统一为 true 便于自动化管线）
+calc_solution: true
+
+queries:
+  q1:
+    # 题面仅在 q1.desc 中呈现，避免重复与冗余
+    desc: "将字母{', '.join(special_letters[:-1])}和{special_letters[-1]}依次移到字母表的开头（前缀顺序为 {prefix_chain}，其后为 a 到 z 的原有顺序）。按该自定义字母表的词典序进行{'降序' if is_desc else '升序'}排序以下单词：{', '.join(words)}。请用逗号+空格输出（示例：word1, word2, word3）。"
+    # 基于自定义字母表进行排序，得到唯一序列
+    ans_formula: sort_words(words, custom_order_map, is_desc)
+    # 输出为逗号+空格分隔
+    ans_text: "', '.join(_ans)"
+    # 答案唯一性与有效性校验：
+    # - 输出长度与输入一致
+    # - 不含重复项
+    # - 至少两个置前字母来自 words 的首字母集合（保证置前对排序产生显著影响）
+    # - 与再次排序结果一致（幂等）
+    ans_assertion: "len(_ans) == word_num and len(set(_ans)) == word_num and len(set([w[0] for w in words]) & set(special_letters)) >= 2 and _ans == sort_words(words, custom_order_map, is_desc)"
+
+# 顶层描述仅引用 q1，避免题面重复
+desc: "{q1}"

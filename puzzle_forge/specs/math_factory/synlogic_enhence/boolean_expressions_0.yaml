@@ -1,0 +1,78 @@
+# ===============================
+# 自定义操作符：引入外部 Python 函数
+# 注意：函数名与 .py 中的定义必须一致
+# ===============================
+custom_operator:
+  function_1: boolean_expressions_0.py
+  function_2: boolean_expressions_0.py
+  make_labels: boolean_expressions_0.py
+
+# ===============================
+# 变量定义：选项标签、随机种子、实例构造与题面文本块
+# ===============================
+variables:
+  # 选项数量（5 到 8），作为难度因子（数量越多越难）
+  label_count:
+    type: int
+    domain: "[5, 8]"
+    diff_factor: 1
+
+  # 选项标签，例如 ['A','B','C','D','E']
+  labels:
+    formula: "make_labels(label_count)"
+
+  # 随机种子
+  seed:
+    type: int
+    domain: "[1000, 1000000]"
+    diff_factor: 0
+
+  # 调用 Python 生成完整实例：规则说明、选项文本、答案、真值映射与事实文本
+  instance:
+    formula: "function_2(labels, seed)"
+
+  # 规则说明文本块（纯中文）
+  rule_text:
+    formula: "instance.get('rule_text')"
+
+  # 选项文本块：形如 A. 文本\\nB. 文本...
+  options_block:
+    formula: "instance['options_block']"
+
+  # 事实文本：形如 已知 命题甲为真，命题乙为假。
+  facts_text:
+    formula: "instance['facts_text']"
+
+  # 真选项数量（由 Python 直接提供，避免在 YAML 中调用内置函数）
+  true_count:
+    formula: "instance.get('true_count')"
+
+  # 唯一性标志（用于断言）
+  unique_flag:
+    formula: "instance.get('unique', False)"
+
+# ===============================
+# 符号与条件：本题为直接计算，无符号约束
+# ===============================
+symbols: {}
+conditions: {}
+
+# ===============================
+# 计算模式：直接计算（不启用 Z3）
+# ===============================
+calc_solution: false
+
+# ===============================
+# 问题与答案：开放题型，答案为逗号分隔的标签
+# ===============================
+queries:
+  q1:
+    desc: '哪些选项的陈述在自洽意义下最终为真？请按标签升序输出并用逗号分隔，示例 A,B。若只有一个，请直接输出该标签，例如 A。'
+    ans_formula: 'function_1(instance)'
+    ans_text: '_ans'
+    ans_assertion: 'unique_flag and true_count >= 1 and true_count < label_count'
+
+# ===============================
+# 题面描述
+# ===============================
+desc: '这是一个关于自指与算术混合的判断题。\n{rule_text}\n{facts_text}\n请评估以下每个陈述的真假，按整体自洽原则找出所有最终为真的选项。答案格式为按标签升序并用逗号分隔，示例 A,B；若只有一个，请直接输出该标签，例如 A。\n{options_block}\n{q1}'

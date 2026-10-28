@@ -1,0 +1,50 @@
+custom_operator:
+  function_1: futoshiki_0.py
+  function_2: futoshiki_0.py
+  pick_from: futoshiki_0.py
+
+variables:
+  n:
+    type: int
+    domain: "[4, 6]"
+  ineq_density:
+    type: float
+    domain: "[0.25, 0.7]"
+  hint_rate:
+    type: float
+    domain: "[0.15, 0.55]"
+  cage_density:
+    type: float
+    domain: "[0.0, 0.35]"
+  # 使用公式随机选择字符串枚举，避免不被支持的 str 类型
+  rule_mode:
+    formula: pick_from(['auto','ineq_only','ineq_plus_diff','ineq_plus_cages','mixed'])
+  language_style:
+    formula: pick_from(['symbolic','verbal','mixed'])
+
+  sol_grid:
+    formula: function_1(n)
+  puz_info:
+    formula: function_2(sol_grid, ineq_density, hint_rate, rule_mode, cage_density, language_style)
+
+  rules_text:
+    formula: puz_info['rules_text']
+  rules_join:
+    formula: "'\\n'.join(rules_text)"
+  hint_grid_text:
+    formula: puz_info['hint_grid_text']
+  rule_brief:
+    formula: puz_info['rule_brief']
+  explain_join:
+    formula: "'\\n'.join(puz_info['rule_explain_text'])"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请将完整解矩阵按 [[a11, a12, ...],[a21, a22, ...],...] 的格式输出。'
+    ans_formula: sol_grid
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+desc: '这是一个{n}x{n}的不等式数独进阶变体（基于拉丁方阵）。求解规则：\\n(1) 每行与每列均需使用1到{n}的所有数字且不得重复。\\n(2) 本题包含的约束类型概览：{rule_brief}。必要的定义见下文说明。\\n(3) 题面中的提示矩阵用 X 表示未预填，数字为线索。\\n说明：\\n{explain_join}\\n当前提示矩阵：\\n{hint_grid_text}\\n约束列表：\\n{rules_join}\\n答案请按形如 [[a11, a12, ...],[a21, a22, ...],...] 的单行字符串提交。\\n{q1}'

@@ -1,0 +1,72 @@
+# 可变参数化的岛屿-墙壁谜题（规则显式渲染 + 邻格约束非显见化 + MRV剪枝 + 全局计数约束）
+# 采用直接计算模式（calc_solution: false），所有计算由 number_wall_2.py 中的函数完成。
+# 关键改进：
+# - 禁用“行/列墙格恰好为0或满行满列”的等式提示，避免显见线索。
+# - 强/超强/兜底唯一化统一使用非平凡等式 + 奇偶 + 邻格（每锚最多两向）+ 小区域（2×2/2×3/3×2）组合，保留推理深度。
+# - 统一规则开关，显式包含 forbid_wall_2x2 与 forbid_island_2x2，并在文本与校验中一致生效。
+# - 题面文本明确答案格式与示例；不泄漏生成逻辑与唯一验证手段。
+
+# ================================
+# 自定义算子：生成、求解、渲染文本、答案校验、尺寸获取
+# ================================
+custom_operator:
+  make_puzzle: number_wall_2.py
+  solve_from_clue: number_wall_2.py
+  render_rules: number_wall_2.py
+  check_answer: number_wall_2.py
+  get_rows: number_wall_2.py
+  get_cols: number_wall_2.py
+
+# ================================
+# 变量：网格规模（请求值与实际值分离）、生成包、规则文本
+# ================================
+variables:
+  rows_req:
+    type: int
+    domain: "[5, 8]"
+    diff_factor: 1
+  cols_req:
+    type: int
+    domain: "[5, 8]"
+    diff_factor: 1
+  puzzle_pack:
+    formula: 'make_puzzle(rows_req, cols_req)'
+    diff_factor: 0
+  clue_grid:
+    formula: "puzzle_pack['clue']"
+    diff_factor: 0
+  solution_grid:
+    formula: "puzzle_pack['solution']"
+    diff_factor: 0
+  rules_pack:
+    formula: "puzzle_pack['rules_pack']"
+    diff_factor: 0
+  rows:
+    formula: 'get_rows(clue_grid)'
+    diff_factor: 0
+  cols:
+    formula: 'get_cols(clue_grid)'
+    diff_factor: 0
+  rules_text:
+    formula: 'render_rules(rows, cols, rules_pack)'
+    diff_factor: 0
+
+# ================================
+# 直接计算模式：不启用 Z3
+# ================================
+calc_solution: false
+
+# ================================
+# 查询：输出最终二维整数列表
+# ================================
+queries:
+  q1:
+    desc: '在一个 {rows}×{cols} 的网格中放置墙与岛屿。以下为本题规则与约束（行列与坐标均从1开始计数）：\n{rules_text}\n已知线索网格（-1 表示未知，正整数 k 表示该格为锚点且对应岛大小为 k）：{clue_grid}。请根据规则与线索推理并给出最终解，答案必须严格为形状为 {rows}×{cols} 的嵌套整数列表（二维列表）；编码约定为 0=墙，1=岛的非数字格，k=锚点且岛大小为 k（k≥2）；示例 [[0,1,1,2],[1,0,1,0]]。'
+    ans_formula: 'solution_grid'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'check_answer(_ans, clue_grid, rules_pack)'
+
+# ================================
+# 题干描述（单行、无双引号，显式包含全部规则文本）
+# ================================
+desc: '在一个 {rows}×{cols} 的网格中放置墙与岛屿。以下为本题规则与约束（行列与坐标均从1开始计数）：\n{rules_text}\n已知线索网格（-1 表示未知，正整数 k 表示该格为锚点且对应岛大小为 k）：{clue_grid}。请根据规则与线索输出最终解，答案必须严格为形状为 {rows}×{cols} 的嵌套整数列表（二维列表）；编码约定为 0=墙，1=岛的非数字格，k=锚点且岛大小为 k（k≥2）；示例 [[0,1,1,2],[1,0,1,0]]。'

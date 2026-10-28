@@ -1,0 +1,78 @@
+custom_operator:
+  function_1: object_properties_1.py
+  function_2: object_properties_1.py
+  gen_modules: object_properties_1.py
+  gen_type_order: object_properties_1.py
+  gen_ruleset: object_properties_1.py
+  build_rules_desc: object_properties_1.py
+  verify_unique_answer: object_properties_1.py
+
+# ---------------------------------------------------------------
+# 全面泛化：随机属性池、初始清单、动态规则集与查询条件
+# ---------------------------------------------------------------
+variables:
+  # 初始模块数量
+  module_num:
+    type: int
+    domain: "[18, 32]"
+
+  # 尺寸顺序（由小到大）
+  size_order:
+    formula: "['超小','小','中','大','超大','超超大']"
+
+  # 功耗等级（由低到高）
+  power_levels:
+    formula: "['低','中','高','极高']"
+
+  # 属性池（可扩展）
+  materials_pool:
+    formula: "['铝','钢','陶瓷','塑料','碳纤','铜','钛']"
+  colors_pool:
+    formula: "['黑','蓝','红','白','银','绿','黄','紫']"
+  origins_pool:
+    formula: "['中国','日本','德国','美国','韩国','法国','意大利']"
+  types_pool:
+    formula: "['传感器','执行臂','控制芯片','动力单元','外壳','定位器','滤波器','电源','接头','散热片','控制单元','天线']"
+
+  # 使用的类型子集大小与集合
+  types_select_num:
+    type: int
+    domain: "[5, 8]"
+  types_idx:
+    formula: "generate_random_list(types_select_num, 'int', [0, len(types_pool) - 1], ['lambda l: len(set(l)) == len(l)'])"
+  types:
+    formula: "[types_pool[i] for i in types_idx]"
+
+  # 初始模块清单（随机）
+  initial_modules:
+    formula: "gen_modules(module_num, types, size_order, origins_pool, materials_pool, power_levels, colors_pool)"
+
+  # 动态规则集（包含：固件增量、替换、复制、统一、分组、固件窗口、容量、去重、查询条件）
+  ruleset:
+    formula: "gen_ruleset(types, size_order, origins_pool, materials_pool, power_levels, colors_pool, module_num)"
+
+  # 初始清单与规则文本（单行）
+  initial_desc:
+    formula: "'; '.join([str(i+1)+' '+m['type']+' '+m['size']+' '+m['origin']+' '+m['material']+' '+m['power']+' '+m['color']+' '+('{:.1f}'.format(m['fw'])) for i, m in enumerate(initial_modules)])"
+  rules_desc:
+    formula: "build_rules_desc(ruleset)"
+
+# ---------------------------------------------------------------
+# 无SMT求解，答案由规则执行得到
+# ---------------------------------------------------------------
+calc_solution: false
+
+# ---------------------------------------------------------------
+# 问题与答案（开放式问答，含唯一解验证）
+# ---------------------------------------------------------------
+queries:
+  q1:
+    desc: '请计算最终在架模块中，满足以下全部条件的数量：类型属于查询指定集合；颜色属于查询指定集合或材质属于查询指定集合；且功耗不为查询指定的排除等级。答案格式：填写一个非负整数（例如 12），仅写数字。'
+    ans_formula: function_1(initial_modules, ruleset)
+    ans_text: "str(_ans)"
+    ans_assertion: "verify_unique_answer(initial_modules, ruleset, 120)"
+
+# ---------------------------------------------------------------
+# 单行题面描述（花括号仅作变量引用）
+# ---------------------------------------------------------------
+desc: '高阶综合推理·智能工厂模块管理（超随机规则版）：初始共有 {module_num} 个模块，清单为 [ {initial_desc} ]。系统将按顺序执行一组随机生成的规则 [ {rules_desc} ]。说明：升/降一级指相邻等级变动（尺寸按 [超小<小<中<大<超大<超超大]，功耗按 [低<中<高<极高]），固件小数统一保留一位；固件窗口会将所有固件限制在指定区间后按位数取整；分组规则基于指定字段（类型、产地或材质）对整组进行统一操作。全部规则执行后，回答：满足类型∈查询集合，且(颜色∈查询集合 或 材质∈查询集合)，同时功耗≠排除等级 的模块数量。答案格式：填写一个非负整数（例如 12），仅写数字。{q1}'

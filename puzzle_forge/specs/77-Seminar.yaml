@@ -1,0 +1,108 @@
+variables:
+  p_num:
+    type: int
+    domain: "[4, 8]"    # 选手人数，可改
+    diff_factor: 1
+  # 假定每位选手都说了一句话，则只有 1 人错 -> 正确的人数 = p_num - 1
+  correct_num:
+    type: int
+    domain: "[p_num-3, p_num]"
+    diff_factor: 1
+  # 自动生成具体名字
+  names:
+    formula: get_faker(p_num, 'name')
+  name_desc:
+    formula: "'、'.join(names)"
+  # 候选名次（1..p_num）
+  ranks:
+    formula: "list(range(1, p_num+1))"
+
+symbols:
+  # 为每个选手建立一个整型变量 rank_0, rank_1, ..., rank_{p_num-1}
+  vars:
+    source:
+    - names
+    type: int
+
+  # 每位选手说一条话（total: p_num）。模板会从下面几种形式随机/按规则生成具体发言
+  speeches_s:
+    total: p_num
+    templates:
+    # 形式1: "x号不是第k1名。"
+    - source:
+      - names   # 被提到的选手（名字）
+      - ranks   # 要否定的名次（数值）
+      formula: vars[_sym[0]] != _sym[1]
+      desc: "{names[_index]}说：\"{_sym[0]}不是第{_sym[1]}名。\""
+
+    # 形式2: "y号不是第k2，也不是第k3。"
+    - source:
+      - names
+      - ranks
+      amount:
+      - '1'
+      - '2'
+      formula: And(vars[_sym[0][0]] != _sym[1][0],
+                   vars[_sym[0][0]] != _sym[1][1])
+      desc: "{names[_index]}说：\"{_sym[0][0]}不是第{_sym[1][0]}名, 也不是第{_sym[1][1]}名。\""
+
+    # 形式3: "z号的名次在q号的前面。"
+    - source:
+      - names
+      amount:
+      - '2'
+      formula: vars[_sym[0][0]] < vars[_sym[0][1]]
+      desc: "{names[_index]}说：“{_sym[0][0]}的名次在{_sym[0][1]}的前面。”"
+
+    # 形式4: "p号将得第k4。"
+    - source:
+      - names
+      - ranks
+      formula: vars[_sym[0]] == _sym[1]
+      desc: "{names[_index]}说：“{_sym[0]}将得第{_sym[1]}名。”"
+
+    # 形式5: "y号在第k2和第k3之间。"（自动排序）
+    - source:
+      - names
+      - ranks
+      amount:
+      - '1'
+      - '2'
+      formula: And(vars[_sym[0][0]] >= min(_sym[1][0], _sym[1][1]), 
+                  vars[_sym[0][0]] <= max(_sym[1][0], _sym[1][1]))
+      desc: "{names[_index]}说：“{_sym[0][0]}在第{min(_sym[1][0], _sym[1][1])}名和第{max(_sym[1][0], _sym[1][1])}名之间。”（包括第{min(_sym[1][0], _sym[1][1])}名和第{max(_sym[1][0], _sym[1][1])}名）"
+    
+    # 形式6: "p号最差是第k4。"
+    - source:
+      - names
+      - ranks
+      formula: vars[_sym[0]] <= _sym[1]
+      desc: "{names[_index]}说：“{_sym[0]}最坏的情况将得第{_sym[1]}名。”"
+
+    # 形式6: "p号最好是第k4。"
+    - source:
+      - names
+      - ranks
+      formula: vars[_sym[0]] >= _sym[1]
+      desc: "{names[_index]}说：“{_sym[0]}最好的情况将得第{_sym[1]}名。”"
+
+conditions:
+  # 每个人的名次在 1..p_num 之间
+  rank_bounds:
+    formula: And([And(vars[name] >= 1, vars[name] <= p_num) for name in names])
+  # 每个名次唯一（排列）
+  distinct_ranks:
+    formula: Distinct([vars[name] for name in names])
+  # 只有 correct_num 条话为真（即只有 1 人错）
+  correct_speech_cond:
+    formula: Sum([If(item, 1, 0) for item in speeches_s]) == correct_num
+max_solution: 300
+queries:
+  q1:
+    desc: 请问{'、'.join(names)}这些选手的排名情况分别为多少种？。
+    # 从每个解里提取 (name, rank) 列表，然后要求所有可行模型得出的名次组合一致（to_unique）
+    ans_formula: to_unique([[get_value(_model, vars[name]) for name in names] for _model in _solutions])
+    ans_text: len(_ans)
+    ans_assertion: len(_ans) >0
+
+desc: 乒乓球单打决赛在{p_num}位选手中进行，选手分别是{name_desc}。{''.join(get_desc(speeches_s))}。比赛结果表明，有{correct_num}人预测正确。{q1}

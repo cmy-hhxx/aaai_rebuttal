@@ -1,0 +1,130 @@
+# -----------------------------
+# 采用外部函数直接计算模式；不使用Z3求解
+# -----------------------------
+custom_operator:
+  # 基础随机辅助函数
+  pick_one: object_properties_2.py
+  pick_k_distinct: object_properties_2.py
+  # 初始化颜色带
+  gen_color_seq_cn: object_properties_2.py
+  # 规则生成与渲染（设置/交换/重着色；固定顺序；设置不改颜色；强制至少一条材质修改；强制联动）
+  gen_rules_cn: object_properties_2.py
+  format_rules_legend_cn: object_properties_2.py
+  format_rules_text_cn: object_properties_2.py
+  # 基础物品生成（保障触发，交换至少两个触发位置）
+  gen_items_general_cn: object_properties_2.py
+  # 统计条件生成与渲染
+  gen_criteria_cn: object_properties_2.py
+  format_criteria_text_cn: object_properties_2.py
+  # 计算与验证
+  compute_final_count_cn_extended: object_properties_2.py
+  compute_top_indices_cn: object_properties_2.py
+  compute_band_color_counts_cn: object_properties_2.py
+  validate_puzzle_cn_extended_unique: object_properties_2.py
+  # 答案/清单渲染辅助
+  format_list_compact: object_properties_2.py
+  format_items_text_compact_cn: object_properties_2.py
+  format_dict_parenthesized: object_properties_2.py
+  # 最终答案拼接（新增，供评测稳健使用）
+  compile_final_answer_cn: object_properties_2.py
+
+# -----------------------------
+# 变量区：参数随机化（增强联动与深度）
+# -----------------------------
+variables:
+  # 物品数量（缩小范围，便于人工推演）
+  item_num:
+    type: int
+    domain: '[8, 12]'
+
+  # 属性候选池（固定候选集，实例随机抽用）
+  sizes_pool:
+    formula: "['超超小','超小','小','中','大','超大']"
+  origins_pool:
+    formula: "['意大利','德国','葡萄牙','墨西哥','加拿大','俄罗斯','土耳其','西班牙','法国','日本','巴西','印度','中国','英国','美国','澳大利亚']"
+  materials_pool:
+    formula: "['陶瓷','玻璃','金属','布','纸','混凝土','木头','钛','塑料']"
+  smells_pool:
+    formula: "['香草','巧克力','咖啡','玫瑰','大蒜','烤面包','燃烧的木头','薄荷','海风','泥土']"
+  types_pool:
+    formula: "['灯','铅笔','瓶子','鞋','尺子','碗','勺子','书','盒子','玩具']"
+  colors_pool:
+    formula: "['金色','黄色','黑色','米色','红色','蓝色','绿色','白色','紫色','橙色','灰色','棕色']"
+
+  # 初始颜色带（3段颜色，不同颜色，段长相加等于 item_num）
+  band_colors:
+    formula: "pick_k_distinct(colors_pool, 3)"
+  band1_count:
+    type: int
+    domain: '[1, item_num - 2]'
+  band2_count:
+    type: int
+    domain: '[1, item_num - band1_count - 1]'
+  band3_count:
+    formula: "item_num - band1_count - band2_count"
+  color_seq:
+    formula: "gen_color_seq_cn(item_num, band_colors, [band1_count, band2_count, band3_count])"
+
+  # 规则数量与规则列表（两条设置在前；交换居中；重着色最后执行；设置规则不改颜色；第二设置依赖第一设置；交换依赖设置；且至少一条设置修改材质）
+  rule_num:
+    type: int
+    domain: '[4, 4]'
+  rules_list:
+    formula: "gen_rules_cn(sizes_pool, origins_pool, materials_pool, smells_pool, types_pool, colors_pool, band_colors, rule_num)"
+  rules_legend:
+    formula: "format_rules_legend_cn(rules_list)"
+  rules_text:
+    formula: "format_rules_text_cn(rules_list)"
+
+  # 统计条件（OR组合）
+  cond_num:
+    type: int
+    domain: '[3, 4]'
+  criteria_list:
+    formula: "gen_criteria_cn(sizes_pool, origins_pool, materials_pool, smells_pool, colors_pool, cond_num)"
+  criteria_text:
+    formula: "format_criteria_text_cn(criteria_list)"
+
+  # 随机生成基础物品清单（保证各设置触发；交换触发位置至少两个）
+  items_base:
+    formula: "gen_items_general_cn(item_num, sizes_pool, origins_pool, materials_pool, smells_pool, types_pool, rules_list)"
+  bands_desc:
+    formula: "'初始颜色依次为：第1至' + str(band1_count) + '件为' + band_colors[0] + '，第' + str(band1_count + 1) + '至' + str(band1_count + band2_count) + '件为' + band_colors[1] + '，第' + str(band1_count + band2_count + 1) + '至' + str(item_num) + '件为' + band_colors[2]"
+  items_text:
+    formula: "format_items_text_compact_cn(items_base)"
+
+  # 最终答案字符串（供评测稳健使用，格式与题面示例一致）
+  final_answer:
+    formula: "compile_final_answer_cn(items_base, color_seq, rules_list, criteria_list, sizes_pool, band_colors)"
+
+# -----------------------------
+# 模式设定：直接计算模式
+# -----------------------------
+calc_solution: false
+
+# -----------------------------
+# 查询：三问并统一答案提交说明
+# -----------------------------
+queries:
+  q1:
+    desc: '问题1：请在依序应用其一至其四条规则后（执行顺序：两条设置、交换、重着色；所有判断与修改均基于即时最新状态；交换的命中位置在执行交换前一次性确定；重着色在前三条规则执行完毕后判断；若新色与目标色相同则不改变），计算最终物品列表中满足以下至少一条属性的物品数量：{criteria_text}。答案格式：整数；示例：7'
+    ans_formula: "compute_final_count_cn_extended(items_base, color_seq, rules_list, criteria_list, sizes_pool)"
+    ans_text: 'str(_ans)'
+    ans_assertion: "validate_puzzle_cn_extended_unique(items_base, color_seq, rules_list, criteria_list, _ans, compute_top_indices_cn(items_base, color_seq, rules_list, criteria_list, sizes_pool), compute_band_color_counts_cn(items_base, color_seq, rules_list, band_colors, sizes_pool), sizes_pool, band_colors)"
+
+  q2:
+    desc: '问题2：请返回最终物品列表中满足上述属性的最小5个索引（从1开始），按升序组成不含空格的列表字符串。答案格式示例：[2,5,8]；若不足5个则按实际数量返回，如：[3]'
+    ans_formula: "compute_top_indices_cn(items_base, color_seq, rules_list, criteria_list, sizes_pool)"
+    ans_text: "format_list_compact(_ans)"
+    ans_assertion: "validate_puzzle_cn_extended_unique(items_base, color_seq, rules_list, criteria_list, compute_final_count_cn_extended(items_base, color_seq, rules_list, criteria_list, sizes_pool), _ans, compute_band_color_counts_cn(items_base, color_seq, rules_list, band_colors, sizes_pool), sizes_pool, band_colors)"
+
+  q3:
+    desc: '问题3：请返回一个字典字符串，键为三段初始颜色（按题面出现顺序：第一段、第二段、第三段），值为最终颜色等于该颜色的物品数量。答案格式：以小括号包裹、键用单引号、key:value之间无空格、单行字符串；示例：( ''金色'':7,''蓝色'':12,''红色'':4 )'
+    ans_formula: "compute_band_color_counts_cn(items_base, color_seq, rules_list, band_colors, sizes_pool)"
+    ans_text: "format_dict_parenthesized(_ans)"
+    ans_assertion: "validate_puzzle_cn_extended_unique(items_base, color_seq, rules_list, criteria_list, compute_final_count_cn_extended(items_base, color_seq, rules_list, criteria_list, sizes_pool), compute_top_indices_cn(items_base, color_seq, rules_list, criteria_list, sizes_pool), _ans, sizes_pool, band_colors)"
+
+# -----------------------------
+# 题目描述：单行、单引号、通过占位符渲染（规则必含重着色、执行顺序固定）
+# -----------------------------
+desc: '我有一个包含{item_num}个奇怪物品的收藏；{bands_desc}。初始物品清单（按索引1..{item_num}）：{items_text}。{rules_legend}随后按如下规则进行了变更：{rules_text}\n{q1}\n{q2}\n{q3}\n最终答案提交说明：请将三个问题的答案按顺序用四个等号连接为单行最终答案提交；示例：7====[2,5,8]====( ''金色'':7,''蓝色'':12,''红色'':4 )'

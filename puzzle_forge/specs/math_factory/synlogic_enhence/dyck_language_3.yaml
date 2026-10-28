@@ -1,0 +1,90 @@
+# -------------------------------
+# 自定义操作符：生成与求解辅助函数
+# -------------------------------
+custom_operator:
+  generate_bracket_stream: dyck_language_3.py
+  generate_stream_with_markers: dyck_language_3.py
+  generate_stream_with_markers_kcover: dyck_language_3.py
+  completions_for_stream: dyck_language_3.py
+  compute_outputs: dyck_language_3.py
+  pick_bracket_pairs: dyck_language_3.py
+  pick_marker_set: dyck_language_3.py
+  validate_completions: dyck_language_3.py
+  validate_outputs: dyck_language_3.py
+  validate_outputs_strong: dyck_language_3.py
+  format_pairs: dyck_language_3.py
+  format_markers: dyck_language_3.py
+  describe_rules: dyck_language_3.py
+  format_outputs_string: dyck_language_3.py
+  parse_outputs_string: dyck_language_3.py
+  format_example_for_markers: dyck_language_3.py
+  count_markers_in_stream: dyck_language_3.py
+  format_stream_readable: dyck_language_3.py
+
+# -------------------------------
+# 题目变量定义：段数、段长、括号集合、标记集合与生成偏好
+# -------------------------------
+variables:
+  seg_num:
+    type: int
+    domain: "[4, 9]"
+    diff_factor: 1
+  min_seg_len:
+    type: int
+    domain: "[2, 5]"
+  max_seg_len:
+    type: int
+    domain: "[min_seg_len + 2, min_seg_len + 7]"
+  push_bias_percent:
+    type: int
+    domain: "[55, 80]"
+    diff_factor: 1
+  min_types_per_seg:
+    type: int
+    domain: "[1, 3]"
+    diff_factor: 1
+  bracket_universe:
+    formula: "['()', '[]', '{}', '<>']"
+  pair_count_max:
+    type: int
+    domain: "[min_types_per_seg, 4]"
+  bracket_pairs:
+    formula: "pick_bracket_pairs(bracket_universe, min_types_per_seg, pair_count_max)"
+  pair_text:
+    formula: "format_pairs(bracket_pairs)"
+  marker_types:
+    formula: "pick_marker_set()"
+  marker_text:
+    formula: "format_markers(marker_types)"
+  require_marker_kinds:
+    formula: "3 if len(marker_types) >= 3 else (2 if len(marker_types) >= 2 else 1)"
+  rule_text:
+    formula: "describe_rules(marker_types)"
+  stream:
+    formula: "generate_stream_with_markers_kcover(seg_num, min_seg_len, max_seg_len, bracket_pairs, push_bias_percent, min_types_per_seg, marker_types, require_marker_kinds)"
+  marker_count:
+    formula: "count_markers_in_stream(stream, marker_types)"
+  stream_readable:
+    formula: "format_stream_readable(stream, marker_types)"
+  example_text:
+    formula: "format_example_for_markers(marker_types)"
+
+# -------------------------------
+# 直接计算类题目：无需SMT求解
+# -------------------------------
+calc_solution: false
+
+# -------------------------------
+# 问题与答案
+# -------------------------------
+queries:
+  q1:
+    desc: '请按顺序给出每个标记位置的输出 使用方括号包裹的逗号分隔字符串格式 不含引号 示例为 {example_text} 每遇到标记立即输出并清空栈继续处理后续输入'
+    ans_formula: 'format_outputs_string(compute_outputs(stream, bracket_pairs, marker_types))'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_outputs_strong(stream, bracket_pairs, marker_types, parse_outputs_string(_ans), marker_count, require_marker_kinds)'
+
+# -------------------------------
+# 题面描述
+# -------------------------------
+desc: '输入流由括号与标记组成 每遇到标记就立即输出结果并清空栈继续处理后续输入 标记集合为 {marker_text} 规则说明为 {rule_text} 本题使用的括号集合为 {pair_text} 输入流为 {stream} 为便于阅读其分段形式为 {stream_readable} 实际评判以原始输入流为准 本题共有 {marker_count} 个标记 因此答案应包含 {marker_count} 项 {q1}\n'

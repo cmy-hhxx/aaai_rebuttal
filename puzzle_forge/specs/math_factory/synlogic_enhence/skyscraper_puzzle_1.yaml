@@ -1,0 +1,108 @@
+custom_operator:
+  generate_instance: skyscraper_puzzle_1.py
+  format_clues: skyscraper_puzzle_1.py
+
+variables:
+  # 棋盘规模控制在 4..5，保证在强约束+剪枝下唯一验证可在时间限制内完成
+  n:
+    type: int
+    domain: "[4, 5]"
+
+  # 地基元素上界
+  base_max:
+    type: int
+    domain: "[0, 6]"
+
+  # 生成完整实例（包含 base、grid、metric_type、view_rule、fixed_cells、shown_clues 以及多元复合约束）
+  instance:
+    formula: "generate_instance(n, base_max, 25)"  # 25秒唯一验证上限
+
+  # 解包实例字段以供题面展示
+  base:
+    formula: "instance['base']"
+  solved_heights:
+    formula: "instance['grid']"
+  metric_type:
+    formula: "instance['metric_type']"
+  view_rule:
+    formula: "instance['view_rule']"
+  fixed_cells:
+    formula: "instance['fixed_cells']"
+
+  # 已显示（可能包含未知）的边缘线索
+  top_shown:
+    formula: "instance['shown_clues']['top']"
+  bottom_shown:
+    formula: "instance['shown_clues']['bottom']"
+  left_shown:
+    formula: "instance['shown_clues']['left']"
+  right_shown:
+    formula: "instance['shown_clues']['right']"
+  clues_text:
+    formula: "format_clues(top_shown, bottom_shown, left_shown, right_shown)"
+
+  # 复合约束参数
+  row_weights:
+    formula: "instance['row_weights']"
+  col_weights:
+    formula: "instance['col_weights']"
+  row_weights2:
+    formula: "instance['row_weights2']"
+  col_weights2:
+    formula: "instance['col_weights2']"
+  row_sums:
+    formula: "instance['row_sums']"        # list of (row_index, sum_value)
+  col_sums:
+    formula: "instance['col_sums']"        # list of (col_index, sum_value)
+  row_sums2:
+    formula: "instance['row_sums2']"       # list of (row_index, sum2_value)
+  col_sums2:
+    formula: "instance['col_sums2']"       # list of (col_index, sum2_value)
+  odd_rows:
+    formula: "instance['odd_rows']"        # list of (row_index, odd_count)
+  peak_rows:
+    formula: "instance['peak_rows']"       # list of (row_index, peak_pos 1-based)
+  peak_cols:
+    formula: "instance['peak_cols']"       # list of (col_index, peak_pos 1-based)
+  diag_weights:
+    formula: "instance['diag_weights']"    # weights for main diagonal
+  anti_diag_weights:
+    formula: "instance['anti_diag_weights']"  # weights for anti-diagonal
+  diag_sum:
+    formula: "instance['diag_sum']"
+  anti_diag_sum:
+    formula: "instance['anti_diag_sum']"
+
+  # 文本化辅助
+  fixed_text:
+    formula: "' and '.join([f'({r+1}, {c+1})={v}' for (r, c, v) in fixed_cells]) if len(fixed_cells)>0 else 'None'"
+  row_sums_text:
+    formula: "'; '.join([f'row {r+1} weighted-sum = {s}' for (r, s) in row_sums]) if len(row_sums)>0 else 'None'"
+  row_sums2_text:
+    formula: "'; '.join([f'row {r+1} alt-weighted-sum = {s}' for (r, s) in row_sums2]) if len(row_sums2)>0 else 'None'"
+  col_sums_text:
+    formula: "'; '.join([f'col {c+1} weighted-sum = {s}' for (c, s) in col_sums]) if len(col_sums)>0 else 'None'"
+  col_sums2_text:
+    formula: "'; '.join([f'col {c+1} alt-weighted-sum = {s}' for (c, s) in col_sums2]) if len(col_sums2)>0 else 'None'"
+  odd_rows_text:
+    formula: "'; '.join([f'row {r+1} odd-count = {k}' for (r, k) in odd_rows]) if len(odd_rows)>0 else 'None'"
+  peak_rows_text:
+    formula: "'; '.join([f'row {r+1} peak-at = {p}' for (r, p) in peak_rows]) if len(peak_rows)>0 else 'None'"
+  peak_cols_text:
+    formula: "'; '.join([f'col {c+1} peak-at = {p}' for (c, p) in peak_cols]) if len(peak_cols)>0 else 'None'"
+  diag_text:
+    formula: "f'main-diagonal weights={diag_weights}, weighted-sum={diag_sum}'"
+  anti_diag_text:
+    formula: "f'anti-diagonal weights={anti_diag_weights}, weighted-sum={anti_diag_sum}'"
+
+# 不依赖 Z3，答案由自定义算子直接给出
+calc_solution: false
+
+queries:
+  q1:
+    desc: '答案格式说明：请输出一个 Python 风格的二维列表，如 [[a11, a12, ...], ..., [an1, ..., ann]]；每行必须是 1..{n} 的排列。'
+    ans_formula: "solved_heights"
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+desc: '高阶丘陵城复合推理谜题：棋盘 {n}×{n}，地基 base={base}。可见度度量 {metric_type}（total 表示按 base+height；height 表示仅按楼高），判定规则 {view_rule}（strict 表示严格更高才可见；ge 表示不降低即可见）。边缘线索 {clues_text}（? 表示未知）。固定楼高为 [{fixed_text}]。复合约束：行权重={row_weights} 与备用权重={row_weights2}；列权重={col_weights} 与备用权重={col_weights2}；行加权和 [{row_sums_text}] 与备用加权和 [{row_sums2_text}]；列加权和 [{col_sums_text}] 与备用加权和 [{col_sums2_text}]；行奇数计数 [{odd_rows_text}]；行峰位（按当前度量的最大值首次出现位置）[{peak_rows_text}]；列峰位 [{peak_cols_text}]；主对角线约束 [{diag_text}]；副对角线约束 [{anti_diag_text}]。请在每格填入 1..{n} 的楼高，满足每行每列不重复，并使可见度与所有约束一致。{q1}'

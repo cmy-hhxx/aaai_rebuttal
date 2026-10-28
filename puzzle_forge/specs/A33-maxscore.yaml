@@ -1,0 +1,23 @@
+custom_operator: 
+    maxScore: customs/maxscore.py
+variables:
+  n: 
+    type: int
+    domain: "[1, 10]"
+    diff_factor: 1
+  upper_bound: 
+    type: int
+    domain: "[10**3, 10**3]"
+    diff_factor: 1
+  nums:
+    formula: "[random.randint(1, upper_bound) for _ in range(2*n)]"
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请问 {n} 次操作后，能获得的分数和最大为多少？
+    ans_formula: maxScore(nums)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 给定某个数组nums={str(nums)}，它是一个大小为 {str(2*n)} 的正整数数组。你必须对这个数组执行 {n} 次操作。在第 i 次操作时（操作编号从 1 开始），你需要：1、选择两个元素 x 和 y 。2、获得分数 i * gcd(x, y) 。3、将 x 和 y 从 nums 中删除。函数 gcd(x, y) 是 x 和 y 的最大公约数。{q1}

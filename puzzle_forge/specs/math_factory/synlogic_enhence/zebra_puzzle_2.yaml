@@ -1,0 +1,371 @@
+# =========================================
+# Highly parameterized Spaceport Bays Zebra-style logic puzzle (uniqueness strengthened)
+# =========================================
+
+# --------------------------
+# 自定义操作符：采样与打乱
+# --------------------------
+custom_operator:
+  shuffle_list: zebra_puzzle_2.py
+  pick_k_distinct: zebra_puzzle_2.py
+  pick_two_distinct: zebra_puzzle_2.py
+  pick_one: zebra_puzzle_2.py
+  pick_one_excluding: zebra_puzzle_2.py
+
+# --------------------------
+# 变量定义：位置与大池采样、锚点选择
+# --------------------------
+variables:
+  bay_num:
+    type: int
+    domain: '[5, 5]'
+    diff_factor: 1
+  positions:
+    formula: 'list(range(1, bay_num + 1))'
+  positions_text:
+    formula: "', '.join([str(p) for p in positions])"
+
+  nationality_pool:
+    formula: '["Earthian", "Martian", "Venusian", "Jovian", "Saturnian", "Mercurian", "Neptunian", "Plutonian"]'
+  color_pool:
+    formula: '["Red", "Blue", "Green", "Yellow", "White", "Black", "Orange"]'
+  cargo_pool:
+    formula: '["Spices", "Ore", "Bio-samples", "Artifacts", "Medicine", "Crystals", "Microchips"]'
+  fuel_pool:
+    formula: '["Ion", "Fusion", "Antimatter", "Solar", "Hydrogen", "Plasma", "Warp"]'
+  robot_pool:
+    formula: '["Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Omega"]'
+
+  nationalities:
+    formula: 'shuffle_list(pick_k_distinct(nationality_pool, 5))'
+  colors:
+    formula: 'shuffle_list(pick_k_distinct(color_pool, 5))'
+  cargos:
+    formula: 'shuffle_list(pick_k_distinct(cargo_pool, 5))'
+  fuels:
+    formula: 'shuffle_list(pick_k_distinct(fuel_pool, 5))'
+  robots:
+    formula: 'shuffle_list(pick_k_distinct(robot_pool, 5))'
+
+  nationalities_text:
+    formula: "', '.join(nationalities)"
+  colors_text:
+    formula: "', '.join(colors)"
+  cargos_text:
+    formula: "', '.join(cargos)"
+  fuels_text:
+    formula: "', '.join(fuels)"
+  robots_text:
+    formula: "', '.join(robots)"
+
+  # 轻度对称性破坏与弱锚点
+  sb_color_pair:
+    formula: 'pick_two_distinct(colors)'
+  sb_cargo_pair:
+    formula: 'pick_two_distinct(cargos)'
+
+  edge_nat:
+    formula: 'pick_one(nationalities)'
+
+# --------------------------
+# 符号定义：各实体对应的停泊位编号（1..bay_num）
+# --------------------------
+symbols:
+  pos_nat:
+    source:
+    - nationalities
+    type: int
+    desc: '{_nationalities}的飞船所在位置编号'
+  pos_color:
+    source:
+    - colors
+    type: int
+    desc: '{_colors}船体的飞船所在位置编号'
+  pos_cargo:
+    source:
+    - cargos
+    type: int
+    desc: '{_cargos}货物的飞船所在位置编号'
+  pos_fuel:
+    source:
+    - fuels
+    type: int
+    desc: '{_fuels}燃料的飞船所在位置编号'
+  pos_robot:
+    source:
+    - robots
+    type: int
+    desc: '{_robots}机器人所在飞船的位置编号'
+
+# --------------------------
+# 预生成约束：基础域与轻度对称性破坏、弱线索
+# --------------------------
+conditions:
+  # 位置范围与全异性
+  pos_nat_bounds:
+    formula: 'And([And(pos_nat[n] >= 1, pos_nat[n] <= bay_num) for n in nationalities])'
+    desc: '每种国籍对应的位置编号在有效范围内'
+  pos_color_bounds:
+    formula: 'And([And(pos_color[c] >= 1, pos_color[c] <= bay_num) for c in colors])'
+    desc: '每种颜色对应的位置编号在有效范围内'
+  pos_cargo_bounds:
+    formula: 'And([And(pos_cargo[g] >= 1, pos_cargo[g] <= bay_num) for g in cargos])'
+    desc: '每种货物对应的位置编号在有效范围内'
+  pos_fuel_bounds:
+    formula: 'And([And(pos_fuel[f] >= 1, pos_fuel[f] <= bay_num) for f in fuels])'
+    desc: '每种燃料对应的位置编号在有效范围内'
+  pos_robot_bounds:
+    formula: 'And([And(pos_robot[r] >= 1, pos_robot[r] <= bay_num) for r in robots])'
+    desc: '每种机器人的位置编号在有效范围内'
+
+  nat_positions_distinct:
+    formula: 'Distinct([pos_nat[n] for n in nationalities])'
+    desc: '每种舰长国籍占据不同的停泊位'
+  color_positions_distinct:
+    formula: 'Distinct([pos_color[c] for c in colors])'
+    desc: '每种船体颜色占据不同的停泊位'
+  cargo_positions_distinct:
+    formula: 'Distinct([pos_cargo[g] for g in cargos])'
+    desc: '每种货物占据不同的停泊位'
+  fuel_positions_distinct:
+    formula: 'Distinct([pos_fuel[f] for f in fuels])'
+    desc: '每种燃料占据不同的停泊位'
+  robot_positions_distinct:
+    formula: 'Distinct([pos_robot[r] for r in robots])'
+    desc: '每种机器人的位置编号各不相同'
+
+  # 轻度对称性破坏（颜色、货物的左右顺序）
+  sym_break_color:
+    formula: 'pos_color[sb_color_pair[0]] < pos_color[sb_color_pair[1]]'
+    desc: '{sb_color_pair[0]}船体的飞船在{sb_color_pair[1]}船体的左侧'
+  sym_break_cargo:
+    formula: 'pos_cargo[sb_cargo_pair[0]] < pos_cargo[sb_cargo_pair[1]]'
+    desc: '携带{sb_cargo_pair[0]}的飞船在携带{sb_cargo_pair[1]}的飞船左侧'
+
+  # 弱锚点线索：某国籍在最左或最右
+  clue_1:
+    formula: 'Or(pos_nat[edge_nat] == positions[0], pos_nat[edge_nat] == positions[bay_num - 1])'
+    desc: '{edge_nat}的飞船停在最左边或最右边'
+
+# --------------------------
+# 后生成：从求解解中抽取一致线索并公布，确保唯一性
+# --------------------------
+post_generation:
+  post_gen_vars:
+    edge_nat_pos: 'get_value(_sol, pos_nat[edge_nat])'
+    extra_clue_text: '"{0}的飞船停在最左边".format(edge_nat) if edge_nat_pos == positions[0] else "{0}的飞船停在最右边".format(edge_nat)'
+
+    nat_color_link_nat: 'pick_one(nationalities)'
+    nat_color_link_color: '[c for c in colors if get_value(_sol, pos_color[c]) == get_value(_sol, pos_nat[nat_color_link_nat])][0]'
+
+    robot_fuel_link_robot: 'pick_one(robots)'
+    robot_fuel_link_fuel: '[f for f in fuels if get_value(_sol, pos_fuel[f]) == get_value(_sol, pos_robot[robot_fuel_link_robot])][0]'
+
+    co_cargo: 'pick_one(cargos)'
+    co_fuel: '[f for f in fuels if get_value(_sol, pos_fuel[f]) == get_value(_sol, pos_cargo[co_cargo])][0]'
+
+    adj_robot_color_pairs: '[(r, c) for r in robots for c in colors if abs(get_value(_sol, pos_robot[r]) - get_value(_sol, pos_color[c])) == 1]'
+    adj_robot_color_pair2: 'pick_one(adj_robot_color_pairs)'
+    adj_robot2: 'adj_robot_color_pair2[0]'
+    adj_color2: 'adj_robot_color_pair2[1]'
+
+    par_nat_cargo_pairs: '[(n, g) for n in nationalities for g in cargos if (get_value(_sol, pos_nat[n]) % 2) == (get_value(_sol, pos_cargo[g]) % 2)]'
+    par_nat_cargo_pair: 'pick_one(par_nat_cargo_pairs)'
+    par_nat: 'par_nat_cargo_pair[0]'
+    par_cargo: 'par_nat_cargo_pair[1]'
+
+    eq_robot_color_pairs2: '[(r, c) for r in robots for c in colors if get_value(_sol, pos_robot[r]) == get_value(_sol, pos_color[c])]'
+    eq_robot_color_pair2: 'pick_one(eq_robot_color_pairs2)'
+    alpha_color_robot2: 'eq_robot_color_pair2[0]'
+    alpha_color2: 'eq_robot_color_pair2[1]'
+
+    eq_nat_cargo_pairs: '[(n, g) for n in nationalities for g in cargos if get_value(_sol, pos_nat[n]) == get_value(_sol, pos_cargo[g])]'
+    eq_nat_cargo_pair: 'pick_one(eq_nat_cargo_pairs)'
+    jovian_cargo_nat2: 'eq_nat_cargo_pair[0]'
+    jovian_cargo2: 'eq_nat_cargo_pair[1]'
+
+    ord_nat_pair: 'pick_two_distinct(nationalities)'
+    ord_nat_left: 'sorted([ord_nat_pair[0], ord_nat_pair[1]], key=lambda n: get_value(_sol, pos_nat[n]))[0]'
+    ord_nat_right: 'sorted([ord_nat_pair[0], ord_nat_pair[1]], key=lambda n: get_value(_sol, pos_nat[n]))[1]'
+
+    adj_fc_pairs3: '[(f, g) for f in fuels for g in cargos if abs(get_value(_sol, pos_fuel[f]) - get_value(_sol, pos_cargo[g])) == 1]'
+    adj_fc_pair3: 'pick_one(adj_fc_pairs3)'
+    adj_fuel3: 'adj_fc_pair3[0]'
+    adj_cargo3: 'adj_fc_pair3[1]'
+
+    par_color_robot_pairs2: '[(c, r) for c in colors for r in robots if (get_value(_sol, pos_color[c]) % 2) == (get_value(_sol, pos_robot[r]) % 2)]'
+    par_color_robot_pair2: 'pick_one(par_color_robot_pairs2)'
+    par_color2b: 'par_color_robot_pair2[0]'
+    par_robot2: 'par_color_robot_pair2[1]'
+
+    nat_color_adj_pairs: '[(n, c) for n in nationalities for c in colors if abs(get_value(_sol, pos_nat[n]) - get_value(_sol, pos_color[c])) == 1]'
+    nat_color_nonadj_pairs: '[(n, c) for n in nationalities for c in colors if abs(get_value(_sol, pos_nat[n]) - get_value(_sol, pos_color[c])) != 1]'
+    xor_true_pair: 'pick_one(nat_color_adj_pairs)'
+    xor_false_pair: 'pick_one(nat_color_nonadj_pairs)'
+    xor_true_nat: 'xor_true_pair[0]'
+    xor_true_color: 'xor_true_pair[1]'
+    xor_false_nat: 'xor_false_pair[0]'
+    xor_false_color: 'xor_false_pair[1]'
+
+    nr_non_same_pairs: '[(n, r) for n in nationalities for r in robots if get_value(_sol, pos_nat[n]) != get_value(_sol, pos_robot[r])]'
+    nr_non_same_pair: 'pick_one(nr_non_same_pairs)'
+    nr_non_same_nat: 'nr_non_same_pair[0]'
+    nr_non_same_robot: 'nr_non_same_pair[1]'
+
+    mid_color: '[c for c in colors if get_value(_sol, pos_color[c]) == positions[2]][0]'
+    right_nat_color_pairs: '[(n, c) for n in nationalities for c in colors if get_value(_sol, pos_nat[n]) == get_value(_sol, pos_color[c]) + 1]'
+    right_nat_color_pair: 'pick_one(right_nat_color_pairs)'
+    right_nat: 'right_nat_color_pair[0]'
+    right_color: 'right_nat_color_pair[1]'
+    eq_nat_robot_pairs3: '[(n, r) for n in nationalities for r in robots if get_value(_sol, pos_nat[n]) == get_value(_sol, pos_robot[r])]'
+    eq_nat_robot_pair3: 'pick_one(eq_nat_robot_pairs3)'
+    eq_nat_robot_nat: 'eq_nat_robot_pair3[0]'
+    eq_nat_robot_robot: 'eq_nat_robot_pair3[1]'
+
+    # 提问目标与答案
+    ans_fuel_target: 'pick_one(fuels)'
+    owner_fuel_target: '[n for n in nationalities if get_value(_sol, pos_nat[n]) == get_value(_sol, pos_fuel[ans_fuel_target])][0]'
+    ans_cargo_target: 'pick_one(cargos)'
+    owner_cargo_target: '[n for n in nationalities if get_value(_sol, pos_nat[n]) == get_value(_sol, pos_cargo[ans_cargo_target])][0]'
+
+    # 更强锚定：最左颜色、最右燃料、之间、非相邻、货物顺序、燃料与颜色同位
+    leftmost_color: '[c for c in colors if get_value(_sol, pos_color[c]) == positions[0]][0]'
+    rightmost_fuel: '[f for f in fuels if get_value(_sol, pos_fuel[f]) == positions[bay_num - 1]][0]'
+    between_triples: '[(n, c1, c2) for n in nationalities for c1 in colors for c2 in colors if get_value(_sol, pos_color[c1]) < get_value(_sol, pos_nat[n]) and get_value(_sol, pos_nat[n]) < get_value(_sol, pos_color[c2])]'
+    between_choice: 'pick_one(between_triples)'
+    between_nat: 'between_choice[0]'
+    between_left_color: 'between_choice[1]'
+    between_right_color: 'between_choice[2]'
+    nonadj_nf_pairs: '[(n, f) for n in nationalities for f in fuels if abs(get_value(_sol, pos_nat[n]) - get_value(_sol, pos_fuel[f])) != 1]'
+    nonadj_nf_choice: 'pick_one(nonadj_nf_pairs)'
+    nonadj_nat: 'nonadj_nf_choice[0]'
+    nonadj_fuel: 'nonadj_nf_choice[1]'
+    ord_cargo_pair: 'pick_two_distinct(cargos)'
+    ord_cargo_left: 'sorted([ord_cargo_pair[0], ord_cargo_pair[1]], key=lambda g: get_value(_sol, pos_cargo[g]))[0]'
+    ord_cargo_right: 'sorted([ord_cargo_pair[0], ord_cargo_pair[1]], key=lambda g: get_value(_sol, pos_cargo[g]))[1]'
+    eq_fc_pairs: '[(f, c) for f in fuels for c in colors if get_value(_sol, pos_fuel[f]) == get_value(_sol, pos_color[c])]'
+    eq_fc_choice: 'pick_one(eq_fc_pairs)'
+    eq_fc_fuel: 'eq_fc_choice[0]'
+    eq_fc_color: 'eq_fc_choice[1]'
+
+    # 新增两条位置锚定（避开已用元素）与一条三链顺序
+    anchor_nat2: 'pick_one_excluding(nationalities, [edge_nat])'
+    anchor_nat2_pos: 'get_value(_sol, pos_nat[anchor_nat2])'
+    anch_cargo2: 'pick_one_excluding(cargos, [ord_cargo_left, ord_cargo_right, co_cargo])'
+    anchor_cargo2_pos: 'get_value(_sol, pos_cargo[anch_cargo2])'
+    chain_triplets: '[(f, g, c) for f in fuels for g in cargos for c in colors if get_value(_sol, pos_fuel[f]) < get_value(_sol, pos_cargo[g]) and get_value(_sol, pos_cargo[g]) < get_value(_sol, pos_color[c])]'
+    chain_choice: 'pick_one(chain_triplets)'
+    chain_fuel: 'chain_choice[0]'
+    chain_cargo: 'chain_choice[1]'
+    chain_color: 'chain_choice[2]'
+
+    # 进一步增强唯一性的新增锚定：随机一个机器人与一个燃料的绝对位置
+    anchor_robot: 'pick_one(robots)'
+    anchor_robot_pos: 'get_value(_sol, pos_robot[anchor_robot])'
+    anchor_fuel2: 'pick_one_excluding(fuels, [rightmost_fuel])'
+    anchor_fuel2_pos: 'get_value(_sol, pos_fuel[anchor_fuel2])'
+
+  post_gen_conditions:
+    fix_edge_nat:
+      formula: 'pos_nat[edge_nat] == edge_nat_pos'
+      desc: '{extra_clue_text}'
+    eq_nat_color:
+      formula: 'pos_nat[nat_color_link_nat] == pos_color[nat_color_link_color]'
+      desc: '{nat_color_link_nat}的飞船是{nat_color_link_color}船体'
+    eq_robot_fuel:
+      formula: 'pos_robot[robot_fuel_link_robot] == pos_fuel[robot_fuel_link_fuel]'
+      desc: '{robot_fuel_link_robot}机器人所在飞船使用{robot_fuel_link_fuel}燃料'
+    eq_cargo_fuel:
+      formula: 'pos_cargo[co_cargo] == pos_fuel[co_fuel]'
+      desc: '携带{co_cargo}的飞船使用{co_fuel}燃料'
+    adj_robot_color2:
+      formula: 'Or(pos_robot[adj_robot2] == pos_color[adj_color2] + 1, pos_robot[adj_robot2] + 1 == pos_color[adj_color2])'
+      desc: '{adj_robot2}机器人所在飞船与{adj_color2}船体相邻'
+    par_nat_cargo:
+      formula: '(pos_nat[par_nat] % 2) == (pos_cargo[par_cargo] % 2)'
+      desc: '{par_nat}的飞船与携带{par_cargo}的飞船位置奇偶性相同'
+    eq_robot_color2:
+      formula: 'pos_robot[alpha_color_robot2] == pos_color[alpha_color2]'
+      desc: '{alpha_color_robot2}机器人所在飞船是{alpha_color2}船体'
+    eq_nat_cargo2:
+      formula: 'pos_nat[jovian_cargo_nat2] == pos_cargo[jovian_cargo2]'
+      desc: '{jovian_cargo_nat2}的飞船携带{jovian_cargo2}'
+    order_nat_lr:
+      formula: 'pos_nat[ord_nat_left] < pos_nat[ord_nat_right]'
+      desc: '{ord_nat_left}的飞船在{ord_nat_right}的左侧'
+    adj_fuel3_cargo3:
+      formula: 'Or(pos_fuel[adj_fuel3] == pos_cargo[adj_cargo3] + 1, pos_fuel[adj_fuel3] + 1 == pos_cargo[adj_cargo3])'
+      desc: '使用{adj_fuel3}的飞船与携带{adj_cargo3}的飞船相邻'
+    par_color_robot2:
+      formula: '(pos_color[par_color2b] % 2) == (pos_robot[par_robot2] % 2)'
+      desc: '{par_color2b}船体与{par_robot2}机器人所在飞船位置奇偶性相同'
+    xor_adj_nat_color:
+      formula: 'Xor(Or(pos_nat[xor_true_nat] == pos_color[xor_true_color] + 1, pos_nat[xor_true_nat] + 1 == pos_color[xor_true_color]), Or(pos_nat[xor_false_nat] == pos_color[xor_false_color] + 1, pos_nat[xor_false_nat] + 1 == pos_color[xor_false_color]))'
+      desc: '以下两条恰好一条成立：{xor_true_nat}与{xor_true_color}船体相邻；{xor_false_nat}与{xor_false_color}船体相邻'
+    not_same_nat_robot:
+      formula: 'pos_nat[nr_non_same_nat] != pos_robot[nr_non_same_robot]'
+      desc: '{nr_non_same_nat}的飞船与{nr_non_same_robot}机器人所在飞船不在同一艘'
+    mid_color_center:
+      formula: 'pos_color[mid_color] == positions[2]'
+      desc: '{mid_color}船体在中间位置'
+    nat_right_of_color:
+      formula: 'pos_nat[right_nat] == pos_color[right_color] + 1'
+      desc: '{right_nat}的飞船紧挨着{right_color}船体右侧'
+    eq_nat_robot3:
+      formula: 'pos_nat[eq_nat_robot_nat] == pos_robot[eq_nat_robot_robot]'
+      desc: '{eq_nat_robot_nat}的飞船与{eq_nat_robot_robot}机器人在同一艘飞船'
+    leftmost_color_fix:
+      formula: 'pos_color[leftmost_color] == positions[0]'
+      desc: '{leftmost_color}船体在最左边'
+    rightmost_fuel_fix:
+      formula: 'pos_fuel[rightmost_fuel] == positions[bay_num - 1]'
+      desc: '{rightmost_fuel}燃料在最右边'
+    nat_between_colors:
+      formula: 'And(pos_color[between_left_color] < pos_nat[between_nat], pos_nat[between_nat] < pos_color[between_right_color])'
+      desc: '{between_nat}的飞船在{between_left_color}与{between_right_color}船体之间'
+    nonadj_nat_fuel:
+      formula: 'Not(Or(pos_nat[nonadj_nat] == pos_fuel[nonadj_fuel] + 1, pos_nat[nonadj_nat] + 1 == pos_fuel[nonadj_fuel]))'
+      desc: '{nonadj_nat}的飞船与使用{nonadj_fuel}燃料的飞船不相邻'
+    order_cargo_lr:
+      formula: 'pos_cargo[ord_cargo_left] < pos_cargo[ord_cargo_right]'
+      desc: '携带{ord_cargo_left}的飞船在携带{ord_cargo_right}的飞船左侧'
+    eq_fuel_color:
+      formula: 'pos_fuel[eq_fc_fuel] == pos_color[eq_fc_color]'
+      desc: '使用{eq_fc_fuel}的飞船是{eq_fc_color}船体'
+    # 新增两条位置锚定与三链顺序（强唯一性）
+    fix_anchor_nat2:
+      formula: 'pos_nat[anchor_nat2] == anchor_nat2_pos'
+      desc: '{anchor_nat2}的飞船停在编号{anchor_nat2_pos}'
+    fix_anchor_cargo2:
+      formula: 'pos_cargo[anch_cargo2] == anchor_cargo2_pos'
+      desc: '携带{anch_cargo2}的飞船停在编号{anchor_cargo2_pos}'
+    chain_fuel_cargo_color:
+      formula: 'And(pos_fuel[chain_fuel] < pos_cargo[chain_cargo], pos_cargo[chain_cargo] < pos_color[chain_color])'
+      desc: '使用{chain_fuel}的飞船在携带{chain_cargo}的飞船左侧，且该船在{chain_color}船体的左侧'
+    # 进一步增强唯一性的新增位置锚定
+    fix_anchor_robot:
+      formula: 'pos_robot[anchor_robot] == anchor_robot_pos'
+      desc: '{anchor_robot}机器人所在飞船停在编号{anchor_robot_pos}'
+    fix_anchor_fuel2:
+      formula: 'pos_fuel[anchor_fuel2] == anchor_fuel2_pos'
+      desc: '使用{anchor_fuel2}的飞船停在编号{anchor_fuel2_pos}'
+
+# --------------------------
+# 问题查询
+# --------------------------
+queries:
+  q1:
+    desc: '谁使用{ans_fuel_target}'
+    ans_formula: owner_fuel_target
+    ans_text: '{owner_fuel_target}'
+    ans_assertion: 'len(_solutions) == 1'
+  q2:
+    desc: '谁携带{ans_cargo_target}'
+    ans_formula: owner_cargo_target
+    ans_text: '{owner_cargo_target}'
+    ans_assertion: 'len(_solutions) == 1'
+
+# --------------------------
+# 题面描述（包含答案格式说明与示例）
+# --------------------------
+desc: '共有{bay_num}个停泊湾从左到右编号为{positions_text}。属性维度为舰长国籍{nationalities_text}，船体色{colors_text}，货物{cargos_text}，燃料{fuels_text}，同伴机器人{robots_text}。基础规则：每个类别的五种取值均恰好出现一次且一一对应不同停泊位。相邻指位置编号相差1，紧挨着右侧指右边且相邻，中间位置指编号3，之间指严格位于两者位置之间但不是同位。请满足以下线索约束：\n{clue_1}\n{sym_break_color}\n{sym_break_cargo}\n{fix_edge_nat}\n{eq_nat_color}\n{eq_robot_fuel}\n{eq_cargo_fuel}\n{adj_robot_color2}\n{par_nat_cargo}\n{eq_robot_color2}\n{eq_nat_cargo2}\n{order_nat_lr}\n{adj_fuel3_cargo3}\n{par_color_robot2}\n{xor_adj_nat_color}\n{not_same_nat_robot}\n{mid_color_center}\n{nat_right_of_color}\n{eq_nat_robot3}\n{leftmost_color_fix}\n{rightmost_fuel_fix}\n{nat_between_colors}\n{nonadj_nat_fuel}\n{order_cargo_lr}\n{eq_fuel_color}\n{fix_anchor_nat2}\n{fix_anchor_cargo2}\n{chain_fuel_cargo_color}\n{fix_anchor_robot}\n{fix_anchor_fuel2}\n{q1}\n{q2}\n答案格式说明：每个问题的答案为某个国籍名称例如示例为{nationalities[0]}，请直接输出该名称'

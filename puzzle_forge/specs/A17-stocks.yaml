@@ -1,0 +1,23 @@
+custom_operator: 
+    maxProfit: customs/stocks.py
+variables:
+    num_deal: 
+      type: int
+      domain: "[1, 100]"
+      diff_factor: 1
+    num_stocks: 
+      type: int
+      domain: "[1, 100]"
+      diff_factor: 1
+    prices:
+      formula: '[randint(1,50) for _ in range(num_stocks)]'
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+    q1:
+      desc: 你是一名股票交易员，{num_stocks}天内最多能完成{num_deal}笔交易，请问{num_stocks}天内你能获得的最大利润为多少元？
+      ans_formula: maxProfit(num_deal,prices)
+      ans_text: str(_ans)+'元'
+      ans_assertion: 'True'
+desc: 某只股票在{num_stocks}天内的价格分别为{'、'.join(str(p) for p in prices)}元，{q1}

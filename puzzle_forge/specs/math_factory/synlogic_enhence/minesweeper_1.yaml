@@ -1,0 +1,212 @@
+custom_operator:
+  function_1: minesweeper_1.py
+  function_pick_unique: minesweeper_1.py
+  function_pick_pairs: minesweeper_1.py
+
+variables:
+  rows:
+    type: int
+    domain: "[5, 6]"
+  cols:
+    type: int
+    domain: "[5, 6]"
+
+  all_coords:
+    formula: "[(r, c) for r in range(rows) for c in range(cols)]"
+  row_keys:
+    formula: "['r' + str(i) for i in range(rows)]"
+  col_keys:
+    formula: "['c' + str(j) for j in range(cols)]"
+
+  obstacles_count:
+    formula: "randint(max(1, (rows * cols) // 8), max(1, (rows * cols) // 3))"
+  obstacles:
+    formula: "function_pick_unique(all_coords, min(obstacles_count, len(all_coords)))"
+
+  valid_cells:
+    formula: "[(r, c) for (r, c) in all_coords if (r, c) not in obstacles]"
+
+  knight_neighbors:
+    formula: "function_1(rows, cols, obstacles)"
+  nontrivial_cells:
+    formula: "[(r, c) for (r, c) in valid_cells if len(knight_neighbors[(r, c)]) >= 2]"
+
+  eq_count:
+    formula: "randint(max(2, (rows * cols) // 3), max(3, (rows * cols) // 2))"
+  eq_positions:
+    formula: "function_pick_unique(valid_cells, min(eq_count, len(valid_cells)))"
+
+  avail_no_eq:
+    formula: "[(r, c) for (r, c) in valid_cells if (r, c) not in eq_positions]"
+  avail_no_eq_nontrivial:
+    formula: "[(r, c) for (r, c) in avail_no_eq if (r, c) in nontrivial_cells]"
+
+  ge_count:
+    formula: "randint(1, max(1, (rows * cols) // 4))"
+  ge_positions_init:
+    formula: "function_pick_unique(avail_no_eq_nontrivial, min(ge_count, len(avail_no_eq_nontrivial)))"
+
+  avail_after_ge:
+    formula: "[(r, c) for (r, c) in avail_no_eq if (r, c) not in ge_positions_init]"
+  avail_after_ge_nontrivial:
+    formula: "[(r, c) for (r, c) in avail_after_ge if (r, c) in nontrivial_cells]"
+  le_count:
+    formula: "randint(1, max(1, (rows * cols) // 4))"
+  le_positions_init:
+    formula: "function_pick_unique(avail_after_ge_nontrivial, min(le_count, len(avail_after_ge_nontrivial)))"
+
+  parity_count:
+    formula: "randint(1, max(1, (rows * cols) // 5))"
+  parity_positions_init:
+    formula: "function_pick_unique(avail_after_ge_nontrivial, min(parity_count, len(avail_after_ge_nontrivial)))"
+
+  unknown_coords:
+    formula: "[(r, c) for (r, c) in valid_cells if (r, c) not in eq_positions]"
+
+  xor_pair_count:
+    formula: "randint(1, max(1, len(unknown_coords) // 4))"
+  xor_pairs_init:
+    formula: "function_pick_pairs(unknown_coords, xor_pair_count)"
+  avail_no_xor:
+    formula: "[(r, c) for (r, c) in unknown_coords if all([(r, c) != p[0] and (r, c) != p[1] for p in xor_pairs_init])]"
+  imp_pair_count:
+    formula: "randint(1, max(1, len(avail_no_xor) // 4))"
+  imp_pairs_init:
+    formula: "function_pick_pairs(avail_no_xor, imp_pair_count)"
+
+  group_size:
+    formula: "randint(2, max(2, len(avail_no_xor) // 3))"
+  group_sum_positions_init:
+    formula: "function_pick_unique(avail_no_xor, min(group_size, len(avail_no_xor)))"
+
+  row_index_list:
+    formula: "list(range(rows))"
+  row_parity_rows_count:
+    formula: "randint(1, max(1, rows // 2))"
+  row_parity_rows:
+    formula: "function_pick_unique(row_index_list, row_parity_rows_count)"
+
+symbols:
+  mines:
+    source:
+    - row_keys
+    - col_keys
+    type: bool
+    desc: 'Cell at ({_row_keys}, {_col_keys}) is a mine'
+  num:
+    source:
+    - row_keys
+    - col_keys
+    type: int
+    desc: 'Number at ({_row_keys}, {_col_keys}) equals the knight-neighborhood mine count when visible'
+
+conditions:
+  obstacles_not_mine:
+    formula: "And([Not(mines[(row_keys[r], col_keys[c])]) for (r, c) in obstacles])"
+    desc: '所有障碍格不可为雷'
+  eq_cells_not_mine:
+    formula: "And([Not(mines[(row_keys[r], col_keys[c])]) for (r, c) in eq_positions])"
+    desc: '所有等式提示格不可为雷'
+  baseline_mine_exist:
+    formula: "Sum([If(mines[(row_keys[r], col_keys[c])], 1, 0) for (r, c) in valid_cells]) >= 1"
+    desc: '网格中至少存在一个雷'
+
+calc_solution: true
+max_solution: 500
+
+post_generation:
+  post_gen_vars:
+    nb_size_map: "{(r, c): len(knight_neighbors[(r, c)]) for (r, c) in valid_cells}"
+    mine_count_map: "{(r, c): sum([1 if get_value(_sol, mines[(row_keys[nr], col_keys[nc])]) else 0 for (nr, nc) in knight_neighbors[(r, c)]]) for (r, c) in valid_cells}"
+
+    eq_value_map: "{(r, c): mine_count_map[(r, c)] for (r, c) in eq_positions}"
+
+    ge_positions_eff: "[(r, c) for (r, c) in ge_positions_init if mine_count_map[(r, c)] >= 1]"
+    le_positions_eff: "[(r, c) for (r, c) in le_positions_init if mine_count_map[(r, c)] <= (nb_size_map[(r, c)] - 1)]"
+    parity_positions_eff: "[(r, c) for (r, c) in parity_positions_init if nb_size_map[(r, c)] >= 2]"
+
+    ge_thresholds: "{(r, c): randint(1, mine_count_map[(r, c)]) for (r, c) in ge_positions_eff}"
+    le_thresholds: "{(r, c): randint(mine_count_map[(r, c)], max(mine_count_map[(r, c)], nb_size_map[(r, c)] - 1)) for (r, c) in le_positions_eff}"
+    parity_targets: "{(r, c): (mine_count_map[(r, c)] % 2) for (r, c) in parity_positions_eff}"
+
+    xor_pairs: "xor_pairs_init"
+    xor_truth_map: "{p: (get_value(_sol, mines[(row_keys[p[0][0]], col_keys[p[0][1]])]) != get_value(_sol, mines[(row_keys[p[1][0]], col_keys[p[1][1]])])) for p in xor_pairs}"
+
+    imp_pairs: "imp_pairs_init"
+    imp_types: "{p: ('to_mine' if get_value(_sol, mines[(row_keys[p[1][0]], col_keys[p[1][1]])]) else 'to_safe') for p in imp_pairs}"
+
+    group_sum_positions: "group_sum_positions_init if len(group_sum_positions_init) >= 2 else []"
+    group_sum_target_raw: "sum([1 if get_value(_sol, mines[(row_keys[r], col_keys[c])]) else 0 for (r, c) in group_sum_positions]) if len(group_sum_positions) > 0 else 0"
+    group_sum_target: "(group_sum_target_raw if (len(group_sum_positions) > 0 and 1 <= group_sum_target_raw <= (len(group_sum_positions) - 1)) else 0)"
+
+    row_parity_targets: "{r: (sum([1 if get_value(_sol, mines[(row_keys[r], col_keys[c])]) else 0 for c in range(cols) if (r, c) in valid_cells]) % 2) for r in row_parity_rows}"
+
+    total_mines_target: "sum([1 if get_value(_sol, mines[(row_keys[r], col_keys[c])]) else 0 for (r, c) in valid_cells])"
+    true_unknowns: "[(r, c) for (r, c) in unknown_coords if get_value(_sol, mines[(row_keys[r], col_keys[c])])]"
+    false_unknowns: "[(r, c) for (r, c) in unknown_coords if not get_value(_sol, mines[(row_keys[r], col_keys[c])])]"
+    fix_true_num: "0 if len(true_unknowns)==0 else max(1, len(true_unknowns)//5)"
+    fix_false_num: "0 if len(false_unknowns)==0 else max(1, len(false_unknowns)//5)"
+    fix_true_subset: "function_pick_unique(true_unknowns, min(fix_true_num, len(true_unknowns)))"
+    fix_false_subset: "function_pick_unique(false_unknowns, min(fix_false_num, len(false_unknowns)))"
+
+    final_grid_rows: "['行' + str(i) + ': ' + ' '.join([('O' if (i, j) in obstacles else (str(eq_value_map[(i, j)]) if (i, j) in eq_positions else 'X')) for j in range(cols)]) for i in range(rows)]"
+    final_grid_desc: "'\\n'.join(final_grid_rows)"
+
+    ge_sentences: "['在坐标(' + str(r) + ',' + str(c) + ')的马步邻域中，雷的数量至少为 ' + str(ge_thresholds[(r, c)]) for (r, c) in ge_positions_eff]"
+    le_sentences: "['在坐标(' + str(r) + ',' + str(c) + ')的马步邻域中，雷的数量至多为 ' + str(le_thresholds[(r, c)]) for (r, c) in le_positions_eff]"
+    parity_sentences: "['在坐标(' + str(r) + ',' + str(c) + ')的马步邻域中，雷的数量为' + ('偶数' if parity_targets[(r, c)] == 0 else '奇数') for (r, c) in parity_positions_eff]"
+    xor_sentences: "['在坐标(' + str(p[0][0]) + ',' + str(p[0][1]) + ')与(' + str(p[1][0]) + ',' + str(p[1][1]) + ')之间' + ('恰有一个为雷' if xor_truth_map[p] else '要么同为雷要么同为非雷') for p in xor_pairs]"
+    imp_sentences: "['若坐标(' + str(p[0][0]) + ',' + str(p[0][1]) + ')为雷，则坐标(' + str(p[1][0]) + ',' + str(p[1][1]) + ')' + ('也为雷' if imp_types[p] == 'to_mine' else '不为雷') for p in imp_pairs]"
+    row_parity_sentences: "['第' + str(r) + '行的雷数为' + ('偶数' if row_parity_targets[r] == 0 else '奇数') for r in row_parity_rows]"
+    count_pair_count: "randint(1, max(1, len(avail_no_eq_nontrivial) // 6))"
+    count_rel_pairs: "function_pick_pairs(avail_no_eq_nontrivial, count_pair_count)"
+    count_rel_types: "{p: ('eq' if mine_count_map[p[0]] == mine_count_map[p[1]] else ('ge' if mine_count_map[p[0]] > mine_count_map[p[1]] else 'le')) for p in count_rel_pairs}"
+    count_rel_sentences: "['坐标(' + str(p[0][0]) + ',' + str(p[0][1]) + ')的马步邻域雷数' + ('=' if count_rel_types[p]=='eq' else ('≥' if count_rel_types[p]=='ge' else '≤')) + '坐标(' + str(p[1][0]) + ',' + str(p[1][1]) + ')的马步邻域雷数' for p in count_rel_pairs]"
+    group_sentence: "('在以下未揭示坐标集合中，雷的数量恰好为 ' + str(group_sum_target) + ': ' + str(group_sum_positions)) if (len(group_sum_positions) > 0 and group_sum_target > 0 and group_sum_target < len(group_sum_positions)) else ''"
+    final_rule_desc: "'\\n'.join([s for s in (ge_sentences + le_sentences + parity_sentences + xor_sentences + imp_sentences + row_parity_sentences + count_rel_sentences + ([group_sentence] if group_sentence != '' else [])) if s != ''])"
+  post_gen_conditions:
+    fix_eq_values:
+      formula: "And([num[(row_keys[r], col_keys[c])] == eq_value_map[(r, c)] for (r, c) in eq_positions])"
+      desc: '固定所有等式型提示的数值'
+    apply_ge_rules:
+      formula: "And([True]) if len(ge_positions_eff) == 0 else And([Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[(r, c)]]) >= ge_thresholds[(r, c)] for (r, c) in ge_positions_eff])"
+      desc: '应用至少型规则'
+    apply_le_rules:
+      formula: "And([True]) if len(le_positions_eff) == 0 else And([Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[(r, c)]]) <= le_thresholds[(r, c)] for (r, c) in le_positions_eff])"
+      desc: '应用至多型规则'
+    apply_parity_rules:
+      formula: "And([True]) if len(parity_positions_eff) == 0 else And([((Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[(r, c)]]) % 2) == parity_targets[(r, c)]) for (r, c) in parity_positions_eff])"
+      desc: '应用奇偶规则'
+    apply_xor_rules:
+      formula: "And([True]) if len(xor_pairs) == 0 else And([ (Xor(mines[(row_keys[p[0][0]], col_keys[p[0][1]])], mines[(row_keys[p[1][0]], col_keys[p[1][1]])]) if xor_truth_map[p] else Not(Xor(mines[(row_keys[p[0][0]], col_keys[p[0][1]])], mines[(row_keys[p[1][0]], col_keys[p[1][1]])])) ) for p in xor_pairs])"
+      desc: '应用恰一/同态规则'
+    apply_imp_rules:
+      formula: "And([True]) if len(imp_pairs) == 0 else And([ (Implies(mines[(row_keys[p[0][0]], col_keys[p[0][1]])], mines[(row_keys[p[1][0]], col_keys[p[1][1]])]) if imp_types[p] == 'to_mine' else Implies(mines[(row_keys[p[0][0]], col_keys[p[0][1]])], Not(mines[(row_keys[p[1][0]], col_keys[p[1][1]])])) ) for p in imp_pairs])"
+      desc: '应用蕴含规则'
+    apply_row_parity:
+      formula: "And([True]) if len(row_parity_rows) == 0 else And([((Sum([If(mines[(row_keys[r], col_keys[c])], 1, 0) for c in range(cols) if (r, c) in valid_cells]) % 2) == row_parity_targets[r]) for r in row_parity_rows])"
+      desc: '应用行奇偶规则'
+    apply_count_rel:
+      formula: "And([True]) if len(count_rel_pairs) == 0 else And(([Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[p[0]]]) == Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[p[1]]]) for p in count_rel_pairs if count_rel_types[p]=='eq'] + [Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[p[0]]]) >= Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[p[1]]]) for p in count_rel_pairs if count_rel_types[p]=='ge'] + [Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[p[0]]]) <= Sum([If(mines[(row_keys[nr], col_keys[nc])], 1, 0) for (nr, nc) in knight_neighbors[p[1]]]) for p in count_rel_pairs if count_rel_types[p]=='le']))"
+      desc: '应用邻域计数相对关系'
+    apply_group_sum:
+      formula: "And([True]) if not (len(group_sum_positions) > 0 and group_sum_target > 0 and group_sum_target < len(group_sum_positions)) else (Sum([If(mines[(row_keys[r], col_keys[c])], 1, 0) for (r, c) in group_sum_positions]) == group_sum_target)"
+      desc: '应用小组计数规则'
+    apply_total_mines:
+      formula: "Sum([If(mines[(row_keys[r], col_keys[c])], 1, 0) for (r, c) in valid_cells]) == total_mines_target"
+      desc: '固定全局雷数(内部唯一性约束)'
+    apply_fix_truth_true:
+      formula: "And([True]) if len(fix_true_subset) == 0 else And([mines[(row_keys[r], col_keys[c])] for (r, c) in fix_true_subset])"
+      desc: '固定部分未揭示格必为雷(内部唯一性约束)'
+    apply_fix_truth_false:
+      formula: "And([True]) if len(fix_false_subset) == 0 else And([Not(mines[(row_keys[r], col_keys[c])]) for (r, c) in fix_false_subset])"
+      desc: '固定部分未揭示格必非雷(内部唯一性约束)'
+
+queries:
+  q1:
+    desc: '必为雷列表:'
+    ans_formula: "sorted([(r, c) for (r, c) in unknown_coords if all([get_value(_model, mines[(row_keys[r], col_keys[c])]) for _model in _solutions])])"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: '骑士雷(马步邻域 + 障碍)高阶复合变体：网格尺寸为 {rows}x{cols}。障碍为O(不可为雷且不计入任何邻域)，数字为等式提示(等于其马步邻域的雷数，且数字格不为雷)，其余为X(未揭示)。此外，题面可能包含如下文本规则：至少/至多(邻域雷数下/上界)、奇偶(邻域雷数为奇数或偶数)、恰一或同态(两格之间恰一为雷或两格同态)、蕴含(若A为雷则B为雷或不为雷)、行奇偶(某行雷数奇偶)、邻域计数相对关系(两个位置的邻域雷数比较)、小组计数(某些未揭示格中雷数恰好为k)。输入网格:\n{final_grid_desc}\n附加规则:\n{final_rule_desc}\n任务: 根据以上规则，找出所有在唯一合法解中必为雷的X坐标。答案格式: 用[(r, c), ...]列出所有必为雷的坐标; 若无则写[]。\n{q1}'

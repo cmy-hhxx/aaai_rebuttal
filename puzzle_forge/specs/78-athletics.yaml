@@ -1,0 +1,97 @@
+variables:
+  total_team:
+    type: int
+    domain: "[4, 8]"   # 队伍数量，可变
+    diff_factor: 1
+  correct_num:
+    type: int
+    domain: "[total_team-2, total_team]"
+    diff_factor: 1
+  team_member:
+    type: int
+    domain: "[1, 2]"   # 每个队伍人数，可变
+    diff_factor: 1
+  team_names:
+    formula: get_faker(total_team, 'country')   # 自动生成 total_team 个队伍名
+  teams_index:
+    formula: "[0,total_team-1]" # list(range(k))
+  team_desc:
+    formula: "'、'.join(team_names)"
+
+symbols:
+  # 前三名的队伍：rank1, rank2, rank3
+  ranks_vars:
+    source:
+    - "[0,1,2]"   # 我们只关心前三名
+    type: int
+
+  speeches_s:
+    total: total_team   # k个人的预测
+    templates:
+    # 模板1: “c1队包揽前二”
+    - source:
+      - teams_index
+      formula: And(ranks_vars[0]==_sym[0], ranks_vars[1]==_sym[0])
+      desc: "有人说：“{team_names[_sym[0]]}队包揽前二。”"
+
+    # 模板2: “x队或y队能进前三”
+    - source:
+      - teams_index
+      amount:
+      - '2'
+      formula: Or(ranks_vars[1]==_sym[0][0], ranks_vars[2]==_sym[0][0], ranks_vars[0]==_sym[0][0],
+                  ranks_vars[1]==_sym[0][1], ranks_vars[2]==_sym[0][1], ranks_vars[0]==_sym[0][1])
+      desc: "有人说：“{team_names[_sym[0][0]]}队或者{team_names[_sym[0][1]]}队能进前三。”"
+
+    # 模板3: “第一名要么是z队，要么是q队”
+    - source:
+      - teams_index
+      amount:
+      - '2'
+      formula: Or(ranks_vars[0]==_sym[0][0], ranks_vars[0]==_sym[0][1])
+      desc: "有人说：“第一名如果不是{team_names[_sym[0][0]]}队的，就是{team_names[_sym[0][1]]}队的。”"
+
+    # 模板4: “某队前三名最多一人”
+    - source:
+      - teams_index
+      formula: Sum([If(ranks_vars[0]==_sym[0],1,0),
+                    If(ranks_vars[1]==_sym[0],1,0),
+                    If(ranks_vars[2]==_sym[0],1,0)]) <= 1
+      desc: "有人说：“{team_names[_sym[0]]}队前三名至多一人。”"
+
+    # 新增模板5: "某队没有进入前三名"
+    - source:
+      - teams_index
+      formula: And(ranks_vars[0]!=_sym[0], ranks_vars[1]!=_sym[0], ranks_vars[2]!=_sym[0])
+      desc: "有人说：“{team_names[_sym[0]]}队没有进入前三名。”"
+
+    # 新增模板6: "某队的名次比另一队好"
+    - source:
+      - teams_index
+      amount:
+      - '2'
+      formula: Or(
+          And(ranks_vars[0]==_sym[0][0], ranks_vars[1]==_sym[0][1]),
+          And(ranks_vars[0]==_sym[0][0], ranks_vars[2]==_sym[0][1]),
+          And(ranks_vars[1]==_sym[0][0], ranks_vars[2]==_sym[0][1]))
+      desc: "有人说：\"前三名中，{team_names[_sym[0][0]]}队的存在队员的名次比{team_names[_sym[0][1]]}队好。\""
+conditions:
+  team_range:
+    formula: And([And(ranks_vars[i]>=0,ranks_vars[i]<total_team) for i in range(3)])
+  correct_speech_cond:
+    formula: Sum([If(item, 1, 0) for item in speeches_s]) == correct_num  # 只有一个人说错
+  # 每个队伍进前三的人数 ≤ n
+  team_quota:
+    formula: And([
+      Sum([If(ranks_vars[i]==t,1,0) for i in range(3)]) <= team_member for t in teams_index])
+max_solution: 3000
+queries:
+  q1:
+    desc: 请问前三名分别来自哪些国家才能满足这些条件，共有多少种情况？答案只需要回答情况数量。
+    ans_formula: len(to_unique([[get_value(_model, ranks_vars[0]),
+                             get_value(_model, ranks_vars[1]),
+                             get_value(_model, ranks_vars[2])] for _model in _solutions]))
+    ans_text: str(_ans)
+    ans_assertion: _ans > 0 #and len(_ans[0]) == 3
+
+desc: 男子10000米比赛中，共有{total_team} 个队伍参加，分别是 {team_desc}，每个队伍分别派了{team_member}名队员参赛。{''.join(get_desc(speeches_s))}。有{correct_num}个人说对，{q1}

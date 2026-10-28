@@ -1,0 +1,41 @@
+custom_operator:
+  # 随机生成填字谜题（网格、横词、纵词、填充后的网格）
+  function_1: wordscapes_0.py
+  # 格式化或严格校验答案
+  function_2: wordscapes_0.py
+
+variables:
+  # 随机生成完整的谜题构件（包含 grid / across / down / filled）
+  bundle:
+    formula: function_1()
+
+  # 提取各字段供描述与答案使用
+  grid:
+    formula: bundle['grid']
+  across_words:
+    formula: bundle['across']
+  down_words:
+    formula: bundle['down']
+  filled_grid:
+    formula: bundle['filled']
+
+  # 将二维网格格式化为题面要求的字符串（字母带引号，0位置输出为空格）
+  answer_str:
+    formula: function_2(grid, across_words, down_words, filled_grid, False)
+
+symbols: {}
+
+conditions: {}
+
+# 本题采用正向随机生成输入与逻辑校验的方式，无需SMT
+calc_solution: false
+
+queries:
+  q1:
+    desc: "Provide your completed grid in the format [[row1, row2, ...]]."
+    ans_formula: answer_str
+    ans_text: _ans
+    # 严格校验答案唯一性：横向、纵向顺序匹配给定单词；交叉一致；0位置为空格
+    ans_assertion: function_2(grid, across_words, down_words, filled_grid, True)
+
+desc: "Complete this crossword puzzle:\nacross words: {', '.join(across_words)}\ndown words: {', '.join(down_words)}\nPuzzle grid (X=letter position, 0=empty):\n{chr(10).join(['        '.join(row) for row in grid])}\n\nINSTRUCTIONS:\n1. Fill in the grid with the given words.\n2. Across words read from left to right, down words read from top to bottom.\n3. Where words intersect, they must share the same letter.\n4. Format your answer as [[row1, row2, ...]] with letters in quotes.\n5. Replace Xs with appropriate letters to form the given words.\n6. Keep 0 positions as spaces (represented as \" \") in your answer.\n7. Example format: [[\"C\", \"A\", \"T\"], [\" \", \" \", \" \"], [\"D\", \"O\", \"G\"]]\n\n{q1}"

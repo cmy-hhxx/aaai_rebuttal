@@ -1,0 +1,27 @@
+custom_operator: 
+    minDistance: customs/installmailbox.py
+variables:
+  n:
+    type: int
+    domain: "[1, 50]"
+    diff_factor: 1
+  k: 
+    type: int
+    domain: "[1, n]"
+    diff_factor: 1
+  upper_bound:
+    type: int
+    domain: "[2000, 2000]"
+    diff_factor: 1
+  houses:
+    formula: random.sample(range(1, upper_bound+1),n)
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请问每栋房子与离它最近的邮筒之间的距离的 最小总和 为多少？注意：房屋地址与邮筒安装地址均为整数。
+    ans_formula: minDistance(houses,k)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 你是一个安装邮筒的工人。已知房屋数组 houses={str(houses)} 和整数 k={k}，其中 houses[i] 是第 i 栋房子在一条街上的位置，这条街上现在需要安装 {k} 个邮筒且只能安装 {k} 个邮筒，目标是让每栋房子与离它最近的邮筒之间的 距离总和 尽可能小。{q1}

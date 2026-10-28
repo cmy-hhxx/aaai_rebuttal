@@ -1,0 +1,130 @@
+# =================================================================
+# Custom operators: external Python functions for data generation and solving
+# =================================================================
+custom_operator:
+  compute_variance_diff_cols_ext: buggy_tables_2.py
+  generate_sensor_columns_ext: buggy_tables_2.py
+  render_columns: buggy_tables_2.py
+  render_header_with_index: buggy_tables_2.py
+
+  sample_list: buggy_tables_2.py
+  choose_two_distinct: buggy_tables_2.py
+  gen_start_ts: buggy_tables_2.py
+  make_zone_names: buggy_tables_2.py
+
+  select_sigma: buggy_tables_2.py
+  select_dedup_policy: buggy_tables_2.py
+  select_subset_template: buggy_tables_2.py
+  select_clipping_method: buggy_tables_2.py
+  select_iqr_k: buggy_tables_2.py
+  select_variance_mode: buggy_tables_2.py
+  select_normalize_mode: buggy_tables_2.py
+  select_gate_mode: buggy_tables_2.py
+  select_rolling_median_w: buggy_tables_2.py
+
+  render_dedup_desc: buggy_tables_2.py
+  render_subset_desc: buggy_tables_2.py
+  render_clipping_desc: buggy_tables_2.py
+  render_variance_desc: buggy_tables_2.py
+  render_normalize_desc: buggy_tables_2.py
+  render_gate_desc: buggy_tables_2.py
+  render_rolling_desc: buggy_tables_2.py
+  render_pipeline_notes: buggy_tables_2.py
+
+  validate_uniqueness_ext: buggy_tables_2.py
+
+# =================================================================
+# Variables: parameterized scenario with randomized internal rules
+# =================================================================
+variables:
+  metrics_pool:
+    formula: "['temp_c','humidity_pct','co2_ppm','light_lux','fan_speed_rpm','soil_moisture_pct']"
+  metric_pair:
+    formula: "choose_two_distinct(metrics_pool)"
+  metric_x:
+    formula: "metric_pair[0]"
+  metric_y:
+    formula: "metric_pair[1]"
+
+  zone_num:
+    type: int
+    domain: "[3, 6]"
+  zone_names:
+    formula: "make_zone_names(zone_num)"
+  allowed_zone_count:
+    type: int
+    domain: "[2, 3]"
+  allowed_zones:
+    formula: "sample_list(zone_names, allowed_zone_count)"
+
+  weekdays_pool:
+    formula: "['Mon','Tue','Wed','Thu','Fri','Sat','Sun']"
+  allowed_weekdays_count:
+    type: int
+    domain: "[2, 4]"
+  allowed_weekdays:
+    formula: "sample_list(weekdays_pool, allowed_weekdays_count)"
+
+  row_base_num:
+    type: int
+    domain: "[8, 14]"
+  timestamp_start:
+    formula: "gen_start_ts()"
+  step_minutes:
+    type: int
+    domain: "[5, 30]"
+  duplicate_count:
+    type: int
+    domain: "[1, 2]"
+
+  pump_threshold:
+    type: int
+    domain: "[8, 20]"
+  fan_threshold:
+    type: int
+    domain: "[1200, 1700]"
+
+  dedup_policy:
+    formula: "select_dedup_policy()"
+  subset_template:
+    formula: "select_subset_template()"
+  clipping_method:
+    formula: "select_clipping_method()"
+  sigma_k:
+    formula: "select_sigma()"
+  iqr_k:
+    formula: "select_iqr_k()"
+  variance_mode:
+    formula: "select_variance_mode()"
+  normalize_mode:
+    formula: "select_normalize_mode()"
+  gating_mode:
+    formula: "select_gate_mode()"
+  rolling_median_w:
+    formula: "select_rolling_median_w()"
+
+  header:
+    formula: "['timestamp','temp_c','humidity_pct','co2_ppm','light_lux','pump_minutes','fan_speed_rpm','soil_moisture_pct','zone_id','weekday']"
+
+  data_cols:
+    formula: "generate_sensor_columns_ext(header, row_base_num, timestamp_start, step_minutes, zone_names, duplicate_count, allowed_zones, pump_threshold, subset_template, allowed_weekdays, fan_threshold)"
+
+# =================================================================
+# Solver mode: direct computation without SMT
+# =================================================================
+calc_solution: false
+
+# =================================================================
+# Queries: one essay question with strict answer format and randomized internal rules
+# =================================================================
+queries:
+  q1:
+    desc: '智慧温室传感器日志按列给出；每列 j 的底部严格追加 j 个缺陷占位（数值列为接近 0 的随机值或空值；类别列为随机合法值），计算前需逐列严格按列索引 j 从底部剔除 j 个元素；剔除后以各列剔除后的最短长度重组为行；之后按 timestamp 去重（{render_dedup_desc(dedup_policy)}）；再对 {metric_x} 与 {metric_y} 先{render_normalize_desc(normalize_mode, allowed_zones)}，再做{render_rolling_desc(rolling_median_w)}，随后{render_clipping_desc(clipping_method, sigma_k, iqr_k)}；子集筛选基于去重后行的原始字段（{render_subset_desc(subset_template, allowed_zones, pump_threshold, fan_threshold, allowed_weekdays)}）；在该子集中，按{render_gate_desc(gating_mode)}计算两者的{render_variance_desc(variance_mode)}之绝对差；若任一方差无法计算（没有值或仅有一个值），最终答案输出为 0.00。补充说明：{render_pipeline_notes()} 答案格式：保留两位小数的数字字符串（不带引号），例如 12.30。列索引映射：{render_header_with_index(header)}。数据如下：{render_columns(header, data_cols)}\n'
+    ans_formula: "compute_variance_diff_cols_ext(header, data_cols, metric_x, metric_y, subset_template, allowed_zones, pump_threshold, fan_threshold, allowed_weekdays, dedup_policy, clipping_method, sigma_k, iqr_k, variance_mode, normalize_mode, gating_mode, rolling_median_w)"
+    ans_text: '_ans'
+    ans_assertion: "validate_uniqueness_ext(header, data_cols, metric_x, metric_y, subset_template, allowed_zones, pump_threshold, fan_threshold, allowed_weekdays, dedup_policy, clipping_method, sigma_k, iqr_k, variance_mode, normalize_mode, gating_mode, rolling_median_w)"
+
+# =================================================================
+# Description: single-line presentation reflecting the randomized internal rules
+# =================================================================
+desc: '下表为智慧温室日志的列式数据与处理规则说明：1) 每列 j 底部严格追加 j 个缺陷占位（数值列为接近 0 的随机值或空值；类别列为随机合法值），需逐列按列索引 j 从底部剔除 j 个元素；2) 剔除后按各列剔除后的最短长度重组为行；3) 组行后{render_dedup_desc(dedup_policy)}；4) 对 {metric_x} 与 {metric_y} 先{render_normalize_desc(normalize_mode, allowed_zones)}，再做{render_rolling_desc(rolling_median_w)}；5) 随后{render_clipping_desc(clipping_method, sigma_k, iqr_k)}；6) 子集筛选基于去重后行的原始字段（{render_subset_desc(subset_template, allowed_zones, pump_threshold, fan_threshold, allowed_weekdays)}）；7) 在子集中按{render_gate_desc(gating_mode)}计算{render_variance_desc(variance_mode)}之绝对差；8) 若不可计算则输出 0.00。补充说明：{render_pipeline_notes()} 答案格式：保留两位小数的数字字符串（不带引号），例如 12.30。列索引映射：{render_header_with_index(header)}。数据如下：{render_columns(header, data_cols)}\n'

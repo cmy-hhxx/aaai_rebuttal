@@ -1,0 +1,90 @@
+custom_operator:
+  function_1: dyck_language_errors_1.py
+  function_2: dyck_language_errors_1.py
+  build_rules: dyck_language_errors_1.py
+  rules_to_text: dyck_language_errors_1.py
+  validate_unique: dyck_language_errors_1.py
+  pick_one: dyck_language_errors_1.py
+  choose_target_type: dyck_language_errors_1.py
+
+variables:
+  # 使用的括号种类数（2~4）
+  n_pairs:
+    type: int
+    domain: "[2, 4]"
+
+  # 两类溢出判定模式：'gt' 或 'ge'
+  overflow_w:
+    formula: "pick_one(['gt', 'ge'])"
+  overflow_g:
+    formula: "pick_one(['gt', 'ge'])"
+
+  # 权重上限（增强多样性）
+  w_max:
+    type: int
+    domain: "[3, 7]"
+  gw_max:
+    type: int
+    domain: "[2, 6]"
+
+  # 阈值范围
+  T_w_min:
+    type: int
+    domain: "[3, 15]"
+  T_w_max:
+    type: int
+    domain: "[T_w_min + 2, T_w_min + 20]"
+  T_g_min:
+    type: int
+    domain: "[2, 12]"
+  T_g_max:
+    type: int
+    domain: "[T_g_min + 2, T_g_min + 18]"
+
+  # 长度与最早错误位置下限（至少2，避免首字符即错）
+  min_len:
+    type: int
+    domain: "[10, 32]"
+  max_len:
+    type: int
+    domain: "[min_len + 2, min_len + 50]"
+  min_err_pos:
+    type: int
+    domain: "[2, min_len - 1]"
+
+  # 开括号判错检查顺序（WG: 先W后G；GW: 先G后W）
+  check_order:
+    formula: "pick_one(['WG', 'GW'])"
+
+  # 目标首错类型（根据min_err_pos筛选，排除早闭显见线索）
+  target_type:
+    formula: "choose_target_type(min_err_pos)"
+
+  # 规则包：括号子集、两类权重、两类阈值、判定模式、检查顺序、参与G的类型集合
+  rule_pack:
+    formula: "build_rules(n_pairs, overflow_w, overflow_g, T_w_min, T_w_max, T_g_min, T_g_max, w_max, gw_max, check_order)"
+
+  # 规则文本（避免直接使用花括号字符）
+  rules_text:
+    formula: "rules_to_text(rule_pack['pairs'], rule_pack['w_open'], rule_pack['g_open'], rule_pack['overflow_w'], rule_pack['overflow_g'], rule_pack['T_w'], rule_pack['T_g'], rule_pack['check_order'], rule_pack['active_in_g'])"
+
+  # 提取阈值便于展示与调用
+  T_w:
+    formula: "rule_pack['T_w']"
+  T_g:
+    formula: "rule_pack['T_g']"
+
+  # 随机生成括号序列，并保证首错位置不早于min_err_pos
+  seq_str:
+    formula: "function_2(rule_pack, min_len, max_len, target_type, min_err_pos)"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '带权括号解析：{rules_text} 给定阈值T_w={T_w}与T_g={T_g}以及序列{seq_str}，按规则返回-1或第一个错误的位置编号（从1开始）。答案格式说明：输出一个整数；若合法输出-1，否则输出首错位置编号。'
+    ans_formula: function_1(seq_str, rule_pack)
+    ans_text: "str(_ans)"
+    ans_assertion: "validate_unique(seq_str, rule_pack, _ans, 180.0)"
+
+desc: '多层带权括号首错定位：规则已随机生成并在题干中说明。请仔细阅读权重、阈值、检查顺序与参与组载荷的括号类型，理解溢出与匹配判定，再进行多步推理求解。{q1}'

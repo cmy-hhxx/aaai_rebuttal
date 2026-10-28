@@ -1,0 +1,35 @@
+custom_operator:
+  generate_puzzle: numbrix_1.py
+  matrix_to_string: numbrix_1.py
+
+calc_solution: false
+
+variables:
+  data:
+    formula: generate_puzzle()
+
+  matrix_question_str:
+    formula: "data['matrix_question_str']"
+  matrix_answer_str:
+    formula: "data['matrix_answer_str']"
+  cell_num:
+    formula: "data['cell_num']"
+  exit_row:
+    formula: "data['exit'][0]"
+  exit_col:
+    formula: "data['exit'][1]"
+  hints_str:
+    formula: "data['hints_str']"
+  row_cnt:
+    formula: "data['rows']"
+  col_cnt:
+    formula: "data['cols']"
+
+queries:
+  q1:
+    desc: '请根据上述线索补全 1–{cell_num} 的连续编号路径，并以单行 Python 列表形式（{row_cnt} 行 {col_cnt} 列）提交完整矩阵。示例:[[0,1,None],[0,2,3],[0,0,4]]，其中 0 代表墙体，行列数须与题干一致。'
+    ans_formula: matrix_answer_str
+    ans_text: matrix_answer_str
+    ans_assertion: 'True'
+
+desc: '考古学家在一处遗迹探险，可走格共 {cell_num} 个，入口编号 1，出口编号 {cell_num}。任意连续数字必须上下左右相邻且不重复。\n(1) 遗迹矩阵（0 为墙，None 为待填）：\n{matrix_question_str}\n(2) 线索：\n{hints_str}\n{q1.desc}'

@@ -1,0 +1,29 @@
+custom_operator:
+  gen_sort_puzzle: word_sorting_mistake_1.py
+  function_1: word_sorting_mistake_1.py
+  function_2: word_sorting_mistake_1.py
+
+calc_solution: false
+
+variables:
+  word_num:
+    type: int
+    domain: '[8, 15]'
+
+  puzzle_data:
+    formula: gen_sort_puzzle(word_num)
+
+  problem_desc:
+    formula: puzzle_data['problem']
+
+  correct_answer:
+    formula: "puzzle_data['answer']"
+
+queries:
+  q1:
+    desc: '请按要求作答（若全过程无误写 No，否则写首个错误出现的步骤编号）：'
+    ans_formula: correct_answer
+    ans_text: 'str(correct_answer)'
+    ans_assertion: 'True'
+
+desc: '请阅读下列关于单词排序的思考过程并按格式回答。\n作答格式：若过程无误，写 No；否则写首个出错步骤的编号（数字）。示例答案：4    或   No（注意大小写、无多余空格）。\n\n【操作规则说明】(附示例)\n1. 将余下单词里最小的 X 放到位置 i：把仍未在正确位置的最小单词 X 插入到第 i 个位置。(例：…d b c→b c d)\n2. 将包含元音的子序列(位置 a-b)按字典序排序：对第 a 到 b 位、首尾单词均含元音的连续区段整体升序。(例：…cat zip art→art cat zip)\n3. 将位置 a-b 的子列表循环右移 k 位：区段 [a,b] 右移 k 位，溢出回到区段开头。(例：abcde → deabc)\n4. 将所有长度为 odd/even 的单词整体提前(保持相对顺序)。\n5. 将前 k 个单词按长度奇偶交替重新排列(偶长–奇长–偶长…)。\n6. 取出位置 i,j,m 的单词按字典序重排后放回原位。\n\n{problem_desc}\n{queries}'

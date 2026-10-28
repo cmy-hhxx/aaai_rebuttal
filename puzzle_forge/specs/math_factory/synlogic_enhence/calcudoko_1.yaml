@@ -1,0 +1,40 @@
+# ============================================================================
+# 高阶泛化造题规格：6×6 拉丁方 + 随机复合规则（和/积/线性组合/模/笼子/对角/外环/边/角/子集）
+# 生成模式：逆向生成（先生成唯一解 -> 回填规则文本与答案）
+# ============================================================================
+
+custom_operator:
+  function_1: calcudoko_1.py
+  function_2: calcudoko_1.py
+
+# 由 Python 保证唯一解与复杂逻辑，YAML 不求解
+calc_solution: false
+
+variables:
+  # 网格规模固定为 6（便于中心 2×2/3×3 与 2×2/3×3 笼子）
+  n:
+    type: int
+    domain: "[6, 6]"
+
+  # 生成包：包含 grid、rules（结构化）、rules_text（可读中文）、answer
+  gen_pack:
+    formula: function_1(n)
+
+  grid:
+    formula: gen_pack['grid']
+  rules:
+    formula: gen_pack['rules']
+  rules_text:
+    formula: gen_pack['rules_text']
+  answer_str:
+    formula: gen_pack['answer']
+
+queries:
+  q1:
+    desc: '请按指定格式输出解网格：每行用空格分隔，行与行之间用分号分隔。示例：1 2 3 4 5 6;6 5 4 3 2 1;...'
+    ans_formula: "answer_str"
+    ans_text: "_ans"
+    ans_assertion: "True"
+
+# 题面文本（单行与单引号；\\n 手动换行；花括号仅用于变量插值）
+desc: '构建一个 {n}×{n} 的拉丁方：每行与每列都使用数字 1 到 {n} 且不重复。下面给出若干随机生成的复合规则，请满足所有规则：1) 求和规则：将列出的格子数值相加；2) 乘积规则：将列出的格子数值相乘；3) 线性组合规则：形如 a1×某些格子的和 + a2×另外一些格子的和 = 目标值；4) 取模规则：某些格子的和对 m 取模等于 r。为确保可读性，每条规则将列出所涉及的部分坐标。具体本题规则如下：{rules_text}。答案格式：请输出完整解网格，每行用空格分隔，行与行之间用分号分隔。\\n{q1}'

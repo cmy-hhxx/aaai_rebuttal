@@ -1,0 +1,108 @@
+# -------------------------------
+# 自定义操作符：均在 dyck_language_1.py 中实现
+# -------------------------------
+custom_operator:
+  dyck_min_completion: dyck_language_1.py
+  unmatched_count: dyck_language_1.py
+  choose_pairs: dyck_language_1.py
+  make_charset_order: dyck_language_1.py
+  gen_valid_prefix: dyck_language_1.py
+  completed_length: dyck_language_1.py
+  suffix_counts_list: dyck_language_1.py
+  suffix_counts_list_mode: dyck_language_1.py
+  validate_unique_completion: dyck_language_1.py
+  validate_puzzle_uniqueness: dyck_language_1.py
+  is_string: dyck_language_1.py
+  sum_list: dyck_language_1.py
+  choose_rule_pack: dyck_language_1.py
+  choose_count_mode: dyck_language_1.py
+  count_mode_label: dyck_language_1.py
+  make_q1_text: dyck_language_1.py
+  make_q2_text: dyck_language_1.py
+  make_q3_text: dyck_language_1.py
+
+# -------------------------------
+# 变量定义：参数化与多维随机化
+# -------------------------------
+variables:
+  # 随机选择括号种类数，影响难度
+  type_num:
+    type: int
+    domain: "[2, 4]"
+    diff_factor: 1
+  # 从四类括号对中随机选择 type_num 种
+  chosen_pairs:
+    formula: "choose_pairs(type_num)"
+  # 随机生成字符比较顺序，用于题面描述与统计顺序
+  charset_order:
+    formula: "make_charset_order(chosen_pairs)"
+  # 前缀长度范围
+  min_len:
+    type: int
+    domain: "[6, 14]"
+  max_len:
+    type: int
+    domain: "[min_len + 2, min_len + 10]"
+  # 未匹配左括号目标数量，至少为1
+  target_unmatched:
+    type: int
+    domain: "[1, 6]"
+  # 生成合法且复杂度达标的前缀，未匹配左括号数量为 target_unmatched
+  prefix:
+    formula: "gen_valid_prefix(chosen_pairs, min_len, max_len, target_unmatched)"
+  # 前缀长度，作为难度因子
+  prefix_len:
+    formula: "len(prefix)"
+    diff_factor: 1
+  # 实际未匹配左括号数量校验
+  unmatched_open:
+    formula: "unmatched_count(prefix)"
+  # 规则包与计数模式（影响题面与第三问）
+  rule_pack:
+    formula: "choose_rule_pack()"
+  count_mode:
+    formula: "choose_count_mode()"
+  count_mode_note:
+    formula: "count_mode_label(count_mode)"
+  # 三个小问的可变描述文本
+  q1_text:
+    formula: "make_q1_text(rule_pack)"
+  q2_text:
+    formula: "make_q2_text(rule_pack)"
+  q3_text:
+    formula: "make_q3_text(rule_pack, count_mode_note)"
+
+# -------------------------------
+# 直接计算模式：无需Z3求解
+# -------------------------------
+calc_solution: false
+
+# -------------------------------
+# 问题与答案：三问多步推理并提供答案格式示例
+# -------------------------------
+queries:
+  # 小问一：输出最小完整序列（唯一）
+  q1:
+    desc: '{q1_text}'
+    ans_formula: 'dyck_min_completion(prefix)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_unique_completion(prefix) and is_string(_ans) and validate_puzzle_uniqueness(prefix, chosen_pairs, charset_order, count_mode)'
+
+  # 小问二：输出完整序列长度
+  q2:
+    desc: '{q2_text}'
+    ans_formula: 'completed_length(prefix)'
+    ans_text: 'str(_ans)'
+    ans_assertion: '_ans >= prefix_len and validate_puzzle_uniqueness(prefix, chosen_pairs, charset_order, count_mode)'
+
+  # 小问三：新增右括号计数列表（顺序随模式变化）
+  q3:
+    desc: '{q3_text}'
+    ans_formula: 'suffix_counts_list_mode(prefix, chosen_pairs, charset_order, count_mode)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'sum_list(_ans) == unmatched_open and validate_puzzle_uniqueness(prefix, chosen_pairs, charset_order, count_mode)'
+
+# -------------------------------
+# 问题描述：解释规则与格式 仅呈现环境与必要信息
+# -------------------------------
+desc: '本题研究多种括号的栈匹配补全规则 合法括号序列的定义为 任意左括号必须由同类型右括号按后进先出顺序闭合 标准四类括号对为 () [] {{}} <> 字符按比较顺序排列为 {", ".join(charset_order)} 给定的前缀序列为 {prefix} 仅允许在末尾追加必要的右括号使其成为合法括号序列 不得插入删除或重排\n答案格式提示：\n小问一 输出补全后的完整序列 示例 ()[]<> 或 ()[]{{}}\n小问二 输出补全后序列的长度 示例 12\n小问三 按照题目指定顺序统计补全新增的右括号计数列表 示例 [0,2,1]\n{q1}\n{q2}\n{q3}'

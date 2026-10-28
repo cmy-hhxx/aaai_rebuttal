@@ -1,0 +1,79 @@
+custom_operator:
+  # 随机生成高质量、可复现的三人本周日程，支持难度参数与回检重采样
+  gen_schedules_advanced: customs/time_sequence_0.py
+  # 将个人日程转为可读的中文描述文本（无尾随标点）
+  format_schedule: customs/time_sequence_0.py
+  # 计算在“整点或半点开始”的最长可会议时长及对应选项数（考虑赫伟可清除≤30分钟的忙碌区间）
+  compute_best_meeting: customs/time_sequence_0.py
+
+variables:
+  # 工作时间窗口（本地时间）
+  work_start:
+    formula: "'09:00'"
+  work_end:
+    formula: "'17:00'"
+  # 工作日列表
+  days:
+    formula: "['星期一','星期二','星期三','星期四','星期五']"
+
+  # 可复现随机种子
+  seed:
+    type: int
+    domain: "[1, 10000000]"
+
+  # 难度画像的各组成参数（避免在公式中内嵌注释导致语法错误）
+  target_mode:
+    formula: "random.choice(['unique_max', 'tie_max', 'no_solution', 'requires_clearance'])"
+  grid:
+    type: int
+    domain: "[30, 30]"
+  min_len:
+    formula: "random.choice([45, 60, 75])"
+  max_len:
+    formula: "random.choice([90, 105, 120])"
+  require_clearance:
+    formula: "True"
+  max_resample:
+    type: int
+    domain: "[150, 300]"
+
+  # 组合难度画像为字典
+  difficulty_profile:
+    formula: "{'target_mode': target_mode, 'grid': grid, 'min_len': min_len, 'max_len': max_len, 'require_clearance': require_clearance, 'max_resample': max_resample}"
+
+  # 随机生成本周三人的日程安排（高质量+可回检达标）
+  schedules:
+    formula: gen_schedules_advanced(work_start, work_end, days, difficulty_profile, seed)
+
+  # 三人的结构化日程
+  hewei:
+    formula: schedules['hewei']
+  fengjie:
+    formula: schedules['fengjie']
+  gaolei:
+    formula: schedules['gaolei']
+
+  # 三人的中文描述文本（无尾随标点，句式友好）
+  hewei_desc:
+    formula: format_schedule(hewei, '赫伟')
+  fengjie_desc:
+    formula: format_schedule(fengjie, '丰杰')
+  gaolei_desc:
+    formula: format_schedule(gaolei, '郜磊')
+
+symbols: {}
+conditions: {}
+# 本题通过自定义函数计算，不需SMT求解
+calc_solution: false
+
+queries:
+  q1:
+    desc: "如果会议必须在整点或半点开始，请给出可以安排的会议的最长时间（以分钟为单位），以及可安排的选项数(必须是最长时间的)。如果无法安排符合条件的会议，都回答0即可。请在回答的末尾将可安排的会议最长时间和选项数，按顺序放在[ ]中，无需其他内容，形如：[45, 3]"
+    # 返回 [最长时长, 选项数]
+    ans_formula: compute_best_meeting(hewei, fengjie, gaolei, work_start, work_end, difficulty_profile['grid'], True)
+    # 以 [max, count] 的格式输出
+    ans_text: f"[{_ans[0]}, {_ans[1]}]"
+    # 若难度画像要求唯一最大解，则进行断言保证题目答案唯一；其他模式允许为真（不强制唯一）
+    ans_assertion: "difficulty_profile['target_mode'] != 'unique_max' or (_ans[0] > 0 and _ans[1] == 1)"
+
+desc: "赫伟、丰杰、郜磊的工作时间为工作日当地时间早上9点到下午5点，他们想在本周的某个时间一起开会。\n\n{hewei_desc}\n{fengjie_desc}\n{gaolei_desc}\n赫伟可以从日程安排中清除任何30分钟或更短的会议。\n\n{q1}"

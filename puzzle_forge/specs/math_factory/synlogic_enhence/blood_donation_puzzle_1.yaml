@@ -1,0 +1,416 @@
+# ============================================================
+# Blood Donation Puzzle 2 - strengthened constraints for uniqueness (1-based positions)
+# ============================================================
+
+# ------------------------------
+# Custom operators
+# ------------------------------
+custom_operator:
+  distinct_list: blood_donation_puzzle_1.py
+  positions_in_range: blood_donation_puzzle_1.py
+  find_label_by_equal_pos: blood_donation_puzzle_1.py
+  shuffle_list: blood_donation_puzzle_1.py
+  sample_list: blood_donation_puzzle_1.py
+  sample_sorted: blood_donation_puzzle_1.py
+  get_pos_by_tag: blood_donation_puzzle_1.py
+  adj_positions: blood_donation_puzzle_1.py
+  left_of_positions: blood_donation_puzzle_1.py
+  exact_left_of_positions: blood_donation_puzzle_1.py
+  at_ends_positions: blood_donation_puzzle_1.py
+  between_positions: blood_donation_puzzle_1.py
+  label_text: blood_donation_puzzle_1.py
+  gap_positions: blood_donation_puzzle_1.py
+  next_to_end_positions: blood_donation_puzzle_1.py
+  position_in_set: blood_donation_puzzle_1.py
+  order_three_positions: blood_donation_puzzle_1.py
+  older_than_pos: blood_donation_puzzle_1.py
+  heavier_than_pos: blood_donation_puzzle_1.py
+
+# ------------------------------
+# Variables
+# ------------------------------
+variables:
+  donors_num:
+    type: int
+    domain: '[5, 5]'
+    diff_factor: 1
+
+  names_pool:
+    formula: "['Andrea','Brooke','Kathleen','Meghan','Nichole','Olivia','Sofia','Isabella','Mia','Amelia','Harper','Evelyn','Abigail','Emily','Ella','Avery','Scarlett','Grace','Chloe','Victoria','Hannah','Lily','Aria','Zoey','Penelope','Layla','Riley','Nora','Hazel','Aurora']"
+  names:
+    formula: 'sample_list(names_pool, donors_num)'
+  name_roles:
+    formula: 'shuffle_list(names)'
+  r_andrea:
+    formula: 'name_roles[0]'
+  r_brooke:
+    formula: 'name_roles[1]'
+  r_kathleen:
+    formula: 'name_roles[2]'
+  r_meghan:
+    formula: 'name_roles[3]'
+  r_nichole:
+    formula: 'name_roles[4]'
+
+  colors_pool:
+    formula: "['Black','Purple','Green','Red','Blue','Yellow','Orange','Pink','White','Gray','Brown','Teal','Cyan','Magenta','Maroon','Navy','Olive','Lime','Indigo','Violet']"
+  shirts:
+    formula: 'sample_list(colors_pool, donors_num)'
+  shirts_roles:
+    formula: 'shuffle_list(shirts)'
+  s_black:
+    formula: 'shirts_roles[0]'
+  s_purple:
+    formula: 'shirts_roles[1]'
+  s_green:
+    formula: 'shirts_roles[2]'
+  s_red:
+    formula: 'shirts_roles[3]'
+  s_blue:
+    formula: 'shirts_roles[4]'
+
+  jobs_pool:
+    formula: "['Actress','Chef','Florist','Engineer','Policewoman','Doctor','Nurse','Teacher','Designer','Photographer','Writer','Architect','Scientist','Lawyer','Pilot','Musician','Dancer','Journalist','Baker','Pharmacist']"
+  jobs:
+    formula: 'sample_list(jobs_pool, donors_num)'
+  jobs_roles:
+    formula: 'shuffle_list(jobs)'
+  j_actress:
+    formula: 'jobs_roles[0]'
+  j_chef:
+    formula: 'jobs_roles[1]'
+  j_florist:
+    formula: 'jobs_roles[2]'
+  j_engineer:
+    formula: 'jobs_roles[3]'
+  j_queryjob:
+    formula: 'jobs_roles[4]'
+
+  blood_types:
+    formula: "shuffle_list(['A+', 'B+', 'O-', 'AB+', 'B-'])"
+  t_Aplus:
+    formula: "'A+'"
+  t_Bplus:
+    formula: "'B+'"
+  t_Ominus:
+    formula: "'O-'"
+  t_ABplus:
+    formula: "'AB+'"
+  t_Bminus:
+    formula: "'B-'"
+
+  weight_pool:
+    formula: '[110, 115, 120, 125, 130, 135, 140, 145, 150, 155, 160, 165, 170, 175, 180]'
+  weights:
+    formula: 'sample_sorted(weight_pool, donors_num)'
+  w_roles:
+    formula: 'shuffle_list(weights)'
+  w_end:
+    formula: 'w_roles[0]'
+  w_right:
+    formula: 'w_roles[1]'
+  w_between:
+    formula: 'w_roles[2]'
+  w_bplus:
+    formula: 'w_roles[3]'
+  w_query:
+    formula: 'w_roles[4]'
+
+  age_pool:
+    formula: '[22, 24, 25, 26, 28, 30, 32, 34, 35, 36, 38, 40, 42, 44, 45]'
+  ages:
+    formula: 'sample_sorted(age_pool, donors_num)'
+  a_youngest:
+    formula: 'ages[0]'
+  a_second:
+    formula: 'ages[1]'
+  a_middle:
+    formula: 'ages[2]'
+  a_fourth:
+    formula: 'ages[3]'
+  a_oldest:
+    formula: 'ages[4]'
+
+  odd_positions:
+    formula: '[p for p in range(1, donors_num + 1) if p % 2 == 1]'
+  gaps_pool:
+    formula: '[2, 3]'
+
+  labels_all:
+    formula: "[('name', n) for n in names] + [('btype', t) for t in blood_types] + [('weight', w) for w in weights] + [('age', a) for a in ages] + [('shirt', s) for s in shirts] + [('job', j) for j in jobs]"
+
+  labels_rel:
+    formula: "[lv for lv in labels_all if not ((lv[0] == 'name' and lv[1] == r_andrea) or (lv[0] == 'btype' and lv[1] == t_Bminus) or (lv[0] == 'weight' and lv[1] == w_query) or (lv[0] == 'shirt' and lv[1] == s_purple) or (lv[0] == 'job' and lv[1] == j_queryjob) or (lv[0] == 'shirt' and lv[1] == s_red) or (lv[0] == 'btype' and lv[1] == t_Bplus) or (lv[0] == 'weight' and lv[1] == w_end) or (lv[0] == 'weight' and lv[1] == w_bplus) or (lv[0] == 'shirt' and lv[1] == s_blue))]"
+
+  names_desc:
+    formula: "', '.join(names)"
+  blood_types_desc:
+    formula: "', '.join(blood_types)"
+  weight_desc:
+    formula: "', '.join([str(w) + ' lb' for w in weights])"
+  ages_desc:
+    formula: "', '.join([str(a) for a in ages])"
+  shirts_desc:
+    formula: "', '.join(shirts)"
+  jobs_desc:
+    formula: "', '.join(jobs)"
+
+# ------------------------------
+# Symbols
+# ------------------------------
+symbols:
+  pos_name:
+    source:
+    - names
+    type: int
+    desc: '{_names} occupies a position in the row'
+  pos_btype:
+    source:
+    - blood_types
+    type: int
+    desc: '{_blood_types} occupies a position in the row'
+  pos_weight:
+    source:
+    - weights
+    type: int
+    desc: '{_weights} occupies a position in the row'
+  pos_age:
+    source:
+    - ages
+    type: int
+    desc: '{_ages} occupies a position in the row'
+  pos_shirt:
+    source:
+    - shirts
+    type: int
+    desc: '{_shirts} occupies a position in the row'
+  pos_job:
+    source:
+    - jobs
+    type: int
+    desc: '{_jobs} occupies a position in the row'
+
+# ------------------------------
+# Conditions
+# ------------------------------
+conditions:
+  # --- domain/range + distinctness for each attribute ---
+  range_names:
+    formula: positions_in_range([pos_name[n] for n in names], donors_num)
+    desc: 'all names occupy valid positions'
+  range_btypes:
+    formula: positions_in_range([pos_btype[t] for t in blood_types], donors_num)
+    desc: 'all blood types occupy valid positions'
+  range_weights:
+    formula: positions_in_range([pos_weight[w] for w in weights], donors_num)
+    desc: 'all weights occupy valid positions'
+  range_ages:
+    formula: positions_in_range([pos_age[a] for a in ages], donors_num)
+    desc: 'all ages occupy valid positions'
+  range_shirts:
+    formula: positions_in_range([pos_shirt[s] for s in shirts], donors_num)
+    desc: 'all shirt colors occupy valid positions'
+  range_jobs:
+    formula: positions_in_range([pos_job[j] for j in jobs], donors_num)
+    desc: 'all jobs occupy valid positions'
+
+  distinct_names:
+    formula: distinct_list([pos_name[n] for n in names])
+    desc: 'positions for names are all different'
+  distinct_btypes:
+    formula: distinct_list([pos_btype[t] for t in blood_types])
+    desc: 'positions for blood types are all different'
+  distinct_weights:
+    formula: distinct_list([pos_weight[w] for w in weights])
+    desc: 'positions for weights are all different'
+  distinct_ages:
+    formula: distinct_list([pos_age[a] for a in ages])
+    desc: 'positions for ages are all different'
+  distinct_shirts:
+    formula: distinct_list([pos_shirt[s] for s in shirts])
+    desc: 'positions for shirts are all different'
+  distinct_jobs:
+    formula: distinct_list([pos_job[j] for j in jobs])
+    desc: 'positions for jobs are all different'
+
+  # --- static anchors (visible in the story) ---
+  anchor_end_weight:
+    formula: at_ends_positions(pos_weight[w_end], donors_num)
+    desc: 'the person weighing {w_end} lb stands at one of the ends'
+  anchor_bplus_weight_equal:
+    formula: pos_btype[t_Bplus] == pos_weight[w_bplus]
+    desc: 'the {t_Bplus} donor weighs {w_bplus} lb'
+  anchor_exact_left_name_shirt:
+    formula: exact_left_of_positions(pos_name[r_andrea], pos_shirt[s_red])
+    desc: '{r_andrea} is exactly to the left of the person in the {s_red} shirt'
+  anchor_equal_name_job:
+    formula: pos_name[r_brooke] == pos_job[j_chef]
+    desc: '{r_brooke} is the {j_chef}'
+  anchor_left_end_before_bplus:
+    formula: left_of_positions(pos_weight[w_end], pos_btype[t_Bplus])
+    desc: 'the person weighing {w_end} lb stands somewhere to the left of the {t_Bplus} donor'
+  anchor_purple_next_to_end:
+    formula: next_to_end_positions(pos_shirt[s_purple], donors_num)
+    desc: 'the person in the {s_purple} shirt is next to one of the ends'
+  anchor_adjacent_blue_bminus:
+    formula: adj_positions(pos_shirt[s_blue], pos_btype[t_Bminus])
+    desc: 'the person in the {s_blue} shirt is next to the {t_Bminus} donor'
+  anchor_left_kathleen_of_meghan:
+    formula: left_of_positions(pos_name[r_kathleen], pos_name[r_meghan])
+    desc: '{r_kathleen} stands somewhere to the left of {r_meghan}'
+
+  # --- extra static anchors to strengthen uniqueness ---
+  anchor_youngest_left_oldest:
+    formula: left_of_positions(pos_age[a_youngest], pos_age[a_oldest])
+    desc: 'the youngest stands somewhere to the left of the oldest'
+  anchor_between_andrea_young_old:
+    formula: between_positions(pos_age[a_youngest], pos_name[r_andrea], pos_age[a_oldest])
+    desc: '{r_andrea} stands somewhere between the youngest and the oldest'
+  anchor_wquery_left_bminus:
+    formula: left_of_positions(pos_weight[w_query], pos_btype[t_Bminus])
+    desc: 'the person weighing {w_query} lb stands somewhere to the left of the {t_Bminus} donor'
+
+  # --- cross-domain anchors to reduce solution space (visible in the story) ---
+  anchor_equal_age_blue_shirt:
+    formula: pos_age[a_middle] == pos_shirt[s_blue]
+    desc: 'the {a_middle} year old person is in the {s_blue} shirt'
+  anchor_job_black_shirt:
+    formula: pos_job[j_engineer] == pos_shirt[s_black]
+    desc: 'the {j_engineer} wears the {s_black} shirt'
+  anchor_btype_green_shirt:
+    formula: pos_btype[t_Ominus] == pos_shirt[s_green]
+    desc: 'the {t_Ominus} donor wears the {s_green} shirt'
+
+  # --- dynamic relational clues (now mandatory) ---
+  rel_adjacent_pairs:
+    source:
+    - labels_rel
+    amount:
+    - '2'
+    domain: '[1, 1]'
+    formula: adj_positions(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][1], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job))
+    desc: '{label_text(_sym[0][0])} is next to {label_text(_sym[0][1])}'
+
+  rel_left_pairs:
+    source:
+    - labels_rel
+    amount:
+    - '2'
+    domain: '[1, 1]'
+    formula: left_of_positions(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][1], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job))
+    desc: '{label_text(_sym[0][0])} is somewhere to the left of {label_text(_sym[0][1])}'
+
+  rel_exact_left_pairs:
+    source:
+    - labels_rel
+    amount:
+    - '2'
+    domain: '[1, 1]'
+    formula: exact_left_of_positions(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][1], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job))
+    desc: '{label_text(_sym[0][0])} is exactly to the left of {label_text(_sym[0][1])}'
+
+  rel_at_end_singles:
+    source:
+    - labels_rel
+    amount:
+    - '1'
+    domain: '[1, 1]'
+    formula: at_ends_positions(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), donors_num)
+    desc: '{label_text(_sym[0][0])} is at one of the ends'
+
+  rel_gap_pairs:
+    source:
+    - labels_rel
+    - gaps_pool
+    amount:
+    - '2'
+    - '1'
+    domain: '[1, 1]'
+    formula: gap_positions(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][1], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), _sym[1][0])
+    desc: '{label_text(_sym[0][0])} is exactly {_sym[1][0]} positions away from {label_text(_sym[0][1])}'
+
+  rel_parity_single:
+    source:
+    - labels_rel
+    amount:
+    - '1'
+    domain: '[1, 1]'
+    formula: position_in_set(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), odd_positions)
+    desc: '{label_text(_sym[0][0])} is at an odd position'
+
+  rel_next_to_end_single:
+    source:
+    - labels_rel
+    amount:
+    - '1'
+    domain: '[1, 1]'
+    formula: next_to_end_positions(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), donors_num)
+    desc: '{label_text(_sym[0][0])} is next to one of the ends'
+
+  # --- new dynamic order/weight/age relations to cut symmetry ---
+  rel_order_triple:
+    source:
+    - labels_rel
+    amount:
+    - '3'
+    domain: '[1, 1]'
+    formula: order_three_positions(get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][1], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][2], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job))
+    desc: '{label_text(_sym[0][0])}, {label_text(_sym[0][1])}, and {label_text(_sym[0][2])} are ordered from left to right in that order'
+
+  rel_heavier_pair:
+    source:
+    - labels_rel
+    amount:
+    - '2'
+    domain: '[1, 1]'
+    formula: heavier_than_pos(pos_weight, weights, get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][1], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job))
+    desc: '{label_text(_sym[0][0])} is heavier than {label_text(_sym[0][1])}'
+
+  rel_older_pair:
+    source:
+    - labels_rel
+    amount:
+    - '2'
+    domain: '[1, 1]'
+    formula: older_than_pos(pos_age, ages, get_pos_by_tag(_sym[0][0], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job), get_pos_by_tag(_sym[0][1], pos_name, pos_btype, pos_weight, pos_age, pos_shirt, pos_job))
+    desc: '{label_text(_sym[0][0])} is older than {label_text(_sym[0][1])}'
+
+# ------------------------------
+# Queries
+# ------------------------------
+queries:
+  q1_who_is_Bminus:
+    desc: 'Whose blood type is {t_Bminus}\nAnswer format requirement: output a single token without spaces, for example Andrea'
+    ans_formula: find_label_by_equal_pos(names, [get_value(_solutions[0], pos_name[n]) for n in names], get_value(_solutions[0], pos_btype[t_Bminus]))
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q2_shirt_of_weight_query:
+    desc: 'What color shirt is worn by the person weighing {w_query} lb\nAnswer format requirement: output a single token without spaces, for example Green'
+    ans_formula: find_label_by_equal_pos(shirts, [get_value(_solutions[0], pos_shirt[s]) for s in shirts], get_value(_solutions[0], pos_weight[w_query]))
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q3_age_of_Andrea:
+    desc: 'How many years old is {r_andrea}\nAnswer format requirement: output an integer only, for example 30'
+    ans_formula: find_label_by_equal_pos(ages, [get_value(_solutions[0], pos_age[a]) for a in ages], get_value(_solutions[0], pos_name[r_andrea]))
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q4_btype_of_query_job:
+    desc: 'Which blood type is the {j_queryjob}\nAnswer format requirement: output a single token without spaces, for example AB+'
+    ans_formula: find_label_by_equal_pos(blood_types, [get_value(_solutions[0], pos_btype[t]) for t in blood_types], get_value(_solutions[0], pos_job[j_queryjob]))
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q5_job_of_purple_shirt:
+    desc: 'Which job does the person in the {s_purple} shirt have\nAnswer format requirement: output a single token without spaces, for example Chef'
+    ans_formula: find_label_by_equal_pos(jobs, [get_value(_solutions[0], pos_job[j]) for j in jobs], get_value(_solutions[0], pos_shirt[s_purple]))
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+
+# ------------------------------
+# Control
+# ------------------------------
+max_solution: 6000
+
+# ------------------------------
+# Description
+# ------------------------------
+desc: 'There are {donors_num} donors standing in a row at positions 1 to {donors_num}. Each donor has a unique name, blood type, weight, age, shirt color, and job. The donors are {names_desc}. The available blood types are {blood_types_desc}. The possible weights are {weight_desc}. The possible ages are {ages_desc}. The shirt colors are {shirts_desc}. The jobs are {jobs_desc}. The following relations are known:\n{anchor_end_weight}\n{anchor_bplus_weight_equal}\n{anchor_exact_left_name_shirt}\n{anchor_equal_name_job}\n{anchor_left_end_before_bplus}\n{anchor_purple_next_to_end}\n{anchor_adjacent_blue_bminus}\n{anchor_left_kathleen_of_meghan}\n{anchor_youngest_left_oldest}\n{anchor_between_andrea_young_old}\n{anchor_wquery_left_bminus}\n{anchor_equal_age_blue_shirt}\n{anchor_job_black_shirt}\n{anchor_btype_green_shirt}\n{rel_adjacent_pairs}\n{rel_left_pairs}\n{rel_exact_left_pairs}\n{rel_at_end_singles}\n{rel_gap_pairs}\n{rel_parity_single}\n{rel_next_to_end_single}\n{rel_order_triple}\n{rel_heavier_pair}\n{rel_older_pair}\nNow answer the following questions strictly following the required formats:\n{q1_who_is_Bminus}\n{q2_shirt_of_weight_query}\n{q3_age_of_Andrea}\n{q4_btype_of_query_job}\n{q5_job_of_purple_shirt}\n'

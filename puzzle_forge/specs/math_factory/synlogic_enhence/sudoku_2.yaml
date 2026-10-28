@@ -1,0 +1,140 @@
+# ---------------------------------------------------------------
+# High-complexity Sudoku generator (direct-calculation mode) with enforced multi-rule interplay and clearer coordinates.
+# - Builds a full solution constructively
+# - Creates a givens mask that tends to be non-unique under standard Sudoku
+# - Adds at least two categories of extra rules with minimum density
+# - Verifies uniqueness under full rule set with Z3 in Python
+# ---------------------------------------------------------------
+
+# 1) Custom operators (Python helpers)
+custom_operator:
+  choose_one: sudoku_2.py
+  make_index_list: sudoku_2.py
+  make_blocks: sudoku_2.py
+  gen_full_sudoku: sudoku_2.py
+  format_answer_tuple: sudoku_2.py
+  make_unique_puzzle_mask: sudoku_2.py
+  make_puzzle_mask_interplay: sudoku_2.py
+  build_givens_from_mask: sudoku_2.py
+  grid_to_lines: sudoku_2.py
+  ensure_unique_rule_bundle: sudoku_2.py
+  format_rules_text: sudoku_2.py
+
+# 2) Direct-calculation mode (all logic in Python)
+calc_solution: false
+
+# 3) Variables
+variables:
+  # Grid size fixed to 9x9
+  n:
+    type: int
+    domain: '[9, 9]'
+
+  # Symmetry for givens layout
+  symmetry:
+    formula: 'choose_one(["none","rot180","mirror_h","mirror_v"])'
+
+  # Givens density (slightly reduced to encourage non-uniqueness under standard Sudoku)
+  givens_min:
+    type: int
+    domain: '[24, 30]'
+    diff_factor: -1
+  givens_max:
+    type: int
+    domain: '[givens_min + 3, givens_min + 12]'
+    diff_factor: -1
+
+  # Distribution safeguards
+  min_row_givens:
+    type: int
+    domain: '[0, 2]'
+  min_col_givens:
+    type: int
+    domain: '[0, 2]'
+  # Minimum givens per 3x3 block
+  min_block_givens:
+    type: int
+    domain: '[1, 2]'
+
+  # Extra rule count ranges (maintain depth)
+  parity_min:
+    type: int
+    domain: '[1, 3]'
+  parity_max:
+    type: int
+    domain: '[parity_min + 1, parity_min + 3]'
+
+  ineq_min:
+    type: int
+    domain: '[2, 4]'
+  ineq_max:
+    type: int
+    domain: '[ineq_min + 1, ineq_min + 4]'
+
+  cage_min:
+    type: int
+    domain: '[0, 3]'
+  cage_max:
+    type: int
+    domain: '[cage_min + 1, cage_min + 3]'
+
+  kropki_min:
+    type: int
+    domain: '[0, 4]'
+  kropki_max:
+    type: int
+    domain: '[kropki_min + 1, kropki_min + 4]'
+
+  thermo_min:
+    type: int
+    domain: '[0, 3]'
+  thermo_max:
+    type: int
+    domain: '[thermo_min + 1, thermo_min + 3]'
+
+  arrow_min:
+    type: int
+    domain: '[0, 3]'
+  arrow_max:
+    type: int
+    domain: '[arrow_min + 1, arrow_min + 3]'
+
+  # Toggles
+  diagX_toggle:
+    formula: 'choose_one(["off","on"])'
+  anti_knight_toggle:
+    formula: 'choose_one(["off","on"])'
+
+  # Z3 uniqueness check timeout (ms)
+  timeout_ms:
+    type: int
+    domain: '[120000, 180000]'
+
+  # Full solved grid
+  sol_grid:
+    formula: 'gen_full_sudoku(n)'
+
+  # Interplay-oriented puzzle mask and renderings
+  mask_positions:
+    formula: 'make_puzzle_mask_interplay(sol_grid, n, symmetry, givens_min, givens_max, min_row_givens, min_col_givens, min_block_givens)'
+  givens:
+    formula: 'build_givens_from_mask(sol_grid, mask_positions)'
+  puzzle_lines:
+    formula: 'grid_to_lines(sol_grid, mask_positions, "X")'
+
+  # Rule bundle ensuring uniqueness under all rules, and text
+  rule_bundle:
+    formula: 'ensure_unique_rule_bundle(sol_grid, n, mask_positions, parity_min, parity_max, ineq_min, ineq_max, cage_min, cage_max, kropki_min, kropki_max, thermo_min, thermo_max, arrow_min, arrow_max, diagX_toggle, anti_knight_toggle, timeout_ms)'
+  rules_text:
+    formula: 'format_rules_text(rule_bundle)'
+
+# 4) Query: strict answer format
+queries:
+  q1:
+    desc: '请按题面所示的嵌套元组格式提交整张数独解。'
+    ans_formula: 'sol_grid'
+    ans_text: 'format_answer_tuple(_ans)'
+    ans_assertion: 'True'
+
+# 5) Problem statement (single line with explicit newlines)
+desc: '下面是一个9x9的高阶数独谜题。空位用X表示；请填入数字1-9，使得每行、每列和每个3x3子网格中的数字都不重复。坐标说明：rXcY表示第X行第Y列（1基）；下方9行自上而下对应r1..r9，每行采用3-3-3分组并用“|”分隔（如“12X|3X7|XX9”）。\n{puzzle_lines[0]}\n{puzzle_lines[1]}\n{puzzle_lines[2]}\n{puzzle_lines[3]}\n{puzzle_lines[4]}\n{puzzle_lines[5]}\n{puzzle_lines[6]}\n{puzzle_lines[7]}\n{puzzle_lines[8]}\n规则说明：\n- 标准数独规则：每行、每列、每个3x3子网格的9个数字均为1-9且互不相同。\n{rules_text}\n答案格式要求：请按嵌套元组形式输出整张数独的完成解，格式为((r1c1,r1c2,...,r1c9),(r2c1,...,r2c9),...,(r9c1,...,r9c9))；例如：((1,2,3,4,5,6,7,8,9),(4,5,6,7,8,9,1,2,3),(7,8,9,1,2,3,4,5,6),(2,3,4,5,6,7,8,9,1),(5,6,7,8,9,1,2,3,4),(8,9,1,2,3,4,5,6,7),(3,4,5,6,7,8,9,1,2),(6,7,8,9,1,2,3,4,5),(9,1,2,3,4,5,6,7,8))。\n{q1}'

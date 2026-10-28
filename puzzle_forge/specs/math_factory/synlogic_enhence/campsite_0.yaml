@@ -1,0 +1,167 @@
+custom_operator:
+  generate_unique_tents_puzzle: campsite_0.py
+  function_1: campsite_0.py
+  function_2: campsite_0.py
+  enumerate_tent_solutions_advanced: campsite_0.py
+  rand_pick: campsite_0.py
+  rand_float: campsite_0.py
+
+variables:
+  min_rows:
+    type: int
+    domain: "[4, 6]"
+  max_rows:
+    type: int
+    domain: "[min_rows + 1, min_rows + 3]"
+  min_cols:
+    type: int
+    domain: "[3, 5]"
+  max_cols:
+    type: int
+    domain: "[min_cols + 1, min_cols + 3]"
+  alpha_min:
+    formula: "rand_float(0.2, 0.35)"
+  alpha_max:
+    formula: "min(alpha_min + rand_float(0.05, 0.2), 0.5)"
+  max_tries:
+    type: int
+    domain: "[80, 240]"
+
+  puzzle:
+    formula: "generate_unique_tents_puzzle(min_rows, max_rows, min_cols, max_cols, alpha_min, alpha_max, max_tries)"
+
+  grid:
+    formula: "puzzle['grid']"
+  row_constraints:
+    formula: "puzzle['row_constraints']"
+  col_constraints:
+    formula: "puzzle['col_constraints']"
+  solution_grid:
+    formula: "puzzle['solution_grid']"
+  zone_list:
+    formula: "puzzle.get('zones', [])"
+  chess_offset:
+    formula: "puzzle.get('chess', {}).get('offset', 0)"
+  chess_black_count:
+    formula: "puzzle.get('chess', {}).get('black_count', 0)"
+  dir_hints:
+    formula: "puzzle.get('dir_hints', [])"
+
+  rows:
+    formula: "len(grid)"
+  cols:
+    formula: "len(grid[0])"
+  r_idx:
+    formula: "list(range(rows))"
+  c_idx:
+    formula: "list(range(cols))"
+  r_labels:
+    formula: "['r'+str(i) for i in range(rows)]"
+  c_labels:
+    formula: "['c'+str(j) for j in range(cols)]"
+  tree_positions:
+    formula: "[(i, j) for i in range(rows) for j in range(cols) if grid[i][j] == 'T']"
+  tree_count:
+    formula: "len(tree_positions)"
+  dir_delta:
+    formula: "{'N': (-1,0), 'S': (1,0), 'W': (0,-1), 'E': (0,1)}"
+
+  binding_mode:
+    formula: "rand_pick(['exact_plus_count', 'exact_plus_atmost'])"
+  include_count_eq:
+    formula: "binding_mode == 'exact_plus_count'"
+  include_at_most_one_tree:
+    formula: "binding_mode == 'exact_plus_atmost'"
+  include_requires_tree:
+    formula: "rand_pick([True, False])"
+  include_chess_parity:
+    formula: "rand_pick([True, False])"
+  include_zone_constraints:
+    formula: "(len(zone_list) > 0) and rand_pick([True, False])"
+  include_dir_hints:
+    formula: "(len(dir_hints) > 0) and rand_pick([True, False])"
+
+  zone_descriptions:
+    formula: "['区域 (' + str(z['r1']) + ',' + str(z['c1']) + ')-(' + str(z['r2']) + ',' + str(z['c2']) + '): 帐篷数=' + str(z['count']) for z in zone_list]"
+  zone_desc:
+    formula: "'; '.join(zone_descriptions)"
+  zone_desc_final:
+    formula: "zone_desc if include_zone_constraints else '无分区约束'"
+  chess_desc_final:
+    formula: "'棋盘奇偶: 偏移=' + str(chess_offset) + ', 黑格帐篷数=' + str(chess_black_count) if include_chess_parity else '无棋盘约束'"
+  dir_hint_descriptions:
+    formula: "['树(' + str(ti) + ',' + str(tj) + ') 允许方向 [' + ','.join(dirs) + ']' for (ti, tj, dirs) in dir_hints]"
+  dir_hint_desc:
+    formula: "'定向提示: ' + ('; '.join(dir_hint_descriptions) if len(dir_hint_descriptions)>0 else '无')"
+  dir_hint_desc_final:
+    formula: "dir_hint_desc if include_dir_hints else '无定向提示'"
+  phr_forbid:
+    formula: "rand_pick(['不能在标有T的格子上放置帐篷', '树木所在格子禁止放置帐篷'])"
+  phr_non_touching:
+    formula: "rand_pick(['任意两顶帐篷在八邻域内都不得相邻', '帐篷之间不能相互接触, 包括对角方向'])"
+  phr_rowcol:
+    formula: "rand_pick(['每行与每列的帐篷数量需分别满足其约束', '行与列约束给出了各自必须放置的帐篷数量'])"
+  phr_binding:
+    formula: "rand_pick(['每棵树恰好邻接一顶帐篷', '每棵树都只配一顶帐篷'])"
+  phr_requires_tree_opt:
+    formula: "(' ; 每顶帐篷必须与至少一棵树正交相邻') if include_requires_tree else ''"
+  phr_binding_mode_opt:
+    formula: "(' ; 帐篷总数=树木总数') if include_count_eq else ( ' ; 每顶帐篷至多邻接一棵树' if include_at_most_one_tree else '' )"
+  coord_rule:
+    formula: "'坐标说明: 采用0起始索引, 格子(i,j)表示第i行第j列。'"
+  dir_rule:
+    formula: "'方向说明: N=上方, S=下方, W=左侧, E=右侧。'"
+  chess_rule:
+    formula: "'棋盘说明: 若启用棋盘约束, 黑格定义为 (i + j + 偏移) 为偶数的格子, 黑格上的帐篷数需与给定值一致。'"
+
+symbols:
+  tent:
+    source:
+    - r_labels
+    - c_labels
+    type: Bool
+    desc: '在第 {_r_labels} 行第 {_c_labels} 列放置帐篷'
+
+conditions:
+  forbid_tent_on_tree:
+    formula: "And([Not(tent[(r_labels[i], c_labels[j])]) for i in range(rows) for j in range(cols) if grid[i][j] == 'T'])"
+    desc: '{phr_forbid}'
+  tents_non_touching:
+    formula: "And([Implies(tent[(r_labels[i], c_labels[j])], And([Not(tent[(r_labels[ni], c_labels[nj])]) for ni in range(max(0, i - 1), min(rows - 1, i + 1) + 1) for nj in range(max(0, j - 1), min(cols - 1, j + 1) + 1) if not (ni == i and nj == j)])) for i in range(rows) for j in range(cols)])"
+    desc: '{phr_non_touching}'
+  row_tent_counts:
+    formula: "And([Sum([If(tent[(r_labels[i], c_labels[j])], 1, 0) for j in range(cols)]) == row_constraints[i] for i in range(rows)])"
+    desc: '{phr_rowcol}'
+  col_tent_counts:
+    formula: "And([Sum([If(tent[(r_labels[i], c_labels[j])], 1, 0) for i in range(rows)]) == col_constraints[j] for j in range(cols)])"
+    desc: ''
+  each_tree_has_exactly_one_adjacent_tent:
+    formula: "And([Sum([If(tent[(r_labels[ni], c_labels[nj])], 1, 0) for (ni, nj) in [(ti - 1, tj), (ti + 1, tj), (ti, tj - 1), (ti, tj + 1)] if 0 <= ni < rows and 0 <= nj < cols]) == 1 for (ti, tj) in tree_positions])"
+    desc: '{phr_binding}{phr_requires_tree_opt}{phr_binding_mode_opt}'
+  opt_each_tent_adjacent_to_tree:
+    formula: "True if not include_requires_tree else And([Implies(tent[(r_labels[i], c_labels[j])], Or([(i > 0 and grid[i - 1][j] == 'T'), (i < rows - 1 and grid[i + 1][j] == 'T'), (j > 0 and grid[i][j - 1] == 'T'), (j < cols - 1 and grid[i][j + 1] == 'T')])) for i in range(rows) for j in range(cols)])"
+    desc: ''
+  tent_adjacent_to_at_most_one_tree:
+    formula: "True if not include_at_most_one_tree else And([Implies(tent[(r_labels[i], c_labels[j])], ( (1 if (i > 0 and grid[i - 1][j] == 'T') else 0) + (1 if (i < rows - 1 and grid[i + 1][j] == 'T') else 0) + (1 if (j > 0 and grid[i][j - 1] == 'T') else 0) + (1 if (j < cols - 1 and grid[i][j + 1] == 'T') else 0) ) <= 1) for i in range(rows) for j in range(cols)])"
+    desc: ''
+  tent_count_equals_tree_count:
+    formula: "True if not include_count_eq else Sum([If(tent[(r_labels[i], c_labels[j])], 1, 0) for i in range(rows) for j in range(cols)]) == tree_count"
+    desc: ''
+  zone_constraints:
+    formula: "True if not include_zone_constraints else And([Sum([If(tent[(r_labels[i], c_labels[j])], 1, 0) for i in range(z['r1'], z['r2']+1) for j in range(z['c1'], z['c2']+1)]) == z['count'] for z in zone_list])"
+    desc: '{zone_desc_final}'
+  chess_parity_constraint:
+    formula: "True if not include_chess_parity else Sum([If(tent[(r_labels[i], c_labels[j])], 1, 0) for i in range(rows) for j in range(cols) if ((i + j + chess_offset) % 2 == 0)]) == chess_black_count"
+    desc: '{chess_desc_final}'
+  directional_hints_constraint:
+    formula: "True if not include_dir_hints else And([Sum([If(tent[(r_labels[ti + dir_delta[d][0]], c_labels[tj + dir_delta[d][1]])], 1, 0) for d in dirs if 0 <= ti + dir_delta[d][0] < rows and 0 <= tj + dir_delta[d][1] < cols]) == 1 for (ti, tj, dirs) in dir_hints])"
+    desc: '{dir_hint_desc_final}'
+
+queries:
+  q1:
+    desc: '请在满足规则前提下放置帐篷, 并以二维列表形式输出完成后的网格, 树用T, 帐篷用C, 空地用X。答案格式示例: [[T, X, X, ...], [X, C, X, ...], ...]。请严格按此格式作答, 元素仅使用 T/C/X。'
+    ans_formula: "[['T' if grid[i][j] == 'T' else ('C' if get_value(_solutions[0], tent[(r_labels[i], c_labels[j])]) else 'X') for j in range(cols)] for i in range(rows)]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: '高阶营地谜题: 网格尺寸 {rows}x{cols}, 初始网格 {str(grid)}, 行约束 {str(row_constraints)}, 列约束 {str(col_constraints)}。规则: [不能在T格放帐篷; 八邻域内帐篷不得相邻; 行列约束必须满足; 树-帐篷一一对应{phr_requires_tree_opt}{phr_binding_mode_opt}; {zone_desc_final}; {chess_desc_final}; {dir_hint_desc_final}]。{coord_rule} ; {dir_rule} ; {chess_rule} 。请输出二维列表答案, 元素仅使用 T/C/X。{q1}'

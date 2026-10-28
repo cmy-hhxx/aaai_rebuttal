@@ -1,0 +1,182 @@
+custom_operator:
+  function_1: skyscraper_puzzle_0.py
+  function_2: skyscraper_puzzle_0.py
+  generate_solution_grid: skyscraper_puzzle_0.py
+  compute_views: skyscraper_puzzle_0.py
+  gen_relational_constraints: skyscraper_puzzle_0.py
+  render_rel_desc: skyscraper_puzzle_0.py
+  gen_aux_constraints: skyscraper_puzzle_0.py
+  render_aux_desc: skyscraper_puzzle_0.py
+  gen_branch_rule: skyscraper_puzzle_0.py
+  render_branch_desc: skyscraper_puzzle_0.py
+  build_branch_expr: skyscraper_puzzle_0.py
+  pick_intro_resolved: skyscraper_puzzle_0.py
+  build_aggregate_z3: skyscraper_puzzle_0.py
+  select_fixed_positions_for_uniqueness: skyscraper_puzzle_0.py
+
+variables:
+  grid_size:
+    type: int
+    domain: "[4, 7]"
+    diff_factor: 1
+
+  # 使用 1 基索引键（R1..Rn, C1..Cn），题面将明确说明
+  row_keys:
+    formula: "[ 'R' + str(i + 1) for i in range(grid_size) ]"
+  col_keys:
+    formula: "[ 'C' + str(j + 1) for j in range(grid_size) ]"
+
+  # 逆向生成：先生成一个合法解，然后派生视野与约束
+  solution_grid:
+    formula: generate_solution_grid(grid_size)
+
+  view_bundle:
+    formula: compute_views(solution_grid)
+  top_view:
+    formula: view_bundle['top']
+  bottom_view:
+    formula: view_bundle['bottom']
+  left_view:
+    formula: view_bundle['left']
+  right_view:
+    formula: view_bundle['right']
+
+  # 单元格关系（操作符池化）
+  op_pool:
+    formula: "['gt','lt','eq','neq','ge','le']"
+  n_rel_constraints:
+    type: int
+    domain: "[grid_size, grid_size * 2]"
+  rel_constraints:
+    formula: gen_relational_constraints(grid_size, solution_grid, n_rel_constraints, op_pool)
+
+  # 聚合约束类型池（子集和，避免冗余）
+  aux_pool:
+    formula: "['row_part_diff_eq','col_part_diff_eq','row_col_part_comp']"
+  n_aux_constraints:
+    type: int
+    domain: "[grid_size - 1, grid_size + 2]"
+  aux_constraints:
+    formula: gen_aux_constraints(grid_size, solution_grid, n_aux_constraints, aux_pool)
+
+  # 条件分支规则（子集和）
+  branch_rule:
+    formula: gen_branch_rule(grid_size, solution_grid)
+  branch_text:
+    formula: render_branch_desc(row_keys, col_keys, branch_rule)
+
+  # 固定格子上限（按需揭示，确保唯一解）
+  fix_cell_cap:
+    type: int
+    domain: "[1, grid_size * grid_size // 2]"
+
+  fixed_positions:
+    formula: select_fixed_positions_for_uniqueness(grid_size, solution_grid, left_view, right_view, top_view, bottom_view, fix_cell_cap, rel_constraints, aux_constraints, branch_rule)
+
+  # 自然语言描述文本（已格式化，避免未替换占位符）
+  intro_templates:
+    formula: "['在一个 {grid_size}×{grid_size} 的摩天楼谜题中，需为每个格子填入 1..{grid_size} 的高度，且每行每列数字不重复。', '这是一个规模为 {grid_size} 的摩天楼逻辑题：每行每列必须是 1..{grid_size} 的排列（不可重复）。']"
+  intro_text:
+    formula: pick_intro_resolved(intro_templates, grid_size)
+
+  relations_text:
+    formula: render_rel_desc(row_keys, col_keys, rel_constraints)
+  aux_text:
+    formula: render_aux_desc(row_keys, col_keys, aux_constraints)
+
+symbols:
+  # 高度变量字典：cell[(row_key, col_key)] 为一个整数符号
+  cell:
+    source:
+    - row_keys
+    - col_keys
+    type: int
+    desc: "高度变量：{_row_keys}-{_col_keys} 的摩天楼高度"
+
+conditions:
+  # 值域约束
+  value_domain:
+    formula: And([And(cell[(r, c)] >= 1, cell[(r, c)] <= grid_size) for r in row_keys for c in col_keys])
+    desc: 所有格子高度均在1到{grid_size}之间
+
+  # 行唯一性
+  unique_rows:
+    formula: And([Distinct([cell[(row_keys[i], col_keys[j])] for j in range(grid_size)]) for i in range(grid_size)])
+    desc: 每一行的高度互不重复
+
+  # 列唯一性
+  unique_cols:
+    formula: And([Distinct([cell[(row_keys[i], col_keys[j])] for i in range(grid_size)]) for j in range(grid_size)])
+    desc: 每一列的高度互不重复
+
+  # 视野约束（四侧）
+  view_left:
+    formula: And([function_1([cell[(row_keys[i], col_keys[j])] for j in range(grid_size)], left_view[i]) for i in range(grid_size)])
+    desc: 左侧视野提示成立
+
+  view_right:
+    formula: And([function_1([cell[(row_keys[i], col_keys[j])] for j in list(reversed(range(grid_size)))], right_view[i]) for i in range(grid_size)])
+    desc: 右侧视野提示成立
+
+  view_top:
+    formula: And([function_1([cell[(row_keys[i], col_keys[j])] for i in range(grid_size)], top_view[j]) for j in range(grid_size)])
+    desc: 顶部视野提示成立
+
+  view_bottom:
+    formula: And([function_1([cell[(row_keys[i], col_keys[j])] for i in list(reversed(range(grid_size)))], bottom_view[j]) for j in range(grid_size)])
+    desc: 底部视野提示成立
+
+  # 单元格关系约束（操作符池化）
+  relational_constraints:
+    formula: >
+      And([make_expr(item['op'],
+                     cell[(row_keys[item['i']], col_keys[item['j']])],
+                     cell[(row_keys[item['k']], col_keys[item['l']])])
+           for item in rel_constraints])
+    desc: 动态生成的单元格关系约束成立
+
+  # 聚合（子集和）约束（多类型混合；避免冗余）
+  aggregate_constraints:
+    formula: build_aggregate_z3(row_keys, col_keys, cell, aux_constraints, grid_size)
+    desc: 动态生成的行/列子集和约束成立
+
+  # 条件分支规则（子集和）
+  branch_rule_cond:
+    formula: build_branch_expr(row_keys, col_keys, cell, branch_rule, grid_size)
+    desc: 条件分支规则成立
+
+  # 必要的固定格子约束（确保唯一解）
+  fixed_cells:
+    formula: And([cell[(row_keys[i], col_keys[j])] == solution_grid[i][j] for (i, j) in fixed_positions])
+    desc: 局部揭示的固定格子满足给定的数值
+
+# 强制唯一解（若不唯一，该配置将被丢弃）
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请输出完成的网格（Python的二维列表格式，每个子列表是一行；行按自上而下 R1..R{grid_size}，列按自左而右 C1..C{grid_size}）。答案格式示例：[[1,2,3,...],[...],...]"
+    ans_formula: function_2(_solutions[0], row_keys, col_keys, cell)
+    ans_text: str(_ans)
+    ans_assertion: len(_solutions) == 1
+
+desc: >
+  {intro_text}
+  视野规则简述：从边缘朝行/列方向观察，能看到的楼数为严格递增的“峰值”计数，更高楼会遮挡后面的更低楼。
+  边缘视野提示如下（从该方向看时能看到的摩天楼数量）：
+    顶部：{top_view}
+    底部：{bottom_view}
+    左侧：{left_view}
+    右侧：{right_view}
+
+  另外，还有如下关系提示（可能包含“大于/小于/等于/不等于/不小于/不大于”等变体）：
+  {relations_text}
+
+  同时包含基于行/列子集和的约束（避免冗余与重复）：
+  {aux_text}
+
+  条件分支规则（基于子集和，避免自相矛盾）：
+  {branch_text}
+
+  为确保唯一解，题面已按需揭示少量格子数值，且已通过求解器验证唯一解。
+  {q1}

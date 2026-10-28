@@ -1,0 +1,138 @@
+custom_operator:
+  build_matrix: customs/survo_0.py
+  choose_unknowns: customs/survo_0.py
+  compute_unknown_num: customs/survo_0.py
+
+variables:
+  # 随机种子（可复现）
+  seed:
+    type: int
+    domain: "[1, 99999]"
+
+  # 难度等级（显式枚举：0=easy, 1=medium, 2=hard）
+  difficulty_level:
+    type: int
+    domain: "[0, 2]"
+    diff_factor: 1
+
+  # 难度标签（仅用于题面展示）
+  difficulty:
+    formula: "['easy','medium','hard'][difficulty_level]"
+
+  # 规模（行数/列数）
+  m:
+    type: int
+    domain: "[4, 10]"
+  n:
+    type: int
+    domain: "[4, 10]"
+
+  # 内部格取值范围（随难度调节）
+  min_val:
+    formula: "1 + difficulty_level"        # easy=1, medium=2, hard=3
+  max_val:
+    formula: "min_val + 12 + 4 * difficulty_level"  # easy≈13, medium≈16, hard≈20
+
+  # 未知格数量（由难度与 seed 控制，且不超过内部行/列上限；完全绑定 seed 以提升复现性）
+  unknown_num:
+    formula: compute_unknown_num(m, n, difficulty_level, seed)
+
+  # 行列标识（字符串，避免符号键为整数导致的拼接错误）
+  row_ids:
+    formula: generate_letters(m)
+  col_ids:
+    formula: generate_letters(n)
+
+  # 随机生成完整矩阵（满足 Survo 行/列和规则；使用 seed 控制复现）
+  filled_total:
+    formula: build_matrix(m, n, min_val, max_val, seed)
+
+  # 依据难度选择未知格位置（行/列受控，确保唯一性），并导出：已知三元组与可用数字多重集
+  sel_pack:
+    formula: choose_unknowns(m, n, filled_total, unknown_num, difficulty_level, seed)
+  unknown_positions:
+    formula: sel_pack['unknown']       # 形如 [[i,j], ...]，仅内部区域
+  known_triplets:
+    formula: sel_pack['known']         # 形如 [(i,j,val), ...]，仅内部已知
+  avail_nums:
+    formula: sel_pack['avail']         # 未知位置的真实值组成的多重集
+
+  # 多重集计数辅助
+  uniq_vals:
+    formula: to_unique(avail_nums)
+  counts:
+    formula: "[(avail_nums.count(v)) for v in uniq_vals]"
+
+symbols:
+  # 矩阵符号 cell[(row_id, col_id)] 为整数
+  cell:
+    source:
+    - row_ids
+    - col_ids
+    type: int
+
+conditions:
+  # 内部域约束（仅对内部 m-1 行、n-1 列）
+  interior_domain:
+    formula: "And([And(cell[(row_ids[i], col_ids[j])] >= min_val, cell[(row_ids[i], col_ids[j])] <= max_val) for i in range(m - 1) for j in range(n - 1)])"
+    desc: 内部格为正整数并限定在[min_val, max_val]范围
+
+  # 固定所有已知的内部单元格（三元组）
+  fixed_known_cells:
+    formula: "And([cell[(row_ids[i], col_ids[j])] == val for (i, j, val) in known_triplets])"
+    desc: 已知内部位置的数值固定为生成矩阵中的对应值
+
+  # 固定最后一列（行和）
+  fix_last_col:
+    formula: "And([cell[(row_ids[r], col_ids[n - 1])] == filled_total[r][n - 1] for r in range(m)])"
+    desc: 每行最后一格（行和）与生成矩阵一致
+
+  # 固定最后一行（列和）
+  fix_last_row:
+    formula: "And([cell[(row_ids[m - 1], col_ids[c])] == filled_total[m - 1][c] for c in range(n)])"
+    desc: 每列最后一格（列和）与生成矩阵一致
+
+  # 行和规则（表达题意）
+  row_sums:
+    formula: "And([Sum([cell[(row_ids[r], col_ids[c])] for c in range(n - 1)]) == cell[(row_ids[r], col_ids[n - 1])] for r in range(m - 1)])"
+    desc: 每行最后的数字代表该行其他数字之和
+
+  # 列和规则（表达题意）
+  col_sums:
+    formula: "And([Sum([cell[(row_ids[r], col_ids[c])] for r in range(m - 1)]) == cell[(row_ids[m - 1], col_ids[c])] for c in range(n - 1)])"
+    desc: 每列最后的数字代表该列其他数字之和
+
+  # 未知格取值域（避免解构语法，使用索引）
+  unknown_any_domain:
+    formula: "And([Or([cell[(row_ids[unknown_positions[t][0]], col_ids[unknown_positions[t][1]])] == v for v in uniq_vals]) for t in range(len(unknown_positions))])"
+    desc: X 位置只能填入可用数字集合中的某个值
+
+  # 多重集计数约束：每个唯一值的使用次数严格等于其在 avail_nums 中的计数（恰好使用一次）
+  unknown_multiset:
+    formula: "And([Sum([If(cell[(row_ids[unknown_positions[t][0]], col_ids[unknown_positions[t][1]])] == uniq_vals[k], 1, 0) for t in range(len(unknown_positions))]) == counts[k] for k in range(len(uniq_vals))])"
+    desc: 可用数字的每个副本恰好使用一次
+
+# 要求唯一解（若不唯一，生成器将丢弃该实例）
+max_solution: 1
+
+# 逆向渲染题面：展示带 X 的矩阵与可用数字多重集（顺序无关）
+post_generation:
+  post_gen_vars:
+    # 依据唯一解抽取完整矩阵
+    filled: "[[get_value(_sol, cell[(row_ids[i], col_ids[j])]) for j in range(n)] for i in range(m)]"
+    # 题面矩阵：仅内部未知位置显示为 'X'
+    matrix_with_X: "[[filled[i][j] if not ((i < m - 1 and j < n - 1) and [i, j] in unknown_positions) else 'X' for j in range(n)] for i in range(m)]"
+    # 逐行渲染提升可读性
+    matrix_lines: "['[' + ', '.join([str(e) for e in row]) + ']' for row in matrix_with_X]"
+    matrix_with_X_str: "'[\\n  ' + ',\\n  '.join(matrix_lines) + '\\n]'"
+    # 可用数字展示顺序打乱（顺序无关）
+    avail_desc: "'[' + ', '.join([str(v) for v in sorted(avail_nums, reverse=(seed % 2 == 0))]) + ']'"
+
+queries:
+  q1:
+    desc: "请给出填充后的完整矩阵,例如[[13, 9, 4, 11, 2, 10, 49], [12, 10, 10, 8, 10, 12, 62], [4, 1, 2, 3, 8, 10, 28], [29, 20, 16, 22, 20, 32, 139]]。"
+    ans_formula: "filled"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: "Survo谜题规则：矩阵的每行最后一格为该行其他格之和，每列最后一格为该列其他格之和。内部若干格以 X 表示未知，其值需从给定的可用数字多重集中选取，且每个副本恰好使用一次（顺序无关）。\\n给定矩阵：{matrix_with_X_str}\\n可用数字：{avail_desc}（本题保证唯一解）。\\n{q1}"

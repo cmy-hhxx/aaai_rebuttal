@@ -1,0 +1,150 @@
+custom_operator:
+  function_1: space_reasoning_1.py
+  function_2: space_reasoning_1.py
+
+variables:
+  layers:
+    type: int
+    domain: "[3, 6]"
+  start_r:
+    type: int
+    domain: "[1, layers - 1]"
+  start_c:
+    type: int
+    domain: "[-start_r + 1, start_r - 1]"
+
+  base_dirs:
+    formula: "['LU','RU','LD','RD']"
+  allowed_dir_mask:
+    formula: "generate_random_list(4, 'int', [0, 1], ['lambda l: (l[0] + l[1] >= 1) and (l[2] + l[3] >= 1)'])"
+  allowed_dirs:
+    formula: "[base_dirs[i] for i in range(4) if allowed_dir_mask[i] == 1]"
+
+  window_label_num:
+    type: int
+    domain: "[2, 3]"
+  label_palette:
+    formula: "['红','蓝','绿','紫']"
+  rule_type_ints:
+    formula: "generate_random_list(window_label_num, 'int', [0, 2])"
+
+  seq1_len:
+    type: int
+    domain: "[2, 4]"
+  seq2_len:
+    type: int
+    domain: "[4, 6]"
+
+  beacon_num:
+    type: int
+    domain: "[1, 5]"
+  use_init_jump_flag:
+    formula: "generate_random_list(1, 'int', [0, 1])[0]"
+  allow_second_jump_flag:
+    formula: "generate_random_list(1, 'int', [0, 1])[0]"
+  use_init_jump:
+    formula: "use_init_jump_flag == 1"
+  allow_second_jump:
+    formula: "allow_second_jump_flag == 1"
+  jt_idx:
+    type: int
+    domain: "[0, 2]"
+  jump_trigger_mode:
+    formula: "['beacon_only','any','beacon_or_start'][jt_idx]"
+  allow_sym_flag:
+    formula: "generate_random_list(1, 'int', [0, 1])[0]"
+  allow_up_flag:
+    formula: "generate_random_list(1, 'int', [0, 1])[0]"
+  allow_down_flag:
+    formula: "generate_random_list(1, 'int', [0, 1])[0]"
+  allow_sym:
+    formula: "allow_sym_flag == 1"
+  allow_up:
+    formula: "allow_up_flag == 1"
+  allow_down:
+    formula: "allow_down_flag == 1"
+  max_pass_per_edge:
+    type: int
+    domain: "[1, 2]"
+
+  energy_budget:
+    type: int
+    domain: "[12, 24]"
+  move_costs:
+    formula: "generate_random_list(4, 'int', [1, 6])"
+  jump_cost:
+    type: int
+    domain: "[0, 5]"
+  beacon_energy_refill:
+    type: int
+    domain: "[0, 8]"
+
+  restrict_mode_flag:
+    type: int
+    domain: "[0, 1]"
+  token_capacity:
+    type: int
+    domain: "[1, 4]"
+  token_refill:
+    type: int
+    domain: "[1, token_capacity]"
+  init_tokens:
+    type: int
+    domain: "[0, token_capacity]"
+
+  names_locale:
+    formula: "'zh_CN'"
+  nodes_count:
+    formula: "sum([2*r + 1 for r in range(layers + 1)])"
+  node_names:
+    formula: "get_faker(nodes_count, 'name', names_locale)"
+  cargo_ids:
+    formula: "[f'W{i+1}' for i in range(nodes_count)]"
+  nm_idx:
+    type: int
+    domain: "[0, 1]"
+  naming_mode:
+    formula: "['poi','cargo'][nm_idx]"
+  color_seed:
+    formula: "randint(0, 999999)"
+
+  result:
+    formula: "function_1(layers, start_r, start_c, allowed_dirs, beacon_num, seq1_len, seq2_len, use_init_jump, allow_second_jump, jump_trigger_mode, allow_sym, allow_up, allow_down, max_pass_per_edge, node_names, cargo_ids, naming_mode, color_seed, label_palette, window_label_num, rule_type_ints, energy_budget, move_costs, jump_cost, beacon_energy_refill, restrict_mode_flag, token_capacity, token_refill, init_tokens)"
+
+  start_name:
+    formula: "result['start_name']"
+  allowed_dirs_text:
+    formula: "result['allowed_dirs_text']"
+  rule_text:
+    formula: "result['rule_text']"
+  energy_text:
+    formula: "result['energy_text']"
+  token_text:
+    formula: "result['token_text']"
+  jump_text:
+    formula: "result['jump_text']"
+  beacons_text:
+    formula: "result['beacons_text']"
+  seq1_text:
+    formula: "result['seq1_text']"
+  initial_trace_text:
+    formula: "result['initial_trace_text']"
+  seq2_text:
+    formula: "result['seq2_text']"
+  answer_format_text:
+    formula: "result['answer_format_text']"
+  ans1:
+    formula: "result['q1']"
+  ans2:
+    formula: "result['q2']"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '问题一：按续行序列与全部规则执行（窗口标签、能量、令牌、边使用上限、可选跳跃），最终到达的终点名称或编号是什么？若不可达则输出 unknown。请按答案格式提交。'
+    ans_formula: ans1
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+
+desc: '太空货运分层菱形网络任务：网络层数 {layers}；起点 {start_name}；可用方向 [{allowed_dirs_text}]；时间窗标签与规则：{rule_text}；能量规则：{energy_text}；令牌规则：{token_text}；跳跃策略：{jump_text}；边使用上限：每条边最多通过 {max_pass_per_edge} 次；初段序列：{seq1_text}；初段执行记录：{initial_trace_text}；续行序列：{seq2_text}；信标信息 {beacons_text}；{q1}'

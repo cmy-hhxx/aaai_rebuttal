@@ -1,0 +1,58 @@
+custom_operator:
+  generate_star_battle: star_placement_puzzle_3.py
+  format_coords: star_placement_puzzle_3.py
+
+calc_solution: false
+
+variables:
+  data:
+    formula: generate_star_battle()
+
+  # --- 基础参数 ---
+  size:
+    formula: data['size']
+  k:
+    formula: data['k']
+  adjacency_mode:
+    formula: data['adjacency_mode']
+  block_used:
+    formula: data['block_used']
+  block_max:
+    formula: data.get('block_max', None)
+  diag_type:
+    formula: data['diag_type']
+  diag_k:
+    formula: data.get('diag_k', 0)
+
+  # --- 棋盘与答案 ---
+  region_map:
+    formula: data['region_map']
+  star_coords:
+    formula: data['stars']
+  revealed:
+    formula: data['revealed']
+
+  # --- 文本辅助 ---
+  grid_str:
+    formula: "'\\n'.join([' '.join(row) for row in region_map])"
+  revealed_str:
+    formula: "format_coords(revealed) if revealed else '无'"
+  rule_adj:
+    formula: "'水平或垂直' if adjacency_mode=='rook' else '水平、垂直或对角'"
+  rule_block:
+    formula: "'且每个 2×2 小方块的摄像头数不超过 ' + str(block_max) + ' 颗' if block_used else '且本题无 2×2 小方块限制'"
+  rule_diag:
+    formula: "('并且' if block_used else '且') + ('主对角线上恰有 ' + str(diag_k) + ' 颗摄像头' if diag_type=='main' else ('副对角线上恰有 ' + str(diag_k) + ' 颗摄像头' if diag_type=='anti' else '本题无对角线星数限制'))"
+  example_fmt:
+    formula: "'(1,1) (2,3)'"
+  answer_str:
+    formula: format_coords(star_coords)
+
+queries:
+  q1:
+    desc: '请在满足全部规则的前提下，给出所有摄像头坐标（格式：(r1,c1) (r2,c2)…，行列从1开始，先行后列升序），例如 {example_fmt}。'
+    ans_formula: answer_str
+    ans_text: _ans
+    ans_assertion: 'True'
+
+desc: '【博物馆的红外摄像头】在一座 {size}×{size} 的博物馆大厅内需安装摄像头（星）。规则：①每行恰有 {k} 颗；②每列恰有 {k} 颗；③每个展区恰有 {k} 颗；④任意两颗摄像头不得{rule_adj}相邻；⑤X 格不可放置；{rule_block}{rule_diag}。下表为展区示意图（相同字母为同一区域，X 为障碍）：\\n{grid_str}\\n已知摄像头坐标：{revealed_str}\\n{q1}'

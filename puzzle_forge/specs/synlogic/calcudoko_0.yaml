@@ -1,0 +1,87 @@
+custom_operator:
+  # 生成一个随机拉丁方（每行每列为1..N的排列，作为唯一解的候选）
+  gen_latin: calcudoko_0.py
+  # 根据解生成连通的笼划分与运算目标（KenKen/Calcudoku风格）
+  make_cages: calcudoko_0.py
+  # 将笼列表转换为统一的Z3约束表达式（And([...])）
+  build_cage_constraint: calcudoko_0.py
+  # 笼的文本描述（用于题面展示，格式统一）
+  cages_to_desc: calcudoko_0.py
+
+variables:
+  # 网格大小 N（随机生成以提升多样性）
+  N:
+    type: int
+    domain: "[4, 6]"
+    diff_factor: 1
+
+  # 重要：将行列索引转成字符串作为键，避免底层对键名做字符串拼接时报错
+  rows:
+    formula: "['r' + str(i) for i in range(1, N + 1)]"
+  cols:
+    formula: "['c' + str(i) for i in range(1, N + 1)]"
+
+  # 逆向生成：先随机生成一个拉丁方作为正确答案的候选
+  grid_sol:
+    formula: gen_latin(N)
+
+  # 基于正确答案随机生成覆盖全盘的笼；如非唯一解，将被丢弃并重试（由max_solution保障）
+  cages:
+    formula: make_cages(grid_sol, N)
+
+symbols:
+  # x[(r,c)] 表示单元格(r,c)的取值，取1..N之间的整数
+  x:
+    source:
+    - rows
+    - cols
+    type: int
+
+conditions:
+  # 每个格子的取值范围：[1, N]
+  domain_range:
+    formula: And([And(x[(r, c)] >= 1, x[(r, c)] <= N) for r in rows for c in cols])
+
+  # 每行数字互不相同
+  row_distinct:
+    formula: And([Distinct([x[(r, c)] for c in cols]) for r in rows])
+
+  # 每列数字互不相同
+  col_distinct:
+    formula: And([Distinct([x[(r, c)] for r in rows]) for c in cols])
+
+  # 笼约束（由cages变量构造）
+  cages_all:
+    formula: build_cage_constraint(x, cages)
+
+# 要求唯一解；若不唯一，生成器会丢弃并重新生成（保证题目答案唯一）
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请输出整盘的解，按 [[A, B, C],[D, E, F],...] 的嵌套数组格式："
+    ans_assertion: len(_solutions) == 1
+    ans_formula: "[[get_value(_solutions[0], x[(rows[i], cols[j])]) for j in range(N)] for i in range(N)]"
+    ans_text: str(_ans)
+
+desc: >
+  欢迎来到计算数独（KenKen/Calcudoku）！你需要在 N×N 的网格上解题。
+  规则：
+  1) 在每一行与每一列中填入 1..N 的数字，且每行、每列不重复。
+  2) 网格被划分为若干“笼”。每个笼附有一个目标数字与运算符，表示笼内数字经该运算得到目标值。
+     注意：笼内数字不要求互不相同；减法与除法为“顺序无关”：
+       - 减法笼（target-）：两个格子的差的绝对值等于 target；
+       - 除法笼（target÷）：两个格子能够整除，较大数除以较小数的商等于 target；
+       - 加法/乘法笼分别为和/积等于 target；
+       - 等号笼（target=）表示该格子的值即为 target。
+  笼的格式示例：((1,1),(2,1),(3,1)):12+ 表示这些格子的数字之和等于 12。
+  The size of the grid is {N}×{N}.
+  具体笼约束如下（坐标为(行,列)，1-based）：
+  {cages_to_desc(cages)}
+
+  请按照下述格式返回答案。
+  例如，如果答案是：
+  A B C
+  D E F
+  G H I
+  请输出 [[A, B, C],[D, E, F],[G, H, I]]。{q1}

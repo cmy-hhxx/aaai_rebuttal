@@ -1,0 +1,114 @@
+# 造题框架：高校科技节徽章互换赛（纯计算模式，强化“完成者判定规则”）
+
+# 1) 引入自定义操作符（全部在 goods_exchange_2.py 中定义，且文件必须真实存在）
+custom_operator:
+  pick_unique_names: goods_exchange_2.py
+  gen_badges: goods_exchange_2.py
+  assign_initial: goods_exchange_2.py
+  pick_volatile_badge: goods_exchange_2.py
+  choose_style: goods_exchange_2.py
+  pick_hazard_rule: goods_exchange_2.py
+  hazard_to_text: goods_exchange_2.py
+  pick_bonus_rule: goods_exchange_2.py
+  bonus_to_text: goods_exchange_2.py
+  gen_rules: goods_exchange_2.py
+  rules_to_text: goods_exchange_2.py
+  pairs_to_text: goods_exchange_2.py
+  sample_format: goods_exchange_2.py
+  compute_final_badges: goods_exchange_2.py
+  format_tuple: goods_exchange_2.py
+  verify_unique_solution: goods_exchange_2.py
+  semantics_text: goods_exchange_2.py
+
+# 2) 随机参数与派生文本（变量命名规范，避免前向引用）
+variables:
+  # 参赛人数
+  n_people:
+    type: int
+    domain: '[8, 16]'
+    diff_factor: 1
+
+  # 规则步数（混合多模板，适度拉高）
+  steps_num:
+    type: int
+    domain: '[10, 14]'
+    diff_factor: 1
+
+  # 文本渲染风格
+  render_style:
+    formula: 'choose_style()'
+    diff_factor: 0
+
+  # 名单与徽章集合
+  names:
+    formula: 'pick_unique_names(n_people)'
+    diff_factor: 0
+  badges:
+    formula: 'gen_badges(n_people)'
+    diff_factor: 0
+
+  # 初始一一对应分配（按 names 的给定顺序）
+  initial_pairs:
+    formula: 'assign_initial(names, badges)'
+    diff_factor: 0
+
+  # 全程“易变徽章”
+  volatile_badge:
+    formula: 'pick_volatile_badge(badges)'
+    diff_factor: 0
+
+  # 易变规则结构与渲染文本（alpha_next 将在文本中内嵌字典序顺序）
+  hazard_struct:
+    formula: 'pick_hazard_rule(names)'
+    diff_factor: 0
+  hazard_text:
+    formula: 'hazard_to_text(hazard_struct)'
+    diff_factor: 0
+
+  # 联动规则结构与渲染文本（theme_link 保证目标主题唯一；alpha类在文本中内嵌字典序顺序）
+  bonus_struct:
+    formula: 'pick_bonus_rule(names, badges)'
+    diff_factor: 0
+  bonus_text:
+    formula: 'bonus_to_text(bonus_struct)'
+    diff_factor: 0
+
+  # 交换规则结构与渲染文本
+  rules_struct:
+    formula: 'gen_rules(names, badges, initial_pairs, steps_num, volatile_badge)'
+    diff_factor: 0
+  rules_text:
+    formula: 'rules_to_text(rules_struct, render_style)'
+    diff_factor: 0
+
+  # 初始分配渲染文本与答案格式示例
+  initial_pairs_text:
+    formula: 'pairs_to_text(initial_pairs, render_style)'
+    diff_factor: 0
+  answer_sample:
+    formula: 'sample_format()'
+    diff_factor: 0
+
+  # 完成者判定规则文本（公开到题面）
+  semantics_text:
+    formula: 'semantics_text()'
+    diff_factor: 0
+
+  # 唯一性验证（不满足则丢弃重生）
+  unique_ok:
+    formula: 'verify_unique_solution(initial_pairs, rules_struct, hazard_struct, bonus_struct)'
+    diff_factor: 0
+
+# 3) 本题为纯计算，不进行Z3求解
+calc_solution: false
+
+# 4) 问答（严格的答案格式要求与示例）
+queries:
+  q1:
+    desc: '最终每人持有的徽章是什么？请按给定顺序（题面“初始分配”中姓名的顺序）输出一个Python tuple 字符串（每项为''姓名-徽章''），逗号后保留一个空格。例如：{answer_sample}'
+    ans_formula: 'compute_final_badges(initial_pairs, rules_struct, hazard_struct, bonus_struct)'
+    ans_text: '{format_tuple(_ans)}'
+    ans_assertion: 'unique_ok'
+
+# 5) 题干描述（单行字符串，显式 \\n 换行；题面只包含可见信息）
+desc: '高校科技节徽章互换赛：共有{n_people}位参赛者与{n_people}枚不同徽章。\\n题目环境：\\n参与者：{", ".join(names)}。\\n徽章：{", ".join(badges)}。\\n初始分配（按给定顺序）：{initial_pairs_text}。\\n全程附加规则：设有一枚“易变徽章”——“{volatile_badge}”。{hazard_text}。此外，{bonus_text}。附加交换不再触发其他附加规则；每一步先判定易变规则，再判定联动规则；若某一步“主步骤”直接产生多人获得新徽章，则按“初始分配”名单顺序从前到后逐一判定并依次执行联动规则（这些附加交换不再触发其他附加规则）。\\n完成者判定规则：{semantics_text}。\\n交换流程：{rules_text}。其中：凡题面出现“以下两两交换（按列出顺序逐一执行）”之处，均按列出顺序逐一执行；“相邻交换链”表示依次进行相邻交换。\\n请根据上述信息推演，回答下列问题（答案格式严格）：\\n{q1}'

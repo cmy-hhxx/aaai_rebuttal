@@ -1,0 +1,77 @@
+custom_operator:
+  function_1: operation_1.py
+  function_2: operation_1.py
+
+variables:
+  a:
+    type: int
+    domain: "[0, 3]"
+  b:
+    type: int
+    domain: "[1, 12]"
+  m:
+    type: int
+    domain: "[0, 12]"
+  alpha:
+    type: int
+    domain: "[1, 2]"
+  beta:
+    type: int
+    domain: "[3, 5]"
+  gamma:
+    type: int
+    domain: "[3, 4]"
+  lam:
+    type: int
+    domain: "[4, 5]"
+  delta:
+    type: int
+    domain: "[0, 2]"
+  r1:
+    type: int
+    domain: "[2, 2]"
+  r2:
+    type: int
+    domain: "[2, 2]"
+  p:
+    type: int
+    domain: "[2, 2]"
+  t_pow:
+    type: int
+    domain: "[1, 2]"
+  s_margin:
+    type: int
+    domain: "[1, 4]"
+  u_margin:
+    type: int
+    domain: "[1, 4]"
+  L_var:
+    formula: "min(a, b) - s_margin"
+  U_var:
+    formula: "max(a, b) + u_margin"
+  precision:
+    type: int
+    domain: "[3, 6]"
+  op_symbol:
+    type: enum
+    domain: "['⊙', '◇', '★']"
+  explain_style:
+    type: enum
+    domain: "['detailed', 'concise']"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请在实数范围内求复合函数 F(x) 的全局最小值及对应的 x。答案按 min====x 的格式填写。'
+    ans_formula: function_1('pair', a, b, m, alpha, beta, gamma, lam, delta, r1, r2, p, t_pow, L_var, U_var, precision, op_symbol, explain_style)
+    ans_text: "str(_ans[0]) + '====' + str(_ans[1])"
+    ans_assertion: 'function_2(a, b, m, alpha, beta, gamma, lam, delta, r1, r2, p, t_pow, L_var, U_var)'
+
+  # q2:
+  #   desc: '请简述你的推导过程, 包含分段点、可能的驻点与软约束的作用, 给出合理的多步分析结论。'
+  #   ans_formula: function_1('derivation', a, b, m, alpha, beta, gamma, lam, delta, r1, r2, p, t_pow, L_var, U_var, precision, op_symbol, explain_style)
+  #   ans_text: 'str(_ans)'
+  #   ans_assertion: 'True'
+
+desc: '高阶优化与推理问题 定义自定义符号 {op_symbol}: x {op_symbol} y = x^2*Abs(y)^r1。考虑复合函数 F(x) = alpha*x^2*Abs(a - x)^r1 + beta*Abs(b - x)^r2 + gamma*Abs(x - m)^p + lam*x^2 + delta*[max(0, L - x)^t + max(0, x - U)^t]。其中 L={L_var}, U={U_var} 为区间边界, 带外软约束仅在 x<L 或 x>U 时生效。参数为 a={a}, b={b}, m={m}, alpha={alpha}, beta={beta}, gamma={gamma}, lam={lam}, delta={delta}, r1={r1}, r2={r2}, p={p}, t={t_pow}, 输出精度 {precision} 位。答案格式说明: 请按 min====x 填写两个数值。\n{q1}'

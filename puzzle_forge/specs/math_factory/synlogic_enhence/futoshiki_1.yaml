@@ -1,0 +1,108 @@
+custom_operator:
+  function_1: futoshiki_1.py
+  function_2: futoshiki_1.py
+
+variables:
+  # 棋盘规模（支持 4、6、8、9）
+  n:
+    type: int
+    domain: "[4, 6, 8, 9]"
+
+  # 生成满足拉丁与随机子块结构的完整解，以及选定的子块尺寸
+  pack:
+    formula: "function_1(n)"
+
+  block_r:
+    formula: "pack['r']"
+  block_c:
+    formula: "pack['c']"
+  solved_grid:
+    formula: "pack['grid']"
+
+  # 索引（1-based）
+  rows_i:
+    formula: "list(range(1, n + 1))"
+  cols_i:
+    formula: "list(range(1, n + 1))"
+
+  # 是否启用子块唯一约束（随机）
+  use_blocks:
+    type: bool
+    domain: "[True, False]"
+
+  # 线索与复合规则数量参数（全部参数化，不硬编码）
+  # 注意：避免使用 max/min 等多参数函数，直接用 n 作下界，解析器更稳定
+  givens_num:
+    type: int
+    domain: "[n, n * n // 2]"
+  parity_even_num:
+    type: int
+    domain: "[0, n * n // 3]"
+  parity_odd_num:
+    type: int
+    domain: "[0, n * n // 3]"
+  num_ineq:
+    type: int
+    domain: "[n // 2, 2 * n]"
+  num_diff:
+    type: int
+    domain: "[0, n]"
+  num_sum:
+    type: int
+    domain: "[0, n]"
+  sum_group_min:
+    type: int
+    domain: "[2, 3]"
+  sum_group_max:
+    type: int
+    domain: "[3, 4]"
+  num_parcount:
+    type: int
+    domain: "[0, n]"
+  parcount_min:
+    type: int
+    domain: "[2, 3]"
+  parcount_max:
+    type: int
+    domain: "[3, 6]"
+  num_chains:
+    type: int
+    domain: "[0, n]"
+  # 唯一性验证时间限制（秒），确保远小于 180s
+  time_limit_s:
+    type: int
+    domain: "[30, 120]"
+
+  # 从解中逆向生成规则并保证唯一解；返回结构化题面
+  puzzle:
+    formula: "function_2(solved_grid, rows_i, cols_i, givens_num, parity_even_num, parity_odd_num, num_ineq, num_diff, num_sum, sum_group_min, sum_group_max, use_blocks, block_r, block_c, num_parcount, parcount_min, parcount_max, num_chains, time_limit_s)"
+
+  givens:
+    formula: "puzzle['givens']"
+  E_pos:
+    formula: "puzzle['E_pos']"
+  O_pos:
+    formula: "puzzle['O_pos']"
+  inequalities:
+    formula: "puzzle['inequalities']"
+  diffs:
+    formula: "puzzle['diffs']"
+  sums:
+    formula: "puzzle['sums']"
+  parcounts:
+    formula: "puzzle['parcounts']"
+  chains:
+    formula: "puzzle['chains']"
+  rules_text:
+    formula: "puzzle['rules_text']"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请输出完整解。答案格式：每一行用空格分隔，各行之间用分号分隔；例如：1 2 3 ...; 4 5 6 ...; ...'
+    ans_formula: "'; '.join([' '.join([str(x) for x in row]) for row in solved_grid])"
+    ans_text: "_ans"
+    ans_assertion: "True"
+
+desc: '题目名称：高阶复合规则拉丁方谜题\n索引：使用1-based索引，(i,j) 表示第 i 行第 j 列，X 表示未知。\n目标：在 n×n 网格中填入 1..n，满足下列规则与线索（均为本次随机生成且自洽）：\n基础规则：1) 每行 1..n 不重复；2) 每列 1..n 不重复；3) 若启用子块规则，则每个子块（block_r×block_c）内 1..n 不重复。\n附加规则说明：\n- 偶数格 E：列出的格子必须为偶数。\n- 奇数格 O：列出的格子必须为奇数。\n- 不等式 inequalities：同一行或同一列的两个格子，用 < 或 > 表示大小关系。\n- 绝对差 diffs：两格子的绝对差等于给定值，记为 abs((i1,j1)-(i2,j2))=d。\n- 选点求和 sums（笼子）：若干格子的和值等于给定常数。\n- 奇偶计数 parcounts：若干格子中，奇数的个数等于给定整数。\n- 单调链 chains：在同一行或同一列的三个格子构成严格递增或严格递减序列。\n本次实例：n={n}，子块={block_r}×{block_c}，启用子块规则={use_blocks}。\n线索清单：givens={givens}；E={E_pos}；O={O_pos}；inequalities={inequalities}；diffs={diffs}；sums={sums}；parcounts={parcounts}；chains={chains}。\n规则汇总便于阅读：\n{rules_text}\n答案格式说明：每行数字用空格分隔，行与行之间用分号分隔，例如 1 2 3 ...; 4 5 6 ...。请按此格式作答。\n{q1}'

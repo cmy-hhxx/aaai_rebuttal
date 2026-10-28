@@ -1,0 +1,195 @@
+# =================================================================
+# 高阶泛化版：营地谜题（Tents and Trees）——多层线索复合 + 逆向固化 + 唯一解验证
+# 调整要点：
+# - 题面明确补充“帐篷不能放在树上”规则，使题面与约束一致
+# - 固定 tent-树 邻接为 4 邻域，提升首次可解率
+# - 保持稀疏树密度范围 [(r*c)//7, (r*c)//5]，避免小盘面初解无解
+# - dir_total_constraints 统一使用 And([...]) 形式，规范一致
+# =================================================================
+
+# 引入外部 Python 运算符（必须提供 campsite_3.py，并且函数名需在该文件中定义）
+custom_operator:
+  neighbors4: campsite_3.py
+  neighbors8: campsite_3.py
+  neighbors_diag: campsite_3.py
+  example_grid_str: campsite_3.py
+
+# =================================================================
+# 变量定义（随机化尺寸、模式与可读文本片段）
+# =================================================================
+variables:
+  # 网格尺寸（行、列）
+  r_num:
+    type: int
+    domain: "[4, 7]"
+  c_num:
+    type: int
+    domain: "[4, 7]"
+
+  # 索引与键（便于遍历与符号键）
+  row_idx:
+    formula: "list(range(r_num))"
+  col_idx:
+    formula: "list(range(c_num))"
+  rows:
+    formula: "['r' + str(i) for i in range(r_num)]"
+  cols:
+    formula: "['c' + str(j) for j in range(c_num)]"
+
+  # 树木数量（更稀疏以保障可解性）
+  tree_num:
+    type: int
+    domain: "[(r_num * c_num) // 7, (r_num * c_num) // 5]"
+
+  # 邻接模式与帐篷不可接触模式（固定为经典 4 邻域 + 正交不相邻）
+  adjacency_mode_code:
+    type: int
+    domain: "[0, 0]"
+  # no_touch_mode_code: 固定为 0 表示帐篷不正交相邻（允许对角）
+  no_touch_mode_code:
+    type: int
+    domain: "[0, 0]"
+
+  # 2x2 满块分块数（仅统计完整2x2块，避免边缘不完整块）
+  br_num:
+    formula: "r_num // 2"
+  bc_num:
+    formula: "c_num // 2"
+
+  # 方向提示候选坐标（确定性候选集，按行优先顺序）
+  hint_coords:
+    formula: "[(i, j) for i in range(r_num) for j in range(c_num) if ((i * 7 + j * 11) % 5 == 0)]"
+  # 实际使用的方向提示配额（0~2）
+  hint_quota:
+    type: int
+    domain: "[0, 2]"
+
+  # 文本描述片段（邻接模式说明）
+  adj_desc:
+    formula: "'正交相邻' if adjacency_mode_code == 0 else '相邻（包含对角线）'"
+  touch_desc:
+    formula: "'帐篷之间不能正交相邻' if no_touch_mode_code == 0 else '帐篷之间不能相邻即便对角线'"
+
+  # 示例答案格式（与 Python 的 str(list) 一致）
+  answer_example:
+    formula: "example_grid_str()"
+
+# =================================================================
+# 符号定义：每格是否为树/是否为帐篷（布尔）
+# =================================================================
+symbols:
+  # 是否为树
+  tree:
+    source:
+    - rows
+    - cols
+    type: Bool
+    desc: 'Cell ({_rows}, {_cols}) is a tree'
+  # 是否为帐篷
+  tent:
+    source:
+    - rows
+    - cols
+    type: Bool
+    desc: 'Cell ({_rows}, {_cols}) has a tent'
+
+# =================================================================
+# 初次求解的基础规则约束（生成一个场景，不固定题面信息）
+# =================================================================
+conditions:
+  # A) 树数量恰为 tree_num
+  exact_tree_count:
+    formula: "Sum([If(tree[(rows[i], cols[j])], 1, 0) for i in range(r_num) for j in range(c_num)]) == tree_num"
+    desc: 'There are exactly tree_num trees.'
+  # B) 帐篷不可放在树上
+  no_tent_on_tree:
+    formula: "And([Implies(tree[(rows[i], cols[j])], Not(tent[(rows[i], cols[j])])) for i in range(r_num) for j in range(c_num)])"
+    desc: 'No tent is allowed on a tree cell.'
+  # C) 每个帐篷与树的邻接基数：恰好一个（邻接定义由 adjacency_mode_code 控制）
+  tent_adjacent_tree_exactly_one:
+    formula: "And([Implies(tent[(rows[i], cols[j])], (Sum([If(tree[(rows[ni], cols[nj])], 1, 0) for (ni, nj) in (neighbors4(i, j, r_num, c_num) if adjacency_mode_code == 0 else neighbors8(i, j, r_num, c_num))]) == 1)) for i in range(r_num) for j in range(c_num)])"
+    desc: 'Each tent is adjacent to exactly one tree (adjacency follows adjacency_mode_code).'
+  # D) 每棵树与帐篷的邻接基数固定为“恰好一个”；邻接定义由 adjacency_mode_code 控制
+  tree_adjacent_tent_exactly_one:
+    formula: "And([Implies(tree[(rows[i], cols[j])], (Sum([If(tent[(rows[ni], cols[nj])], 1, 0) for (ni, nj) in (neighbors4(i, j, r_num, c_num) if adjacency_mode_code == 0 else neighbors8(i, j, r_num, c_num))]) == 1)) for i in range(r_num) for j in range(c_num)])"
+    desc: 'Each tree must be adjacent to exactly one tent (adjacency follows adjacency_mode_code).'
+  # E) 帐篷相互不接触：仅禁止正交接触（no_touch_mode_code 固定为 0）
+  tents_do_not_touch_orth:
+    formula: "And([Implies(tent[(rows[i], cols[j])], (Sum([If(tent[(rows[ni], cols[nj])], 1, 0) for (ni, nj) in neighbors4(i, j, r_num, c_num)]) == 0)) for i in range(r_num) for j in range(c_num)])"
+    desc: 'No two tents touch orthogonally.'
+
+# =================================================================
+# 逆向生成核心：首次解 -> 提取线索 -> 固化后二次求解（唯一解）
+# =================================================================
+post_generation:
+  post_gen_vars:
+    # 树分布（T/X）
+    grid_T: "[['T' if get_value(_sol, tree[(rows[i], cols[j])]) else 'X' for j in range(c_num)] for i in range(r_num)]"
+    # 行列帐篷计数
+    row_constraints: "[sum([1 if get_value(_sol, tent[(rows[i], cols[j])]) else 0 for j in range(c_num)]) for i in range(r_num)]"
+    col_constraints: "[sum([1 if get_value(_sol, tent[(rows[i], cols[j])]) else 0 for i in range(r_num)]) for j in range(c_num)]"
+    # 2x2 满块帐篷计数矩阵（大小 br_num x bc_num）
+    block_counts: "[[sum([1 if get_value(_sol, tent[(rows[2*bi + di], cols[2*bj + dj])]) else 0 for di in range(2) for dj in range(2)]) for bj in range(bc_num)] for bi in range(br_num)]"
+    # 全局方向总数 [N, E, S, W]
+    dir_total: "[\
+      sum([1 if (i > 0 and get_value(_sol, tree[(rows[i], cols[j])]) and get_value(_sol, tent[(rows[i-1], cols[j])])) else 0 for i in range(1, r_num) for j in range(c_num)]), \
+      sum([1 if (j + 1 < c_num and get_value(_sol, tree[(rows[i], cols[j])]) and get_value(_sol, tent[(rows[i], cols[j+1])])) else 0 for i in range(r_num) for j in range(c_num - 1)]), \
+      sum([1 if (i + 1 < r_num and get_value(_sol, tree[(rows[i], cols[j])]) and get_value(_sol, tent[(rows[i+1], cols[j])])) else 0 for i in range(r_num - 1) for j in range(c_num)]), \
+      sum([1 if (j > 0 and get_value(_sol, tree[(rows[i], cols[j])]) and get_value(_sol, tent[(rows[i], cols[j-1])])) else 0 for i in range(r_num) for j in range(1, c_num)]) \
+    ]"
+    # 局部方向提示列表（至多 hint_quota 个；仅收集真实方向提示）
+    dir_hints_list: "[[i, j, ('N' if (i > 0 and get_value(_sol, tent[(rows[i-1], cols[j])])) else ('E' if (j + 1 < c_num and get_value(_sol, tent[(rows[i], cols[j+1])])) else ('S' if (i + 1 < r_num and get_value(_sol, tent[(rows[i+1], cols[j])])) else 'W')))] for (i, j) in hint_coords if (get_value(_sol, tree[(rows[i], cols[j])]) and ((i > 0 and get_value(_sol, tent[(rows[i-1], cols[j])])) or (j + 1 < c_num and get_value(_sol, tent[(rows[i], cols[j+1])])) or (i + 1 < r_num and get_value(_sol, tent[(rows[i+1], cols[j])])) or (j > 0 and get_value(_sol, tent[(rows[i], cols[j-1])]))))][:hint_quota]"
+    # —— 文本化变量（用于 desc 的安全插值，避免复杂表达式出现在花括号内）——
+    row_constraints_str: "', '.join([str(x) for x in row_constraints])"
+    col_constraints_str: "', '.join([str(x) for x in col_constraints])"
+    block_counts_str: "str(block_counts)"
+    dir_total_str: "str(dir_total)"
+    dir_hints_str: "str(dir_hints_list)"
+  post_gen_conditions:
+    # 固化：树分布
+    fix_tree_cells:
+      formula: "And([tree[(rows[i], cols[j])] == (grid_T[i][j] == 'T') for i in range(r_num) for j in range(c_num)])"
+      desc: 'Tree symbols are fixed to the given grid positions of T.'
+    # 固化：行列帐篷计数
+    row_count_constraints:
+      formula: "And([Sum([If(tent[(rows[i], cols[j])], 1, 0) for j in range(c_num)]) == row_constraints[i] for i in range(r_num)])"
+      desc: 'Row-wise tent counts equal the row constraints.'
+    col_count_constraints:
+      formula: "And([Sum([If(tent[(rows[i], cols[j])], 1, 0) for i in range(r_num)]) == col_constraints[j] for j in range(c_num)])"
+      desc: 'Column-wise tent counts equal the column constraints.'
+    # 固化：2x2 满块帐篷计数
+    block_count_constraints:
+      formula: "And([Sum([If(tent[(rows[2*bi + di], cols[2*bj + dj])], 1, 0) for di in range(2) for dj in range(2)]) == block_counts[bi][bj] for bi in range(br_num) for bj in range(bc_num)])"
+      desc: 'Each 2x2 full block has the published tent count.'
+    # 固化：全局方向总数 [N, E, S, W]（统一使用 And([...]) 形式）
+    dir_total_constraints:
+      formula: "And([\
+        Sum([If(And(tree[(rows[i], cols[j])], tent[(rows[i-1], cols[j])]), 1, 0) for i in range(1, r_num) for j in range(c_num)]) == dir_total[0], \
+        Sum([If(And(tree[(rows[i], cols[j])], tent[(rows[i], cols[j+1])]), 1, 0) for i in range(r_num) for j in range(c_num - 1)]) == dir_total[1], \
+        Sum([If(And(tree[(rows[i], cols[j])], tent[(rows[i+1], cols[j])]), 1, 0) for i in range(r_num - 1) for j in range(c_num)]) == dir_total[2], \
+        Sum([If(And(tree[(rows[i], cols[j])], tent[(rows[i], cols[j-1])]), 1, 0) for i in range(r_num) for j in range(1, c_num)]) == dir_total[3]\
+      ])"
+      desc: 'The global direction totals [N, E, S, W] equal the published numbers.'
+    # 固化：局部方向提示（对于披露的若干树，明确其相邻方向必须满足）
+    dir_hints_constraints:
+      formula: "And([ (tent[(rows[i-1], cols[j])] if d == 'N' else (tent[(rows[i], cols[j+1])] if d == 'E' else (tent[(rows[i+1], cols[j])] if d == 'S' else tent[(rows[i], cols[j-1])])) ) for [i, j, d] in dir_hints_list ])"
+      desc: 'The disclosed tree-to-tent directions must hold.'
+
+# =================================================================
+# 解唯一性限制（超过则抛弃本题）
+# =================================================================
+max_solution: 1
+
+# =================================================================
+# 查询：输出完整网格（二维列表，以 T=树；C=帐篷；X=空地）
+# =================================================================
+queries:
+  q1:
+    desc: '请输出完成后的网格（二维列表，使用单引号与英文逗号；T 表示树，C 表示帐篷，X 表示空地；答案格式示例：{answer_example}）。'
+    ans_formula: "[[('T' if grid_T[i][j] == 'T' else ('C' if get_value(_solutions[0], tent[(rows[i], cols[j])]) else 'X')) for j in range(c_num)] for i in range(r_num)]"
+    ans_text: "str(_ans)"
+
+# =================================================================
+# 题面描述（单行、仅使用单引号、使用 \\n 控制换行；不含双引号；不以花括号作集合展示）
+# =================================================================
+desc: '给定一个{r_num}x{c_num}的营地谜题：网格中 T 表示树，X 表示可放置帐篷的空地；帐篷不能放在树上；每个帐篷必须与恰好一棵树{adj_desc}，每棵树必须与恰好一个帐篷{adj_desc}；{touch_desc}；因此帐篷总数等于树木总数。题目给出如下线索：1) 每行与每列的帐篷总数分别为[{row_constraints_str}] 与 [{col_constraints_str}]；2) 对每个完整的 2x2 子块（从左上角起分块），其帐篷总数矩阵为{block_counts_str}（大小为 {br_num}x{bc_num}）；3) 全局方向总数 [N, E, S, W] 为 {dir_total_str}（若树的相邻帐篷位于其上方则计入 N，右方计入 E，下方计入 S，左方计入 W）；4) 部分树的方向提示列表为{dir_hints_str}（索引从 0 开始，每个元素为 [行索引, 列索引, 方向]）。初始树分布为{grid_T}。请根据上述规则与线索在网格上放置帐篷，并输出完成后的网格（二维列表，使用单引号与英文逗号；T 表示树，C 表示帐篷，X 表示空地；答案格式示例：{answer_example}）。\\n'

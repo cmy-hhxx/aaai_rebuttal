@@ -1,0 +1,39 @@
+custom_operator:
+  compute_odot: customs/operation_0.py       # 计算自定义运算 ⊙：x ⊙ y = x^2 · |y|
+  gen_problem: customs/operation_0.py        # 随机生成含 ⊙ 的（带括号的）表达式与其唯一数值答案（避免除零与歧义）
+  verify_with_meta: customs/operation_0.py   # 使用生成的元信息对答案进行完备校验
+
+variables:
+  # 随机生成一个表达式（含自定义运算 ⊙，并可能含加减乘除与括号），以及其数值答案与校验元信息
+  problem_pack:
+    formula: gen_problem()
+  # 表达式文本（渲染到题干）
+  expr:
+    formula: problem_pack['expr']
+  # 表达式的唯一数值答案
+  ans_val:
+    formula: problem_pack['ans']
+
+# 本题无需符号与约束求解，直接用自定义函数生成并计算
+symbols: {}
+conditions: {}
+
+# 关闭SMT求解流程（正向：先生成输入，再计算答案）
+calc_solution: false
+
+queries:
+  q1:
+    # 简洁提问，避免重复表述
+    desc: "请给出数值结果。"
+    # 使用预计算好的答案
+    ans_formula: ans_val
+    # 直接输出字符串形式的答案
+    ans_text: "str(_ans)"
+    # 使用元信息完备校验，确保答案唯一且正确
+    ans_assertion: verify_with_meta(problem_pack)
+
+# 精炼题面描述（避免不必要的优先级赘述，并消除潜在结合性歧义）
+desc: >
+  定义自定义运算“⊙”如下：在实数域上，x ⊙ y = x^2 · |y|（其中 |·| 表示绝对值，· 表示乘号）。
+  计算规则：括号具有最高优先级；⊙ 的优先级高于乘除，表达式中均以括号明确计算顺序以消除结合性歧义。
+  下面给出需要计算的表达式：{expr}。{q1}

@@ -1,0 +1,350 @@
+# =============================
+# 自定义算子：引用 kukurasu_3.py 中的函数（必须存在）
+# =============================
+custom_operator:
+  generate_kakurasu_grid: kukurasu_3.py
+  calc_kakurasu_sums: kukurasu_3.py
+  generate_weights: kukurasu_3.py
+  cell_truth: kukurasu_3.py
+  diag_id_pool: kukurasu_3.py
+  diag_coords: kukurasu_3.py
+  diag_count_truth: kukurasu_3.py
+  rect_id_pool: kukurasu_3.py
+  rect_coords: kukurasu_3.py
+  rect_count_truth: kukurasu_3.py
+  pos_sum_row: kukurasu_3.py
+  pos_sum_col: kukurasu_3.py
+  xor_truth: kukurasu_3.py
+  global_parity_truth: kukurasu_3.py
+  # 文本化辅助算子
+  cell_char: kukurasu_3.py
+  xor_text_str: kukurasu_3.py
+  parity_text_from_count: kukurasu_3.py
+  global_parity_text: kukurasu_3.py
+  # 非平凡线索池
+  diag_id_pool_filtered: kukurasu_3.py
+  rect_id_pool_filtered: kukurasu_3.py
+  row_count_hint_ids: kukurasu_3.py
+  col_count_hint_ids: kukurasu_3.py
+  row_possum_hint_ids: kukurasu_3.py
+  col_possum_hint_ids: kukurasu_3.py
+
+# =============================
+# 变量定义：参数化与逆向生成（遵循解析顺序与依赖约束）
+# =============================
+variables:
+  # 网格大小：在 4 到 8 随机
+  n:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+
+  # 行/列权重模式（多样化）
+  row_weight_mode:
+    formula: "['standard','reverse','ap_increase','ap_decrease','zigzag','permute'][randint(0,5)]"
+  col_weight_mode:
+    formula: "['standard','reverse','ap_increase','ap_decrease','zigzag','permute'][randint(0,5)]"
+
+  # 等差起点与步长（供 ap_* 与 zigzag 使用）
+  ap_start:
+    type: int
+    domain: "[1, 3]"
+  ap_step:
+    type: int
+    domain: "[1, 3]"
+
+  # 填充比例（百分比）：控制 1 的密度
+  fill_ratio:
+    type: int
+    domain: "[25, 75]"
+    diff_factor: 1
+
+  # 行/列字符串索引列表（用于符号键）
+  rows_s:
+    formula: "[str(i) for i in range(n)]"
+  cols_s:
+    formula: "[str(j) for j in range(n)]"
+
+  # 行/列权重：多种模式生成
+  row_weights:
+    formula: "generate_weights(row_weight_mode, n, ap_start, ap_step)"
+  col_weights:
+    formula: "generate_weights(col_weight_mode, n, ap_start, ap_step)"
+
+  # 逆向生成的目标解网格（布尔二维列表，保证每行每列非全 0/全 1）
+  sol_grid:
+    formula: "generate_kakurasu_grid(n, fill_ratio)"
+
+  # 由解网格计算得到的行/列加权和（作为核心输入）
+  row_sums:
+    formula: "calc_kakurasu_sums(sol_grid, row_weights, col_weights, 'row')"
+  col_sums:
+    formula: "calc_kakurasu_sums(sol_grid, row_weights, col_weights, 'col')"
+
+  # 行/列 '1' 个数（供计数/奇偶提示使用）
+  row_ones_counts:
+    formula: "[sum(1 for val in sol_grid[i] if val) for i in range(n)]"
+  col_ones_counts:
+    formula: "[sum(1 for i in range(n) if sol_grid[i][j]) for j in range(n)]"
+
+  # 行/列位置权重和（位置从 1 开始）
+  row_pos_sums:
+    formula: "[pos_sum_row(sol_grid, i) for i in range(n)]"
+  col_pos_sums:
+    formula: "[pos_sum_col(sol_grid, j) for j in range(n)]"
+
+  # 对角线 ID 池（主/副对角），过滤掉显见线索（全 0 或全 1）
+  main_diag_ids:
+    formula: "diag_id_pool_filtered(sol_grid, n, 'main')"
+  anti_diag_ids:
+    formula: "diag_id_pool_filtered(sol_grid, n, 'anti')"
+
+  # 矩形区域 ID 池（由最大边长控制），过滤掉显见线索（排除过小矩形与极端计数）
+  max_rect_side:
+    type: int
+    domain: "[2, 3]"
+  rect_ids:
+    formula: "rect_id_pool_filtered(sol_grid, n, max_rect_side)"
+
+  # 经过非平凡过滤的行/列索引池（计数提示用）
+  row_count_ids:
+    formula: "row_count_hint_ids(sol_grid)"
+  col_count_ids:
+    formula: "col_count_hint_ids(sol_grid)"
+
+  # 经过非极值过滤的行/列索引池（位置权重和提示用）
+  row_possum_ids:
+    formula: "row_possum_hint_ids(sol_grid)"
+  col_possum_ids:
+    formula: "col_possum_hint_ids(sol_grid)"
+
+  # 查询 3：随机挑一行（0 基）
+  ask_row_index:
+    formula: "randint(0, n - 1)"
+
+  # ---- 规范化后的动态 domain 上限变量（依赖于上面各池） ----
+  max_extra_row_count_hints:
+    formula: "min(n // 4, len(row_count_ids))"
+  max_extra_col_count_hints:
+    formula: "min(n // 4, len(col_count_ids))"
+  max_main_diag_hints:
+    formula: "min(n // 4, len(main_diag_ids))"
+  max_anti_diag_hints:
+    formula: "min(n // 4, len(anti_diag_ids))"
+  max_rect_region_hints:
+    formula: "min(n // 4, len(rect_ids))"
+  max_row_possum_hints:
+    formula: "min(n // 4, len(row_possum_ids))"
+  max_col_possum_hints:
+    formula: "min(n // 4, len(col_possum_ids))"
+  max_row_parity_hints:
+    formula: "max(1, n // 5)"
+  max_col_parity_hints:
+    formula: "max(1, n // 5)"
+  max_xor_cell_hints:
+    formula: "max(1, n // 5)"
+
+  # ---- 线索总量预算与分配（限制各类提示总和不超过预算） ----
+  hint_budget:
+    formula: "randint(max(2, n // 3), max(3, n // 2))"
+
+  num_extra_row_count_hints:
+    formula: "randint(0, min(max_extra_row_count_hints, hint_budget))"
+  rem_budget_1:
+    formula: "max(0, hint_budget - num_extra_row_count_hints)"
+
+  num_extra_col_count_hints:
+    formula: "randint(0, min(max_extra_col_count_hints, rem_budget_1))"
+  rem_budget_2:
+    formula: "max(0, rem_budget_1 - num_extra_col_count_hints)"
+
+  num_fixed_cell_hints:
+    formula: "randint(0, min(1, rem_budget_2))"
+  rem_budget_3:
+    formula: "max(0, rem_budget_2 - num_fixed_cell_hints)"
+
+  num_main_diag_hints:
+    formula: "randint(0, min(max_main_diag_hints, rem_budget_3))"
+  rem_budget_4:
+    formula: "max(0, rem_budget_3 - num_main_diag_hints)"
+
+  num_anti_diag_hints:
+    formula: "randint(0, min(max_anti_diag_hints, rem_budget_4))"
+  rem_budget_5:
+    formula: "max(0, rem_budget_4 - num_anti_diag_hints)"
+
+  num_rect_region_hints:
+    formula: "randint(0, min(max_rect_region_hints, rem_budget_5))"
+  rem_budget_6:
+    formula: "max(0, rem_budget_5 - num_rect_region_hints)"
+
+  num_row_possum_hints:
+    formula: "randint(0, min(max_row_possum_hints, rem_budget_6))"
+  rem_budget_7:
+    formula: "max(0, rem_budget_6 - num_row_possum_hints)"
+
+  num_col_possum_hints:
+    formula: "randint(0, min(max_col_possum_hints, rem_budget_7))"
+  rem_budget_8:
+    formula: "max(0, rem_budget_7 - num_col_possum_hints)"
+
+  num_row_parity_hints:
+    formula: "randint(0, min(max_row_parity_hints, rem_budget_8))"
+  rem_budget_9:
+    formula: "max(0, rem_budget_8 - num_row_parity_hints)"
+
+  num_col_parity_hints:
+    formula: "randint(0, min(max_col_parity_hints, rem_budget_9))"
+  rem_budget_10:
+    formula: "max(0, rem_budget_9 - num_col_parity_hints)"
+
+  num_xor_cell_hints:
+    formula: "randint(0, min(max_xor_cell_hints, rem_budget_10))"
+
+# =============================
+# 符号定义：未知布尔格子 cells[(row_str, col_str)]
+# =============================
+symbols:
+  cells:
+    source:
+    - rows_s
+    - cols_s
+    type: bool
+    desc: 'cell({_rows_s}, {_cols_s}) 为 ''1'' 表示 True, 为 ''X'' 表示 False'
+
+# =============================
+# 约束定义：核心约束 + 多类型提示（均为线性/布尔；domain 范围受预算控制）
+# =============================
+conditions:
+  # --- 核心约束：行/列加权和等式（保证 Kakurasu 基本规则） ---
+  row_weighted_sums:
+    formula: "And([Sum([If(cells[(str(i), str(j))], col_weights[j], 0) for j in range(n)]) == row_sums[i] for i in range(n)])"
+    desc: ''
+  col_weighted_sums:
+    formula: "And([Sum([If(cells[(str(i), str(j))], row_weights[i], 0) for i in range(n)]) == col_sums[j] for j in range(n)])"
+    desc: ''
+
+  # --- 额外提示 A：随机若干行/列的 '1' 个数（经非平凡过滤） ---
+  extra_row_count_hints:
+    source:
+    - row_count_ids
+    domain: "[num_extra_row_count_hints, num_extra_row_count_hints]"
+    formula: "Sum([If(cells[(_sym[0], str(j))], 1, 0) for j in range(n)]) == row_ones_counts[int(_sym[0])]"
+    desc: '提示: 第 {_sym[0]} 行含有 {row_ones_counts[int(_sym[0])]} 个 ''1''\n'
+  extra_col_count_hints:
+    source:
+    - col_count_ids
+    domain: "[num_extra_col_count_hints, num_extra_col_count_hints]"
+    formula: "Sum([If(cells[(str(i), _sym[0])], 1, 0) for i in range(n)]) == col_ones_counts[int(_sym[0])]"
+    desc: '提示: 第 {_sym[0]} 列含有 {col_ones_counts[int(_sym[0])]} 个 ''1''\n'
+
+  # --- 额外提示 B：已知单格（显式给出 True/False，严格限制数量） ---
+  fixed_cell_hints:
+    source:
+    - rows_s
+    - cols_s
+    domain: "[num_fixed_cell_hints, num_fixed_cell_hints]"
+    formula: "cells[(_sym[0], _sym[1])] == cell_truth(sol_grid, _sym[0], _sym[1])"
+    desc: '提示: 单元格 ({_sym[0]}, {_sym[1]}) 固定为 {cell_char(sol_grid, _sym[0], _sym[1])}\n'
+
+  # --- 额外提示 C：对角线计数（过滤显见线索后的 ID 池） ---
+  main_diag_hints:
+    source:
+    - main_diag_ids
+    domain: "[num_main_diag_hints, num_main_diag_hints]"
+    formula: "Sum([If(cells[(str(i), str(j))], 1, 0) for (i, j) in diag_coords('main', _sym[0], n)]) == diag_count_truth(sol_grid, 'main', _sym[0])"
+    desc: '提示: 主对角 {_sym[0]} 上共有 {diag_count_truth(sol_grid, ''main'', _sym[0])} 个 ''1''\n'
+  anti_diag_hints:
+    source:
+    - anti_diag_ids
+    domain: "[num_anti_diag_hints, num_anti_diag_hints]"
+    formula: "Sum([If(cells[(str(i), str(j))], 1, 0) for (i, j) in diag_coords('anti', _sym[0], n)]) == diag_count_truth(sol_grid, 'anti', _sym[0])"
+    desc: '提示: 副对角 {_sym[0]} 上共有 {diag_count_truth(sol_grid, ''anti'', _sym[0])} 个 ''1''\n'
+
+  # --- 额外提示 D：矩形区域计数（过滤显见线索后的 ID 池，排除过小矩形） ---
+  rect_region_hints:
+    source:
+    - rect_ids
+    domain: "[num_rect_region_hints, num_rect_region_hints]"
+    formula: "Sum([If(cells[(str(i), str(j))], 1, 0) for (i, j) in rect_coords(_sym[0])]) == rect_count_truth(sol_grid, _sym[0])"
+    desc: '提示: 矩形 {_sym[0]} 内共有 {rect_count_truth(sol_grid, _sym[0])} 个 ''1''\n'
+
+  # --- 额外提示 E：行/列位置权重和（经非极值过滤） ---
+  row_possum_hints:
+    source:
+    - row_possum_ids
+    domain: "[num_row_possum_hints, num_row_possum_hints]"
+    formula: "Sum([If(cells[(str(int(_sym[0])), str(j))], j + 1, 0) for j in range(n)]) == pos_sum_row(sol_grid, int(_sym[0]))"
+    desc: '提示: 第 {_sym[0]} 行的位置权重和为 {pos_sum_row(sol_grid, int(_sym[0]))}\n'
+  col_possum_hints:
+    source:
+    - col_possum_ids
+    domain: "[num_col_possum_hints, num_col_possum_hints]"
+    formula: "Sum([If(cells[(str(i), str(int(_sym[0])))], i + 1, 0) for i in range(n)]) == pos_sum_col(sol_grid, int(_sym[0]))"
+    desc: '提示: 第 {_sym[0]} 列的位置权重和为 {pos_sum_col(sol_grid, int(_sym[0]))}\n'
+
+  # --- 额外提示 F：行/列奇偶性（适度，已隐含非显见性） ---
+  row_parity_hints:
+    source:
+    - rows_s
+    domain: "[num_row_parity_hints, num_row_parity_hints]"
+    formula: "Sum([If(cells[(str(int(_sym[0])), str(j))], 1, 0) for j in range(n)]) % 2 == (row_ones_counts[int(_sym[0])] % 2)"
+    desc: '提示: 第 {_sym[0]} 行中 ''1'' 的个数为 {parity_text_from_count(row_ones_counts[int(_sym[0])])}\n'
+  col_parity_hints:
+    source:
+    - cols_s
+    domain: "[num_col_parity_hints, num_col_parity_hints]"
+    formula: "Sum([If(cells[(str(i), str(int(_sym[0])))], 1, 0) for i in range(n)]) % 2 == (col_ones_counts[int(_sym[0])] % 2)"
+    desc: '提示: 第 {_sym[0]} 列中 ''1'' 的个数为 {parity_text_from_count(col_ones_counts[int(_sym[0])])}\n'
+
+  # --- 额外提示 G：两格 XOR 关系（适度减少） ---
+  xor_cell_hints:
+    source:
+    - rows_s
+    - cols_s
+    amount:
+    - '2'
+    - '2'
+    order:
+    - false
+    - false
+    duplicate:
+    - false
+    - false
+    domain: "[num_xor_cell_hints, num_xor_cell_hints]"
+    formula: "Xor(cells[(_sym[0][0], _sym[1][0])], cells[(_sym[0][1], _sym[1][1])]) == xor_truth(sol_grid, int(_sym[0][0]), int(_sym[1][0]), int(_sym[0][1]), int(_sym[1][1]))"
+    desc: '提示: 单元格 ({_sym[0][0]}, {_sym[1][0]}) 与 ({_sym[0][1]}, {_sym[1][1]}) 的关系: {xor_text_str(sol_grid, _sym[0][0], _sym[1][0], _sym[0][1], _sym[1][1])}\n'
+
+  # --- 全局奇偶提示（单条） ---
+  global_parity:
+    formula: "Sum([If(cells[(str(i), str(j))], 1, 0) for i in range(n) for j in range(n)]) % 2 == global_parity_truth(sol_grid)"
+    desc: '提示: 全盘 ''1'' 的总数为 {global_parity_text(sol_grid)}\n'
+
+# =============================
+# 求解器控制：求解并保持唯一性断言
+# =============================
+calc_solution: true
+max_solution: 1
+
+# =============================
+# 查询：输出解与统计（明确答案格式，避免双引号）
+# =============================
+queries:
+  q1:
+    desc: '请输出完成后的二维列表(列表的列表), 用''1''和''X''表示网格; 答案格式示例: [[''1'',''X''],[''X'',''1''],...], 内容需与网格大小匹配'
+    ans_formula: "[['1' if get_value(_solutions[0], cells[(str(i), str(j))]) else 'X' for j in range(n)] for i in range(n)]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+  q2:
+    desc: '请输出网格中''1''的总数量, 答案格式: 整数 (例如 10)'
+    ans_formula: "sum(1 for i in range(n) for j in range(n) if get_value(_solutions[0], cells[(str(i), str(j))]))"
+    ans_text: "str(_ans)"
+  q3:
+    desc: '随机选中一行, 行索引为 {ask_row_index} (0 基), 请输出该行中''1''的数量, 答案格式: 整数 (例如 3)'
+    ans_formula: "sum(1 for j in range(n) if get_value(_solutions[0], cells[(str(ask_row_index), str(j))]))"
+    ans_text: "str(_ans)"
+
+# =============================
+# 题面描述：单行，单引号，禁止换行；花括号仅用于变量引用
+# =============================
+desc: '这是一个 Kakurasu 谜题, 网格大小为 {n}x{n}; 行权重为 {row_weights}, 列权重为 {col_weights}; 每行的加权和为 {row_sums}, 每列的加权和为 {col_sums}; 规则: 行 i 的加权和等于该行所有为''1''的格子对应列权重之和, 列 j 的加权和等于该列所有为''1''的格子对应行权重之和; 行列索引均为 0 基; 对角/矩形标注: 主对角 M_k 表示 j-i=k, 副对角 A_s 表示 i+j=s, 矩形 R_r0_c0_r1_c1 表示行区间 [r0,r1], 列区间 [c0,c1] 均为闭区间; 以下为本题实际给出的附加提示(仅以下所列提示生效, 若某类提示为空则省略):\n{extra_row_count_hints}{extra_col_count_hints}{fixed_cell_hints}{main_diag_hints}{anti_diag_hints}{rect_region_hints}{row_possum_hints}{col_possum_hints}{row_parity_hints}{col_parity_hints}{xor_cell_hints}{global_parity}\n为便于判分, 请严格按以下格式作答:\n{q1}\n{q2}\n{q3}'

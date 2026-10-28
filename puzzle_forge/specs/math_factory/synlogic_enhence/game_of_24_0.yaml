@@ -1,0 +1,97 @@
+custom_operator:
+  function_1: game_of_24_0.py
+  function_2: game_of_24_0.py
+
+variables:
+  n_num:
+    type: int
+    domain: "[4, 4]"
+  num_min:
+    type: int
+    domain: "[1, 6]"
+  num_max:
+    type: int
+    domain: "[10, 18]"
+  target_low:
+    type: int
+    domain: "[8, 60]"
+  target_high:
+    type: int
+    domain: "[24, 150]"
+  max_attempts:
+    type: int
+    domain: "[100, 200]"
+  time_limit_sec:
+    type: int
+    domain: "[60, 150]"
+  budget_low:
+    type: int
+    domain: "[3, 10]"
+  budget_high:
+    type: int
+    domain: "[10, 20]"
+  switch_weight_low:
+    type: int
+    domain: "[0, 3]"
+  switch_weight_high:
+    type: int
+    domain: "[1, 6]"
+  depth_weight_low:
+    type: int
+    domain: "[0, 3]"
+  depth_weight_high:
+    type: int
+    domain: "[1, 6]"
+  ops_universe:
+    formula: "['+', '-', '*', '/']"
+
+  instance:
+    formula: "function_1(n_num, num_min, num_max, ops_universe, target_low, target_high, max_attempts, budget_low, budget_high, switch_weight_low, switch_weight_high, depth_weight_low, depth_weight_high, time_limit_sec)"
+
+  nums:
+    formula: "instance['nums']"
+  ops_set:
+    formula: "instance['ops_set']"
+  effective_ops_str:
+    formula: "instance['effective_ops_str']"
+  costs:
+    formula: "instance['costs']"
+  target:
+    formula: "instance['target']"
+  best:
+    formula: "instance['best']"
+  rules_desc:
+    formula: "instance['rules_desc']"
+  ops_list_str:
+    formula: "instance['ops_list_str']"
+  costs_str:
+    formula: "instance['costs_str']"
+  effective_costs_str:
+    formula: "instance['effective_costs_str']"
+
+  nums_str:
+    formula: "', '.join(map(str, nums))"
+
+  best_nums:
+    formula: "best['nums']"
+  best_ops:
+    formula: "best['ops']"
+  best_parens:
+    formula: "best['parens']"
+  best_cost:
+    formula: "best['total_cost']"
+
+  verified:
+    formula: "function_2(instance, time_limit_sec)"
+  example:
+    formula: "{'nums': [10, 13, 9, 16], 'ops': ['+', '-', '-'], 'parens': '(10+13)-(9-16)', 'total_cost': 11}"
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请以字典形式给出唯一的最低综合代价表达式方案。答案格式为单行字典且键顺序固定为[nums, ops, parens, total_cost]。'
+    ans_formula: "best_cost"
+    ans_text: "str({'nums': best_nums, 'ops': best_ops, 'parens': best_parens, 'total_cost': best_cost})"
+    ans_assertion: "verified"
+
+desc: '预算运算复合优化题。给定数字[{nums_str}]；实际允许的运算为[{effective_ops_str}]；运算成本(仅针对允许的运算)为[{effective_costs_str}]；目标值为{target}。规则说明: {rules_desc}。请输出键为[nums, ops, parens, total_cost]的字典作为答案。提示: 字典序比较指的是从左到右逐位比较的先后顺序。{q1}输出样例 {example}。'

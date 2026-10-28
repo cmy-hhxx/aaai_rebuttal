@@ -1,0 +1,96 @@
+# 高阶泛化版：摩天楼（颜色规则/可见度子集/风向不等式/片段和/进阶约束）逆向生成与唯一性验证
+custom_operator:
+  function_1: skyscraper_puzzle_2.py
+  function_2: skyscraper_puzzle_2.py
+  function_3: skyscraper_puzzle_2.py
+  derive_color: skyscraper_puzzle_2.py
+  build_grid: skyscraper_puzzle_2.py
+  gen_inequalities: skyscraper_puzzle_2.py
+  pick_parity_scheme: skyscraper_puzzle_2.py
+  pick_phrases: skyscraper_puzzle_2.py
+  random_visibility_mask: skyscraper_puzzle_2.py
+  build_visibility_subset: skyscraper_puzzle_2.py
+  gen_segment_sum_clues: skyscraper_puzzle_2.py
+  format_inequalities: skyscraper_puzzle_2.py
+  gen_advanced_constraints: skyscraper_puzzle_2.py
+  verify_unique: skyscraper_puzzle_2.py
+
+variables:
+  n:
+    type: int
+    domain: "[4, 8]"
+  row_keys:
+    formula: "['r' + str(i) for i in range(n)]"
+  col_keys:
+    formula: "['c' + str(j) for j in range(n)]"
+  grid_val:
+    formula: build_grid(n)
+  parity_scheme:
+    formula: pick_parity_scheme()
+  color:
+    formula: derive_color(grid_val, parity_scheme)
+  color_desc:
+    formula: "'[' + ', '.join([str(row) for row in color]) + ']'"
+  clues:
+    formula: function_3(grid_val)
+  vis_mask:
+    formula: random_visibility_mask(2)  # 至少选择 2 个方向
+  vis_info:
+    formula: build_visibility_subset(clues, vis_mask)
+  vis_vals:
+    formula: "vis_info['vals']"
+  vis_desc:
+    formula: "vis_info['desc']"
+  ineq_num:
+    type: int
+    domain: "[n, 2 * n]"
+  inequalities:
+    formula: gen_inequalities(grid_val, ineq_num)
+  phrases:
+    formula: pick_phrases()
+  inequalities_desc:
+    formula: format_inequalities(inequalities, phrases)
+  seg_num:
+    type: int
+    domain: "[1, n]"
+  seg_sum_info:
+    formula: gen_segment_sum_clues(grid_val, seg_num)
+  seg_sum_desc:
+    formula: "seg_sum_info['desc']"
+  adv_pack:
+    formula: gen_advanced_constraints(grid_val, n)
+  adv_desc:
+    formula: "adv_pack['desc']"
+  adv_data:
+    formula: "adv_pack['data']"
+  color_rule_text:
+    formula: "('红格为奇数楼高，蓝格为偶数楼高' if parity_scheme == 'odd_red' else '红格为偶数楼高，蓝格为奇数楼高')"
+  unique_verified:
+    formula: verify_unique(n, color, parity_scheme, vis_vals, inequalities, seg_sum_info['clues'], adv_data)
+
+symbols:
+  h:
+    source:
+    - row_keys
+    - col_keys
+    type: int
+    desc: "楼高符号"
+
+conditions:
+  value_domain:
+    formula: And([And(h[(row_keys[i], col_keys[j])] >= 1, h[(row_keys[i], col_keys[j])] <= n) for i in range(n) for j in range(n)])
+    desc: '每个格子的楼高均在 1..n 区间内'
+  lock_grid:
+    formula: And([h[(row_keys[i], col_keys[j])] == grid_val[i][j] for i in range(n) for j in range(n)])
+    desc: '锁定楼高矩阵为逆向构造得到的唯一解'
+
+max_solution: 1
+
+queries:
+  q1:
+    desc: '请根据题面规则与线索，推理出最终的 n×n 楼高矩阵并以 Python 列表的列表输出；示例格式：[ [1,2,...], [..], ... ]。'
+    ans_formula: grid_val
+    ans_text: "str(_ans)"
+    ans_assertion: "unique_verified"
+
+desc: '{phrases["title"]}：规模 n = {n}；颜色规则：{color_rule_text}；颜色矩阵 color = {color_desc}；{phrases["vis_term"]}（随机子集）为 {vis_desc}；风向不等式为 [{inequalities_desc}]；进阶约束为 {adv_desc}；片段和提示 {seg_sum_desc}。规则解释：每行每列的楼高在 1..n 且不重复；可见度指从一侧观测时能看到的楼数（更高楼会遮挡更矮楼）；风向不等式的 a 与 b 是相邻坐标，{phrases["gt_word"]} 表示 a 的楼高大于 b，{phrases["lt_word"]} 表示 a 的楼高小于 b。答案格式：请输出矩阵，例如 [[1,2,...],[...],...]。\n{q1}'

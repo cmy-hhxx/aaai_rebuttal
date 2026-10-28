@@ -1,0 +1,38 @@
+custom_operator:
+  generate_instance: game_of_24_3.py
+  search_expression:  game_of_24_3.py
+
+# ---------------------------- Variables ----------------------------
+variables:
+  instance: {formula: 'generate_instance()'}
+
+  nums:        {formula: 'instance["nums"]'}
+  target:      {formula: 'instance["target"]'}
+  mod_cnt:     {formula: 'instance["mod_cnt"]'}
+  div_limit:   {formula: 'instance["div_limit"]'}
+  k1:          {formula: 'instance["k1"]'}
+  k2:          {formula: 'instance["k2"]'}
+  r2:          {formula: 'instance["r2"]'}
+  sum_min:     {formula: 'instance["sum_min"]'}
+  bracket_id:  {formula: 'instance["bracket_id"]'}
+
+  # 文本化括号与中间值描述，避免 f-string 嵌套表达式导致语法错误
+  bracket_text:
+    formula: '"((a op1 b) op2 (c op3 d))" if bracket_id==0 else "(a op1 (b op2 (c op3 d)))"'
+  mid1_text:
+    formula: '"(a op1 b)" if bracket_id==0 else "(b op2 (c op3 d))"'
+  mid2_text:
+    formula: '"(c op3 d)"'   # 两种结构下均相同
+
+calc_solution: false
+
+# ---------------------------- Queries ----------------------------
+queries:
+  q1:
+    desc: '已知分值 {nums}，请使用三次二元运算将它们组合成 {target}。可选运算符 [+ - * / %]，其中 % 必须恰好出现 {mod_cnt} 次，/ 最多出现 {div_limit} 次；括号结构为 {bracket_text}。运算过程中禁止除以0且所有结果均为整数。额外要求：① 中间值 {mid1_text} 可被 {k1} 整除；② 中间值 {mid2_text} 对 {k2} 取模等于 {r2}；③ 两中间值之和大于 {sum_min}。请写出唯一满足条件的表达式，答案格式 (nums:[a,b,c,d], ops:[op1,op2,op3])，示例：(nums:[3,4,5,6], ops:[+,*,%])'
+    ans_formula: search_expression(nums, target, mod_cnt, div_limit, k1, k2, r2, sum_min, bracket_id)
+    ans_text: _ans
+    ans_assertion: "_ans is not None and _ans != 'IMPOSSIBLE'"
+
+# ---------------------------- Description ------------------------
+desc: '将四个原始分值 {nums} 通过三次二元运算 (运算符取自 [+ - * / %]) 组合得到目标 {target}。取模出现 {mod_cnt} 次，除法出现次数 ≤ {div_limit}；括号结构为 {bracket_text}。要求：中间值 {mid1_text} 能被 {k1} 整除；中间值 {mid2_text} 对 {k2} 取模为 {r2}；两中间值之和大于 {sum_min}；运算过程中不得出现除以0且所有结果需为整数。答案格式 (nums:[a,b,c,d], ops:[op1,op2,op3])，示例：(nums:[3,4,5,6], ops:[+,*,%])。'

@@ -1,0 +1,88 @@
+custom_operator:
+  function_1: futoshiki_2.py
+  function_2: futoshiki_2.py
+
+variables:
+  # 固定规模，降低计数复杂度，仍可生成200+不同题
+  n:
+    type: int
+    domain: "[4, 4]"
+  thermo_target_num:
+    type: int
+    domain: "[2, n + 2]"
+  chain_target_num:
+    type: int
+    domain: "[2, n + 2]"
+  ineq_target_num:
+    type: int
+    domain: "[2 * n, 2 * n]"
+  givens_target_num:
+    type: int
+    domain: "[0, n]"
+  # 行评分权重描述用参数占位（具体权重由Python随机生成）
+  row_score_alpha:
+    type: int
+    domain: "[1, 1]"
+  row_score_beta:
+    type: int
+    domain: "[1, 1]"
+  row_score_gamma:
+    type: int
+    domain: "[0, 0]"
+  solver_time_limit_sec:
+    type: int
+    domain: "[60, 120]"
+  seed:
+    type: int
+    domain: "[0, 1000000]"
+
+  puzzle_config:
+    formula: "function_1(n, thermo_target_num, chain_target_num, ineq_target_num, givens_target_num, seed, solver_time_limit_sec, row_score_alpha, row_score_beta, row_score_gamma)"
+
+  rows:
+    formula: "list(range(1, puzzle_config['n'] + 1))"
+  cols:
+    formula: "list(range(1, puzzle_config['n'] + 1))"
+  matrix_desc:
+    formula: "puzzle_config['matrix_desc']"
+  unique_flag:
+    formula: "puzzle_config['unique']"
+
+  diag_desc:
+    formula: "puzzle_config['diag_desc']"
+  thermo_desc:
+    formula: "puzzle_config['thermo_desc']"
+  chain_desc:
+    formula: "puzzle_config['chain_desc']"
+  row_score_desc:
+    formula: "puzzle_config['row_score_desc']"
+  region_desc:
+    formula: "puzzle_config['region_desc']"
+  ineq_desc:
+    formula: "puzzle_config['ineq_desc']"
+
+  thermo_paths_text:
+    formula: "puzzle_config['thermo_paths_text']"
+  thermo_deltas_text:
+    formula: "puzzle_config['thermo_deltas_text']"
+  order_chains_text:
+    formula: "puzzle_config['order_chains_text']"
+  row_order_constraints_text:
+    formula: "puzzle_config['row_order_constraints_text']"
+  region_defs_text:
+    formula: "puzzle_config['region_defs_text']"
+  region_order_constraints_text:
+    formula: "puzzle_config['region_order_constraints_text']"
+  ineqs_text:
+    formula: "puzzle_config['ineqs_text']"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请在n×n网格中填入1..n并满足全部规则。答案格式为行优先展开，行内用空格分隔，行间用竖线分隔，例如 1 2 3 4|4 3 2 1|...'
+    ans_formula: "function_2(puzzle_config)"
+    ans_text: "_ans"
+    ans_assertion: "unique_flag == True"
+
+desc: '题目名称: 高阶温度计-不等式-行评分-区域比较综合拉丁网格。索引: 使用1-based索引, (i,j)表示第i行第j列, X表示未知。目标: 在n×n网格中填入1..n, 满足以下规则: 行列拉丁(每行、每列均为1..n且不重复); 不启用对角线递增约束; {thermo_desc}; {chain_desc}; {row_score_desc}; {region_desc}; {ineq_desc}。初始矩阵为:\\n{matrix_desc}\\n温度计路径: {thermo_paths_text}\\n温度计差值约束: {thermo_deltas_text}\\n顺序链: {order_chains_text}\\n行评分排序约束: {row_order_constraints_text}\\n区域集合: {region_defs_text}\\n区域比较约束: {region_order_constraints_text}\\n不等式约束: {ineqs_text}\\n答案格式: 行优先展开, 行内用空格分隔, 行间用竖线分隔。'

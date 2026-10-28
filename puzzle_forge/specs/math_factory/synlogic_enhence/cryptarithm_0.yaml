@@ -1,0 +1,122 @@
+custom_operator:
+  # function_1: 生成满足随机复合约束的实例并进行唯一性验证，返回完整结构
+  # function_2: 将字母-数字映射格式化为可读字符串（按给定字母顺序输出，仅含题面出现字母）
+  function_1: cryptarithm_0.py
+  function_2: cryptarithm_0.py
+
+# 逆向生成 + 唯一性验证均在 Python 内完成；YAML 负责参数与题面拼装
+calc_solution: false
+
+variables:
+  # 覆盖0-9的字母池规模（固定为10）
+  letter_pool_size:
+    type: int
+    domain: "[10, 10]"
+    diff_factor: 1
+  # 随机重试次数（单次调用内部生成实例的尝试上限）
+  gen_attempts:
+    type: int
+    domain: "[3, 6]"
+    diff_factor: 1
+
+  # 词长范围（WORD1/WORD2）
+  w1_len_min:
+    type: int
+    domain: "[4, 6]"
+  w1_len_max:
+    type: int
+    domain: "[5, 7]"
+  w2_len_min:
+    type: int
+    domain: "[4, 6]"
+  w2_len_max:
+    type: int
+    domain: "[5, 7]"
+
+  # 完全平方数位数范围（2或3位）
+  square_len_min:
+    type: int
+    domain: "[2, 2]"
+  square_len_max:
+    type: int
+    domain: "[3, 3]"
+
+  # 额外约束数量范围（不含基本约束：双射/首字母非零/W4为平方），至少2条以提升信息密度
+  extra_constraints_min:
+    type: int
+    domain: "[2, 3]"
+  extra_constraints_max:
+    type: int
+    domain: "[3, 4]"
+
+  # 最多使用的不同数字个数（控制搜索规模，提高唯一性验证效率）
+  used_digits_max:
+    type: int
+    domain: "[6, 7]"
+
+  # 唯一性验证时间上限（秒，须小于等于180）
+  time_limit_sec:
+    type: int
+    domain: "[90, 150]"
+
+  # 是否强制唯一（True：不唯一时追加约束或重生成）
+  require_unique:
+    type: bool
+    domain: "[True, True]"
+
+  # 主生成与验证调用，返回包含：words/values/ops/mapping_used/constraints_desc/ops_text/unique_label等
+  solver_out:
+    formula: "function_1(letter_pool_size, gen_attempts, w1_len_min, w1_len_max, w2_len_min, w2_len_max, square_len_min, square_len_max, extra_constraints_min, extra_constraints_max, used_digits_max, time_limit_sec, require_unique)"
+
+  # 展示用派生变量
+  w1:
+    formula: "solver_out['words'][0]"
+  w2:
+    formula: "solver_out['words'][1]"
+  w3:
+    formula: "solver_out['words'][2]"
+  w4:
+    formula: "solver_out['words'][3]"
+  w5:
+    formula: "solver_out['words'][4]"
+  v1:
+    formula: "solver_out['values'][0]"
+  v2:
+    formula: "solver_out['values'][1]"
+  v3:
+    formula: "solver_out['values'][2]"
+  v4:
+    formula: "solver_out['values'][3]"
+  v5:
+    formula: "solver_out['values'][4]"
+  ops_text:
+    formula: "solver_out['ops_text']"
+  letters_sorted:
+    formula: "sorted(list(solver_out['mapping'].keys()))"
+  constraints_desc:
+    formula: "solver_out['constraints_desc']"
+  unique_label:
+    formula: "solver_out.get('unique_label', 'unknown')"
+
+queries:
+  # 问题1：RESULT（{w5}）的数值
+  q1:
+    desc: '问题1：RESULT（最后一个词 {w5}）的数值是多少？'
+    ans_formula: "v5"
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+  # 问题2：字母-数字映射（按字母序）字符串，仅包含题面出现的字母
+  q2:
+    desc: '问题2：给出字母-数字映射（按字母序，仅填写题面出现的字母）。'
+    ans_formula: "function_2(solver_out.get('mapping'), letters_sorted)"
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+  # 问题3：唯一性标识（unique 或 multiple）
+  q3:
+    desc: '问题3：该实例的解是否唯一（unique或multiple）。'
+    ans_formula: "unique_label"
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+# 单行题面，解释不常见规则，并给出答案格式
+desc: '高阶字母算术综合题（十进制，多重约束与唯一性）。有五个词：{w1}、{w2}、{w3}、{w4}、{w5}。{ops_text}所有字母对应0-9且互不相同，每个词的首字母不为0；{w4}为指定位数的完全平方数。额外随机约束：{constraints_desc}说明：1) 同余X≡Y mod 10表示X与Y除以10余数相同；2) 数位和SumDigits(W)是W的十进制各位数字之和；3) 九余数SumDigitsMod9(Z)表示Z的数位和对9取余数（若题面出现mod 9约束）。请给出答案，并按格式填写：数值====映射串====唯一性。注意：映射串仅包含题面出现的字母，按字母序书写。例如：12345====A=1, B=3, C=0, ...====unique。\\n{q1}\\n{q2}\\n{q3}'

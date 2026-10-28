@@ -1,0 +1,224 @@
+# ================================================================
+# 自定义操作符：引入外部Python函数
+# ================================================================
+custom_operator:
+  compute_answer: object_counting_3.py
+  simplify_ratio: object_counting_3.py
+  validate_instance: object_counting_3.py
+  apply_hold_release: object_counting_3.py
+  compute_promo_bonus_shirts: object_counting_3.py
+  apply_cap: object_counting_3.py
+  validate_uniqueness: object_counting_3.py
+
+# ================================================================
+# 变量定义：参数随机化与多层规则
+# ================================================================
+variables:
+  # —— 基础套数（难度因子：越大总量越大）
+  sets_num:
+    type: int
+    domain: '[40, 160]'
+    diff_factor: 1
+
+  # —— 是否包含袜子与按双折算规则
+  include_socks:
+    type: bool
+    domain: '[True, False]'
+  count_pairs_as_two:
+    type: bool
+    domain: '[True, False]'
+  pair_weight:
+    formula: '2 if count_pairs_as_two else 1'
+
+  # —— 追加与报废（上衣、长裤、鞋双、袜双）
+  extra_shirts:
+    type: int
+    domain: '[0, 2 * sets_num]'
+  extra_pants:
+    type: int
+    domain: '[0, 2 * sets_num]'
+  extra_shoes_pairs:
+    type: int
+    domain: '[0, 2 * sets_num]'
+  extra_socks_pairs:
+    type: int
+    domain: '[0, sets_num]'
+
+  base_socks_pairs:
+    formula: 'sets_num if include_socks else 0'
+
+  discard_shirts:
+    type: int
+    domain: '[0, sets_num + extra_shirts - 1]'
+  discard_pants:
+    type: int
+    domain: '[0, sets_num + extra_pants - 1]'
+  discard_shoes_pairs:
+    type: int
+    domain: '[0, sets_num + extra_shoes_pairs - 1]'
+  discard_socks_pairs:
+    type: int
+    domain: '[0, base_socks_pairs + extra_socks_pairs]'
+
+  # —— 报废后的件数或双数
+  shirts_after_discard:
+    formula: 'sets_num + extra_shirts - discard_shirts'
+  pants_after_discard:
+    formula: 'sets_num + extra_pants - discard_pants'
+  shoes_pairs_after_discard:
+    formula: 'sets_num + extra_shoes_pairs - discard_shoes_pairs'
+  socks_pairs_after_discard:
+    formula: 'base_socks_pairs + extra_socks_pairs - discard_socks_pairs'
+
+  # —— 质量抽检与复检返还（统一百分比与比例）
+  hold_percent:
+    type: int
+    domain: '[6, 20]'
+  release_ratio_num:
+    type: int
+    domain: '[30, 90]'
+  release_ratio_den:
+    type: int
+    domain: '[100, 100]'
+
+  shirts_after_qc:
+    formula: 'apply_hold_release(shirts_after_discard, hold_percent, release_ratio_num, release_ratio_den)'
+  pants_after_qc:
+    formula: 'apply_hold_release(pants_after_discard, hold_percent, release_ratio_num, release_ratio_den)'
+  shoes_pairs_after_qc:
+    formula: 'apply_hold_release(shoes_pairs_after_discard, hold_percent, release_ratio_num, release_ratio_den)'
+  socks_pairs_after_qc:
+    formula: 'apply_hold_release(socks_pairs_after_discard, hold_percent, release_ratio_num, release_ratio_den)'
+
+  # —— 促销赠送：按照完整套装批次赠送上衣
+  promo_k:
+    type: int
+    domain: '[3, 7]'
+  gift_shirts_per_batch:
+    type: int
+    domain: '[1, 3]'
+  promo_shirts_bonus:
+    formula: 'compute_promo_bonus_shirts(shirts_after_qc, pants_after_qc, shoes_pairs_after_qc, socks_pairs_after_qc, include_socks, promo_k, gift_shirts_per_batch)'
+
+  # —— 服装最终件数（将双按 pair_weight 折算为件）
+  shirts_final:
+    formula: 'shirts_after_qc + promo_shirts_bonus'
+  shoes_pieces_final:
+    formula: 'shoes_pairs_after_qc * pair_weight'
+  socks_pieces_final:
+    formula: 'socks_pairs_after_qc * pair_weight'
+  clothes_total:
+    formula: 'shirts_final + pants_after_qc + shoes_pieces_final + socks_pieces_final'
+
+  # —— 车辆初始与变动（计入租入口径）
+  count_rented_into_ownership:
+    type: bool
+    domain: '[True, False]'
+
+  buses0:
+    type: int
+    domain: '[1, 8]'
+  vans0:
+    type: int
+    domain: '[4, 18]'
+  cars0:
+    type: int
+    domain: '[6, 26]'
+
+  scrapped_buses:
+    type: int
+    domain: '[0, buses0 - 1]'
+  sold_vans:
+    type: int
+    domain: '[0, vans0 - 1]'
+  rent_cars_in:
+    type: int
+    domain: '[0, 10]'
+  rent_cars_return:
+    type: int
+    domain: '[0, rent_cars_in]'
+
+  # —— 轿车租入净额后的中间件
+  cars_after_rent:
+    formula: 'cars0 + (rent_cars_in - rent_cars_return) if count_rented_into_ownership else cars0'
+
+  # —— 临时借调（借出与归还）
+  loan_buses_out:
+    type: int
+    domain: '[0, buses0 - scrapped_buses]'
+  loan_buses_return:
+    type: int
+    domain: '[0, loan_buses_out]'
+
+  loan_vans_out:
+    type: int
+    domain: '[0, vans0 - sold_vans]'
+  loan_vans_return:
+    type: int
+    domain: '[0, loan_vans_out]'
+
+  loan_cars_out:
+    type: int
+    domain: '[0, cars_after_rent]'
+  loan_cars_return:
+    type: int
+    domain: '[0, loan_cars_out]'
+
+  # —— 借调后的数量
+  buses_after_loans:
+    formula: 'buses0 - scrapped_buses - loan_buses_out + loan_buses_return'
+  vans_after_loans:
+    formula: 'vans0 - sold_vans - loan_vans_out + loan_vans_return'
+  cars_after_loans:
+    formula: 'cars_after_rent - loan_cars_out + loan_cars_return'
+
+  # —— 编制上限
+  cap_buses:
+    type: int
+    domain: '[buses0, buses0 + 6]'
+  cap_vans:
+    type: int
+    domain: '[vans0, vans0 + 10]'
+  cap_cars:
+    type: int
+    domain: '[cars0, cars0 + 20]'
+
+  # —— 上限裁剪与车辆总数
+  buses_capped:
+    formula: 'apply_cap(buses_after_loans, cap_buses)'
+  vans_capped:
+    formula: 'apply_cap(vans_after_loans, cap_vans)'
+  cars_capped:
+    formula: 'apply_cap(cars_after_loans, cap_cars)'
+  vehicles_total:
+    formula: 'buses_capped + vans_capped + cars_capped'
+
+  # —— 描述文本片段（避免在 desc 内直接写字面量）
+  include_socks_text:
+    formula: "'包含' if include_socks else '不包含'"
+  pair_rule_desc:
+    formula: "'每双计为' + str(pair_weight) + '件'"
+  rent_count_rule_text:
+    formula: "'并计入现拥有' if count_rented_into_ownership else '不计入现拥有'"
+  socks_per_set_text:
+    formula: "'每套另含袜子1双' if include_socks else '每套不含袜子'"
+
+# ================================================================
+# 求解模式：直接计算，无符号求解
+# ================================================================
+calc_solution: false
+
+# ================================================================
+# 查询：输出差值与比值（车辆/服装），固定格式字符串答案
+# ================================================================
+queries:
+  q1:
+    desc: '请计算并按指定答案格式输出两类数量的差值diff以及车辆总数与服装总件数之比ratio与其approx'
+    ans_formula: 'compute_answer(clothes_total, vehicles_total)'
+    ans_text: '_ans'
+    ans_assertion: 'validate_instance(clothes_total, vehicles_total) and validate_uniqueness(shirts_after_discard, pants_after_discard, shoes_pairs_after_discard, socks_pairs_after_discard, hold_percent, release_ratio_num, release_ratio_den, promo_k, gift_shirts_per_batch, include_socks, pair_weight, loan_buses_out, loan_buses_return, loan_vans_out, loan_vans_return, loan_cars_out, loan_cars_return, count_rented_into_ownership, rent_cars_in, rent_cars_return, cars0, scrapped_buses, sold_vans, buses0, vans0, cap_buses, cap_vans, cap_cars, clothes_total, vehicles_total)'
+
+# ================================================================
+# 描述文本：问题陈述与提问（单行且不含英文引号）
+# ================================================================
+desc: '职业战队赛季投入升级版：赛季初共配发{sets_num}套制服套装，每套包含上衣1件、长裤1件、鞋1双；{socks_per_set_text}；中途追加上衣{extra_shirts}件、长裤{extra_pants}件、鞋{extra_shoes_pairs}双、袜子{extra_socks_pairs}双；淘汰报废上衣{discard_shirts}件、长裤{discard_pants}件、鞋{discard_shoes_pairs}双、袜子{discard_socks_pairs}双；随后进行质量抽检，按百分比{hold_percent}%暂扣四类物资，复检按{release_ratio_num}/{release_ratio_den}比例返还，所有涉及比例的取整一律向下取整；供应商促销规则为每形成{promo_k}套完整套装即额外赠送上衣{gift_shirts_per_batch}件，完整套装定义为上衣、长裤、鞋各不少于1且若本题声明包含袜子则还需袜子，否则不含袜子；以双为单位的物品在最终统计时按{pair_rule_desc}。车辆方面，赛季初拥有巴士{buses0}辆、面包车{vans0}辆、轿车{cars0}辆；赛季中报废巴士{scrapped_buses}辆、卖出面包车{sold_vans}辆、租入轿车{rent_cars_in}辆，{rent_count_rule_text}，随后退租{rent_cars_return}辆；另有临时借调，借出巴士{loan_buses_out}辆、归还{loan_buses_return}辆，借出面包车{loan_vans_out}辆、归还{loan_vans_return}辆，借出轿车{loan_cars_out}辆、归还{loan_cars_return}辆；最终结算以快照计入现拥有，并受编制上限约束，巴士上限{cap_buses}辆、面包车上限{cap_vans}辆、轿车上限{cap_cars}辆，超出上限部分不计入现拥有。\n按最终结算，服装按单件总数计数，车辆按现拥有总数计数，{q1}。答案格式为diff等于车辆总数减服装总件数的整数分号ratio等于车辆总数与服装总件数之比的最简分数或undefined分号approx等于该比值保留四位小数或undefined；示例：diff=10;ratio=2/3;approx=0.6667'

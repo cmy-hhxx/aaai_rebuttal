@@ -1,0 +1,188 @@
+# -------------------------
+# 自定义操作符：引用外部Python函数
+# -------------------------
+custom_operator:
+  to_minutes: time_sequence_1.py
+  to_hhmm: time_sequence_1.py
+  compute_london_options_text: time_sequence_1.py
+
+# -------------------------
+# 随机变量定义
+# -------------------------
+variables:
+  # --- 三地UTC偏移（小时，整点，收敛到现实取值） ---
+  ny_utc_offset:
+    type: int
+    domain: "[-5, -4]"
+  lon_utc_offset:
+    type: int
+    domain: "[0, 1]"
+  sg_utc_offset:
+    type: int
+    domain: "[7, 9]"
+
+  # --- 甲地（纽约）工作时间与缓冲、灵活参与 ---
+  ny_start_h:
+    formula: "randint(8, 10)"
+  ny_start_min:
+    formula: "randint(0, 1) * 30"
+  ny_end_h:
+    formula: "ny_start_h + randint(8, 10)"
+  ny_end_min:
+    formula: "randint(0, 1) * 30"
+  ny_start_local_m:
+    formula: "to_minutes(ny_start_h, ny_start_min)"
+  ny_end_local_m:
+    formula: "to_minutes(ny_end_h, ny_end_min)"
+  # 强制允许任意时间参与，保证三地交集存在
+  ny_flex_anytime:
+    formula: "True"
+  ny_flex_minutes:
+    formula: "randint(8, 16) * 5"
+    diff_factor: -1
+  ny_buf_before:
+    formula: "randint(0, 3) * 5"
+  ny_buf_after:
+    formula: "randint(0, 3) * 5"
+
+  # --- 乙地（伦敦）工作时间、延长策略、缓冲与黑窗 ---
+  lon_start_h:
+    formula: "randint(8, 9)"
+  lon_start_min:
+    formula: "randint(0, 2) * 15"
+  lon_end_h:
+    formula: "randint(17, 18)"
+  lon_end_min:
+    formula: "randint(0, 2) * 15"
+  lon_extend_end_m:
+    type: int
+    domain: "[0, 30]"
+  lon_start_local_m:
+    formula: "to_minutes(lon_start_h, lon_start_min)"
+  lon_end_local_m:
+    formula: "to_minutes(lon_end_h, lon_end_min)"
+  # 必有延长策略：1 上班前延长，2 下班后延长，3 两端同时延长
+  lon_extend_dir_idx:
+    formula: "randint(1, 3)"
+  lon_extend_dir_start_enabled:
+    formula: "lon_extend_dir_idx in [1, 3]"
+  lon_extend_dir_end_enabled:
+    formula: "lon_extend_dir_idx in [2, 3]"
+  lon_extend_text:
+    formula: "('不延长' if lon_extend_dir_idx == 0 else ('上班前延长' if lon_extend_dir_idx == 1 else ('下班后延长' if lon_extend_dir_idx == 2 else '两端同时延长')))"
+  lon_buf_before:
+    formula: "randint(0, 2) * 5"
+  lon_buf_after:
+    formula: "randint(0, 2) * 5"
+  # 伦敦维护黑窗设置：缩小至0或1天，避免全周不可行
+  lon_black_days:
+    formula: "randint(0, 1)"
+  lon_black_start_h:
+    formula: "randint(10, 14)"
+  lon_black_start_min:
+    formula: "randint(0, 3) * 15"
+  lon_black_len_m:
+    type: int
+    domain: "[30, 120]"
+  lon_black_start_local_m:
+    formula: "to_minutes(lon_black_start_h, lon_black_start_min)"
+  lon_black_end_local_m:
+    formula: "lon_black_start_local_m + lon_black_len_m"
+
+  # --- 丙地（新加坡）工作时间、午休与缓冲 ---
+  sg_start_h:
+    formula: "randint(8, 9)"
+  sg_start_min:
+    formula: "randint(0, 1) * 30"
+  sg_end_h:
+    formula: "randint(18, 19)"
+  sg_end_min:
+    formula: "randint(0, 1) * 30"
+  sg_lunch_start_h:
+    formula: "randint(12, 13)"
+  sg_lunch_start_min:
+    formula: "randint(0, 1) * 30"
+  sg_lunch_len_m:
+    formula: "randint(0, 2) * 15 + 60"
+  sg_start_local_m:
+    formula: "to_minutes(sg_start_h, sg_start_min)"
+  sg_end_local_m:
+    formula: "to_minutes(sg_end_h, sg_end_min)"
+  sg_lunch_start_m:
+    formula: "to_minutes(sg_lunch_start_h, sg_lunch_start_min)"
+  sg_lunch_end_m:
+    formula: "sg_lunch_start_m + sg_lunch_len_m"
+  sg_lunch_enabled:
+    formula: "randint(0, 1) == 1"
+  sg_lunch_enabled_text:
+    formula: "('启用' if sg_lunch_enabled else '未启用')"
+  sg_buf_before:
+    formula: "randint(0, 3) * 5"
+  sg_buf_after:
+    formula: "randint(0, 3) * 5"
+
+  # --- 周内天数与对齐粒度 ---
+  weekdays:
+    type: int
+    domain: "[4, 6]"
+  slot_minutes:
+    formula: "randint(0, 1) * 15 + 15"
+
+  # --- 文本辅助：UTC偏移显示与时间段字符串 ---
+  ny_utc_text:
+    formula: "('UTC+' + str(ny_utc_offset) if ny_utc_offset >= 0 else 'UTC' + str(ny_utc_offset))"
+  lon_utc_text:
+    formula: "('UTC+' + str(lon_utc_offset) if lon_utc_offset >= 0 else 'UTC' + str(lon_utc_offset))"
+  sg_utc_text:
+    formula: "('UTC+' + str(sg_utc_offset) if sg_utc_offset >= 0 else 'UTC' + str(sg_utc_offset))"
+
+  ny_start_text:
+    formula: "to_hhmm(ny_start_local_m)"
+  ny_end_text:
+    formula: "to_hhmm(ny_end_local_m)"
+  lon_start_text:
+    formula: "to_hhmm(lon_start_local_m)"
+  lon_end_text:
+    formula: "to_hhmm(lon_end_local_m)"
+  sg_start_text:
+    formula: "to_hhmm(sg_start_local_m)"
+  sg_end_text:
+    formula: "to_hhmm(sg_end_local_m)"
+  sg_lunch_start_text:
+    formula: "to_hhmm(sg_lunch_start_m)"
+  sg_lunch_end_text:
+    formula: "to_hhmm(sg_lunch_end_m)"
+  lon_black_start_text:
+    formula: "to_hhmm(lon_black_start_local_m)"
+  lon_black_end_text:
+    formula: "to_hhmm(lon_black_end_local_m)"
+  ny_anytime_text:
+    formula: "('允许任意时间参与' if ny_flex_anytime else '仅在其工作时段参与')"
+  lon_black_desc_text:
+    formula: "('本周无维护黑窗' if lon_black_days == 0 else ('本周有 ' + str(lon_black_days) + ' 天维护黑窗，黑窗时段为 ' + lon_black_start_text + '-' + lon_black_end_text + '，仅在这些天生效'))"
+  ny_buf_text:
+    formula: "'前置 ' + str(ny_buf_before) + ' 分钟，后置 ' + str(ny_buf_after) + ' 分钟'"
+  lon_buf_text:
+    formula: "'前置 ' + str(lon_buf_before) + ' 分钟，后置 ' + str(lon_buf_after) + ' 分钟'"
+  sg_buf_text:
+    formula: "'前置 ' + str(sg_buf_before) + ' 分钟，后置 ' + str(sg_buf_after) + ' 分钟'"
+
+# -------------------------
+# 直接计算模式：答案由自定义函数直接返回
+# -------------------------
+calc_solution: false
+
+# -------------------------
+# 题目与答案
+# -------------------------
+queries:
+  q1:
+    desc: '请在城市乙时间下计算以每 {slot_minutes} 分钟为对齐的可用会议开始时间中可实现的全周最长会议时长以及达到该时长的开始时间个数。答案格式为：X 分钟, Y 个选项；示例：30 分钟, 12 个选项'
+    ans_formula: 'compute_london_options_text(ny_utc_offset, lon_utc_offset, sg_utc_offset, ny_start_local_m, ny_end_local_m, lon_start_local_m, lon_end_local_m, lon_extend_end_m, sg_start_local_m, sg_lunch_start_m, sg_lunch_end_m, sg_end_local_m, weekdays, slot_minutes, ny_flex_minutes, ny_flex_anytime, lon_extend_dir_start_enabled, lon_extend_dir_end_enabled, sg_lunch_enabled, lon_black_days, lon_black_start_local_m, lon_black_end_local_m, ny_buf_before, ny_buf_after, lon_buf_before, lon_buf_after, sg_buf_before, sg_buf_after)'
+    ans_text: '_ans'
+    ans_assertion: 'not _ans.startswith(''0'')'
+
+# -------------------------
+# 题干文本
+# -------------------------
+desc: '三地跨时区会议窗口规划。设城市甲时区为 {ny_utc_text}，城市乙时区为 {lon_utc_text}，城市丙时区为 {sg_utc_text}。所有时间均以各自本地时间给出，计算与输出均以城市乙本地时间为准。\n规则如下：\n1 城市甲工作时间为 {ny_start_text}-{ny_end_text}，单次会议时长上限为 {ny_flex_minutes} 分钟，参与限制为 {ny_anytime_text}。若为允许任意时间参与，则甲地不受其工作时段与缓冲限制，仅受单次时长上限与他两地窗口约束；若为仅在其工作时段参与，则甲地工作窗口与缓冲一并生效。甲地缓冲为 {ny_buf_text}。\n2 城市乙工作时间为 {lon_start_text}-{lon_end_text}，延长策略为 {lon_extend_text}，每个工作日可在对应端各延长 {lon_extend_end_m} 分钟；同时采用城市乙缓冲 {lon_buf_text}。此外，{lon_black_desc_text}。\n3 城市丙工作时间为 {sg_start_text}-{sg_end_text}。城市丙午休状态为 {sg_lunch_enabled_text}，若启用午休则 {sg_lunch_start_text}-{sg_lunch_end_text} 时段不可用；城市丙缓冲为 {sg_buf_text}。\n4 对齐粒度为每 {slot_minutes} 分钟。每个工作日的可用会议开始时间需落在三地可用窗口的交集中，并满足城市乙对齐粒度。窗口以闭开区间理解，会议开始时间不得落在禁用时段或缓冲覆盖区间内。\n5 黑窗规则按天生效，即一周内分为存在黑窗的若干天与不存在黑窗的其他天，两类日型分别计算每日可行开始时间及对应最大会议时长。全周的最长会议时长取两类日型中的全局最大值，并统计全周所有达到该最大值的开始时间个数。\n本周工作日数为 {weekdays} 天。请在上述规则下计算全周最长会议时长以及按照城市乙时间计的开始时间个数。答案格式为：X 分钟, Y 个选项；示例：30 分钟, 12 个选项。\n{q1}'

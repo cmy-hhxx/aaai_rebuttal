@@ -1,0 +1,85 @@
+custom_operator:
+  function_2: word_sorting_1.py
+  function_3: word_sorting_1.py
+  function_4: word_sorting_1.py
+  function_5: word_sorting_1.py
+  function_6: word_sorting_1.py
+  function_7: word_sorting_1.py
+  function_8: word_sorting_1.py
+  function_9: word_sorting_1.py
+  function_10: word_sorting_1.py
+  function_13: word_sorting_1.py
+
+variables:
+  item_num:
+    type: int
+    domain: "[10, 20]"
+  min_len:
+    type: int
+    domain: "[3, 7]"
+  max_len:
+    type: int
+    domain: "[min_len + 2, min_len + 6]"
+  accent_pct:
+    type: int
+    domain: "[5, 70]"
+  ll_pct:
+    type: int
+    domain: "[5, 70]"
+  enye_pct:
+    type: int
+    domain: "[5, 50]"
+  uppercase_pct:
+    type: int
+    domain: "[0, 50]"
+
+  front_letters_num:
+    type: int
+    domain: "[2, 4]"
+  back_letters_num:
+    type: int
+    domain: "[0, 3]"
+  prefer_bon_prob:
+    type: int
+    domain: "[20, 80]"
+  letters_pool:
+    formula: "['a','b','c','d','e','f','g','h','i','j','k','l','m','n','ñ','o','p','q','r','s','t','u','v','w','x','y','z']"
+
+  front_letters:
+    formula: function_4(letters_pool, front_letters_num, prefer_bon_prob)
+  back_letters:
+    formula: function_8(front_letters, letters_pool, back_letters_num)
+
+  titles:
+    formula: function_3(item_num, min_len, max_len, accent_pct, ll_pct, enye_pct, uppercase_pct)
+  rule_config:
+    formula: function_5(front_letters, back_letters)
+
+  sorted_titles:
+    formula: function_6(titles, rule_config)
+  unique_ok:
+    formula: function_9(titles, rule_config, 3000)
+  checksum:
+    formula: function_10(sorted_titles, rule_config)
+
+  titles_desc:
+    formula: "', '.join(titles)"
+  front_letters_desc:
+    formula: "', '.join(front_letters)"
+  back_letters_desc:
+    formula: "', '.join(back_letters)"
+  back_letters_desc_safe:
+    formula: "back_letters_desc if len(back_letters) > 0 else '无'"
+  rules_desc:
+    formula: function_7(rule_config)
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请输出最终排序，格式为 item1,item2,item3,…。'
+    ans_formula: function_13(sorted_titles, rule_config)
+    ans_text: str(_ans)
+    ans_assertion: "unique_ok and (_ans.count(',') + 1) == item_num"
+
+desc: '任务：对给定的西语风格标题进行两阶段排序。第一阶段，按自定义字母序（前置[{front_letters_desc}]，尾置[{back_letters_desc_safe}]）进行主比较；可选地将 ll/ch/rr 视为单一字母，ñ 与 n 的关系由规则指定；重音与大小写策略亦由规则给出。若主键相同，则依次比较多个度量（例如重音个数、元音总数、辅音单位个数、单位长度），必要时使用一个隐藏加权分数进一步决胜；如仍完全相同，则按原标题的字典序比较。第二阶段，在第一阶段结果的基础上，按规则对每个首单位分组进行确定性调整（例如反转偶数长度块、交换首尾或整体右移一位）。规则说明：{rules_desc} 本次共有 {item_num} 个标题，待排序数据为 [{titles_desc}]。请按 item1,item2,item3,… 的格式作答。{q1}'

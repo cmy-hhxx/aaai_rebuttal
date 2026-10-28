@@ -1,0 +1,37 @@
+custom_operator:
+  generate_puzzle: minesweeper_3.py
+  grid_to_text: minesweeper_3.py
+
+variables:
+  cube_size:
+    type: int
+    domain: '[3,3]'
+
+  puzzle_info:
+    # returns [grid, mines_disp, safe_disp, neigh_desc, slice_desc, note]
+    formula: generate_puzzle(cube_size)
+
+  grid:          { formula: "puzzle_info[0]" }
+  forced_mines:  { formula: "puzzle_info[1]" }
+  forced_safe:   { formula: "puzzle_info[2]" }
+  neigh_desc:    { formula: "puzzle_info[3]" }
+  slice_desc:    { formula: "puzzle_info[4]" }
+  note:          { formula: "puzzle_info[5]" }
+  grid_text:     { formula: grid_to_text(grid) }
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: 'a) 必含爆雷的格子 (若没有写 NONE)：'
+    ans_formula: forced_mines
+    ans_text: "', '.join([str(c) for c in sorted(_ans)])"
+    ans_assertion: 'True'
+
+  q2:
+    desc: 'b) 必安全的格子 (若没有写 NONE)：'
+    ans_formula: forced_safe
+    ans_text: "', '.join([str(c) for c in sorted(_ans)])"
+    ans_assertion: 'True'
+
+desc: 'Below is a {cube_size}×{cube_size}×{cube_size} deep-sea grid. “*” denotes an unknown cell; a digit shows how many mines touch it through {neigh_desc}. Global slice clues: {slice_desc}. (Row/column indices are y-/x-axes; layers follow the z-axis.) Rows are separated by “|”, layers by “//”. {note}\\n\\nAnswer format: ascending coordinates separated by “, ”, e.g. (0,0,1), (1,2,0). Write NONE if empty.\\n\\nGrid:\\n{grid_text}\\n\\nBased solely on logical necessity, answer:\\n{q1}\\n{q2}'

@@ -1,0 +1,57 @@
+# 高度参数化与规则随机化 + 唯一解验证：Nurikabe（墙-岛）逆向生成框架（受控提示，避免显见线索）
+custom_operator:
+  grid_to_str: number_wall_0.py
+  validate_solution: number_wall_0.py
+  validate_unique: number_wall_0.py
+  build_rule_profile: number_wall_0.py
+  build_random_nurikabe: number_wall_0.py
+  render_rule_desc: number_wall_0.py
+  render_hints_desc: number_wall_0.py
+  gen_puzzle: number_wall_0.py
+
+variables:
+  rows:
+    type: int
+    domain: "[5, 7]"
+  cols:
+    type: int
+    domain: "[5, 7]"
+  wall_density_pct:
+    type: int
+    domain: "[30, 60]"
+  unique_timeout_sec:
+    type: int
+    domain: "[100, 180]"
+
+  rule_profile:
+    formula: "build_rule_profile(rows, cols)"
+  # 生成实例，包含解、题面、玩家提示与内部提示
+  instance:
+    formula: "build_random_nurikabe(rows, cols, wall_density_pct, rule_profile)"
+  solution_grid:
+    formula: "instance['solution_grid']"
+  given_grid:
+    formula: "instance['given_grid']"
+  hints_public:
+    formula: "instance['hints_public']"
+  hints_internal:
+    formula: "instance['hints_internal']"
+
+  given_grid_str:
+    formula: "grid_to_str(given_grid)"
+  rule_desc_str:
+    formula: "render_rule_desc(rule_profile)"
+  hint_desc_str:
+    formula: "render_hints_desc(hints_public)"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请给出满足规则与提示的二维列表解，列表中 A 表示墙，X 表示岛格，数字保持在原位置。答案格式说明：请输出 JSON 风格二维列表，元素仅可为 A、X 或整数，例如 [[''A'',''X'',2],...]; 必须与题面中已知数字与已知 A 保持一致。'
+    ans_formula: "grid_to_str(solution_grid)"
+    ans_text: "_ans"
+    # 玩家提示用于可见规则校验；唯一性验证使用内部提示集
+    ans_assertion: "validate_solution(given_grid, solution_grid, rule_profile, hints_public) and validate_unique(given_grid, rule_profile, hints_internal, unique_timeout_sec)"
+
+desc: '放置墙壁(标记为 A) 将网格分割成岛屿；规则如下：\n{rule_desc_str}\n提示信息(需严格遵守)：\n{hint_desc_str}\n网格(行×列 {rows}×{cols}):\n{given_grid_str}\n请在 X 上决定放置 A(墙) 或保留为 X(岛)，并输出二维列表的解。'

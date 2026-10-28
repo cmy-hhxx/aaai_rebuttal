@@ -1,0 +1,19 @@
+custom_operator: 
+    candy: customs/candy.py
+variables:
+  num_child: 
+    type: int
+    domain: "[2, 30]"
+    diff_factor: 1
+  ratings: 
+    formula: '[randint(0,10) for _ in range(num_child)]'
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请给每个孩子分发糖果，计算并输出需要准备的最少糖果数目。
+    ans_formula: candy(ratings)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 已知有{num_child}个孩子，每个孩子的评分分别为{'、'.join(str(rate) for rate in ratings)}。需要按照以下要求，给这些孩子分发糖果：1、每个孩子至少分配到 1 个糖果。2、相邻两个孩子中，评分更高的那个会获得更多的糖果。{q1}

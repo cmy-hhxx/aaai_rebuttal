@@ -1,0 +1,231 @@
+# ============================
+# Custom operators (helpers)
+# ============================
+custom_operator:
+  # 网格与显示
+  build_block_letter_grid: norinori_3.py
+  grid_to_one_line_with_x: norinori_3.py
+  grid_to_one_line: norinori_3.py
+  # 基础索引与相邻关系
+  make_cells: norinori_3.py
+  make_row_cells: norinori_3.py
+  make_col_cells: norinori_3.py
+  make_adj_pairs: norinori_3.py
+  # 文本与区域
+  format_row_counts: norinori_3.py
+  build_regions_from_grid: norinori_3.py
+  get_region_names: norinori_3.py
+  # 边键与映射
+  pairs_to_keys: norinori_3.py
+  build_pairs_map: norinori_3.py
+  cell_incidence_keys: norinori_3.py
+  key_to_pair: norinori_3.py
+  # X 的随机选取与可见线索选择、文案合成（增强）
+  select_x_cells: norinori_3.py
+  choose_visible_flags: norinori_3.py
+  choose_extra_flags: norinori_3.py
+  compose_rules_text2: norinori_3.py
+  # 新增：冲突对生成（精准禁止正交相邻）
+  build_conflict_pairs_keys: norinori_3.py
+
+# ============================
+# Variables (grid, flags, display)
+# ============================
+variables:
+  # 2x2 区域块行数与块列数（决定网格尺寸）
+  br:
+    type: int
+    domain: '[2, 4]'
+  bc:
+    type: int
+    domain: '[2, 4]'
+  # 网格尺寸 m=2*br, n=2*bc
+  m:
+    formula: '2 * br'
+  n:
+    formula: '2 * bc'
+  # 是否打乱区域字母
+  shuffle_regions:
+    type: bool
+    domain: '[True, False]'
+  # 纯字母网格（不含 X），按块填充 2x2 字母
+  letters_grid:
+    formula: build_block_letter_grid(br, bc, shuffle_regions)
+  # 全部格子线性索引与行/列索引集合
+  cells:
+    formula: make_cells(m, n)
+  row_cells:
+    formula: make_row_cells(m, n)
+  col_cells:
+    formula: make_col_cells(m, n)
+  # 相邻格对与键映射
+  adj_pairs:
+    formula: make_adj_pairs(m, n)
+  pair_keys:
+    formula: pairs_to_keys(adj_pairs)
+  pairs_map:
+    formula: build_pairs_map(adj_pairs)
+  # 区域及名称
+  region_cells:
+    formula: build_regions_from_grid(letters_grid, m, n)
+  region_names:
+    formula: get_region_names(region_cells)
+  region_count:
+    formula: 'len(region_names)'
+  # X 的数量范围与具体位置（增强：同一区域两个 X 必须相邻）
+  x_k_min:
+    type: int
+    domain: '[1, 2]'
+  x_k_max:
+    formula: 'br * bc // 3 + 1'
+  x_cells:
+    formula: select_x_cells(letters_grid, m, n, x_k_min, x_k_max)
+  # 展示用网格文本（叠加 X）
+  grid_text:
+    formula: grid_to_one_line_with_x(letters_grid, x_cells, m, n)
+  # 主线索选择的数量范围与具体布尔向量（长度4）
+  flags_min_on:
+    type: int
+    domain: '[2, 3]'
+  flags_max_on:
+    type: int
+    domain: '[2, 3]'
+  visible_flags:
+    formula: choose_visible_flags(flags_min_on, flags_max_on)
+  use_rows_counts:
+    formula: 'visible_flags[0]'
+  use_cols_counts:
+    formula: 'visible_flags[1]'
+  use_vband_counts:
+    formula: 'visible_flags[2]'
+  use_hband_counts:
+    formula: 'visible_flags[3]'
+  # 扩展线索选择（长度2）：总竖/横向管道数、四角覆盖布尔向量
+  aux_flags_min_on:
+    type: int
+    domain: '[0, 1]'
+  aux_flags_max_on:
+    type: int
+    domain: '[0, 1]'
+  extra_flags:
+    formula: choose_extra_flags(aux_flags_min_on, aux_flags_max_on)
+  use_orient_totals:
+    formula: 'extra_flags[0]'
+  use_corner_flags:
+    formula: 'extra_flags[1]'
+  # 文案风格
+  style_id:
+    type: int
+    domain: '[0, 2]'
+  # 多米诺冲突对键（用于强约束：禁止正交相邻）
+  conflict_pair_keys:
+    formula: build_conflict_pairs_keys(m, n, pairs_map)
+
+# ============================
+# Symbols (domino selections)
+# ============================
+symbols:
+  # 每对正交相邻格是否被选择为管道（两格多米诺）
+  edge_s:
+    source:
+    - pair_keys
+    type: bool
+    desc: '相邻格对 {_pair_keys} 是否被选择为管道'
+
+# ============================
+# Conditions (base structural constraints)
+# ============================
+conditions:
+  # 每个格子至多被一个多米诺覆盖（度<=1）
+  cell_degree_at_most_one:
+    formula: And([Sum([If(edge_s[k], 1, 0) for k in cell_incidence_keys(c, pairs_map)]) <= 1 for c in cells])
+    desc: '每个格子至多被一个管道覆盖'
+  # 禁止不同多米诺之间在四连通意义上的正交相邻（允许对角接触）
+  no_adjacent_pipes:
+    formula: And([Or(Not(edge_s[a]), Not(edge_s[b])) for (a, b) in conflict_pair_keys])
+    desc: '不同管道之间不得正交相邻（允许对角接触）'
+  # 每个字母区域恰有两个被覆盖的格子
+  regions_two_each:
+    formula: And([Sum([If(Sum([If(edge_s[k], 1, 0) for k in cell_incidence_keys(c, pairs_map)]) >= 1, 1, 0) for c in region_cells[name]]) == 2 for name in region_names])
+    desc: '每个字母区域恰有两个格子铺设管道'
+  # 每个字母区域内部恰好 1 个多米诺（不跨区域）
+  region_internal_domino:
+    formula: And([Sum([If(edge_s[k], 1, 0) for k in pair_keys if (key_to_pair(k, pairs_map)[0] in region_cells[name] and key_to_pair(k, pairs_map)[1] in region_cells[name])]) == 1 for name in region_names])
+    desc: '每个字母区域内部恰好放置 1 个管道'
+  # 所有 X 必须并入某个多米诺（度==1）
+  x_must_be_in_pipe:
+    formula: And([Sum([If(edge_s[k], 1, 0) for k in cell_incidence_keys(x, pairs_map)]) == 1 for x in x_cells])
+    desc: '所有 X 位置必须并入某个管道'
+  # 多米诺总数等于区域数
+  total_domino_count:
+    formula: Sum([If(edge_s[k], 1, 0) for k in pair_keys]) == region_count
+    desc: '管道总数等于字母区域数'
+
+# ============================
+# Solve-then-constrain (post generation: extract stats and lock selected hints)
+# ============================
+post_generation:
+  # 从首个可行解中提取计数与文本，并构造题面规则文本
+  post_gen_vars:
+    # 行覆盖计数与文本
+    row_cover_counts: "[sum([1 for c in row_cells[r] if any([get_value(_sol, edge_s[k2]) for k2 in cell_incidence_keys(c, pairs_map)])]) for r in range(m)]"
+    row_counts_text: "format_row_counts(row_cover_counts)"
+    # 列覆盖计数与文本
+    col_cover_counts: "[sum([1 for c in [r * n + col for r in range(m)] if any([get_value(_sol, edge_s[k2]) for k2 in cell_incidence_keys(c, pairs_map)])]) for col in range(n)]"
+    col_counts_text: "format_row_counts(col_cover_counts)"
+    # 每两行带中的竖向管道数量与文本
+    vertical_by_band: "[sum([1 for k in pair_keys if (get_value(_sol, edge_s[k]) and abs(key_to_pair(k, pairs_map)[0] - key_to_pair(k, pairs_map)[1]) == n and ((key_to_pair(k, pairs_map)[0] // n) // 2 == b) and ((key_to_pair(k, pairs_map)[1] // n) // 2 == b))]) for b in range(m // 2)]"
+    vertical_band_text: "format_row_counts(vertical_by_band)"
+    # 每两列带中的横向管道数量与文本
+    horizontal_by_band: "[sum([1 for k in pair_keys if (get_value(_sol, edge_s[k]) and abs(key_to_pair(k, pairs_map)[0] - key_to_pair(k, pairs_map)[1]) == 1 and ((key_to_pair(k, pairs_map)[0] % n) // 2 == b) and ((key_to_pair(k, pairs_map)[1] % n) // 2 == b))]) for b in range(n // 2)]"
+    horizontal_band_text: "format_row_counts(horizontal_by_band)"
+    # 扩展线索：总竖/横向管道数与文本
+    vertical_total: "sum([1 for k in pair_keys if (get_value(_sol, edge_s[k]) and abs(key_to_pair(k, pairs_map)[0] - key_to_pair(k, pairs_map)[1]) == n)])"
+    horizontal_total: "region_count - vertical_total"
+    orient_totals_text: "format_row_counts([vertical_total, horizontal_total])"
+    # 扩展线索：四角覆盖布尔向量（1/0）与文本
+    corner_cells: "[0, n - 1, (m - 1) * n, m * n - 1]"
+    corner_flags: "[1 if any([get_value(_sol, edge_s[k2]) for k2 in cell_incidence_keys(c, pairs_map)]) else 0 for c in corner_cells]"
+    corner_flags_text: "format_row_counts(corner_flags)"
+    # 综合规则文本（新版）
+    rules_text: "compose_rules_text2(use_rows_counts, use_cols_counts, use_vband_counts, use_hband_counts, use_orient_totals, use_corner_flags, row_counts_text, col_counts_text, vertical_band_text, horizontal_band_text, orient_totals_text, corner_flags_text, m, n, br, bc, style_id)"
+  # 将被选中的额外线索固化为约束（未选中的线索不强制）
+  post_gen_conditions:
+    rows_coverage_fixed:
+      formula: "Implies(use_rows_counts, And([Sum([If(Sum([If(edge_s[k], 1, 0) for k in cell_incidence_keys(c, pairs_map)]) >= 1, 1, 0) for c in row_cells[r]]) == row_cover_counts[r] for r in range(m)]))"
+      desc: '当启用该线索时：每一行被覆盖的格子数依次为 {row_counts_text}'
+    columns_coverage_fixed:
+      formula: "Implies(use_cols_counts, And([Sum([If(Sum([If(edge_s[k], 1, 0) for k in cell_incidence_keys(c, pairs_map)]) >= 1, 1, 0) for c in col_cells[col]]) == col_cover_counts[col] for col in range(n)]))"
+      desc: '当启用该线索时：每一列被覆盖的格子数依次为 {col_counts_text}'
+    vertical_domino_count_per_two_row_band:
+      formula: "Implies(use_vband_counts, And([Sum([If(edge_s[k], 1, 0) for k in pair_keys if (abs(key_to_pair(k, pairs_map)[0] - key_to_pair(k, pairs_map)[1]) == n and ((key_to_pair(k, pairs_map)[0] // n) // 2 == b) and ((key_to_pair(k, pairs_map)[1] // n) // 2 == b))]) == vertical_by_band[b] for b in range(m // 2)]))"
+      desc: '当启用该线索时：每两行带中的竖向管道数量依次为 {vertical_band_text}'
+    horizontal_domino_count_per_two_col_band:
+      formula: "Implies(use_hband_counts, And([Sum([If(edge_s[k], 1, 0) for k in pair_keys if (abs(key_to_pair(k, pairs_map)[0] - key_to_pair(k, pairs_map)[1]) == 1 and ((key_to_pair(k, pairs_map)[0] % n) // 2 == b) and ((key_to_pair(k, pairs_map)[1] % n) // 2 == b))]) == horizontal_by_band[b] for b in range(n // 2)]))"
+      desc: '当启用该线索时：每两列带中的横向管道数量依次为 {horizontal_band_text}'
+    orientation_totals_fixed:
+      formula: "Implies(use_orient_totals, Sum([If(edge_s[k] if abs(key_to_pair(k, pairs_map)[0] - key_to_pair(k, pairs_map)[1]) == n else False, 1, 0) for k in pair_keys]) == vertical_total)"
+      desc: '当启用该线索时：总竖向管道数与题面一致'
+    corner_flags_fixed:
+      formula: "Implies(use_corner_flags, And([Sum([If(edge_s[k], 1, 0) for k in cell_incidence_keys(corner_cells[i], pairs_map)]) == corner_flags[i] for i in range(4)]))"
+      desc: '当启用该线索时：四个角落的覆盖情况与题面一致'
+
+# ============================
+# Global solve controls
+# ============================
+max_solution: 6000
+
+# ============================
+# Query (final answer with strict format)
+# ============================
+queries:
+  q1:
+    desc: '给出所有管道的放置坐标（以1为起始行列索引），答案格式：列表，每一项为((r1,c1),(r2,c2))；示例：[((1,1),(1,2)), ((2,2),(3,2))]；请按任意顺序列出全部管道。'
+    ans_formula: '[( (u // n + 1, u % n + 1), (v // n + 1, v % n + 1) ) for k in pair_keys for (u, v) in [key_to_pair(k, pairs_map)] if get_value(_solutions[0], edge_s[k])]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# ============================
+# Description (single-line, variable sentence style and selected hints)
+# ============================
+desc: '城市排水管道布局：在一个 {m}×{n} 的网格上（每个字母区域为2×2且不跨区放置），将若干两格长的管道（多米诺）铺设在格子之间；{rules_text}；网格为 [{grid_text}]；答案格式：列表，每项为((r1,c1),(r2,c2))，示例：[((1,1),(1,2)), ((2,2),(3,2))]；请按题目中给定的答案格式返回所有管道的放置坐标（行列均从1开始）。'

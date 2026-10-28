@@ -1,0 +1,150 @@
+# ================================================================
+# 深海实验室样本罐（纯计算模式，前向生成，规则与谓词全面抽象化，扩展版；含ID规则说明）
+# 说明：所有计算均由 object_properties_3.py 提供的函数完成，calc_solution: false。
+# 题面不展示最终集合，仅给初始集合与规则，需要多步推演后作答。
+# ================================================================
+custom_operator:
+  # 属性宇宙生成
+  gen_size_values: object_properties_3.py
+  gen_material_values: object_properties_3.py
+  gen_color_values: object_properties_3.py
+  gen_scent_values: object_properties_3.py
+  gen_ocean_values: object_properties_3.py
+  gen_label_values: object_properties_3.py
+  # 变换规范与谓词
+  gen_transform_spec_v2: object_properties_3.py
+  get_predicate: object_properties_3.py
+  build_transform_desc_v2: object_properties_3.py
+  build_question_text_v2: object_properties_3.py
+  build_question_text_ids_v2: object_properties_3.py
+  build_question_text_labelmax_v2: object_properties_3.py
+  get_predicate_clause_num_v2: object_properties_3.py
+  build_id_policy_text_v1: object_properties_3.py
+  calibrate_predicate_v2: object_properties_3.py
+  # 初始集合构造与变换、计数
+  build_initial_samples_v2: object_properties_3.py
+  apply_transforms_v2: object_properties_3.py
+  count_satisfying_v2: object_properties_3.py
+  compute_ids_satisfying_v2: object_properties_3.py
+  label_counts_v2: object_properties_3.py
+  pick_top_label_v2: object_properties_3.py
+  get_total_count: object_properties_3.py
+  validate_answer_range: object_properties_3.py
+  verify_uniqueness_bundle_v2: object_properties_3.py
+  # 摘要与断言统计
+  summarize_samples: object_properties_3.py
+  effects_nonempty: object_properties_3.py
+
+# ================================================================
+# 变量：参数随机化、场景构建与统计（带难度注释）
+# ================================================================
+variables:
+  # 样本数量（影响难度：越多越难）
+  n_items:
+    type: int
+    domain: '[9, 14]'
+    diff_factor: 1
+
+  # 属性宇宙（随机子集）
+  size_values:
+    formula: gen_size_values()
+  material_values:
+    formula: gen_material_values()
+  color_values:
+    formula: gen_color_values()
+  scent_values:
+    formula: gen_scent_values()
+  ocean_values:
+    formula: gen_ocean_values()
+  label_values:
+    formula: gen_label_values()
+
+  # 动态变换规范与查询谓词（至少5步：含1条可选规则）
+  tf_spec:
+    formula: gen_transform_spec_v2(size_values, material_values, color_values, scent_values, ocean_values, label_values)
+
+  # 初始集合与变换后集合
+  init_samples:
+    formula: build_initial_samples_v2(n_items, size_values, material_values, color_values, scent_values, ocean_values, label_values, tf_spec)
+  transformed_samples:
+    formula: apply_transforms_v2(init_samples, tf_spec)
+
+  # 谓词校准：保证非平凡计数（1 到 total-1）
+  predicate:
+    formula: calibrate_predicate_v2(transformed_samples, tf_spec)
+
+  # 谓词条数（影响难度：越多越难）
+  predicate_clause_num:
+    formula: get_predicate_clause_num_v2(predicate)
+    diff_factor: 1
+
+  # 计数答案与辅助数据
+  final_count:
+    formula: count_satisfying_v2(transformed_samples, predicate)
+    diff_factor: 1
+  final_total:
+    formula: get_total_count(transformed_samples)
+  ids_satisfying:
+    formula: compute_ids_satisfying_v2(transformed_samples, predicate)
+  label_counts:
+    formula: label_counts_v2(transformed_samples)
+  top_label:
+    formula: pick_top_label_v2(label_counts)
+
+  # 断言标志：每条规则都有非空效果；答案非平凡；整束唯一一致
+  effects_nonempty_flag:
+    formula: effects_nonempty(init_samples, tf_spec)
+  answer_valid_flag:
+    formula: validate_answer_range(final_count, final_total)
+  unique_bundle_flag:
+    formula: verify_uniqueness_bundle_v2(transformed_samples, predicate, final_count, ids_satisfying, label_counts, top_label)
+
+  # 题面文本片段（每问包含格式说明与示例）
+  init_summary:
+    formula: summarize_samples(init_samples)
+  transform_desc:
+    formula: build_transform_desc_v2(tf_spec)
+  id_policy_text:
+    formula: build_id_policy_text_v1()
+  q1_text:
+    formula: build_question_text_v2(predicate)
+  q2_text:
+    formula: build_question_text_ids_v2(predicate)
+  q3_text:
+    formula: build_question_text_labelmax_v2()
+
+# ================================================================
+# 关闭Z3求解：纯计算模式，无 _model/_solutions/_value
+# ================================================================
+calc_solution: false
+
+# ================================================================
+# 查询：三问组合，答案格式显式说明，便于比较正误
+# ================================================================
+queries:
+  # 问题1：计数题（整数）
+  q1:
+    desc: '{q1_text}'
+    ans_formula: final_count
+    ans_text: str(_ans)
+    ans_assertion: 'effects_nonempty_flag and answer_valid_flag and unique_bundle_flag'
+
+  # 问题2：ID列表（升序）
+  q2:
+    desc: '{q2_text}'
+    ans_formula: ids_satisfying
+    ans_text: str(_ans)
+    ans_assertion: 'effects_nonempty_flag and answer_valid_flag and unique_bundle_flag'
+
+  # 问题3：最多标签（字母序并列裁决；答案为单个大写字母）
+  q3:
+    desc: '{q3_text}'
+    ans_formula: top_label
+    ans_text: str(_ans)
+    ans_assertion: 'effects_nonempty_flag and unique_bundle_flag'
+
+# ================================================================
+# 描述：单行题干，包含初始摘要、变换说明与ID规则，不展示最终集合
+# 注意：不含双引号；使用 \n 显式换行；花括号仅做变量插值
+# ================================================================
+desc: '深海实验室样本罐：共有{n_items}个样本罐，属性包括尺寸{size_values}、材质{material_values}、颜色{color_values}、气味{scent_values}、海域{ocean_values}、标签{label_values}；初始逐项：{init_summary}；变换步骤：{transform_desc}；ID规则：{id_policy_text}；问题：\n{q1}\n{q2}\n{q3}\n提示：请严格按各小问的答案格式作答，示例中的括号与逗号不可省略或更改。'

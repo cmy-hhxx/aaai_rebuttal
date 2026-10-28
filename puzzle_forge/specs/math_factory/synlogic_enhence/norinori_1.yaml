@@ -1,0 +1,44 @@
+custom_operator:
+  generate_unique_puzzle: norinori_1.py
+  format_dominoes: norinori_1.py
+
+calc_solution: false
+
+variables:
+  grid_size:
+    type: int
+    domain: "[6, 6]"
+
+  max_x:
+    formula: "12"
+
+  # 随机生成唯一解谜题
+  puzzle:
+    formula: generate_unique_puzzle(grid_size, max_x)
+
+  # 解包
+  X_coords:
+    formula: "puzzle['X']"
+
+  dominoes:
+    formula: "puzzle['D']"
+
+  x_num:
+    formula: "len(X_coords)"
+
+  # 阴影格固定称谓
+  x_term:
+    formula: "'X格'"
+
+  # 标准答案文本
+  answer_text:
+    formula: "format_dominoes(dominoes)"
+
+queries:
+  q1:
+    desc: '【答题要求】请将全部多米诺按 (r1,c1,r2,c2) 形式依次列出，用英文逗号连接且不得出现空格；示例：(1,1,1,2),(1,3,1,4)。'
+    ans_formula: answer_text
+    ans_text: answer_text
+    ans_assertion: 'True'
+
+desc: '多米诺覆盖挑战：在 6×6 的 Norinori 网格中已标记 {x_num} 个 {x_term}，其坐标为 {X_coords}。\n规则：① 每个多米诺覆盖一对水平或垂直相邻且未被 {x_term} 占据的格子；② 所有剩余格必须被恰好一个多米诺覆盖，且多米诺之间不得重叠；③ {x_term} 不可被多米诺覆盖。本题保证唯一解。\n【答题格式】输出全部多米诺坐标，格式 (r1,c1,r2,c2)，用英文逗号串联且不得出现空格；示例：(1,1,1,2),(1,3,1,4)。'

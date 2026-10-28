@@ -1,0 +1,377 @@
+# 基于 Norinori 逻辑的高阶扩展（布尔符号 + 线性约束 + 后置提示）
+# - 随机环境：棋盘尺寸、字母区域布局、X/O 标记、禁止边
+# - 可变规则（自动可行化配额）：
+#   (A) 邻接策略（两种：正交不相邻 或 2×2 方块内至多 1 个）
+#   (B) O 标记必须未覆盖（若存在）
+#   (C) 方向约束（开关自适应，使用收缩后的下限 h_req/v_req）
+#   (D) 平衡约束（开关自适应）：|H-V| ≤ L
+#   (E) 内部连接配额（至少 intra_req 个区域内部存在多米诺）
+#   (F) 跨区配额（至少 bridge_req 条跨区多米诺）
+# - 始终约束：
+#   (1) 每格至多被一个多米诺覆盖
+#   (2) 所有 X 必须被覆盖
+#   (3) 每个字母区域恰有两个格子被覆盖
+#   (4) 指定的禁止边上不得放置多米诺
+# - 唯一解策略：
+#   后置从解中抽取多条行/列覆盖提示 + 两个“等式线索”（恰有若干内部多米诺、恰有若干跨区多米诺），写入题面并添加等式约束收紧解空间
+
+custom_operator:
+  # 布局与索引
+  make_cells: norinori_2.py
+  gen_edges: norinori_2.py
+  flatten_2d: norinori_2.py
+  uniq_regions: norinori_2.py
+  group_region_indices: norinori_2.py
+  indices_by_label: norinori_2.py
+  cell_to_index_map: norinori_2.py
+  build_cell_edge_indices: norinori_2.py
+  list_len: norinori_2.py
+  edges_to_str: norinori_2.py
+  generate_labels_with_marks: norinori_2.py
+  select_blocked_edges: norinori_2.py
+  blocked_indices: norinori_2.py
+  grid_to_line: norinori_2.py
+  edge_orientation_indices: norinori_2.py
+  square_edge_groups: norinori_2.py
+  adj_desc_from_policy: norinori_2.py
+  orient_rule_desc: norinori_2.py
+  marks_desc: norinori_2.py
+  # 扩展：边界与配额描述
+  perimeter_edge_indices: norinori_2.py
+  region_internal_edges_map: norinori_2.py
+  bridge_edge_indices: norinori_2.py
+  row_cell_groups: norinori_2.py
+  choose_k_rows: norinori_2.py
+  row_hints_desc: norinori_2.py
+  hv_balance_desc: norinori_2.py
+  bridge_rule_desc: norinori_2.py
+  intra_rule_desc: norinori_2.py
+  # 自适应选择与收缩
+  choose_adjacency_policy: norinori_2.py
+  choose_orientation_switch: norinori_2.py
+  choose_hv_balance_switch: norinori_2.py
+  clamp_to_max: norinori_2.py
+  list_diff: norinori_2.py
+  # 列提示
+  col_cell_groups: norinori_2.py
+  choose_k_cols: norinori_2.py
+  col_hints_desc: norinori_2.py
+  # 等式线索文本
+  bridge_eq_desc: norinori_2.py
+  intra_eq_desc: norinori_2.py
+  # 新增：题面拼接与格式说明
+  fmt_optional_section: norinori_2.py
+  edge_format_desc: norinori_2.py
+  grid_format_desc: norinori_2.py
+  domino_legal_desc: norinori_2.py
+
+variables:
+  # 网格规模
+  rows:
+    type: int
+    domain: "[4, 7]"
+    diff_factor: 1
+  cols:
+    type: int
+    domain: "[4, 7]"
+    diff_factor: 1
+
+  # 基本集合：格子与相邻边
+  cells:
+    formula: make_cells(rows, cols)
+  edges:
+    formula: gen_edges(rows, cols)
+  edges_str:
+    formula: edges_to_str(edges)
+  cell_to_index:
+    formula: cell_to_index_map(cells)
+  cell_edge_indices:
+    formula: build_cell_edge_indices(cells, edges)
+  cell_num:
+    formula: list_len(cells)
+  edge_num:
+    formula: list_len(edges)
+
+  # 区域数量与大小控制
+  region_min:
+    type: int
+    domain: "[3, 6]"
+  region_max:
+    type: int
+    domain: "[region_min, region_min + 3]"
+  reg_size_min:
+    type: int
+    domain: "[2, 5]"
+  reg_size_max:
+    type: int
+    domain: "[reg_size_min, rows * cols // region_min]"
+
+  # X/O 标记目标数量
+  x_target:
+    type: int
+    domain: "[0, rows]"
+  o_target:
+    type: int
+    domain: "[0, 2]"
+
+  # 随机生成区域布局与 X/O 标记（内部已保证 X 个数为偶数）
+  labels_grid:
+    formula: generate_labels_with_marks(rows, cols, region_min, region_max, reg_size_min, reg_size_max, x_target, o_target)
+  labels:
+    formula: flatten_2d(labels_grid)
+  regions:
+    formula: uniq_regions(labels)
+  region_to_indices:
+    formula: group_region_indices(labels, regions)
+  x_indices:
+    formula: indices_by_label(labels, 'X')
+  x_count:
+    formula: list_len(x_indices)
+  o_indices:
+    formula: indices_by_label(labels, 'O')
+  has_o:
+    formula: list_len(o_indices) > 0
+
+  # 禁止边（域更保守；Python 侧也限制最多10%）
+  blocked_edge_num:
+    type: int
+    domain: "[0, rows * cols // 6]"
+    diff_factor: -1
+  blocked_edges:
+    formula: select_blocked_edges(edges, blocked_edge_num)
+  blocked_edges_str:
+    formula: edges_to_str(blocked_edges)
+  blocked_edge_indices:
+    formula: blocked_indices(edges, blocked_edges)
+
+  # 方向索引与 2×2 方块内部边组
+  orient_indices:
+    formula: edge_orientation_indices(edges)
+  h_indices:
+    formula: orient_indices.get('H')
+  v_indices:
+    formula: orient_indices.get('V')
+  square_groups:
+    formula: square_edge_groups(rows, cols, edges)
+
+  # 边界、多米诺分组索引
+  perimeter_indices:
+    formula: perimeter_edge_indices(rows, cols, edges)
+  region_intra_edges_map:
+    formula: region_internal_edges_map(labels_grid, edges)
+  bridge_indices:
+    formula: bridge_edge_indices(labels_grid, edges)
+
+  # 方向出现约束最小值与开关
+  orientation_min_h:
+    type: int
+    domain: "[0, 2]"
+  orientation_min_v:
+    type: int
+    domain: "[0, 2]"
+  orientation_switch:
+    formula: choose_orientation_switch(rows, cols, orientation_min_h, orientation_min_v, list_len(blocked_edges))
+
+  # 可用边与收缩后的方向下限
+  h_avail_indices:
+    formula: list_diff(h_indices, blocked_edge_indices)
+  v_avail_indices:
+    formula: list_diff(v_indices, blocked_edge_indices)
+  h_req:
+    formula: clamp_to_max(orientation_min_h, list_len(h_avail_indices))
+  v_req:
+    formula: clamp_to_max(orientation_min_v, list_len(v_avail_indices))
+
+  # 平衡约束自适应开关与限制
+  hv_balance_switch:
+    formula: choose_hv_balance_switch(rows, cols, orientation_min_h, orientation_min_v)
+  hv_balance_limit:
+    type: int
+    domain: "[0, 3]"
+  hv_text:
+    formula: hv_balance_desc(hv_balance_switch, hv_balance_limit)
+
+  # 内部连接配额（至少 k 个区域内部有多米诺）——收缩到可行上界
+  intra_quota_min:
+    type: int
+    domain: "[0, 2]"
+  intra_cap:
+    formula: 'sum([1 if list_len(region_intra_edges_map[r]) > 0 else 0 for r in regions])'
+  intra_req:
+    formula: clamp_to_max(intra_quota_min, intra_cap)
+  intra_text:
+    formula: intra_rule_desc(intra_req)
+
+  # 跨区配额（至少 b 条跨区边被使用）——收缩到可行上界
+  bridge_min:
+    type: int
+    domain: "[0, 2]"
+  bridge_req:
+    formula: clamp_to_max(bridge_min, list_len(bridge_indices))
+  bridge_text:
+    formula: bridge_rule_desc(bridge_req)
+
+  # 邻接策略开关：自适应选择（0 正交不相邻；1 2×2 至多 1）
+  adjacency_policy:
+    formula: choose_adjacency_policy(rows, cols, x_count, list_len(blocked_edges), bridge_min, intra_quota_min)
+
+  # 行提示：随机选取若干行用于覆盖数提示（降低显见线索：2~3 行）
+  row_cell_indices:
+    formula: row_cell_groups(rows, cols, cells)
+  row_hint_num:
+    type: int
+    domain: "[2, 3]"
+  row_hint_indices:
+    formula: choose_k_rows(rows, row_hint_num)
+
+  # 列提示：随机选取若干列（降低显见线索：1~2 列）
+  col_cell_indices:
+    formula: col_cell_groups(rows, cols, cells)
+  col_hint_num:
+    type: int
+    domain: "[1, 2]"
+  col_hint_indices:
+    formula: choose_k_cols(cols, col_hint_num)
+
+  # 题面网格单行字符串与规则说明文本
+  grid_line:
+    formula: grid_to_line(labels_grid)
+  grid_format_text:
+    formula: grid_format_desc()
+  adj_text:
+    formula: adj_desc_from_policy(adjacency_policy)
+  orient_text:
+    formula: orient_rule_desc(orientation_switch, h_req, v_req)
+  orient_section_text:
+    formula: fmt_optional_section('方向约束：', orient_text)
+  marks_text:
+    formula: marks_desc(has_o)
+  edge_format_text:
+    formula: edge_format_desc()
+  legal_text:
+    formula: domino_legal_desc()
+
+symbols:
+  # d[e] 为布尔：是否在该相邻格子对上放置多米诺（e 使用字符串键）
+  d:
+    source:
+    - edges_str
+    type: Bool
+    desc: '在边 {_edges_str} 放置多米诺'
+
+conditions:
+  # 1) 每个格子至多被一个多米诺覆盖
+  at_most_one_per_cell:
+    formula: 'And([Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[i]]) <= 1 for i in range(cell_num)])'
+    desc: '每个格子至多被一个多米诺覆盖'
+
+  # 2) X 格子必须被覆盖
+  x_must_be_covered:
+    formula: 'And([Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[i]]) == 1 for i in x_indices])'
+    desc: '所有标记为X的格子必须被某个多米诺覆盖'
+
+  # 3) 每个字母区域恰有两个格子被覆盖
+  region_exact_two:
+    formula: 'And([Sum([If(Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[i]]) == 1, 1, 0) for i in region_to_indices[r]]) == 2 for r in regions])'
+    desc: '每个字母区域恰好有两个格子被多米诺覆盖'
+
+  # A) 邻接策略（两种之一）
+  adjacency_constraint:
+    formula: 'And(Implies(adjacency_policy == 0, And([Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[cell_to_index[edges[i][0]]]]) + Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[cell_to_index[edges[i][1]]]]) <= 1 + If(d[edges_str[i]], 1, 0) for i in range(edge_num)])), Implies(adjacency_policy == 1, And([Sum([If(d[edges_str[idx]], 1, 0) for idx in group]) <= 1 for group in square_groups])))'
+    desc: '应用所选的邻接策略约束'
+
+  # B) O 格子必须未覆盖（仅当存在 O 时生效）
+  o_must_be_uncovered:
+    formula: 'Implies(has_o, And([Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[i]]) == 0 for i in o_indices]))'
+    desc: '所有标记为O的格子必须保持未覆盖（若存在）'
+
+  # C) 方向出现约束（开关打开时生效，使用收缩后下限）
+  orientation_presence:
+    formula: 'Implies(orientation_switch == 1, And(Sum([If(d[edges_str[i]], 1, 0) for i in h_indices]) >= h_req, Sum([If(d[edges_str[i]], 1, 0) for i in v_indices]) >= v_req))'
+    desc: '方向出现约束（至少若干水平与竖直多米诺）'
+
+  # D) 平衡约束（开关打开时：|H-V| ≤ L，以两条线性不等式表达）
+  hv_balance_constraint:
+    formula: 'Implies(hv_balance_switch == 1, And(Sum([If(d[edges_str[i]], 1, 0) for i in h_indices]) - Sum([If(d[edges_str[i]], 1, 0) for i in v_indices]) <= hv_balance_limit, Sum([If(d[edges_str[i]], 1, 0) for i in v_indices]) - Sum([If(d[edges_str[i]], 1, 0) for i in h_indices]) <= hv_balance_limit))'
+    desc: '水平与竖直多米诺的数量差受限（开关开启时）'
+
+  # E) 内部连接配额：至少若干字母区域存在内部多米诺（使用收缩后配额）
+  intra_quota_min_constraint:
+    formula: 'Sum([If(Sum([If(d[edges_str[i]], 1, 0) for i in region_intra_edges_map[r]]) >= 1, 1, 0) for r in regions]) >= intra_req'
+    desc: '至少若干字母区域的两格由同一多米诺连接'
+
+  # F) 跨区多米诺配额：至少若干跨区边被使用（使用收缩后配额）
+  bridge_min_constraint:
+    formula: 'Sum([If(d[edges_str[i]], 1, 0) for i in bridge_indices]) >= bridge_req'
+    desc: '至少若干跨区多米诺'
+
+  # 4) 禁止边约束
+  blocked_edges_forbid:
+    formula: 'And([Not(d[edges_str[i]]) for i in blocked_edge_indices])'
+    desc: '禁止在指定的边上放置多米诺'
+
+post_generation:
+  # 从首个解中抽取多条强提示并写回新等式约束（显式呈现在题面）
+  post_gen_vars:
+    row_counts: '[sum([1 if sum([1 if get_value(_sol, d[edges_str[idx]]) else 0 for idx in cell_edge_indices[j]]) == 1 else 0 for j in row_cell_indices[i]]) for i in range(rows)]'
+    row_hint_values: '[row_counts[row_hint_indices[i] - 1] for i in range(row_hint_num)]'
+    row_hint_text: 'row_hints_desc(row_hint_indices, row_hint_values)'
+    col_counts: '[sum([1 if sum([1 if get_value(_sol, d[edges_str[idx]]) else 0 for idx in cell_edge_indices[j]]) == 1 else 0 for j in col_cell_indices[i]]) for i in range(cols)]'
+    col_hint_values: '[col_counts[col_hint_indices[i] - 1] for i in range(col_hint_num)]'
+    col_hint_text: 'col_hints_desc(col_hint_indices, col_hint_values)'
+    intra_total: 'sum([1 if sum([1 if get_value(_sol, d[edges_str[i]]) else 0 for i in region_intra_edges_map[r]]) >= 1 else 0 for r in regions])'
+    intra_eq_text: 'intra_eq_desc(intra_total)'
+    bridge_total: 'sum([1 if get_value(_sol, d[edges_str[i]]) else 0 for i in bridge_indices])'
+    bridge_eq_text: 'bridge_eq_desc(bridge_total)'
+  post_gen_conditions:
+    row_hint_fix:
+      formula: 'And([Sum([If(Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[j]]) == 1, 1, 0) for j in row_cell_indices[row_hint_indices[i] - 1]]) == row_hint_values[i] for i in range(row_hint_num)])'
+      desc: '行覆盖提示被写入约束'
+    col_hint_fix:
+      formula: 'And([Sum([If(Sum([If(d[edges_str[idx]], 1, 0) for idx in cell_edge_indices[j]]) == 1, 1, 0) for j in col_cell_indices[col_hint_indices[i] - 1]]) == col_hint_values[i] for i in range(col_hint_num)])'
+      desc: '列覆盖提示被写入约束'
+    intra_eq_fix:
+      formula: 'Sum([If(Sum([If(d[edges_str[i]], 1, 0) for i in region_intra_edges_map[r]]) >= 1, 1, 0) for r in regions]) == intra_total'
+      desc: '恰有若干字母区域内部存在多米诺（等式线索）'
+    bridge_eq_fix:
+      formula: 'Sum([If(d[edges_str[i]], 1, 0) for i in bridge_indices]) == bridge_total'
+      desc: '恰有若干跨区多米诺（等式线索）'
+
+# 计算解；限制最多解为 1（多条行/列提示 + 两个等式线索已在题面呈现，确保唯一解）
+calc_solution: true
+max_solution: 1
+
+queries:
+  # Q1：输出唯一解的多米诺列表
+  q1:
+    desc: 'Q1: 请给出一个可行且唯一的多米诺列表，格式为[[(r1,c1),(r1,c2)], ...]；坐标从1开始计数；示例：[[(1,1),(1,2)],[(2,3),(3,3)]]。'
+    ans_formula: '[[edges[i][0], edges[i][1]] for i in range(edge_num) if get_value(_solutions[0], d[edges_str[i]])]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+  # Q2：输出水平与竖直多米诺数量
+  q2:
+    desc: 'Q2: 请同时给出水平与竖直多米诺的数量，格式为[H,V]；示例：[3,4]。'
+    ans_formula: '[sum([1 if get_value(_solutions[0], d[edges_str[i]]) else 0 for i in h_indices]), sum([1 if get_value(_solutions[0], d[edges_str[i]]) else 0 for i in v_indices])]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+  # Q3：具有内部多米诺的字母区域列表（升序）
+  q3:
+    desc: 'Q3: 请输出具有内部多米诺的字母区域列表（按字母升序），格式为[A,B]；如无则输出[]；示例：[A,B]。'
+    ans_formula: "sorted([r for r in regions if sum([1 if get_value(_solutions[0], d[edges_str[i]]) else 0 for i in region_intra_edges_map[r]]) >= 1])"
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+  # Q4：边界上的多米诺数量
+  q4:
+    desc: 'Q4: 请给出边界上的多米诺数量，格式为整数；示例：5。'
+    ans_formula: 'sum([1 if get_value(_solutions[0], d[edges_str[i]]) else 0 for i in perimeter_indices])'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# 注意：
+# - desc 使用单行单引号；等式线索（恰有 K 个内部多米诺、恰有 B 条跨区多米诺）与行/列提示均显式呈现在题面
+# - 所有用于保证唯一解的线索对解者可见，避免“对机器作弊”；禁止边的列表采用字符串表示，仅用于展示，不等同于 Q1 输出格式
+
+desc: '广义 Norinori 网格为 {rows}×{cols}；棋盘为 {grid_line}（{grid_format_text}）。规则：每个字母区域恰有两个格子被覆盖，所有X必须被覆盖，多米诺可跨区域；{legal_text}{marks_text}邻接策略：{adj_text}；{orient_section_text}{hv_text}等式线索：{intra_eq_text}；{bridge_eq_text}行提示：{row_hint_text}；列提示：{col_hint_text}；此外，{edge_format_text}（该表示仅用于展示禁止边）；禁止在以下边放置多米诺：{str(blocked_edges_str)}；答题格式说明：Q1 输出多米诺列表，格式为[[(r1,c1),(r1,c2)], ...]，示例为 [[(1,1),(1,2)],[(2,3),(3,3)]]；Q2 输出水平与竖直多米诺数量，格式为[H,V]，示例为 [3,4]；Q3 输出具有内部多米诺的字母区域列表（升序），格式为 [A,B]；Q4 输出边界上的多米诺数量，格式为整数，示例为 5。\n{q1}\n{q2}\n{q3}\n{q4}'

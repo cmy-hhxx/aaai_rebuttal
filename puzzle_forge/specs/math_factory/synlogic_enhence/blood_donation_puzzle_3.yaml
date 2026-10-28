@@ -1,0 +1,277 @@
+# =================================================================
+# 自定义操作符：统一在 blood_donation_puzzle_3.py 中定义
+# =================================================================
+custom_operator:
+  gen_marathon_puzzle: blood_donation_puzzle_3.py
+  choose_k: blood_donation_puzzle_3.py
+  who_at_mile: blood_donation_puzzle_3.py
+  drink_for_color: blood_donation_puzzle_3.py
+  drink_at_mile: blood_donation_puzzle_3.py
+  color_at_mile: blood_donation_puzzle_3.py
+  pick_query_indices: blood_donation_puzzle_3.py
+
+# =================================================================
+# 变量：规模、实体池、里程参数与线索生成
+# =================================================================
+variables:
+  pos_num:
+    type: int
+    domain: "[5, 7]"
+    diff_factor: 1
+
+  volunteers_pool:
+    formula: "['Wen','Xiu','Yan','Zhe','Qian','Rui','An','Bo','Kai','Lin','Ming','Tao']"
+  drinks_pool:
+    formula: "['水','能量饮','盐水','咖啡','柠檬水','茶','运动饮料','椰子水','果汁']"
+  colors_pool:
+    formula: "['红','蓝','绿','黄','白','橙','紫']"
+
+  volunteers:
+    formula: "choose_k(volunteers_pool, pos_num)"
+  drinks:
+    formula: "choose_k(drinks_pool, pos_num)"
+  colors:
+    formula: "choose_k(colors_pool, pos_num)"
+
+  start_mile:
+    type: int
+    domain: "[4, 10]"
+  mile_step:
+    type: int
+    domain: "[3, 6]"
+  miles:
+    formula: "[str(start_mile + i * mile_step) + 'km' for i in range(pos_num)]"
+
+  positions:
+    formula: "list(range(pos_num))"
+
+  vol_text:
+    formula: "'、'.join(volunteers)"
+  drinks_text:
+    formula: "'、'.join(drinks)"
+  colors_text:
+    formula: "'、'.join(colors)"
+  miles_text:
+    formula: "'、'.join(miles)"
+
+  # 控制线索规模（最少保证可推理，最多避免信息过载）
+  min_clues:
+    formula: "pos_num + 4"
+  max_clues:
+    formula: "min_clues + 3"
+
+  puzzle:
+    formula: "gen_marathon_puzzle(volunteers, drinks, colors, miles, min_clues, max_clues)"
+
+  eq_mile_vol:
+    formula: "puzzle['eq_mile_vol']"
+  eq_mile_drink:
+    formula: "puzzle['eq_mile_drink']"
+  eq_mile_color:
+    formula: "puzzle['eq_mile_color']"
+
+  not_mile_vol:
+    formula: "puzzle['not_mile_vol']"
+  not_mile_drink:
+    formula: "puzzle['not_mile_drink']"
+  not_mile_color:
+    formula: "puzzle['not_mile_color']"
+
+  adj_drink_color:
+    formula: "puzzle['adj_drink_color']"
+  not_adj_drink_color:
+    formula: "puzzle['not_adj_drink_color']"
+
+  leftof_color_color:
+    formula: "puzzle['leftof_color_color']"
+  leftof_drink_drink:
+    formula: "puzzle['leftof_drink_drink']"
+  leftof_color_drink:
+    formula: "puzzle['leftof_color_drink']"
+  two_left_drink_drink:
+    formula: "puzzle['two_left_drink_drink']"
+
+  endpoint_not_vol:
+    formula: "puzzle['endpoint_not_vol']"
+  endpoint_not_drink:
+    formula: "puzzle['endpoint_not_drink']"
+  endpoint_not_color:
+    formula: "puzzle['endpoint_not_color']"
+
+  between_cdc:
+    formula: "puzzle['between_cdc']"
+  dist_vol_drink_1:
+    formula: "puzzle['dist_vol_drink_1']"
+  dist_vol_drink_2:
+    formula: "puzzle['dist_vol_drink_2']"
+  iff_adj_dc_vv:
+    formula: "puzzle['iff_adj_dc_vv']"
+  chain_color3:
+    formula: "puzzle['chain_color3']"
+  chain_drink3:
+    formula: "puzzle['chain_drink3']"
+
+  clue_text:
+    formula: "puzzle['clue_text']"
+
+  query_indices:
+    formula: "pick_query_indices(eq_mile_vol, eq_mile_drink, eq_mile_color, pos_num)"
+  ask_mile_a_idx:
+    formula: "query_indices[0]"
+  ask_mile_b_idx:
+    formula: "query_indices[1]"
+  ask_mile_c_idx:
+    formula: "query_indices[2]"
+  ask_color_idx:
+    formula: "query_indices[3]"
+
+# =================================================================
+# 符号：位置属性（四属性：志愿者、饮品、里程、颜色）
+# =================================================================
+symbols:
+  slot_s:
+    source:
+    - positions
+    attr:
+    - vol
+    - drink
+    - mile
+    - color
+    type:
+    - int
+    - int
+    - int
+    - int
+
+# =================================================================
+# 约束：一一对应与线索集
+# =================================================================
+conditions:
+  c_distinct_vol:
+    formula: And([And(slot_s.get('vol')[i] >= 0, slot_s.get('vol')[i] < pos_num) for i in range(pos_num)] + [Distinct(slot_s.get('vol'))])
+    desc: '志愿者在各位置一一对应且取值合法'
+  c_distinct_drink:
+    formula: And([And(slot_s.get('drink')[i] >= 0, slot_s.get('drink')[i] < pos_num) for i in range(pos_num)] + [Distinct(slot_s.get('drink'))])
+    desc: '饮品在各位置一一对应且取值合法'
+  c_distinct_color:
+    formula: And([And(slot_s.get('color')[i] >= 0, slot_s.get('color')[i] < pos_num) for i in range(pos_num)] + [Distinct(slot_s.get('color'))])
+    desc: '横幅颜色在各位置一一对应且取值合法'
+
+  c_mile_fixed_order:
+    formula: And([slot_s.get('mile')[i] == i for i in range(pos_num)])
+    desc: '从左到右的里程牌依次为给定的里程列表'
+
+  cond_eq_mile_vol:
+    formula: And([slot_s.get('vol')[pair[0]] == pair[1] for pair in eq_mile_vol])
+    desc: '线索组 等式 里程对应志愿者'
+  cond_eq_mile_drink:
+    formula: And([slot_s.get('drink')[pair[0]] == pair[1] for pair in eq_mile_drink])
+    desc: '线索组 等式 里程对应饮品'
+  cond_eq_mile_color:
+    formula: And([slot_s.get('color')[pair[0]] == pair[1] for pair in eq_mile_color])
+    desc: '线索组 等式 里程对应颜色'
+
+  cond_not_mile_vol:
+    formula: And([slot_s.get('vol')[pair[0]] != pair[1] for pair in not_mile_vol])
+    desc: '线索组 不等式 志愿者不在某里程'
+  cond_not_mile_drink:
+    formula: And([slot_s.get('drink')[pair[0]] != pair[1] for pair in not_mile_drink])
+    desc: '线索组 不等式 饮品不在某里程'
+  cond_not_mile_color:
+    formula: And([slot_s.get('color')[pair[0]] != pair[1] for pair in not_mile_color])
+    desc: '线索组 不等式 颜色不在某里程'
+
+  cond_adj_drink_color:
+    formula: And([Or([Or(And(slot_s.get('drink')[i] == pair[0], slot_s.get('color')[i + 1] == pair[1]), And(slot_s.get('color')[i] == pair[1], slot_s.get('drink')[i + 1] == pair[0])) for i in range(pos_num - 1)]) for pair in adj_drink_color])
+    desc: '线索组 相邻 饮品与颜色相邻'
+  cond_not_adj_drink_color:
+    formula: And([And([And(Not(And(slot_s.get('drink')[i] == pair[0], slot_s.get('color')[i + 1] == pair[1])), Not(And(slot_s.get('color')[i] == pair[1], slot_s.get('drink')[i + 1] == pair[0]))) for i in range(pos_num - 1)]) for pair in not_adj_drink_color])
+    desc: '线索组 不相邻 饮品与颜色不相邻'
+
+  cond_leftof_color_color:
+    formula: And([Or([And(slot_s.get('color')[i] == pair[0], slot_s.get('color')[j] == pair[1], j > i) for i in range(pos_num) for j in range(pos_num) if j != i]) for pair in leftof_color_color])
+    desc: '线索组 左右 颜色在颜色左侧'
+  cond_leftof_drink_drink:
+    formula: And([Or([And(slot_s.get('drink')[i] == pair[0], slot_s.get('drink')[j] == pair[1], j > i) for i in range(pos_num) for j in range(pos_num) if j != i]) for pair in leftof_drink_drink])
+    desc: '线索组 左右 饮品在饮品左侧'
+  cond_leftof_color_drink:
+    formula: And([Or([And(slot_s.get('color')[i] == pair[0], slot_s.get('drink')[j] == pair[1], j > i) for i in range(pos_num) for j in range(pos_num)]) for pair in leftof_color_drink])
+    desc: '线索组 左右 颜色在饮品左侧'
+
+  cond_two_left_drink_drink:
+    formula: And([Or([And(slot_s.get('drink')[i] == pair[0], slot_s.get('drink')[i + 2] == pair[1]) for i in range(pos_num - 2)]) for pair in two_left_drink_drink])
+    desc: '线索组 间隔 饮品左侧恰隔一位'
+
+  cond_endpoint_not_vol:
+    formula: And([And(slot_s.get('vol')[0] != v[0], slot_s.get('vol')[pos_num - 1] != v[0]) for v in endpoint_not_vol])
+    desc: '线索组 端点 志愿者不在端点'
+  cond_endpoint_not_drink:
+    formula: And([And(slot_s.get('drink')[0] != d[0], slot_s.get('drink')[pos_num - 1] != d[0]) for d in endpoint_not_drink])
+    desc: '线索组 端点 饮品不在端点'
+  cond_endpoint_not_color:
+    formula: And([And(slot_s.get('color')[0] != c[0], slot_s.get('color')[pos_num - 1] != c[0]) for c in endpoint_not_color])
+    desc: '线索组 端点 颜色不在端点'
+
+  cond_between_cdc:
+    formula: And([Or([And(slot_s.get('color')[i] == triple[0], slot_s.get('drink')[j] == triple[1], slot_s.get('color')[k] == triple[2], And(j > i, k > j)) for i in range(pos_num) for j in range(pos_num) for k in range(pos_num)]) for triple in between_cdc])
+    desc: '线索组 夹在 某饮品夹在两种颜色之间'
+
+  cond_dist_vol_drink_1:
+    formula: And([Or([Or(And(slot_s.get('vol')[i] == pair[0], slot_s.get('drink')[j] == pair[1], j == i + pair[2]), And(slot_s.get('vol')[i] == pair[0], slot_s.get('drink')[j] == pair[1], i == j + pair[2])) for i in range(pos_num) for j in range(pos_num)]) for pair in dist_vol_drink_1])
+    desc: '线索组 距离 志愿者与饮品相邻'
+  cond_dist_vol_drink_2:
+    formula: And([Or([Or(And(slot_s.get('vol')[i] == pair[0], slot_s.get('drink')[j] == pair[1], j == i + pair[2]), And(slot_s.get('vol')[i] == pair[0], slot_s.get('drink')[j] == pair[1], i == j + pair[2])) for i in range(pos_num) for j in range(pos_num)]) for pair in dist_vol_drink_2])
+    desc: '线索组 距离 志愿者与饮品相隔一位'
+
+  cond_iff_adj_dc_vv:
+    formula: And([And(Implies(Or([Or(And(slot_s.get('drink')[i] == quad[0], slot_s.get('color')[i + 1] == quad[1]), And(slot_s.get('color')[i] == quad[1], slot_s.get('drink')[i + 1] == quad[0])) for i in range(pos_num - 1)]), Or([And(slot_s.get('vol')[x] == quad[2], slot_s.get('vol')[y] == quad[3], y > x) for x in range(pos_num) for y in range(pos_num) if y != x])), Implies(Not(Or([Or(And(slot_s.get('drink')[i] == quad[0], slot_s.get('color')[i + 1] == quad[1]), And(slot_s.get('color')[i] == quad[1], slot_s.get('drink')[i + 1] == quad[0])) for i in range(pos_num - 1)])), Not(Or([And(slot_s.get('vol')[x] == quad[2], slot_s.get('vol')[y] == quad[3], y > x) for x in range(pos_num) for y in range(pos_num) if y != x])))) for quad in iff_adj_dc_vv])
+    desc: '线索组 当且仅当 饮品与颜色相邻当且仅当某志愿者在另一志愿者左侧'
+
+  cond_chain_color3:
+    formula: And([Or([And(slot_s.get('color')[i] == triple[0], slot_s.get('color')[j] == triple[1], slot_s.get('color')[k] == triple[2], And(j > i, k > j)) for i in range(pos_num) for j in range(pos_num) for k in range(pos_num)]) for triple in chain_color3])
+    desc: '线索组 顺序 三种颜色从左到右严格递增'
+  cond_chain_drink3:
+    formula: And([Or([And(slot_s.get('drink')[i] == triple[0], slot_s.get('drink')[j] == triple[1], slot_s.get('drink')[k] == triple[2], And(j > i, k > j)) for i in range(pos_num) for j in range(pos_num) for k in range(pos_num)]) for triple in chain_drink3])
+    desc: '线索组 顺序 三种饮品从左到右严格递增'
+
+max_solution: 3000
+
+# =================================================================
+# 二次生成：抽取解值为变量 以便查询不含引号访问
+# =================================================================
+post_generation:
+  post_gen_vars:
+    vol_indices: "get_value(_sol, slot_s.get('vol'))"
+    drink_indices: "get_value(_sol, slot_s.get('drink'))"
+    color_indices: "get_value(_sol, slot_s.get('color'))"
+    mile_indices: "get_value(_sol, slot_s.get('mile'))"
+
+# =================================================================
+# 查询：答案格式明确且避免显见
+# =================================================================
+queries:
+  q1:
+    desc: '问题一 指出谁在{miles[ask_mile_a_idx]} 答案格式为志愿者姓名 示例 Wen 输出时不得包含多余空格或标点'
+    ans_formula: 'who_at_mile(vol_indices, mile_indices, volunteers, ask_mile_a_idx)'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q2:
+    desc: '问题二 指出{colors[ask_color_idx]}横幅对应的饮品 答案格式为饮品名称 示例 水 输出时不得包含多余空格或标点'
+    ans_formula: 'drink_for_color(drink_indices, color_indices, drinks, ask_color_idx)'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q3:
+    desc: '问题三 指出{miles[ask_mile_b_idx]}发放什么饮品 答案格式为饮品名称 示例 茶 输出时不得包含多余空格或标点'
+    ans_formula: 'drink_at_mile(drink_indices, mile_indices, drinks, ask_mile_b_idx)'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q4:
+    desc: '问题四 指出{miles[ask_mile_c_idx]}对应的横幅颜色 答案格式为颜色名称 示例 红 输出时不得包含多余空格或标点'
+    ans_formula: 'color_at_mile(color_indices, mile_indices, colors, ask_mile_c_idx)'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+
+# =================================================================
+# 题面描述：仅呈现线索与问答 不暴露生成逻辑
+# =================================================================
+desc: '马拉松补给站共有{pos_num}个位置 从左到右的里程牌依次为{miles_text} 每个位置分别对应一名志愿者一种饮品和一种横幅颜色 且三类属性各自一一对应且不重复\n志愿者为{vol_text} 饮品为{drinks_text} 横幅颜色为{colors_text}\n请根据以下线索进行推理 线索均真实且彼此一致 并根据推理结果回答以下问题\n{clue_text}\n答题格式严格要求如下 不得包含多余空格或标点\n问题一输出志愿者姓名 示例 Wen\n问题二输出饮品名称 示例 水\n问题三输出饮品名称 示例 茶\n问题四输出横幅颜色名称 示例 红\n{q1}\n{q2}\n{q3}\n{q4}'

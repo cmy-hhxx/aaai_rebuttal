@@ -1,0 +1,73 @@
+# ================================================================
+# spec_bilingual_crossword_unique.yaml
+# ================================================================
+custom_operator:
+  rand_words: wordscapes_0.py
+  gen_cross_data: wordscapes_0.py
+
+variables:
+  n:
+    type: int
+    domain: '[4, 6]'
+
+  cross_data:
+    formula: gen_cross_data(n)
+
+  eng_words:
+    formula: cross_data['eng']
+  fra_words:
+    formula: cross_data['fra']
+  row_perm:
+    formula: cross_data['row_perm']
+  col_perm:
+    formula: cross_data['col_perm']
+  letter_grid:
+    formula: cross_data['grid']
+
+  rows:
+    formula: 'list(map(str, range(n)))'
+  cols:
+    formula: 'list(map(str, range(n)))'
+
+symbols: {}
+
+# 恒真占位条件，确保 _solutions 存在
+conditions:
+  trivial_true:
+    formula: 'True'
+    desc: '永真占位条件，供框架生成 _solutions'
+
+queries:
+  q1:
+    desc: 'Q1. 第 1 行(自顶向下) 放置的英语单词是？(单选)'
+    opt_num: 4
+    source: [eng_words]
+    amount: ['1']
+    cond: any
+    opt_formula: _opt[0][0] == eng_words[row_perm[0]]
+    opt_text: '{_opt[0][0]}'
+
+  q2:
+    desc: 'Q2. 第 1 列(自左向右) 放置的法语单词是？(单选)'
+    opt_num: 4
+    source: [fra_words]
+    amount: ['1']
+    cond: any
+    opt_formula: _opt[0][0] == fra_words[col_perm[0]]
+    opt_text: '{_opt[0][0]}'
+
+  q3:
+    desc: 'Q3. 网格第 2 行第 3 列的字母是？(填空，直接写 1 个小写字母)'
+    ans_formula: letter_grid[1][2]
+    ans_text: _ans
+    ans_assertion: 'True'
+
+  q4:
+    desc: 'Q4. 请写出自顶向下的英语单词排列，用英文逗号分隔（如 apple,banana,...）。'
+    ans_formula: "','.join([eng_words[i] for i in row_perm])"
+    ans_text: _ans
+    ans_assertion: 'True'
+
+desc: '国际机场提示牌双语填字：在一块 {n}×{n} 的网格中需水平放置 {n} 个英语单词(Across)，竖直放置 {n} 个法语单词(Down)，并要求两方向单词在交叉处的字母完全一致。已知单词集合如下：\\n• 英语: {eng_words}\\n• 法语: {fra_words}\\n请根据交叉一致规则推断唯一的行列对应关系，回答下列问题。作答说明：本题共 4 问，若需依次填写多个答案，请按顺序使用====分隔。\\n{q1}\\n{q2}\\n{q3}\\n{q4}'
+calc_solution: true
+max_solution: 1

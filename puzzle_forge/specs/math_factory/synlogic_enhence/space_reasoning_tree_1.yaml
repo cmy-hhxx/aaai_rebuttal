@@ -1,0 +1,111 @@
+# ============================================
+# 公司产品线树与版本、地区、复合规则筛选 —— 高阶泛化版规范说明（去除题面唯一性提示）
+# 改进点：
+# - 保留玩家可见约束（关系/版本/地区/额外/枢纽/行掩码），内部唯一性模块通过叠加可见约束实现唯一解。
+# - 使用组合式SKU名称生成器，避免Faker唯一性不足报错。
+# ============================================
+
+custom_operator:
+  function_1: space_reasoning_tree_1.py  # 关系集合筛选与复合条件过滤（仅使用可见约束）
+  function_2: space_reasoning_tree_1.py  # 排序与答案格式化
+  function_3: space_reasoning_tree_1.py  # 随机层级树构造（groups、product_lines_by_group、sku_data、target_sku_name）
+  function_4: space_reasoning_tree_1.py  # 树结构描述文本生成
+  function_5: space_reasoning_tree_1.py  # 基础随机规则生成（version/region/extra规则）
+  function_6: space_reasoning_tree_1.py  # 规则文本描述生成（解释与格式提醒，仅可见约束）
+  function_7: space_reasoning_tree_1.py  # 唯一解约束综合器（叠加可见约束并验证唯一解）
+  function_8: space_reasoning_tree_1.py  # 组合式SKU名称生成器（根据规模安全生成足量唯一名称）
+
+variables:
+  # --------------------------------------------
+  # 随机规模与域配置（原子参数全量泛化）
+  # --------------------------------------------
+  groups_num:
+    type: int
+    domain: "[2, 5]"  # 事业群数量
+
+  groups:
+    # 使用Faker生成事业群名（公司名）；数量较小，通常可满足唯一性
+    formula: get_faker(groups_num, 'company', 'zh_CN')
+
+  # 每个事业群的产品线数量范围
+  line_range:
+    formula: "[2, 5]"
+
+  # 每条产品线的SKU数量范围
+  sku_range:
+    formula: "[2, 8]"
+
+  # SKU版本号范围
+  version_range:
+    formula: "[1, 12]"
+
+  # 上市地区候选池（泛化覆盖多地区）
+  region_pool:
+    formula: "['欧洲', '亚洲', '北美', '南美', '非洲', '大洋洲', '中东', '东南亚']"
+
+  # SKU名称候选池（改为组合式生成，规模由function_8自动计算，保证唯一性与足量）
+  sku_name_pool:
+    formula: "function_8(groups_num, line_range, sku_range)"
+
+  # --------------------------------------------
+  # 随机化层级树生成（正向生成的核心步骤）
+  # --------------------------------------------
+  pack:
+    formula: "function_3(groups, line_range, sku_range, version_range, region_pool, sku_name_pool)"
+
+  product_lines_by_group:
+    formula: "pack['product_lines_by_group']"
+
+  sku_data:
+    # 结构：字典，键为产品线名，值为SKU列表，每个SKU为{name, version, regions}
+    formula: "pack['sku_data']"
+
+  target_sku_name:
+    formula: "pack['target_sku_name']"
+
+  # --------------------------------------------
+  # 基础规则生成（版本/地区/附加）
+  # --------------------------------------------
+  base_rules:
+    formula: "function_5(version_range, region_pool)"
+
+  # 唯一解验证的时间限制（秒），需≤180秒
+  time_limit_sec:
+    type: int
+    domain: "[60, 120]"
+
+  # --------------------------------------------
+  # 唯一解约束综合：在时限内随机叠加可见约束（行掩码/枢纽/模数/地区集合调整）并验证唯一解
+  # --------------------------------------------
+  rule_pack:
+    formula: "function_7(sku_data, product_lines_by_group, target_sku_name, version_range, region_pool, base_rules, time_limit_sec)"
+
+  rule_config:
+    # 仅包含可见约束（关系、版本、地区、额外、枢纽、行掩码），不包含内部生成逻辑或唯一性提示
+    formula: "rule_pack['rule_config']"
+
+  # 关系集合筛选的最终结果（唯一解验证后的答案集）
+  answer_skus:
+    formula: "rule_pack['answer_skus']"
+
+  # 树结构描述文本（单行）
+  tree_desc:
+    formula: "function_4(groups, product_lines_by_group, sku_data)"
+
+  # 规则描述文本（单行，包含定义说明、筛选条件与答题格式提醒；仅可见约束）
+  rule_desc:
+    formula: "function_6(target_sku_name, rule_config)"
+
+calc_solution: false  # 纯Python逻辑，无Z3
+
+queries:
+  q1:
+    desc: '请按题面给定的答案格式作答。你的最终答案必须只包含SKU名称；如果有多个，请按字母顺序排列并用逗号分隔；若无法确定答案，请回答unknown。'
+    ans_formula: "function_2(answer_skus)"
+    ans_text: "_ans"
+    ans_assertion: "True"
+
+# --------------------------------------------
+# 单行题面描述（无双引号、无直接换行，花括号仅用于变量插值）
+# --------------------------------------------
+desc: '集团的产品树层级为集团—事业群—产品线—SKU；{tree_desc}；{rule_desc}；不考虑停产或下线。{q1}'

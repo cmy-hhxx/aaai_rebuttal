@@ -1,0 +1,78 @@
+# 题目生成配置：多层次JSON括号顺序与栈校验（直接计算模式，统一最终答案为元组）
+# 1) 自定义操作符：引入外部Python函数（文件名与题目名一致）
+custom_operator:
+  find_error_steps: dyck_language_reasoning_errors_3.py
+  gen_instance: dyck_language_reasoning_errors_3.py
+  compute_failed_checkpoints: dyck_language_reasoning_errors_3.py
+  compute_max_depth: dyck_language_reasoning_errors_3.py
+  sort_int_list: dyck_language_reasoning_errors_3.py
+  compute_all_answers: dyck_language_reasoning_errors_3.py
+  format_steps: dyck_language_reasoning_errors_3.py
+
+# 2) 变量定义：参数随机化 + 场景实例生成 + 投影到输入、步骤、规则与检查点文本
+variables:
+  # 结构复杂度与生成控制
+  pair_budget:
+    type: int
+    domain: '[6, 20]'
+    diff_factor: 1
+  min_depth:
+    type: int
+    domain: '[1, 3]'
+    diff_factor: 1
+  max_depth:
+    type: int
+    domain: '[min_depth + 1, min_depth + 4]'
+    diff_factor: 1
+  str_prob:
+    type: int
+    domain: '[10, 70]'
+    diff_factor: 1
+  noise_between:
+    type: int
+    domain: '[0, 3]'
+    diff_factor: 0
+  target_errors:
+    type: int
+    domain: '[1, 4]'
+    diff_factor: 1
+
+  # 实例生成（包含检查点）
+  inst:
+    formula: 'gen_instance(pair_budget, min_depth, max_depth, str_prob, noise_between, target_errors)'
+  input_json:
+    formula: 'inst["json"]'
+  steps:
+    formula: 'inst["steps"]'
+  steps_txt:
+    formula: 'format_steps(steps)'
+  rule:
+    formula: 'inst["rule"]'
+  checked_name:
+    formula: 'rule["checked_name"]'
+  ignore_desc:
+    formula: 'rule["ignore_desc"]'
+  checked_chars:
+    formula: '"、".join(rule["checked_set"])'
+  cp_points:
+    formula: 'inst["cp_points"]'
+  cp_targets:
+    formula: 'inst["cp_targets"]'
+  cp_fail_num:
+    formula: 'inst["cp_fail_num"]'
+  string_rule:
+    formula: '"字符串由双引号界定，反斜杠转义；仅遇到未被奇数个反斜杠转义的双引号时切换是否在字符串内"'
+
+# 3) 直接计算模式：无需Z3求解（所有答案由自定义函数确定）
+calc_solution: false
+
+# 4) 查询：统一最终答案为一个Python元组
+queries:
+  final:
+    desc: '请按规则完成三问并最终提交一个Python元组作为答案（不是集合/列表/字符串等其他类型），格式为((错误步骤编号升序元组), (未满足目标深度的检查点编号升序元组), 最大栈深度整数)。示例: ((2, 5), (3, 7), 7)'
+    ans_formula: 'compute_all_answers(input_json, steps, rule, cp_points, cp_targets)'
+    ans_text: '{_ans}'
+    ans_assertion: 'isinstance(_ans, tuple) and len(_ans) == 3 and isinstance(_ans[0], tuple) and isinstance(_ans[1], tuple) and isinstance(_ans[2], int) and len(_ans[0]) == target_errors and len(_ans[1]) == cp_fail_num and all(isinstance(x, int) for x in _ans[0]) and all(isinstance(x, int) for x in _ans[1]) and list(_ans[0]) == sorted(list(set(_ans[0]))) and list(_ans[1]) == sorted(list(set(_ans[1]))) and tuple(sort_int_list(find_error_steps(input_json, steps, rule))) == _ans[0] and tuple(sort_int_list(compute_failed_checkpoints(input_json, steps, rule, cp_points, cp_targets))) == _ans[1] and compute_max_depth(steps, rule) == _ans[2]'
+
+# 5) 整体描述：单行说明（包含规则解释与答案格式示例；内部序列用元组）
+desc: '场景: 给定一段JSON字符流与一个按序的“思考过程”令牌列表。字符串判断规则: {string_rule}；仅统计出现在字符串之外的括号(该规则仅用于解析输入JSON字符流的括号序列)；{ignore_desc}；校验范围为{checked_name}，校验字符集合: ''{checked_chars}''。步骤以1为起点编号。错误步骤(Q1): 从输入JSON字符流中提取位于字符串之外的全部括号并按出现顺序得到期望序列, 然后仅保留{checked_name}对应的括号；在步骤序列中仅保留{checked_name}对应的括号与其相对顺序；匹配策略: 顺序逐一比较, 相等则前进到下一个期望括号, 不相等则仅记错且不前进；当期望序列耗尽后出现任何待校验括号, 也记为错误(“初始化”与非待校验括号忽略)。检查点(Q2): 定义“计数括号步骤”为步骤序列中属于{checked_name}集合的括号；仅对{checked_name}集合的括号计数, 左括号+1、右括号-1(深度可为负)；cp_points为步骤序列中的1基索引(仅列出属于计数括号步骤的索引), 若某检查点位置不是计数括号步骤则忽略；cp_targets为已给定的目标深度序列, 其由“期望序列”的累计深度按计数括号步骤的序号(1..k)映射得来；若该序号超过cp_targets的长度, 则使用cp_targets的最后一个值作为目标。最大深度(Q3): 仅在{checked_name}的计数序列上跟踪最大深度(遇到负值不影响最大值, 初始深度为0)。输入JSON: {input_json}; 给定令牌序列(按序): {steps_txt}。检查点: cp_points={cp_points}, 目标深度cp_targets={cp_targets}。 \n问题1: 输出全部错误步骤编号组成的升序元组, 示例: (2, 5); \n问题2: 输出未满足目标深度的检查点编号组成的升序元组, 示例: (3, 7); \n问题3: 输出全程最大栈深度(整数), 示例: 7; \n最终提交: 一个Python元组((错误步骤编号升序元组), (未满足目标深度的检查点编号升序元组), 最大栈深度整数), 示例: ((2, 5), (3, 7), 7); \n{final}'

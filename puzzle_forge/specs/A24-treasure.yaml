@@ -1,0 +1,20 @@
+custom_operator: 
+    max_treasure_value: customs/treasure.py
+    create_value_matrix: customs/treasure.py
+variables:
+  n:
+    type: int
+    domain: "[2, 8]"
+    diff_factor: 1
+  value:
+    formula: create_value_matrix(n)
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请问从第一行第一列房间出发，在离开宫殿前最多能带走多少价值的宝藏。
+    ans_formula: max_treasure_value(value)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 有一个巨大的宫殿，可以被视为由{n}行{n}列房间组成，每个房间内有一定价值的宝藏。每个房间都有一扇通往下一行同一列的常开的门，即从第i行第j列房间能移动到第i+1行第j列房间，但是如果选择带走房间内的宝藏，则该侧门会关闭。第{n}行的所有房间的通往下一行同一列的门都通往宫殿外。除此之外，每个房间都有一扇通往同一行下一列的门，该门不常开，但是如果选择带走房间内的宝藏，则该侧门会打开。第{n}列的所有房间的通往同一行下一列的门都通往宫殿外。每个房间的宝藏价值可以用value={str(value)}表示。{q1}

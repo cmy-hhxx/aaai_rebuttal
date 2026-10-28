@@ -1,0 +1,27 @@
+custom_operator: 
+    minCostToEqualizeArray: customs/mincosts.py
+variables:
+    num_numbers: 
+      type: int
+      domain: "[2, 20]"
+      diff_factor: 1
+    c2: 
+      type: int
+      domain: "[1, 10]"
+      diff_factor: 0
+    c1: 
+      type: int
+      domain: "[1, 10]"
+      diff_factor: 0
+    nums:
+      formula: '[randint(1,99) for _ in range(num_numbers)]'
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+    q1:
+      desc: 目标是使数组中所有元素都相等，若nums为[{','.join(str(items) for items in nums)}]，cost1和cost2分别为{str(c1)}和{str(c2)}，请计算实现目标的最小开销之和。
+      ans_formula: minCostToEqualizeArray(nums, c1, c2)
+      ans_text: str(_ans)
+      ans_assertion: 'True'
+desc: 给定一个整数数组nums和两个整数cost1和cost2，可以执行以下任一操作任意次：1、从 nums中选择下标i并且将nums[i]增加1，开销为cost1。2、选择nums中两个不同下标i和j ，并且将nums[i]和nums[j]都增加1，开销为cost2。{q1}

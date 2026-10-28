@@ -1,0 +1,119 @@
+custom_operator:
+  function_1: minesweeper_2.py
+  function_2: minesweeper_2.py
+  function_3: minesweeper_2.py
+  function_5: minesweeper_2.py
+  pick_b_weight: minesweeper_2.py
+  pick_c_weight: minesweeper_2.py
+
+variables:
+  random_seed:
+    formula: "randint(1, 1000000000)"
+
+  n_rows:
+    type: int
+    domain: "[4, 6]"
+  n_cols:
+    type: int
+    domain: "[4, 6]"
+
+  type_count:
+    type: int
+    domain: "[2, 3]"
+
+  unknown_density_percent:
+    type: int
+    domain: "[35, 65]"
+  xa_ratio_percent:
+    type: int
+    domain: "[20, 70]"
+  xb_ratio_percent:
+    type: int
+    domain: "[10, 70]"
+  xc_ratio_percent:
+    type: int
+    domain: "[0, 60]"
+  safe_ratio_percent:
+    type: int
+    domain: "[15, 65]"
+
+  mine_a_percent:
+    type: int
+    domain: "[15, 55]"
+  mine_b_percent:
+    type: int
+    domain: "[10, 55]"
+  mine_c_percent:
+    type: int
+    domain: "[10, 55]"
+
+  A_weight:
+    type: int
+    domain: "[1, 3]"
+  B_weight:
+    formula: "pick_b_weight(A_weight, random_seed)"
+  C_weight:
+    formula: "pick_c_weight(A_weight, B_weight, random_seed)"
+
+  neighbor_kind_code:
+    type: int
+    domain: "[0, 1]"
+  relation_code:
+    type: int
+    domain: "[0, 2]"
+
+  row_bound_target:
+    type: int
+    domain: "[2, 3]"
+  col_bound_target:
+    type: int
+    domain: "[2, 3]"
+  region_bound_target:
+    type: int
+    domain: "[1, 2]"
+
+  bounds_min_width:
+    type: int
+    domain: "[1, 2]"
+
+  unknown_upper_bound:
+    type: int
+    domain: "[12, 18]"
+  min_digits:
+    type: int
+    domain: "[5, 8]"
+  min_positive_digits:
+    type: int
+    domain: "[4, 8]"
+  min_forced:
+    type: int
+    domain: "[3, 6]"
+  time_limit_sec:
+    type: int
+    domain: "[1, 2]"
+
+  world:
+    formula: "function_1(random_seed, n_rows, n_cols, type_count, unknown_density_percent, xa_ratio_percent, xb_ratio_percent, xc_ratio_percent, mine_a_percent, mine_b_percent, mine_c_percent, safe_ratio_percent, relation_code, A_weight, B_weight, C_weight, neighbor_kind_code, row_bound_target, col_bound_target, region_bound_target, bounds_min_width, unknown_upper_bound, min_digits, min_positive_digits, min_forced, time_limit_sec)"
+
+  grid:
+    formula: "world['grid']"
+
+  rule_text:
+    formula: "function_3(type_count, relation_code, A_weight, B_weight, C_weight, neighbor_kind_code)"
+
+  extra_rule_text:
+    formula: "function_5(world['rules'])"
+
+  grid_text:
+    formula: "'\\n'.join(['行' + str(i) + ': ' + ' '.join([str(x) for x in grid[i]]) for i in range(n_rows)])"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: "必定为雷列表: [((r, c), type), ...]"
+    ans_formula: "function_2(world['grid'], world['rules'])"
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+desc: '标题: 复合权重地雷(多约束高阶版)\n- 场景与基础规则: 网格规模为 {n_rows}x{n_cols}, {rule_text}; 非雷权重计为0, 坐标使用0-index。\n- 额外约束: {extra_rule_text}\n- 输入网格:\n{grid_text}\n- 推理说明: 对任意数字格, 其未知邻居子集需要满足指定的数值关系(eq/ge/le)。结合以上额外约束进行多步推理, 可逐步锁定必定为雷的未知格。\n- 答案格式: 列表形式 [((r, c), type), ...] , 其中 type 取 A/B/C 大写字母。示例: [((0,1), A), ((2,3), B)]。\n{q1}'

@@ -1,0 +1,59 @@
+custom_operator:
+  # 枚举所有队伍人数分配 (n1,...,nr)
+  enumerate_team_distributions: customs/CampSeating.py
+  # 检查约束：sum = k, 每个 n_i ≤ S，至少一个等于 m
+  check_distribution_constraints: customs/CampSeating.py
+  # 计算在给定分配下的座位排列数（不相邻，同队员不可邻座）
+  count_non_adjacent_arrangements: customs/CampSeating.py
+  # 组合出所有满足条件的方案数
+  total_valid_arrangements: customs/CampSeating.py
+  #min_num: customs/CampSeating.py
+
+variables:
+  # 队伍数量 T
+  T:
+    type: int
+    domain: "[5, 10]"
+    diff_factor: 1
+  # 每队人数 S
+  S:
+    type: int
+    domain: "[5, 10]"
+    diff_factor: 1
+  # 座位数 k
+  k:
+    type: int
+    domain: "[8, 10]"
+    diff_factor: 1
+  # 被代表的队伍数 r
+  r:
+    type: int
+    domain: "[3, 5]"
+    diff_factor: 1
+  # 至少有一队人数恰好 m
+  m:
+    type: int
+    domain: "[1, 3]"
+    diff_factor: 1
+  total_arrangements: 
+    formula: total_valid_arrangements(T, S, k, r, m)
+
+symbols: {}
+
+conditions: {}
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: 问：满足上述三个条件的有序入座方案总数是多少？  
+    ans_formula: total_arrangements
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+
+desc: 数学训练营里有 {T} 支营队，每支队恰好有 {S} 名营员。训练营要在大礼堂的前排排列 {k} 把编号座椅（座位编号自左至右为 1 到 {k}），并且从全体营员中随机选出 {k} 人按序就座（每个座位坐一人，座位有序）。  
+      主办方希望这次入座满足以下严格规则：  
+      1. 恰好 {r} 支不同的队伍被代表（即入座的 {k} 人来自恰好 {r} 支队）。  
+      2. 在被代表的这 {r} 支队里，至少有一支队恰好派出 {m} 名营员（即该队在这次入座中人数为 {m}）。  
+      3. 座位上不允许同队的两名营员相邻（任意两个相邻座位上的人必须来自不同队）。
+      {q1}

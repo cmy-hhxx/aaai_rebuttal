@@ -1,0 +1,32 @@
+variables:
+  num_cnt: 
+    type: int
+    domain: "[2, 5]"
+    diff_factor: 1
+  remainder: 
+    type: int
+    domain: "[1, 10]"
+    diff_factor: 0
+  div_list:
+    formula: random.sample(range(remainder+1,50),num_cnt)
+symbols:
+  vars:
+    source:
+    - "['total']"
+    type: int
+conditions:
+  cond_divide:
+    formula: And(vars['total'] % div == remainder for div in div_list)
+  cond_divide_sum:
+    formula: And(vars['total'] >= div for div in div_list)
+max_solution: 1
+optimize:
+  type: minimize
+  formula: vars['total']
+queries:
+  q1:
+    desc: 那么这个整数最小是多少？
+    ans_formula: get_value(_solutions, vars['total'])
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 一个大于等于{str(max(div_list))}的整数，它除以{'、'.join(str(div) for div in div_list)}得到相同的余数{remainder}，{q1}

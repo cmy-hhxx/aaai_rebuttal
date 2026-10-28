@@ -1,0 +1,381 @@
+# ============================
+# 音乐节舞台（Zebra风格）两步生成：先解场景，再抽取一致线索
+# ============================
+
+# 自定义操作符：随机工具、解读模型并渲染题面
+custom_operator:
+  shuffle_list: zebra_puzzle_3.py
+  choose_random: zebra_puzzle_3.py
+  choose_k_distinct: zebra_puzzle_3.py
+  choose_pair_distinct: zebra_puzzle_3.py
+  choose_triple_distinct: zebra_puzzle_3.py
+  choose_right_of_pair_avoid: zebra_puzzle_3.py
+  choose_pair_distinct_avoid: zebra_puzzle_3.py
+  choose_color_drink_pair_avoid: zebra_puzzle_3.py
+  choose_country_instrument_pair_avoid: zebra_puzzle_3.py
+  get_color_by_drink: zebra_puzzle_3.py
+  get_color_by_genre: zebra_puzzle_3.py
+  # 基于解提取线索参数
+  leftmost_color_from_solution: zebra_puzzle_3.py
+  immediate_right_colors_from_solution: zebra_puzzle_3.py
+  not_adjacent_colors_from_solution: zebra_puzzle_3.py
+  eq_color_drink_from_solution: zebra_puzzle_3.py
+  eq_color_country_from_solution: zebra_puzzle_3.py
+  eq_country_drink_from_solution: zebra_puzzle_3.py
+  mid_drink_from_solution: zebra_puzzle_3.py
+  edge_genre_from_solution: zebra_puzzle_3.py
+  between_country_colors_from_solution: zebra_puzzle_3.py
+  adjacent_genre_drink_from_solution: zebra_puzzle_3.py
+  adjacent_country_instrument_from_solution: zebra_puzzle_3.py
+  far_left_color_genre_from_solution: zebra_puzzle_3.py
+  adjacent_genre_country_from_solution: zebra_puzzle_3.py
+  color_forbid_and_two_instruments_from_solution: zebra_puzzle_3.py
+  parity_country_drink_from_solution: zebra_puzzle_3.py
+  edge_drink_instrument_from_solution: zebra_puzzle_3.py
+  immediate_left_drink_genre_from_solution: zebra_puzzle_3.py
+  eq_country_instrument_1_from_solution: zebra_puzzle_3.py
+  eq_country_instrument_2_from_solution: zebra_puzzle_3.py
+  gap_drink_instrument_from_solution: zebra_puzzle_3.py
+  not_edge_country_from_solution: zebra_puzzle_3.py
+  not_color_drink_from_solution: zebra_puzzle_3.py
+  immediate_left_countries_from_solution: zebra_puzzle_3.py
+  genre_target_instrument_right_color_from_solution: zebra_puzzle_3.py
+  generate_include_flags_for_solution: zebra_puzzle_3.py
+  build_clue_texts: zebra_puzzle_3.py
+
+# ============================
+# 变量：基本设置与属性集合
+# ============================
+variables:
+  # 舞台数量与位置
+  n:
+    type: int
+    domain: "[5, 5]"
+    diff_factor: 1
+  positions:
+    formula: "list(range(1, n + 1))"
+  mid_pos:
+    formula: "n // 2 + 1"
+
+  # 属性集合（随机顺序）
+  colors:
+    formula: "shuffle_list(['Black', 'White', 'Gold', 'Purple', 'Teal'])"
+  genres:
+    formula: "shuffle_list(['Rock', 'Jazz', 'EDM', 'Folk', 'Classical'])"
+  instruments:
+    formula: "shuffle_list(['Guitar', 'Sax', 'Synth', 'Violin', 'Drums'])"
+  drinks:
+    formula: "shuffle_list(['Beer', 'Wine', 'Juice', 'Tea', 'Water'])"
+  countries:
+    formula: "shuffle_list(['UK', 'USA', 'Japan', 'Brazil', 'Germany'])"
+
+  # 示例颜色（用于答案格式说明）
+  example_color:
+    formula: "colors[0]"
+
+  # 文本拼接
+  colors_text:
+    formula: "', '.join(colors)"
+  genres_text:
+    formula: "', '.join(genres)"
+  instruments_text:
+    formula: "', '.join(instruments)"
+  drinks_text:
+    formula: "', '.join(drinks)"
+  countries_text:
+    formula: "', '.join(countries)"
+
+# ============================
+# 符号：每个位置一个舞台，含五个属性索引（int）
+# ============================
+symbols:
+  stage:
+    source:
+    - positions
+    attr:
+    - color
+    - genre
+    - instrument
+    - drink
+    - country
+    type:
+    - int
+    - int
+    - int
+    - int
+    - int
+
+# ============================
+# 基础约束（保证域与互异）
+# ============================
+conditions:
+  range_color:
+    formula: 'And([And(stage[p].get("color") >= 0, stage[p].get("color") <= 4) for p in positions])'
+    desc: '各位置的舞台色索引在区间零到四'
+  range_genre:
+    formula: 'And([And(stage[p].get("genre") >= 0, stage[p].get("genre") <= 4) for p in positions])'
+    desc: '各位置的主打风格索引在区间零到四'
+  range_instrument:
+    formula: 'And([And(stage[p].get("instrument") >= 0, stage[p].get("instrument") <= 4) for p in positions])'
+    desc: '各位置的重点乐器索引在区间零到四'
+  range_drink:
+    formula: 'And([And(stage[p].get("drink") >= 0, stage[p].get("drink") <= 4) for p in positions])'
+    desc: '各位置的吧台饮品索引在区间零到四'
+  range_country:
+    formula: 'And([And(stage[p].get("country") >= 0, stage[p].get("country") <= 4) for p in positions])'
+    desc: '各位置的主秀国家索引在区间零到四'
+
+  distinct_color:
+    formula: 'Distinct([stage[p].get("color") for p in positions])'
+    desc: '舞台色在五个位置两两不同'
+  distinct_genre:
+    formula: 'Distinct([stage[p].get("genre") for p in positions])'
+    desc: '主打风格在五个位置两两不同'
+  distinct_instrument:
+    formula: 'Distinct([stage[p].get("instrument") for p in positions])'
+    desc: '重点乐器在五个位置两两不同'
+  distinct_drink:
+    formula: 'Distinct([stage[p].get("drink") for p in positions])'
+    desc: '吧台饮品在五个位置两两不同'
+  distinct_country:
+    formula: 'Distinct([stage[p].get("country") for p in positions])'
+    desc: '主秀国家在五个位置两两不同'
+
+# ============================
+# 后生成：从首轮解抽取一致线索并加回约束
+# ============================
+post_generation:
+  post_gen_vars:
+    # 逐条线索的参数均从解中抽取，保证一致
+    leftmost_color: leftmost_color_from_solution(_sol, colors, positions, stage)
+    immediate_right_colors: immediate_right_colors_from_solution(_sol, colors, positions, stage)
+    not_adjacent_colors: not_adjacent_colors_from_solution(_sol, colors, positions, stage)
+    eq_color_drink: eq_color_drink_from_solution(_sol, colors, drinks, positions, stage)
+    eq_color_country: eq_color_country_from_solution(_sol, colors, countries, positions, stage)
+    eq_country_drink: eq_country_drink_from_solution(_sol, countries, drinks, positions, stage)
+    mid_drink: mid_drink_from_solution(_sol, drinks, positions, stage)
+    edge_genre: edge_genre_from_solution(_sol, genres, positions, stage)
+    between_country_colors: between_country_colors_from_solution(_sol, countries, colors, positions, stage)
+    adjacent_genre_drink: adjacent_genre_drink_from_solution(_sol, genres, drinks, positions, stage)
+    adjacent_country_instrument: adjacent_country_instrument_from_solution(_sol, countries, instruments, positions, stage)
+    far_left_color_genre: far_left_color_genre_from_solution(_sol, colors, genres, positions, stage)
+    adjacent_genre_country: adjacent_genre_country_from_solution(_sol, genres, countries, positions, stage)
+    color_forbid_and_two: color_forbid_and_two_instruments_from_solution(_sol, colors, instruments, positions, stage)
+    color_forbid: color_forbid_and_two[0]
+    forbid_instruments: color_forbid_and_two[1]
+    parity_country_drink: parity_country_drink_from_solution(_sol, countries, drinks, positions, stage)
+    edge_drink_instrument: edge_drink_instrument_from_solution(_sol, drinks, instruments, positions, stage)
+    immediate_left_drink_genre: immediate_left_drink_genre_from_solution(_sol, drinks, genres, positions, stage)
+    eq_country_instrument_1: eq_country_instrument_1_from_solution(_sol, countries, instruments, positions, stage)
+    eq_country_instrument_2: eq_country_instrument_2_from_solution(_sol, countries, instruments, positions, stage, eq_country_instrument_1)
+    gap_drink_instrument: gap_drink_instrument_from_solution(_sol, drinks, instruments, positions, stage)
+    not_edge_country: not_edge_country_from_solution(_sol, countries, positions, stage)
+    not_color_drink: not_color_drink_from_solution(_sol, colors, drinks, positions, stage)
+    immediate_left_countries: immediate_left_countries_from_solution(_sol, countries, positions, stage)
+    genre_instrument_right_color: genre_target_instrument_right_color_from_solution(_sol, genres, instruments, colors, positions, stage)
+    genre_target: genre_instrument_right_color[0]
+    instrument_for_genre_target: genre_instrument_right_color[1]
+    right_of_pair_colors: genre_instrument_right_color[2]
+
+    # 索引预计算（用于约束与查询）
+    g_target_idx: "genres.index(genre_target)"
+    i_for_g_target_idx: "instruments.index(instrument_for_genre_target)"
+    c_right_x_idx: "colors.index(right_of_pair_colors[0])"
+    c_right_y_idx: "colors.index(right_of_pair_colors[1])"
+
+    g_adj_idx: "genres.index(adjacent_genre_drink[0])"
+    d_adj_idx: "drinks.index(adjacent_genre_drink[1])"
+
+    g_edge_idx: "genres.index(edge_genre)"
+    d_mid_idx: "drinks.index(mid_drink)"
+
+    k_between_idx: "countries.index(between_country_colors[0])"
+    c_between_left_idx: "colors.index(between_country_colors[1])"
+    c_between_right_idx: "colors.index(between_country_colors[2])"
+
+    k_adj_i_k_idx: "countries.index(adjacent_country_instrument[0])"
+    i_adj_k_i_idx: "instruments.index(adjacent_country_instrument[1])"
+
+    c_far_left_idx: "colors.index(far_left_color_genre[0])"
+    g_far_left_idx: "genres.index(far_left_color_genre[1])"
+
+    g_adj_k_g_idx: "genres.index(adjacent_genre_country[0])"
+    k_adj_k_k_idx: "countries.index(adjacent_genre_country[1])"
+
+    c_forbid_idx: "colors.index(color_forbid)"
+    i_forbid_1_idx: "instruments.index(forbid_instruments[0])"
+    i_forbid_2_idx: "instruments.index(forbid_instruments[1])"
+
+    k_parity_idx: "countries.index(parity_country_drink[0])"
+    d_parity_idx: "drinks.index(parity_country_drink[1])"
+
+    c_not_adj_1_idx: "colors.index(not_adjacent_colors[0])"
+    c_not_adj_2_idx: "colors.index(not_adjacent_colors[1])"
+
+    d_edge_either_idx: "drinks.index(edge_drink_instrument[0])"
+    i_edge_either_idx: "instruments.index(edge_drink_instrument[1])"
+
+    c_immediate_right_x_idx: "colors.index(immediate_right_colors[0])"
+    c_immediate_right_y_idx: "colors.index(immediate_right_colors[1])"
+
+    d_left_genre_d_idx: "drinks.index(immediate_left_drink_genre[0])"
+    g_left_genre_g_idx: "genres.index(immediate_left_drink_genre[1])"
+
+    k_eq_1_idx: "countries.index(eq_country_instrument_1[0])"
+    i_eq_1_idx: "instruments.index(eq_country_instrument_1[1])"
+
+    d_gap_idx: "drinks.index(gap_drink_instrument[0])"
+    i_gap_idx: "instruments.index(gap_drink_instrument[1])"
+
+    c_eq_color_drink_idx: "colors.index(eq_color_drink[0])"
+    d_eq_color_drink_idx: "drinks.index(eq_color_drink[1])"
+
+    c_eq_color_country_idx: "colors.index(eq_color_country[0])"
+    k_eq_color_country_idx: "countries.index(eq_color_country[1])"
+
+    k_eq_2_idx: "countries.index(eq_country_instrument_2[0])"
+    i_eq_2_idx: "instruments.index(eq_country_instrument_2[1])"
+
+    k_left_c1_idx: "countries.index(immediate_left_countries[0])"
+    k_left_c2_idx: "countries.index(immediate_left_countries[1])"
+
+    k_not_edge_idx: "countries.index(not_edge_country)"
+
+    c_leftmost_idx: "colors.index(leftmost_color)"
+
+    c_not_color_drink_idx: "colors.index(not_color_drink[0])"
+    d_not_color_drink_idx: "drinks.index(not_color_drink[1])"
+
+    k_eq_country_drink_idx: "countries.index(eq_country_drink[0])"
+    d_eq_country_drink_idx: "drinks.index(eq_country_drink[1])"
+
+    # 线索启用开关：尽量启用全部线索（23到24条）
+    include_flags: generate_include_flags_for_solution(_sol, positions, stage, 23, 24)
+    include_1: "include_flags[0]"
+    include_2: "include_flags[1]"
+    include_3: "include_flags[2]"
+    include_4: "include_flags[3]"
+    include_5: "include_flags[4]"
+    include_6: "include_flags[5]"
+    include_7: "include_flags[6]"
+    include_8: "include_flags[7]"
+    include_9: "include_flags[8]"
+    include_10: "include_flags[9]"
+    include_11: "include_flags[10]"
+    include_12: "include_flags[11]"
+    include_13: "include_flags[12]"
+    include_14: "include_flags[13]"
+    include_15: "include_flags[14]"
+    include_16: "include_flags[15]"
+    include_17: "include_flags[16]"
+    include_18: "include_flags[17]"
+    include_19: "include_flags[18]"
+    include_20: "include_flags[19]"
+    include_21: "include_flags[20]"
+    include_22: "include_flags[21]"
+    include_23: "include_flags[22]"
+    include_24: "include_flags[23]"
+
+    # 线索文本拼接
+    clue_texts: "build_clue_texts(include_flags, genres, instruments, drinks, countries, colors, genre_target, instrument_for_genre_target, right_of_pair_colors, adjacent_genre_drink, edge_genre, mid_drink, between_country_colors, adjacent_country_instrument, adjacent_genre_country, color_forbid, forbid_instruments, parity_country_drink, not_adjacent_colors, edge_drink_instrument, immediate_right_colors, immediate_left_drink_genre, eq_country_instrument_1, eq_color_drink, eq_color_country, eq_country_instrument_2, not_edge_country, not_color_drink, leftmost_color, far_left_color_genre, gap_drink_instrument, immediate_left_countries, eq_country_drink)"
+
+  post_gen_conditions:
+    # 从此处开始，所有线索约束均以include开关控制
+    # 强化线索1：同时绑定目标风格舞台的颜色
+    clue_1:
+      formula: '(And(And([If(stage[p].get("genre") == g_target_idx, stage[p].get("instrument") == i_for_g_target_idx, True) for p in positions]), And([If(stage[p].get("genre") == g_target_idx, stage[p].get("color") == c_right_x_idx, True) for p in positions]), Sum([If(stage[p].get("genre") == g_target_idx, p, 0) for p in positions]) > Sum([If(stage[p].get("color") == c_right_y_idx, p, 0) for p in positions]))) if include_1 else True'
+      desc: '线索一启用时生效'
+    clue_2:
+      formula: '(Or(Sum([If(stage[p].get("genre") == g_adj_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("drink") == d_adj_idx, p, 0) for p in positions]) + 1, Sum([If(stage[p].get("genre") == g_adj_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("drink") == d_adj_idx, p, 0) for p in positions]) - 1)) if include_2 else True'
+      desc: '线索二启用时生效'
+    clue_3:
+      formula: '(Sum([If(stage[p].get("genre") == g_edge_idx, p, 0) for p in positions]) == 1) if include_3 else True'
+      desc: '线索三启用时生效'
+    clue_4:
+      formula: '(Sum([If(stage[p].get("drink") == d_mid_idx, p, 0) for p in positions]) == mid_pos) if include_4 else True'
+      desc: '线索四启用时生效'
+    clue_5:
+      formula: '(Or(And(Sum([If(stage[p].get("color") == c_between_left_idx, p, 0) for p in positions]) < Sum([If(stage[p].get("country") == k_between_idx, p, 0) for p in positions]), Sum([If(stage[p].get("country") == k_between_idx, p, 0) for p in positions]) < Sum([If(stage[p].get("color") == c_between_right_idx, p, 0) for p in positions])), And(Sum([If(stage[p].get("color") == c_between_right_idx, p, 0) for p in positions]) < Sum([If(stage[p].get("country") == k_between_idx, p, 0) for p in positions]), Sum([If(stage[p].get("country") == k_between_idx, p, 0) for p in positions]) < Sum([If(stage[p].get("color") == c_between_left_idx, p, 0) for p in positions])))) if include_5 else True'
+      desc: '线索五启用时生效'
+    clue_6:
+      formula: '(Or(Sum([If(stage[p].get("country") == k_adj_i_k_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("instrument") == i_adj_k_i_idx, p, 0) for p in positions]) + 1, Sum([If(stage[p].get("country") == k_adj_i_k_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("instrument") == i_adj_k_i_idx, p, 0) for p in positions]) - 1)) if include_6 else True'
+      desc: '线索六启用时生效'
+    clue_7:
+      formula: '(Sum([If(stage[p].get("color") == c_far_left_idx, p, 0) for p in positions]) + 2 <= Sum([If(stage[p].get("genre") == g_far_left_idx, p, 0) for p in positions])) if include_7 else True'
+      desc: '线索七启用时生效'
+    clue_8:
+      formula: '(Or(Sum([If(stage[p].get("genre") == g_adj_k_g_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("country") == k_adj_k_k_idx, p, 0) for p in positions]) + 1, Sum([If(stage[p].get("genre") == g_adj_k_g_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("country") == k_adj_k_k_idx, p, 0) for p in positions]) - 1)) if include_8 else True'
+      desc: '线索八启用时生效'
+    clue_9:
+      formula: '(And([If(stage[p].get("color") == c_forbid_idx, And(stage[p].get("instrument") != i_forbid_1_idx, stage[p].get("instrument") != i_forbid_2_idx), True) for p in positions])) if include_9 else True'
+      desc: '线索九启用时生效'
+    clue_10:
+      formula: '(Or(And(Or(Sum([If(stage[p].get("country") == k_parity_idx, p, 0) for p in positions]) == 1, Sum([If(stage[p].get("country") == k_parity_idx, p, 0) for p in positions]) == 3, Sum([If(stage[p].get("country") == k_parity_idx, p, 0) for p in positions]) == 5), Or(Sum([If(stage[p].get("drink") == d_parity_idx, p, 0) for p in positions]) == 2, Sum([If(stage[p].get("drink") == d_parity_idx, p, 0) for p in positions]) == 4)), And(Or(Sum([If(stage[p].get("drink") == d_parity_idx, p, 0) for p in positions]) == 1, Sum([If(stage[p].get("drink") == d_parity_idx, p, 0) for p in positions]) == 3, Sum([If(stage[p].get("drink") == d_parity_idx, p, 0) for p in positions]) == 5), Or(Sum([If(stage[p].get("country") == k_parity_idx, p, 0) for p in positions]) == 2, Sum([If(stage[p].get("country") == k_parity_idx, p, 0) for p in positions]) == 4)))) if include_10 else True'
+      desc: '线索十启用时生效'
+    clue_11:
+      formula: '(Not(Or(Sum([If(stage[p].get("color") == c_not_adj_1_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("color") == c_not_adj_2_idx, p, 0) for p in positions]) + 1, Sum([If(stage[p].get("color") == c_not_adj_1_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("color") == c_not_adj_2_idx, p, 0) for p in positions]) - 1))) if include_11 else True'
+      desc: '线索十一启用时生效'
+    clue_12:
+      formula: '(And(Sum([If(stage[p].get("drink") == d_edge_either_idx, p, 0) for p in positions]) == n, Sum([If(stage[p].get("instrument") == i_edge_either_idx, p, 0) for p in positions]) == 1)) if include_12 else True'
+      desc: '线索十二启用时生效'
+    clue_13:
+      formula: '(Sum([If(stage[p].get("color") == c_immediate_right_x_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("color") == c_immediate_right_y_idx, p, 0) for p in positions]) + 1) if include_13 else True'
+      desc: '线索十三启用时生效'
+    clue_14:
+      formula: '(Sum([If(stage[p].get("drink") == d_left_genre_d_idx, p, 0) for p in positions]) + 1 == Sum([If(stage[p].get("genre") == g_left_genre_g_idx, p, 0) for p in positions])) if include_14 else True'
+      desc: '线索十四启用时生效'
+    clue_15:
+      formula: '(And([If(stage[p].get("country") == k_eq_1_idx, stage[p].get("instrument") == i_eq_1_idx, True) for p in positions])) if include_15 else True'
+      desc: '线索十五启用时生效'
+    clue_16:
+      formula: '(Or(Sum([If(stage[p].get("drink") == d_gap_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("instrument") == i_gap_idx, p, 0) for p in positions]) + 2, Sum([If(stage[p].get("instrument") == i_gap_idx, p, 0) for p in positions]) == Sum([If(stage[p].get("drink") == d_gap_idx, p, 0) for p in positions]) + 2)) if include_16 else True'
+      desc: '线索十六启用时生效'
+    clue_17:
+      formula: '(And([If(stage[p].get("color") == c_eq_color_drink_idx, stage[p].get("drink") == d_eq_color_drink_idx, True) for p in positions])) if include_17 else True'
+      desc: '线索十七启用时生效'
+    clue_18:
+      formula: '(And([If(stage[p].get("color") == c_eq_color_country_idx, stage[p].get("country") == k_eq_color_country_idx, True) for p in positions])) if include_18 else True'
+      desc: '线索十八启用时生效'
+    clue_19:
+      formula: '(And([If(stage[p].get("country") == k_eq_2_idx, stage[p].get("instrument") == i_eq_2_idx, True) for p in positions])) if include_19 else True'
+      desc: '线索十九启用时生效'
+    clue_20:
+      formula: '(Sum([If(stage[p].get("country") == k_left_c1_idx, p, 0) for p in positions]) + 1 == Sum([If(stage[p].get("country") == k_left_c2_idx, p, 0) for p in positions])) if include_20 else True'
+      desc: '线索二十启用时生效'
+    clue_21:
+      formula: '(Not(Or(Sum([If(stage[p].get("country") == k_not_edge_idx, p, 0) for p in positions]) == 1, Sum([If(stage[p].get("country") == k_not_edge_idx, p, 0) for p in positions]) == n))) if include_21 else True'
+      desc: '线索二十一启用时生效'
+    clue_22:
+      formula: '(And([If(stage[p].get("color") == c_not_color_drink_idx, stage[p].get("drink") != d_not_color_drink_idx, True) for p in positions])) if include_22 else True'
+      desc: '线索二十二启用时生效'
+    clue_23:
+      formula: '(Sum([If(stage[p].get("color") == c_leftmost_idx, p, 0) for p in positions]) == 1) if include_23 else True'
+      desc: '线索二十三启用时生效'
+    clue_24:
+      formula: '(And([If(stage[p].get("country") == k_eq_country_drink_idx, stage[p].get("drink") == d_eq_country_drink_idx, True) for p in positions])) if include_24 else True'
+      desc: '线索二十四启用时生效'
+
+# ============================
+# 求解限制（唯一性验证）
+# ============================
+max_solution: 1
+
+# ============================
+# 查询
+# ============================
+queries:
+  q1:
+    desc: '谁卖 {mid_drink} 请给出该舞台的颜色 答案格式为英文颜色名例如 {example_color}'
+    ans_formula: 'get_color_by_drink(_solutions, colors, positions, stage, d_mid_idx)'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q2:
+    desc: '哪个舞台是 {genre_target} 请给出该舞台的颜色 答案格式为英文颜色名例如 {example_color}'
+    ans_formula: 'get_color_by_genre(_solutions, colors, positions, stage, g_target_idx)'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+
+# ============================
+# 描述
+# ============================
+desc: '共有五个舞台从左到右位置为 {positions} 每个舞台有颜色主打风格重点乐器吧台饮品与主秀国家 这五类属性的取值分别为 颜色 {colors_text} 风格 {genres_text} 乐器 {instruments_text} 饮品 {drinks_text} 国家 {countries_text} 每一类属性在五个位置上各不相同 为便于理解给出术语解释 相邻表示位置编号相差一 左侧紧邻表示在另一个舞台左边一位 右侧紧邻表示在另一个舞台右边一位 边上指位置一或位置五 之间表示位置编号严格介于两者之间 奇偶位以位置编号为准一三五为奇二四为偶 左侧至少两位表示左侧位置编号比右侧位置编号至少小二 恰隔一个舞台表示两者位置编号相差二 下面给出若干线索请据此推理方案 请按题目所给答案格式作答并参考示例颜色格式例如 {example_color}\n{clue_texts}\n{q1}\n{q2}'

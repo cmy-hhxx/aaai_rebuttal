@@ -1,0 +1,60 @@
+# 逆向生成的箭头迷宫规格（修订版）：外部 Python 函数负责生成实例、规则文本与唯一性验证；YAML 仅声明题面参数与渲染
+custom_operator:
+  # 实例生成、回溯求解与格式化函数均在 arrow_maze_2.py 中定义（注意：函数必须在文件中存在）
+  gen_arrow_maze_instance: arrow_maze_2.py
+  solve_arrow_maze: arrow_maze_2.py
+  format_grid: arrow_maze_2.py
+  format_grid_sq: arrow_maze_2.py
+  format_list_sq: arrow_maze_2.py
+  format_regions_sq: arrow_maze_2.py
+  format_cells_sq: arrow_maze_2.py
+  build_rule_text: arrow_maze_2.py
+  example_answer_format: arrow_maze_2.py
+
+# ==============================
+# 变量区：一次性生成完整实例并逐项提取
+# ==============================
+variables:
+  instance:
+    # 生成一个唯一解的题面实例（包含网格规模、方向集合、初始网格、行列计数、区域计数、阻挡格、方向配额、区域轴斜配额、边界/黑白配额、邻接规则、锚点类型等）
+    formula: "gen_arrow_maze_instance()"
+  grid_size:
+    formula: "instance['grid_size']"
+  directions:
+    formula: "instance['directions']"
+  given_grid:
+    # 初始网格（数字、X 与 #）
+    formula: "instance['given_grid']"
+  given_grid_text:
+    # 题面展示用（单引号二维数组字符串，避免 desc 双引号）
+    formula: "format_grid_sq(given_grid)"
+  directions_text:
+    # 可用方向集合的单引号列表字符串（也会在规则文本中出现）
+    formula: "format_list_sq(directions)"
+  rule_text:
+    # 根据启用的约束与参数，生成单行规则说明文本（已包含黑白格判定与邻接规则的精确定义、计数顺序说明；坐标为 0 索引）
+    formula: "build_rule_text(instance)"
+  example_text:
+    # 答案格式示例（单引号二维数组）
+    formula: "example_answer_format()"
+
+# ==============================
+# 直接计算模式：所有求解由外部函数完成
+# ==============================
+calc_solution: false
+
+# ==============================
+# 查询：开放题，要求输出完整网格二维数组（单引号，Python 列表字符串）
+# ==============================
+queries:
+  q1:
+    desc: '请根据题面规则在若干 X 位置放置箭头（仅使用给定的方向集合），数字与阻挡格 # 保持不变，数字以字符串形式输出；未放置箭头的空格仍输出字符 X；答案须以单引号的二维数组字符串输出（元素为箭头字符、数字字符串、# 或 X），例如示例：{example_text}。'
+    # ans_formula 返回二维数组（网格），ans_text 输出单引号字符串以便自动严格比对
+    ans_formula: "solve_arrow_maze(instance)"
+    ans_text: "format_grid_sq(_ans)"
+    ans_assertion: "True"
+
+# ==============================
+# 题面描述（单行、单引号；不得含双引号；换行用 \n）
+# ==============================
+desc: '这是一个 {grid_size}x{grid_size} 的箭头迷宫。{rule_text}。给定初始网格为 {given_grid_text}。请在若干 X 处放置箭头并输出完整网格二维数组作为答案（其余空格保持字符 X）；答案须以单引号的二维数组字符串输出；答案格式示例：{example_text}。\n'

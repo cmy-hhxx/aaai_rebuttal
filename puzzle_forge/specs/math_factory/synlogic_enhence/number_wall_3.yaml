@@ -1,0 +1,107 @@
+# 绿色河谷保护区 Nurikabe 风格（外部函数直接计算模式）
+# 注：本YAML使用外部Python函数直接计算答案，calc_solution: false；不生成Z3相关内置变量
+custom_operator:
+  # --- 随机生成尺寸、线索数量与预设水 ---
+  choose_clue_num: number_wall_3.py
+  choose_preA_num: number_wall_3.py
+  # --- 随机生成规则参数与封装（含新规则） ---
+  choose_forbid_block_k: number_wall_3.py
+  choose_island_adj_mode: number_wall_3.py
+  choose_island_conn: number_wall_3.py
+  choose_water_conn_single: number_wall_3.py
+  choose_border_touch_req: number_wall_3.py
+  choose_water_topology_mode: number_wall_3.py
+  make_rules_config: number_wall_3.py
+  # --- 实例生成与渲染 ---
+  generate_green_valley_instance: number_wall_3.py
+  extract_clues: number_wall_3.py
+  render_grid_text: number_wall_3.py
+  render_rules_text: number_wall_3.py
+  # --- 求解与答案提取（唯一性由生成阶段保证，非唯一则抛错） ---
+  solve_green_valley_A_count: number_wall_3.py
+  solve_green_valley_A_coords_str: number_wall_3.py
+  solve_green_valley_islands_pairs_str: number_wall_3.py
+
+variables:
+  # --- 基础尺寸参数（原子化、可随机） ---
+  rows:
+    type: int
+    domain: "[5, 6]"      # 行数：5或6
+  cols:
+    type: int
+    domain: "[5, 6]"      # 列数：5或6
+
+  # --- 岛屿大小范围（缩减上限以提升性能） ---
+  island_size_low:
+    type: int
+    domain: "[2, 4]"      # 岛屿最小大小
+  island_size_high:
+    type: int
+    domain: "[island_size_low + 1, island_size_low + 2]"  # 最大大小为最低+1至+2之间随机
+
+  # --- 线索数量与预设水域数量（由外部函数根据尺寸随机） ---
+  clue_num:
+    formula: choose_clue_num(rows, cols)
+  preA_num:
+    formula: choose_preA_num(rows, cols)
+
+  # --- 规则参数（随机化，含拓扑与边界触达） ---
+  rule_forbid_block_k:
+    formula: choose_forbid_block_k(rows, cols)              # 0或2或3
+  rule_island_adj_mode:
+    formula: choose_island_adj_mode()                       # 'no_orth' 或 'no_adjacent'
+  rule_island_conn:
+    formula: choose_island_conn()                           # 4 或 8
+  rule_water_conn_single:
+    formula: choose_water_conn_single()                     # True（预留接口）
+  rule_border_touch_req:
+    formula: choose_border_touch_req(rows, cols)            # 3 或 4
+  rule_water_topology_mode:
+    formula: choose_water_topology_mode()                   # 'robust' 或 'bridge_once'
+
+  # --- 规则配置封装（供生成和求解使用） ---
+  rules_cfg:
+    formula: make_rules_config(rule_forbid_block_k, rule_island_adj_mode, rule_island_conn, rule_water_conn_single, rule_border_touch_req, rule_water_topology_mode)
+
+  # --- 随机实例网格（仅含'X'、线索数字及可选'A'），需在所选规则下可解且唯一 ---
+  grid:
+    formula: generate_green_valley_instance(rows, cols, clue_num, island_size_low, island_size_high, preA_num, rules_cfg)
+
+  # --- 抽取线索（用于题面渲染或统计） ---
+  clues:
+    formula: extract_clues(grid)
+
+  # --- 规则文本与网格渲染文本（单行、安全格式） ---
+  rules_text:
+    formula: render_rules_text(rows, cols, rule_forbid_block_k, rule_island_adj_mode, rule_island_conn, rule_border_touch_req, rule_water_topology_mode)
+  grid_text:
+    formula: render_grid_text(grid)
+
+# 本题采用外部函数直接计算模式：无需Z3符号，直接调用求解函数产出答案
+calc_solution: false
+
+# --- 提问设计：三问，答案格式严格规范 ---
+queries:
+  # 问题1：水域A格子的总数（整数）
+  q1:
+    desc: '问题1：在满足全部规则的唯一有效配置中，水域A格子的总数是多少？答案必须是整数，例如 14。'
+    ans_formula: solve_green_valley_A_count(grid, rules_cfg)
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+  # 问题2：水域A格子的坐标列表（标准格式字符串）
+  q2:
+    desc: '问题2：请给出该唯一有效配置中所有水域A格子的坐标列表，按(r,c)的字典序（先按r升序，再按c升序）排序并以固定格式输出，例如 [(0,0),(0,1),(1,0)]；请严格按此无空格格式书写，注意英文逗号与括号。'
+    ans_formula: solve_green_valley_A_coords_str(grid, rules_cfg)
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+  # 问题3：每个线索坐标对应的岛屿格子坐标关系列表（标准格式字符串）
+  q3:
+    desc: '问题3：请给出每个线索坐标对应的岛屿格子坐标关系列表，键为线索坐标，值为该岛屿所有格子的坐标列表；答案为固定格式字符串：整体使用一对方括号[]包裹，内部若干条目以英文逗号分隔，每条目写作 (r,c)->[(r1,c1),(r2,c2)]，其中键与列表均按(r,c)的字典序（先按r升序，再按c升序）排序，内部无空格；例如 [(1,3)->[(1,3),(2,3),(3,3)],(2,1)->[(0,0),(0,1)],(5,2)->[(4,0),(5,0)]].'
+    ans_formula: solve_green_valley_islands_pairs_str(grid, rules_cfg)
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+# --- 题干描述（单行、无双引号、仅变量插入、换行用\n） ---
+desc: '绿色河谷保护区规划谜题：说明：坐标采用0基(r,c)表示，其中r为行(自上而下)、c为列(自左而右)；X表示未知格，A表示河道格，数字表示岛屿线索大小。A代表连成一片的河道（按4连通判定），岛屿连通性见规则(6)。需满足以下规则：{rules_text}。网格尺寸为 {rows}×{cols}，网格内容为 {grid_text}。\n请回答：\n1) 问题1：A格子的总数（答案为整数，例如 14）。\n2) 问题2：所有A格子的坐标列表（答案为固定格式字符串，例如 [(0,0),(0,1)]，按(r,c)的字典序排序，无空格）。\n3) 问题3：每个线索坐标对应的岛屿格子坐标关系列表（答案为固定格式字符串：整体使用一对方括号[]包裹，内部若干条目以英文逗号分隔，每条目写作 (r,c)->[(r1,c1),(r2,c2)]，键与列表均按(r,c)的字典序排序，内部无空格）。'

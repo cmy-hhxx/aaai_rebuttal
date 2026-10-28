@@ -1,0 +1,55 @@
+# ================================================================
+# Survo Puzzle Specification (sum/product 复合版)
+# ================================================================
+custom_operator:
+  generate_survo: survo_1.py
+  function_1: survo_1.py
+  function_2: survo_1.py
+
+# ------------------------------------------------
+# 变量：全部由 generate_survo 返回
+# ------------------------------------------------
+variables:
+  puzzle:
+    formula: generate_survo()
+
+  n:
+    formula: puzzle['n']
+
+  op_type:
+    formula: puzzle['op_type']
+
+  op_desc:
+    formula: "'和' if op_type == 'sum' else '积'"
+
+  matrix_initial:
+    formula: puzzle['matrix_initial']
+
+  available_numbers:
+    formula: puzzle['available_numbers']
+
+  final_matrix:
+    formula: puzzle['final_matrix']
+
+  extra_clues:
+    formula: puzzle['extra_clues_text']
+
+# ------------------------------------------------
+# 不需要 SMT 参与
+# ------------------------------------------------
+calc_solution: false
+
+# ------------------------------------------------
+# 问题与答案
+# ------------------------------------------------
+queries:
+  q1:
+    desc: '请在矩阵中的 X 位置填入数字完成 Survo 谜题并给出填充后的完整矩阵。'
+    ans_formula: final_matrix
+    ans_text: "str(final_matrix)"
+    ans_assertion: 'True'
+
+# ------------------------------------------------
+# 题面描述
+# ------------------------------------------------
+desc: '给定一个(n+1)×(n+1)矩阵{matrix_initial}。本题采用{op_desc}规则：矩阵最后一列与最后一行的数字表示对应行或列前面数字之{op_desc}。额外已知：{", ".join(extra_clues)}。现有可用数字{available_numbers}（列表中如有重复数字则每个实例亦视作独立且只能被使用一次）可替换表中的 X。请补全矩阵，并将答案写成[[r1c1,r1c2,...],[r2c1,...],...]的单行字符串格式提交（示例:[[1,2],[3,4]]）。'

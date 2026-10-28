@@ -1,0 +1,79 @@
+# 该规格文件采用直接计算模式（calc_solution: false），通过 custom_operator 引入 Python 函数完成六向坐标与路径计算、规则随机化、实例生成与文本渲染
+custom_operator:
+  # 引入 space_reasoning_3.py 中的辅助函数（注意：所有函数均在 space_reasoning_3.py 中定义）
+  gen_hex_instance: space_reasoning_3.py
+  coord_to_text: space_reasoning_3.py
+  segments_to_text: space_reasoning_3.py
+  instance_answer: space_reasoning_3.py
+  rules_to_text: space_reasoning_3.py
+  rotation_cycle_text: space_reasoning_3.py
+
+# 变量区：参数范围、实例化与文本派生
+variables:
+  # --- 基础可调范围 ---
+  ring_range: # 最大环半径取值范围（闭区间）
+    formula: '[5, 12]'
+  seg_cnt_obs1_range: # 观察1的段数范围
+    formula: '[2, 4]'
+  seg_cnt_obs2_range: # 观察2的段数范围
+    formula: '[2, 4]'
+  seg_cnt_final_range: # 终问的段数范围
+    formula: '[4, 7]'
+  step_obs_range: # 观察段每段步数范围
+    formula: '[1, 6]'
+  step_final_range: # 终问段每段步数范围
+    formula: '[1, 6]'
+  after_jump_steps_range: # 对径跳转后的单段步数范围
+    formula: '[1, 5]'
+  directions_list: # 可用方向全集
+    formula: "['E','NE','NW','W','SW','SE']"
+  items_pool: # 候选化石名称全集（至少12种，最终随机取5种）
+    formula: "['菊石','树化石','鱼化石','螺类化石','恐龙牙齿化石','三叶虫','硅化木','羽毛化石','珊瑚化石','贝壳','牙形石','腕足化石','箭石','海百合','腹足类化石']"
+  unknown_prob: # 目标 unknown 答案占比（近似）
+    formula: '0.35'
+  ensure_distinct: # 是否强制五个化石位置两两不同
+    formula: 'True'
+
+  # --- 实例生成（正向生成 + 规则随机化 + 唯一性验证：顺序不变性） ---
+  instance: # 随机生成的完整实例
+    formula: 'gen_hex_instance(ring_range, seg_cnt_obs1_range, seg_cnt_obs2_range, seg_cnt_final_range, step_obs_range, step_final_range, after_jump_steps_range, directions_list, items_pool, unknown_prob, ensure_distinct)'
+
+  # --- 文本与提示派生 ---
+  max_ring: # 显式暴露 max_ring 以便题干渲染与难度评估
+    formula: "instance['max_ring']"
+    diff_factor: 1
+  start_coord_text:
+    formula: "coord_to_text(instance['start_coord'])"
+  obs1_text:
+    formula: "segments_to_text(instance['obs1'])"
+  obs2_text:
+    formula: "segments_to_text(instance['obs2'])"
+  after_jump_text:
+    formula: "segments_to_text(instance['after_jump'])"
+  final_query_text:
+    formula: "segments_to_text(instance['final_query'])"
+  allowed_answers_text: # 允许的化石名称集合文本（以顿号分隔）
+    formula: "'、'.join(instance['item_names'])"
+  example_item: # 答案格式示例用
+    formula: "instance['item_names'][0]"
+  rules_text: # 规则说明文本，严格与引擎执行顺序一致
+    formula: "rules_to_text(instance['rules'])"
+  mapping_text: # 五处化石名称与位置映射说明（不泄露坐标）
+    formula: "'起点观测为' + instance['item_names'][0] + '；obs1终点观测为' + instance['item_names'][1] + '；obs2终点观测为' + instance['item_names'][2] + '；对径节点观测为' + instance['item_names'][3] + '；after_jump终点观测为' + instance['item_names'][4]"
+  rotation_text: # 顺时针旋转序列文本（与代码一致）
+    formula: 'rotation_cycle_text()'
+
+# 本题为纯计算类，直接由自定义函数完成，不进行 Z3 求解
+calc_solution: false
+
+# 查询区：最终看到的物品
+queries:
+  q1:
+    # 题干：坐标系、方向、起点、分段、五处化石映射、规则说明与答案格式（公开最大环半径与顺时针序列）
+    desc: '蜂巢六向坐标系说明：采用轴坐标(q,r)，六个方向分别为[东E, 东北NE, 西北NW, 西W, 西南SW, 东南SE]；顺时针方向序列为{rotation_text}；已知最大环半径为{max_ring}；仅以下五处存在化石：[起点, obs1终点, obs2终点, 对径节点, after_jump终点]，其余坐标处视为unknown；同环对径节点定义：若某点坐标为(q,r)，其对径为(-q,-r)。已知起点坐标为{start_coord_text}处能看到一种化石；随后依次{obs1_text}可见第二种化石；再{obs2_text}可见第三种化石；接着在同环对径节点可见第四种化石；再{after_jump_text}可见第五种化石。五处化石的名称映射如下：{mapping_text}。规则说明：{rules_text}。问：从after_jump终点位置开始按{final_query_text}移动，最终看到的物品是什么？答案格式：输出一个字符串，必须完全等于以下名称之一或unknown；可选名称为：{allowed_answers_text}，以及unknown。示例：{example_item} 或 unknown。注意：不要包含多余空格或标点符号。'
+    ans_formula: 'instance_answer(instance)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'isinstance(_ans, str)'
+
+# 总体描述（单行）
+desc: '本题为蜂巢图层（六向）空间路径推断与分步规则作用的复合题；起点、各分段、规则组合与化石名称均随机生成，保证五处化石位置唯一且在有效环内。请根据题干规则与移动顺序推理最终观测结果。\n{q1}'

@@ -1,0 +1,98 @@
+# 马戏团小狗表演问题规范
+variables:
+  # 小狗总数和技能数量
+  total_dogs:
+    type: int
+    domain: "[15, 25]"
+  
+  skill_num:
+    type: int
+    domain: "[3, 6]"
+  
+  # 各项技能的小狗数量 - 保持随机性
+  skill_counts:
+    formula: >
+      generate_random_list(
+        skill_num, 
+        'int', 
+        [
+          total_dogs * 40 // 100,
+          total_dogs
+        ],
+        [
+          "lambda l: all(x >= total_dogs * 2 // 3 for x in l)",
+          "lambda l: max(l) - min(l) >= total_dogs // 4",
+          "lambda l: len(to_unique(l)) >= skill_num - 1"
+        ]
+      )
+  
+  # 扩展技能名称库
+  all_skills:
+    formula: >
+      [
+        '翻筋斗', '倒立', '钻圈', '做算术题', '走钢丝', '跳火圈',
+        '接飞盘', '装死', '握手', '叫唤', '跳舞', '爬梯子',
+        '滚球', '平衡木', '跳绳', '数数'
+      ]
+  
+  # 随机选择技能名称
+  selected_skill_indices:
+    formula: "generate_random_list(skill_num, 'int', [0, 15], ['lambda l: len(to_unique(l)) == skill_num'])"
+  
+  skill_names:
+    formula: "[all_skills[i] for i in selected_skill_indices]"
+  
+  # 对应的动词描述
+  skill_verbs:
+    formula: >
+      [
+        '会表演' if name in ['翻筋斗', '倒立', '钻圈', '走钢丝', '跳火圈', '跳舞', '爬梯子', '滚球', '平衡木', '跳绳'] 
+        else '会做' if name in ['做算术题', '数数']
+        else '会接' if name == '接飞盘'
+        else '会装' if name == '装死'
+        else '会' if name in ['握手', '叫唤']
+        else '会'
+        for name in skill_names
+      ]
+
+symbols:
+  # 定义每种技能组合的狗数量，使用列表形式
+  pattern_counts:
+    source:
+      - "range(2 ** skill_num)"  # 所有可能的技能组合模式
+    type: int
+
+conditions:
+  # 约束1：每种技能组合的狗数量总和等于总狗数
+  total_dogs_constraint:
+    formula: "Sum([pattern_counts[i] for i in range(2 ** skill_num)]) == total_dogs"
+  
+  # 约束2：每项技能的狗数量等于预设值
+  skill_count_constraints:
+    formula: >
+      And([
+        Sum([If((i >> j) & 1 == 1, pattern_counts[i], 0) for i in range(2 ** skill_num)]) == skill_counts[j]
+        for j in range(skill_num)
+      ])
+  
+  # 约束3：所有模式数量非负
+  non_negative_constraint:
+    formula: "And([pattern_counts[i] >= 0 for i in range(2 ** skill_num)])"
+  
+queries:
+  q1:
+    desc: "至少有多少只狗所有技能都会表演？"
+    
+    # 在所有解中找到掌握所有技能的最小狗数量
+    ans_formula: "min([get_value(_model, pattern_counts[(1 << skill_num) - 1]) for _model in _solutions])"
+    
+    ans_text: "str(_ans)"
+    ans_assertion: "_ans >= 0 and _ans <= total_dogs"
+
+# 增加最大解数量以适应更大的问题规模
+max_solution: 1000
+
+desc: >
+  马戏团里驯养了{total_dogs}只小狗{
+    ', '.join([f'其中{skill_counts[i]}只{skill_verbs[i]}{skill_names[i]}' for i in range(skill_num)])
+  }。{q1}

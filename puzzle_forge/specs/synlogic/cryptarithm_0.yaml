@@ -1,0 +1,133 @@
+custom_operator:
+  gen_crypt_instance: customs/cryptarithm_0.py
+  get_letters_from_instance: customs/cryptarithm_0.py
+  gen_guaranteed_relations: customs/cryptarithm_0.py
+  pick_query_desc: customs/cryptarithm_0.py
+  pick_global_desc: customs/cryptarithm_0.py
+  op_word: customs/cryptarithm_0.py
+
+variables:
+  # --- 结构规模 ---
+  nB1:
+    type: int
+    domain: "[3, 5]"
+  nB2:
+    type: int
+    domain: "[3, 5]"
+  nC:
+    type: int
+    domain: "[4, 6]"
+  max_len:
+    formula: "max(nB1, nB2, nC)"
+  nA:
+    formula: "max_len if __import__('random').randint(0,1)==0 else max_len + 1"
+
+  # --- 算式模板 ---
+  arith_templates:
+    formula: "['A - B1 - B2 = C', 'A - B1 = B2 + C', 'A = B1 + B2 + C', 'A + B1 = B2 + C']"
+  arith_choice:
+    type: int
+    domain: "[0, 3]"
+
+  comp_ops:
+    formula: "['eq','gt','lt','ge','le']"
+
+  # --- 实例生成 ---
+  ci:
+    formula: "gen_crypt_instance(nA, nB1, nB2, nC, arith_templates, arith_choice)"
+
+  # 解包
+  letters:
+    formula: "get_letters_from_instance(ci)"
+  word_A:
+    formula: "ci['words']['A']"
+  word_B1:
+    formula: "ci['words']['B1']"
+  word_B2:
+    formula: "ci['words']['B2']"
+  word_C:
+    formula: "ci['words']['C']"
+  digit_map:
+    formula: "ci['mapping']"
+  equation_text:
+    formula: "ci['equation_str']"
+  
+  # --- 字符处理 ---
+  word_A_chars:
+    formula: "list(word_A)"
+  word_B1_chars:
+    formula: "list(word_B1)"
+  word_B2_chars:
+    formula: "list(word_B2)"
+  word_C_chars:
+    formula: "list(word_C)"
+
+  term_names:
+    formula: "['A','B1','B2','C']"
+
+  # --- 约束生成 (关键逻辑：Solve-then-Constrain 保证唯一解) ---
+  relations:
+    formula: "gen_guaranteed_relations(ci, comp_ops, min_constraints=2)"
+  rel_count:
+    formula: "len(relations)"
+
+  # --- 文本描述 ---
+  query_desc:
+    formula: "pick_query_desc(word_A, word_B1, word_B2, word_C, arith_choice)"
+  global_desc:
+    formula: "pick_global_desc(word_A, word_B1, word_B2, word_C)"
+
+symbols:
+  letter_s:
+    source:
+    - letters
+    type: int
+    desc: "Digit for letter {_letters}"
+
+  term_val:
+    source:
+    - term_names
+    type: int
+    desc: "Value of term {_term_names}"
+
+conditions:
+  # 基础约束
+  digit_domain:
+    formula: "And([And(letter_s[ch] >= 0, letter_s[ch] <= 9) for ch in letters])"
+  leading_nonzero:
+    formula: "And(letter_s[word_A_chars[0]] != 0, letter_s[word_B1_chars[0]] != 0, letter_s[word_B2_chars[0]] != 0, letter_s[word_C_chars[0]] != 0)"
+  distinct_digits:
+    formula: "gen_event_count_condition(letter_s, 'distinct')"
+  fixed_mapping:
+    formula: "And([letter_s[ch] == digit_map[ch] for ch in letters])"
+
+  # 术语数值赋值 (用于算式校验)
+  assign_term_values:
+    formula: "And(term_val['A'] == Sum([letter_s[word_A_chars[i]] * (10 ** (len(word_A_chars) - 1 - i)) for i in range(len(word_A_chars))]), term_val['B1'] == Sum([letter_s[word_B1_chars[i]] * (10 ** (len(word_B1_chars) - 1 - i)) for i in range(len(word_B1_chars))]), term_val['B2'] == Sum([letter_s[word_B2_chars[i]] * (10 ** (len(word_B2_chars) - 1 - i)) for i in range(len(word_B2_chars))]), term_val['C'] == Sum([letter_s[word_C_chars[i]] * (10 ** (len(word_C_chars) - 1 - i)) for i in range(len(word_C_chars))]))"
+
+  # 算式逻辑
+  equation_validity:
+    formula: "(lambda a,b1,b2,c,tid: (a - b1 - b2 == c) if tid == 0 else (a - b1 == b2 + c) if tid == 1 else (a == b1 + b2 + c) if tid == 2 else (a + b1 == b2 + c))( term_val['A'], term_val['B1'], term_val['B2'], term_val['C'], arith_choice )"
+
+  # 字母级关系描述
+  digit_relations:
+    source:
+    - relations
+    amount:
+    - '1'
+    domain: "[rel_count, rel_count]"
+    formula: "make_expr(_sym[0][0][2], letter_s[_sym[0][0][0]], letter_s[_sym[0][0][1]])"
+    desc: "The digit for letter {_sym[0][0][0]} {op_word(_sym[0][0][2])} the digit for letter {_sym[0][0][1]}."
+
+# 强制唯一解
+max_solution: 1
+
+queries:
+  q1:
+    desc: "{query_desc}"
+    ans_formula: "equation_text"
+    ans_text: "_ans"
+    ans_assertion: "len(_solutions) == 1"
+
+# 最终题面：只保留 全局描述 + 字母约束 + 问题
+desc: "{global_desc}\n\n[Constraints on Digits]\n{digit_relations}\n\n[Task]\n{q1} output like 56692 = 226 + 1999 + 54467."

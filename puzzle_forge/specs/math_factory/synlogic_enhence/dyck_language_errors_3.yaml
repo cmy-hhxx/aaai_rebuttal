@@ -1,0 +1,42 @@
+custom_operator:
+  generate_case: dyck_language_errors_3.py
+  format_pairs: dyck_language_errors_3.py
+  escape_braces: dyck_language_errors_3.py      # 重新声明
+  verify_unique: dyck_language_errors_3.py
+  gen_rulebook_v24: dyck_language_errors_3.py
+
+variables:
+  case_data:
+    formula: generate_case()
+
+  script:
+    formula: "case_data['script']"
+
+  script_display:
+    formula: "escape_braces(script)"
+
+  script_len:
+    formula: "case_data['script_len']"
+
+  error_index:
+    formula: "case_data['error_index']"
+
+  residue:
+    formula: "case_data['residue']"
+
+  unmatched_normal:
+    formula: "case_data['unmatched_normal']"
+
+  pairs_desc:
+    formula: "format_pairs(case_data['normal_pairs'])"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请写出答案, 依次给出三整数: (1)首个错误括号索引 (2)残留<数量 (3)未匹配常规括号数量, 三数之间用单空格分隔。例如 23 2 1'
+    ans_formula: "f'{error_index} {residue} {unmatched_normal}'"
+    ans_text: _ans
+    ans_assertion: "verify_unique(case_data)"
+
+desc: '受限解析器规则: ① 本题常规括号对为[{pairs_desc}], 必须后进先出(LIFO)匹配; ② 左尖括号<为惰性左括号, 会与随后遇到的首个右括号配对且配对后不再向内查找; ③ 解析结束后仍未匹配的<记为残留; ④ 未匹配常规括号总数包括剩余未配对的左括号以及多余/类型不符的右括号。\n现给出一段长度为{script_len}的脚本:"[{script_display}]".\n请计算并输出: 首个错误括号索引 残留<数量 未匹配常规括号数量, 以空格分隔。\n格式说明: 依次为(错误索引 残留< 未匹配常规括号)。答案示例: 23 2 1'

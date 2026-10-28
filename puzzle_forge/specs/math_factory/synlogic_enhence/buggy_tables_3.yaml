@@ -1,0 +1,149 @@
+# =========================
+# 自定义运算符：生成、清洗、规则与统计（含Q4复合）
+# =========================
+custom_operator:
+  randint_inclusive: buggy_tables_3.py
+  randint_step: buggy_tables_3.py
+  random_choice: buggy_tables_3.py
+  gen_start_date: buggy_tables_3.py
+  generate_raw_flat: buggy_tables_3.py
+  clean_table_rm: buggy_tables_3.py
+  population_variance: buggy_tables_3.py
+  format_two_decimals: buggy_tables_3.py
+  final_answer: buggy_tables_3.py
+  # 规则与答案
+  generate_ruleset: buggy_tables_3.py
+  rules_text: buggy_tables_3.py
+  answer_metric: buggy_tables_3.py
+  validate_ruleset: buggy_tables_3.py
+  answer_count: buggy_tables_3.py
+  validate_count: buggy_tables_3.py
+  # 复合规则与唯一性护栏（增强差异）
+  composite_rules_text: buggy_tables_3.py
+  answer_composite: buggy_tables_3.py
+  validate_composite: buggy_tables_3.py
+  # 规则对调和器（增强差异）
+  harmonize_pair: buggy_tables_3.py
+  # 稳健性校验（增强试次）
+  validate_ruleset_strict: buggy_tables_3.py
+
+# =========================
+# 变量定义：参数化与随机化
+# =========================
+variables:
+  # 数据行数（不含表头）
+  data_rows:
+    formula: 'randint_inclusive(5, 10)'
+    diff_factor: 1
+  # 总行数（含表头）
+  rows:
+    formula: 'data_rows + 1'
+    diff_factor: 0
+  # 列数（固定9）
+  cols:
+    formula: '9'
+    diff_factor: 0
+  # base：前多少个元素用于还原表格
+  base:
+    formula: 'rows * cols'
+    diff_factor: 0
+  # 设备集合与目标设备
+  device_pool:
+    formula: "['mobile','desktop','tablet']"
+    diff_factor: 0
+  target_device:
+    formula: 'random_choice(device_pool)'
+    diff_factor: 0
+  # 点击阈值（120~260，步长10）
+  ad_click_threshold:
+    formula: 'randint_step(120, 260, 10)'
+    diff_factor: 1
+  # 缺陷噪声倍数
+  noise_k:
+    formula: 'randint_inclusive(1, 3)'
+    diff_factor: 1
+  # 起始日期
+  start_date:
+    formula: "gen_start_date('2025-01-05','2026-12-20')"
+    diff_factor: 0
+  # 原始一维数据（含表头，尾部噪声需清洗）
+  raw_flat:
+    formula: 'generate_raw_flat(rows, cols, target_device, ad_click_threshold, noise_k, start_date)'
+    diff_factor: 0
+
+  # -------------------------
+  # 初始随机规则集：Q1/Q2（不同统计目标）
+  # -------------------------
+  rules0_q1:
+    formula: "generate_ruleset(raw_flat, rows, cols, device_pool, ad_click_threshold, 'var_diff')"
+    diff_factor: 0
+  rules0_q2:
+    formula: "generate_ruleset(raw_flat, rows, cols, device_pool, ad_click_threshold, 'std_diff')"
+    diff_factor: 0
+
+  # -------------------------
+  # 规则对调和：确保交集规模与可计算性（供 Q1/Q2/Q4 使用，强制差异维度）
+  # -------------------------
+  rules_pair:
+    formula: "harmonize_pair(raw_flat, rows, cols, rules0_q1, rules0_q2)"
+    diff_factor: 0
+  rules_q1:
+    formula: "rules_pair['a']"
+    diff_factor: 0
+  rules_q2:
+    formula: "rules_pair['b']"
+    diff_factor: 0
+
+  # 文本生成（不同句式）
+  text_q1:
+    formula: "rules_text(rules_q1, 'metric')"
+    diff_factor: 0
+  text_q2:
+    formula: "rules_text(rules_q2, 'metric')"
+    diff_factor: 0
+  # Q3 使用计数类规则，仍独立生成（与 Q1/Q2 不冲突）
+  rules_q3:
+    formula: "generate_ruleset(raw_flat, rows, cols, device_pool, ad_click_threshold, 'mean_ratio')"
+    diff_factor: 0
+  text_q3:
+    formula: "rules_text(rules_q3, 'count')"
+    diff_factor: 0
+  # 复合文本（Q4）：Q1 与 Q2 的交集与稳定度分数
+  text_q4:
+    formula: "composite_rules_text(rules_q1, rules_q2)"
+    diff_factor: 0
+
+# =========================
+# 计算模式：直接计算（无需Z3）
+# =========================
+calc_solution: false
+
+# =========================
+# 查询：四小问，答案格式严格
+# =========================
+queries:
+  q1:
+    desc: '{text_q1}'
+    ans_formula: 'answer_metric(raw_flat, rows, cols, rules_q1)'
+    ans_text: '{_ans}'
+    ans_assertion: 'validate_ruleset_strict(raw_flat, rows, cols, rules_q1)'
+  q2:
+    desc: '{text_q2}'
+    ans_formula: 'answer_metric(raw_flat, rows, cols, rules_q2)'
+    ans_text: '{_ans}'
+    ans_assertion: 'validate_ruleset_strict(raw_flat, rows, cols, rules_q2)'
+  q3:
+    desc: '{text_q3}'
+    ans_formula: 'answer_count(raw_flat, rows, cols, rules_q3)'
+    ans_text: '{_ans}'
+    ans_assertion: 'validate_count(raw_flat, rows, cols, rules_q3)'
+  q4:
+    desc: '{text_q4}'
+    ans_formula: 'answer_composite(raw_flat, rows, cols, rules_q1, rules_q2)'
+    ans_text: '{_ans}'
+    ans_assertion: 'validate_composite(raw_flat, rows, cols, rules_q1, rules_q2)'
+
+# =========================
+# 题目描述：还原—过滤—复合—计算—输出格式
+# =========================
+desc: '你得到一个按行主序展开的一维列表 raw_flat，它可还原为 {rows} 行（含表头）、{cols} 列的表格。表头的列顺序依次为：date、orders、units_sold、returns、session_minutes、device_type、ad_clicks、revenue_usd、region。注意：raw_flat 尾部附带噪声元素，请仅取前 {base} 个元素还原为表格（丢弃所有尾部噪声）。然后依次解答：\nQ1：{text_q1}\nQ2：{text_q2}\nQ3：{text_q3}\nQ4：{text_q4}\n答案格式要求：Q1/Q2 输出两位小数的字符串（如：''12.34''）；Q3 输出纯数字字符串（如：''3''）；Q4 输出形如 ''value|count'' 的字符串（如：''12.34|5''）。\n原始数据 raw_flat 为：{raw_flat}'

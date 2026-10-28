@@ -1,0 +1,138 @@
+# ================================
+# 自定义运算符：全部在 time_sequence_0.py 中定义
+# ================================
+custom_operator:
+  gen_days: time_sequence_0.py
+  gen_work_bounds: time_sequence_0.py
+  gen_people: time_sequence_0.py
+  pick_step: time_sequence_0.py
+  pick_min_duration: time_sequence_0.py
+  pick_clearance_threshold: time_sequence_0.py
+  pick_clearer_index: time_sequence_0.py
+  join_names: time_sequence_0.py
+  join_days: time_sequence_0.py
+  gen_policy_pack_v2: time_sequence_0.py
+  render_rules_v2: time_sequence_0.py
+  gen_schedules: time_sequence_0.py
+  render_schedule: time_sequence_0.py
+  compute_max_and_count_v3: time_sequence_0.py
+
+# ================================
+# 变量：参数化与策略随机化
+# ================================
+variables:
+  # 人数
+  p_num:
+    type: int
+    domain: "[3, 4]"
+    diff_factor: 1
+
+  # 工作日全集
+  days:
+    formula: gen_days()
+    diff_factor: 0
+
+  # 工作时间边界
+  work_bounds:
+    formula: gen_work_bounds()
+    diff_factor: 0
+
+  work_start:
+    formula: "work_bounds['start']"
+    diff_factor: 0
+
+  work_end:
+    formula: "work_bounds['end']"
+    diff_factor: 0
+
+  # 起始时间步长（分钟）
+  step_minutes:
+    formula: pick_step()
+    diff_factor: 1
+
+  # 会议至少持续分钟数
+  min_duration:
+    formula: pick_min_duration(work_bounds, step_minutes)
+    diff_factor: 1
+
+  # 单人清除阈值（在相关策略中使用）
+  clearance_threshold:
+    formula: pick_clearance_threshold()
+    diff_factor: -1
+
+  # 人名列表
+  names:
+    formula: gen_people(p_num)
+    diff_factor: 0
+
+  # 指定唯一可清除忙碌段的人索引
+  clearer_index:
+    formula: pick_clearer_index(p_num)
+    diff_factor: 0
+
+  # 指定唯一可清除忙碌段的人名
+  clearer_name:
+    formula: "names[clearer_index]"
+    diff_factor: 0
+
+  # 目标有多少天达到相同最长时长
+  target_count:
+    type: int
+    domain: "[1, 3]"
+    diff_factor: 1
+
+  # 策略包：仅输出实际生效的条目
+  policy_pack:
+    formula: gen_policy_pack_v2(days, work_start, work_end, step_minutes, names, min_duration)
+    diff_factor: 0
+
+  # 可开会日子集（从策略包提取）
+  allowed_days:
+    formula: "policy_pack['allowed_days']"
+    diff_factor: 0
+
+  # 文本：规则说明（仅包含当前有效规则）
+  rules_desc:
+    formula: render_rules_v2(policy_pack, step_minutes, min_duration, clearer_name, clearance_threshold, work_start, work_end)
+    diff_factor: 0
+
+  # 反向生成的完整日程（结合策略进行可行性与唯一性验证；失败时启用保底构造确保可解）
+  schedules:
+    formula: gen_schedules(names, days, work_start, work_end, step_minutes, min_duration, clearer_index, clearance_threshold, target_count, policy_pack)
+    diff_factor: 0
+
+  # 文本辅助：人名拼接
+  name_desc:
+    formula: join_names(names)
+    diff_factor: 0
+
+  # 文本辅助：工作日拼接
+  day_desc:
+    formula: join_days(days)
+    diff_factor: 0
+
+  # 文本辅助：渲染日程（不含英文引号）
+  schedule_desc:
+    formula: render_schedule(schedules)
+    diff_factor: 0
+
+# ================================
+# 直接计算模式：不使用求解器
+# ================================
+calc_solution: false
+
+# ================================
+# 问题与答案
+# ================================
+queries:
+  q1:
+    # 答案格式明确：返回 Python 列表 [最长分钟数, 具有该最长时长的起始时间个数]
+    desc: '请计算在所有允许工作日中可安排会议的最长分钟数以及达到该最长分钟数的不同起始时间个数答案必须以Python列表形式返回形如:[120, 3]若格式不符视为错误统计口径说明起始时间严格按当日有效对齐方式与步长枚举必须满足所有规则包含缓冲覆盖起始禁区限制午间禁开必须结束时间限制指定人员固定不可用时段不可清除与清除规则或忽略规则等约束'
+    ans_formula: compute_max_and_count_v3(schedules, names, days, work_start, work_end, step_minutes, min_duration, policy_pack, clearer_index, clearance_threshold)
+    ans_text: 'str(_ans)'
+    ans_assertion: '_ans[0] >= min_duration and _ans[1] >= 1'
+
+# ================================
+# 题面描述（单行, 使用显式换行）
+# ================================
+desc: '有{p_num}位同事{name_desc}在工作日{day_desc}的本地时间{work_start}到{work_end}工作以下为当前题目的有效规则与每人的每日日程请据此解答:\n规则列表:\n{rules_desc}\n每日日程:\n{schedule_desc}\n问题:\n{q1}'

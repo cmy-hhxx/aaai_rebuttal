@@ -1,0 +1,66 @@
+custom_operator:
+  function_1: word_sorting_mistake_0.py
+  function_2: word_sorting_mistake_0.py
+  function_generate_words: word_sorting_mistake_0.py
+  function_build_rules: word_sorting_mistake_0.py
+  function_build_steps: word_sorting_mistake_0.py
+  function_unique_check: word_sorting_mistake_0.py
+
+variables:
+  # 随机单词数量
+  word_num:
+    type: int
+    domain: "[8, 16]"
+  # 随机单词最小长度
+  min_len:
+    type: int
+    domain: "[5, 10]"
+  # 随机单词最大长度（保证比min_len大）
+  max_len:
+    type: int
+    domain: "[min_len + 1, min_len + 6]"
+  # 首步是否允许为 list_letters
+  allow_step1:
+    type: bool
+    domain: "[True, False]"
+  # 步骤数量下界
+  num_steps_min:
+    type: int
+    domain: "[3, 5]"
+  # 步骤数量上界
+  num_steps_max:
+    type: int
+    domain: "[num_steps_min, num_steps_min + 1]"
+  # 是否注入错误
+  inject_error:
+    type: bool
+    domain: "[True, False]"
+  # 随机生成词列表（全部小写、仅含a-z、唯一）
+  words:
+    formula: function_generate_words(word_num, min_len, max_len)
+  # 规则配置（包含步骤类型序列、分桶/模数等参数及错误注入规划）
+  rules_config:
+    formula: function_build_rules(num_steps_min, num_steps_max, allow_step1, inject_error)
+  # 实际错误信息字典：{'type': <str>, 'index': <int>}
+  eff_error:
+    formula: "rules_config.get('eff_error')"
+  # 生成思考步骤文本列表
+  steps:
+    formula: function_build_steps(words, rules_config, eff_error)
+  # 题面展示用：把词列表拼接为一行
+  words_str:
+    formula: "' '.join(words)"
+  # 题面展示用：将步骤文本单行化并将双引号替换为反引号
+  steps_desc:
+    formula: function_2(steps)
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请输出首个错误的思考步骤编号；若无错误则输出No。答案格式：若无错误输出No；否则仅输出整数k（首个错误在第k步）。'
+    ans_formula: function_1(words, steps)
+    ans_text: "'No' if _ans == 0 else str(_ans)"
+    ans_assertion: "function_unique_check(words, steps, _ans) and ((eff_error['type'] == 'none' and _ans == 0) or (eff_error['type'] != 'none' and _ans == eff_error['index']))"
+
+desc: '你是单词排序专家。本题按字典序（a到z的小写字母）比较整词，逐字母决定先后，不考虑大小写、连字符或空格。中间步骤可能包含以下说明：1) 按第一个/第二个/最后一个字母的分组或子排序，仅比较对应位置的字母；2) 按类别分桶：元音开头优先于辅音开头，或[a..m]为前半区优先于[n..z]后半区，或首字母序号为素数优先于非素数；3) 按字母值和（a=1..z=26）模某个基数的非降序分桶。最终排序仍以完整字典序为准。请找出推理过程中的第一个错误步骤。问题：按字母顺序排列以下单词：{words_str} {steps_desc} 答案格式：若无错误输出No；否则仅输出整数k（首个错误在第k步）。 {q1}'

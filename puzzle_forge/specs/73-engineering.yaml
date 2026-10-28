@@ -1,0 +1,64 @@
+variables:
+  num_team:
+    type: int
+    domain: "[3, 4]"
+    diff_factor: 1
+  down_restrict:
+    type: int
+    domain: "[8, 12]"
+    diff_factor: 1
+  up_max_work_hour:
+    type: int
+    domain: "[60, 80]"
+    diff_factor: 0
+  down_max_work_hour:
+    type: int
+    domain: "[20, 30]"
+    diff_factor: 0
+  up_eng_time:
+    type: int
+    domain: "[110, 120]"
+    diff_factor: 1
+  down_eng_time:
+    type: int
+    domain: "[70, 90]"
+    diff_factor: 1
+  up_eng_time_first:
+    type: int
+    domain: "[150, 150]"
+    diff_factor: 0
+  down_eng_time_first:
+    type: int
+    domain: "[130, 130]"
+    diff_factor: 0
+  eng_time_list:
+    formula: "[randint(down_eng_time_first,up_eng_time_first)]+[randint(down_eng_time,up_eng_time) for _ in range(num_team-1)]"
+  max_work_list:
+    formula: "[randint(down_max_work_hour,up_max_work_hour) for _ in range(num_team)]"
+  team_names:
+    formula: generate_letters(num_team, 'cn')
+  total_work_hour:
+    formula: int(sum(eng_time_list)/len(eng_time_list))
+symbols:
+  work_times:
+    source:
+    - team_names
+    type: real
+conditions:
+  domain_work_time:
+    formula: And(And(work_times[x] >= down_restrict, work_times[x] <= max_work_list[i]) for i, x in enumerate(team_names))
+  cond_total_work_time:
+    formula: sum([work_times[x] for x in team_names]) <= total_work_hour
+  cond_alcohol_volume:
+    formula: sum([work_times[x]/eng_time_list[i] for i,x in enumerate(team_names)]) >= 1
+max_solution: 1
+optimize:
+  type: maximize
+  formula: work_times['甲']
+queries:
+  q1:
+    desc: 则{team_names[0]}最多工作多少小时？
+    ans_formula: get_value(_solutions, work_times)
+    ans_text: str(int(_ans[0]//1))
+    ans_assertion: 'True'
+desc: 已知{'、'.join(team_names)}共{num_team}个工程队单独完成某项工程分别需要{'、'.join(str(eng_time)+'小时' for eng_time in eng_time_list)}。现在，{'、'.join(team_name+'最多只能工作'+str(max_time)+'小时' for team_name, max_time in zip(team_names,max_work_list))}，{num_team}队工作总时长不能超过{total_work_hour}小时，注意每队都要工作，且每队工作时间不能小于{down_restrict}小时，{q1}

@@ -1,0 +1,138 @@
+custom_operator:
+  # 生成权重模式：列权重用于行和，行权重用于列和
+  gen_col_weights: kukurasu_0.py
+  gen_row_weights: kukurasu_0.py
+  # 逆向构造题目：随机生成唯一解网格与线索（行/列和与若干已知格），确保唯一性
+  build_instance: kukurasu_0.py
+
+variables:
+  # 网格尺寸（参数化范围，提升多样性与难度分层）
+  n:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+  # 随机权重模式（线性、奇数、平移等），用于生成更丰富的加权规则
+  weight_mode:
+    formula: "__import__('random').choice(['linear', 'odd', 'shift'])"
+
+  # 生成列权重（用于行加权和）
+  col_weights:
+    formula: gen_col_weights(n, weight_mode)
+
+  # 生成行权重（用于列加权和）
+  row_weights:
+    formula: gen_row_weights(n, weight_mode)
+
+  # 线索预算（最大提示数量，控制唯一性与难度的平衡）
+  hint_budget:
+    formula: "__import__('random').randint(max(1, n // 3), max(2, n // 2))"
+
+  # 逆向生成：给定尺寸与权重，随机产生唯一解、行/列和以及必要的提示
+  instance:
+    formula: build_instance(n, col_weights, row_weights, hint_budget)
+
+  # 从实例中提取行和、列和、标准解网格与提示列表
+  row_sums:
+    formula: instance['row_sums']
+  col_sums:
+    formula: instance['col_sums']
+  sol_grid:
+    formula: instance['sol_grid']  # [['1'/'X', ...], ...]
+  hints:
+    formula: instance['hints']     # [(i, j, v), ...], v in {0,1}
+  hint_num:
+    formula: len(hints)
+
+  # 行列索引（0-based）
+  rows:
+    formula: list(range(n))
+  cols:
+    formula: list(range(n))
+
+  # 为符号键准备字符串键（避免整数键拼接报错）
+  row_keys:
+    formula: "[f'r{i}' for i in range(n)]"
+  col_keys:
+    formula: "[f'c{j}' for j in range(n)]"
+
+  # 展示用空网格（题面中以X展示）
+  blank_grid:
+    formula: "[['X' for _ in range(n)] for __ in range(n)]"
+
+  # 题面渲染辅助（避免desc中包含复杂表达式导致解析错误）
+  input_block:
+    formula: "'\\n'.join(['  '.join(blank_grid[i]) + '  |  ' + str(row_sums[i]) for i in range(n)])"
+  col_line:
+    formula: "'  '.join([str(v) for v in col_sums])"
+  weight_desc_row:
+    formula: "'列权重（用于行加权和）: ' + ','.join([str(v) for v in col_weights])"
+  weight_desc_col:
+    formula: "'行权重（用于列加权和）: ' + ','.join([str(v) for v in row_weights])"
+  hint_lines:
+    formula: "['提示：第' + str(i + 1) + '行第' + str(j + 1) + '列为' + ('1' if v == 1 else 'X') for (i, j, v) in hints]"
+  hint_desc:
+    formula: "'\\n'.join(hint_lines) if hint_lines else '（无额外提示）'"
+
+symbols:
+  # 二维布尔符号：cell[(rk,ck)] = True 表示该单元填入“1”，False表示填“X”
+  cell:
+    source:
+    - row_keys
+    - col_keys
+    type: Bool
+    desc: "grid[{_row_keys}][{_col_keys}] is 1"
+
+conditions:
+  # 正宗 Kakurasu 约束（允许多格组合）：
+  # 行加权和：第 i 行每个“1”按其列权重 col_weights[j] 计入加权和，需等于 row_sums[i]
+  row_constraints:
+    formula: And([Sum([If(cell[(row_keys[i], col_keys[j])], col_weights[j], 0) for j in range(n)]) == row_sums[i] for i in range(n)])
+    desc: 每行的加权和必须匹配其约束
+
+  # 列加权和：第 j 列每个“1”按其行权重 row_weights[i] 计入加权和，需等于 col_sums[j]
+  col_constraints:
+    formula: And([Sum([If(cell[(row_keys[i], col_keys[j])], row_weights[i], 0) for i in range(n)]) == col_sums[j] for j in range(n)])
+    desc: 每列的加权和必须匹配其约束
+
+  # 线索提示（若存在），用以保障唯一性与难度控制：固定部分格为1或X
+  fixed_cells:
+    formula: And([cell[(row_keys[i], col_keys[j])] if v == 1 else Not(cell[(row_keys[i], col_keys[j])]) for (i, j, v) in hints]) if hint_num > 0 else True
+    desc: 若存在提示，则部分格已固定为1或X
+
+# 要求唯一解，以确保输出的网格确定且高质量
+max_solution: 1
+
+queries:
+  q1:
+    desc: 按照所有规则在网格中放置数字1。请以二维列表(列表的列表)输出完成的网格（1或X）。
+    # 依据唯一解，将布尔解映射为"1"/"X"的二维列表（显式使用唯一模型 _solutions[0]）
+    ans_formula: "[['1' if get_value(_solutions[0], cell[(row_keys[i], col_keys[j])]) else 'X' for j in range(n)] for i in range(n)]"
+    ans_text: str(_ans)
+
+desc: >
+  高质量 Kakurasu（加权求和）谜题生成器
+  - 尺寸：{n} x {n}
+  - 权重模式：{weight_mode}
+  - {weight_desc_row}
+  - {weight_desc_col}
+
+  规则：
+    1. 每个单元格填入“1”或“X”。
+    2. 行加权和的权重由列权重提供（上文所示 col_weights）。
+    3. 列加权和的权重由行权重提供（上文所示 row_weights）。
+    4. 每行/每列的加权和必须分别匹配其约束值。
+    5. 若题面给出提示（固定某些格为1或X），需遵循提示。
+
+  题面：
+  {input_block}
+  -----------------
+    {col_line}
+
+  行和 = {row_sums}
+  列和 = {col_sums}
+  {hint_desc}
+
+  任务：
+    - 在网格中合理放置“1”，使所有行、列加权和满足对应约束（以及提示）。
+    - 以二维列表（列表的列表）输出完成的网格。
+  {q1}

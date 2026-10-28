@@ -1,0 +1,56 @@
+custom_operator:
+  generate_complex_tents_puzzle: campsite_2.py
+  grid_to_str: campsite_2.py
+
+variables:
+  puzzle:
+    formula: generate_complex_tents_puzzle()
+
+  # ----------- 基礎參數 -----------
+  n_rows:
+    formula: "puzzle['n_rows']"
+  n_cols:
+    formula: "puzzle['n_cols']"
+  initial_grid:
+    formula: "puzzle['initial_grid']"
+  row_constraints:
+    formula: "puzzle['row_constraints']"
+  col_constraints:
+    formula: "puzzle['col_constraints']"
+  solution_grid:
+    formula: "puzzle['solution_grid']"
+
+  # ----------- 隨機規則 -----------
+  rule_exact:
+    formula: "puzzle['rule_exact']"
+  diag_prohibit:
+    formula: "puzzle['diag_prohibit']"
+  wind_dir:
+    formula: "puzzle['wind_dir']"
+  regions:
+    formula: "puzzle['regions']"
+  region_cons:
+    formula: "puzzle['region_cons']"
+
+  # ----------- 文本輔助 -----------
+  initial_grid_str:
+    formula: "'\\n'.join([' '.join(r) for r in initial_grid])"
+  rule_sentence_tree:
+    formula: "'每棵樹必須正交相鄰一頂帳篷' if rule_exact else '每棵樹正交相鄰的帳篷數不得超過 1'"
+  rule_sentence_tent_touch:
+    formula: "'任兩帳篷不可相鄰, 包括對角方向' if diag_prohibit else '任兩帳篷不可正交相鄰 (對角方向可以)'"
+  wind_sentence:
+    formula: "'風向為 ' + wind_dir + ', 帳篷不得放在樹的迎風側 (N:北側, S:南側, W:西側, E:東側)'"
+  region_sentence:
+    formula: "\"; \".join([f'區域{chr(65+i)}(第{r[0]+1}-{r[1]+1}行) 需放置 {region_cons[i]} 頂帳篷' for i, r in enumerate(regions)])"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '請根據上述規則完成棋盤配置, 並以 [[行1],[行2],...]] 的格式輸出最終網格 (T 表樹, C 表帳篷, X 表空地)。'
+    ans_formula: solution_grid
+    ans_text: "grid_to_str(solution_grid)"
+    ans_assertion: 'True'
+
+desc: '營地謎題：棋盤大小 {n_rows}×{n_cols}. 行列均以 1 起始。樹木用 T 表示, 空地用 X 表示。\n初始棋盤:\n{initial_grid_str}\n行約束:{row_constraints}, 列約束:{col_constraints}. 額外規則:(1) 每頂帳篷必須正交相鄰且僅相鄰一棵樹; (2) {rule_sentence_tree}; (3) {rule_sentence_tent_touch}; (4) {wind_sentence}; (5) {region_sentence}; (6) 帳篷總數必須等於樹木總數。\n請在棋盤上放置帳篷 C, 並輸出最終棋盤列表, 例如 [[T,C,X],...].'

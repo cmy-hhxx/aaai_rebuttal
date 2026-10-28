@@ -1,0 +1,87 @@
+variables:
+  # 物品总数（固定为20；采用正向随机生成属性与类型，随后按规则变换并计数）
+  item_num:
+    type: int
+    domain: "[20, 20]"
+
+  # 随机生成初始属性列表（确保至少包含：1个玻璃、1个葡萄牙、1个超超小）
+  attrs:
+    formula: gen_attributes(item_num)
+
+  # 将随机生成的属性字典拆分为并行列表，便于描述与构建
+  sizes:
+    formula: attrs['sizes']
+  origins:
+    formula: attrs['origins']
+  materials:
+    formula: attrs['materials']
+  smells:
+    formula: attrs['smells']
+  types:
+    formula: attrs['types']
+
+  # 初始颜色：前7个金色，接下2个黄色，接下其余为黑色
+  colors0:
+    formula: "['金色'] * 7 + ['黄色'] * 2 + ['黑色'] * (item_num - 9)"
+
+  # 便于题面描述的初始条目自然语言列表
+  item_desc_list:
+    formula: "['一个' + sizes[i] + '尺寸的' + origins[i] + '产的由' + materials[i] + '制成的散发' + smells[i] + '气味的' + types[i] for i in range(item_num)]"
+
+  # 组装初始收藏（列表，每件是字典）
+  coll0:
+    formula: build_collection(sizes, origins, materials, smells, types, colors0)
+
+  # 变更步骤1：所有“玻璃” -> 颜色改为金色，气味改为香草
+  coll1:
+    formula: transform_glass(coll0)
+
+  # 变更步骤2：所有“产地=葡萄牙”的物品 -> 尺寸改为“超大”，材质改为“布”（其余属性保持不变）
+  coll2:
+    formula: swap_portugal(coll1)
+
+  # 变更步骤3：所有“尺寸=超超小”的物品，添加两个副本（原件保留）：
+  #   - 副本A：仅将尺寸改为“小”
+  #   - 副本B：仅将颜色改为“米色”
+  coll3:
+    formula: duplicate_xxs_keep_original(coll2)
+
+  # 目标计数：满足以下任一属性的物品数量：
+  #   材质=陶瓷 或 尺寸=超小 或 颜色=米色 或 气味=大蒜 或 产地=俄罗斯
+  final_count:
+    formula: count_target(coll3)
+
+symbols: {}
+
+conditions: {}
+
+# 该题采用正向：随机生成输入 -> 按规则变换 -> 计算答案；无需SMT
+calc_solution: false
+
+queries:
+  q1:
+    desc: "在我当前的收藏中，有多少物品具有以下属性：材质是陶瓷或尺寸是超小或颜色是米色或气味是大蒜或产地是俄罗斯？"
+    ans_formula: final_count
+    ans_text: str(_ans)
+    # 唯一性：对给定输入，解法确定且唯一（确定性统计），因此恒为True
+    ans_assertion: 'True'
+
+# 题面描述：完整呈现随机生成的初始清单、颜色规则与三次变更，然后提出问题
+desc: |
+  我正在研究一个需要精确跟踪物品及其变化属性的逻辑问题。
+  我有一个包含{item_num}个奇怪物品的收藏，经历了几次变化。最初，我有以下物品：
+  {('；'.join(item_desc_list))}。
+  这些物品的颜色依次如下：前七个是金色，接下来的两个是黄色，接下来的{item_num - 9}个是黑色。
+  然后，对于我新收藏中所有由玻璃制成的物品，我哥哥将它们的颜色改为金色，气味改为香草。
+  然后，我阿姨用同等数量的尺寸为超大、材质为布的物品，交换了我收藏中所有葡萄牙产地的物品（其它属性保持不变）。
+  然后，我阿姨用两个副本替换了我新收藏中所有尺寸为超超小的物品（原件保留）：一个副本尺寸变为小，另一个副本颜色变为米色。
+
+  我的问题是：
+  {q1}
+custom_operator:
+  gen_attributes: customs/object_properties_0.py
+  build_collection: customs/object_properties_0.py
+  transform_glass: customs/object_properties_0.py
+  swap_portugal: customs/object_properties_0.py
+  duplicate_xxs_keep_original: customs/object_properties_0.py
+  count_target: customs/object_properties_0.py

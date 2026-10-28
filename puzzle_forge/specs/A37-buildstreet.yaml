@@ -1,0 +1,23 @@
+custom_operator: 
+    minBuildTime: customs/buildstreet.py
+variables:
+  split: 
+    type: int
+    domain: "[1, 50]"
+    diff_factor: 1
+  num_block: 
+    type: int
+    domain: "[1, 100]"
+    diff_factor: 1
+  input_blocks:
+    formula: "[random.randint(1, 1000) for _ in range(num_block)]"
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 建造开始时只有一个工人，各个街区建造时间 block={str(input_blocks)}，请问完成所有街区建造所需的最小时间为？
+    ans_formula: minBuildTime(input_blocks,split)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 你是个城市规划工作者，手里负责管辖一系列的街区。在这个街区列表中 input_blocks[i] = t 意味着第 i 个街区需要 t 个单位的时间来建造。一个街区只能由一个工人来完成建造，且每个工人完成建造后就回家，最多建造一个街区。对于多个街区的建造，只能召唤其余工人一起建造，一个工人一次只能召唤一个工人，且召唤一个工人需要花费额外 {split} 时间（在召唤工人期间无法建造街区）。注意：如果两/多个工人同时召唤别的工人，那么他们的行为是并行的，时间花费仍然是 {split}。{q1}

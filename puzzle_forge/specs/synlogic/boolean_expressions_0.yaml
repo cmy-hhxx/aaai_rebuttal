@@ -1,0 +1,39 @@
+custom_operator:
+  function_1: customs/boolean_expressions_0.py
+  # 注册 function_2 实际上是为了能调用文件里的其他函数
+  function_2: customs/boolean_expressions_0.py
+  reset_and_get: customs/boolean_expressions_0.py
+
+variables:
+  title:
+    formula: "'以下是一个关于逻辑运算的问题：'"
+  
+  # 【关键修改】调用 reset_and_get()，不传参数。
+  # 1. 避免了 unexpected keyword argument 错误
+  # 2. 明确强制刷新题目
+  expr_A_text:
+    formula: reset_and_get()['A_text']
+  
+  # 后续保持调用 function_1() 读取缓存
+  expr_B_text:
+    formula: function_1()['B_text']
+  expr_C_text:
+    formula: function_1()['C_text']
+  expr_D_text:
+    formula: function_1()['D_text']
+  
+  tail_question:
+    formula: "'哪些选项的表达式值为真？请列出所有为真的选项标识，用逗号分隔。'"
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "{tail_question}"
+    ans_formula: function_2(function_1())
+    ans_text: _ans
+    ans_assertion: "len(function_1()['ans_list']) >= 1 and len(function_1()['ans_list']) < 4"
+
+desc: "{title}\n\n请评估以下布尔表达式，选择其中为真（True）的选项：\n\n{expr_A_text}\n{expr_B_text}\n{expr_C_text}\n{expr_D_text}\n\n{q1}"

@@ -1,0 +1,58 @@
+custom_operator:
+  # 所有函数均在同一文件 word_sorting_mistake_0.py 中
+  make_words: customs/word_sorting_mistake_0.py
+  make_thoughts: customs/word_sorting_mistake_0.py
+  check_first_error: customs/word_sorting_mistake_0.py
+
+variables:
+  # 随机种子（用于可复现生成）
+  seed:
+    type: int
+    domain: "[1, 1000000]"
+
+  # 随机生成单词数量（8-12个）
+  word_num:
+    type: int
+    domain: "[8, 15]"
+    diff_factor: 1
+
+  # 错误类型（当 has_error 为 False 时，设为 none）
+  error_type:
+    formula: "random.choice(['none', 'not_in_list', 'misorder', 'omission', 'duplicate', 'case_misunderstanding'])"
+
+  # 首个错误发生的步骤（插入排序从第2步开始，若无错误则设为0）
+  err_step:
+    formula: "random.randint(2, word_num - 1) if error_type != 'none' else 0"
+
+  # 生成更自然的英文单词，含大小写混合与相似前缀（提高难度与真实性）
+  words:
+    formula: make_words(word_num, seed)
+
+  # 模拟插入排序的真实推理步骤，并在指定 err_step 按 error_type 注入错误（或无错误）
+  thoughts:
+    formula: make_thoughts(words, error_type, err_step, seed)
+
+  # 展示用的单词拼接串
+  words_str:
+    formula: "' '.join(words)"
+
+  # 展示用的思考拼接串（换行）
+  thoughts_str:
+    formula: "'\\n'.join(thoughts)"
+
+  # 期望答案（用于断言唯一性）：无错误时为字符串 No，有错误时为具体步骤号
+  expected_ans:
+    formula: "err_step if error_type != 'none' else 'No'"
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "这个排序过程中有错误吗？如果没有错误，请回答No；如果有错误，请写出第一个错误出现在第几个思考步骤,回答数字序号即可。"
+    ans_formula: check_first_error(words, thoughts)
+    ans_text: "str(_ans)"
+    ans_assertion: "str(_ans) == str(expected_ans)"
+
+desc: "你是单词排序专家。你将获得一个单词列表和以思考形式呈现的排序步骤，这些步骤试图将单词按字母顺序排列。你的任务是找出推理过程中的第一个错误步骤。错误可能包括对字母表顺序的误解、错误理解单词或字母，或遗漏或重复某个单词。问题：按字母顺序排列以下单词：{words_str}\n下面是排序的逐步思考（采用插入排序的推理表达，每步包含已排序子序列、待插入单词、计划位置与结果）：\n{thoughts_str}\n{q1}"

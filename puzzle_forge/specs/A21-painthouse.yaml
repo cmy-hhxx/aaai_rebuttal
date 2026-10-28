@@ -1,0 +1,26 @@
+custom_operator: 
+    # generate_cost: customs/painthouse.py
+    minCostII: customs/painthouse.py
+variables:
+  num_houses: 
+    type: int
+    domain: "[2, 20]"
+    diff_factor: 1
+  num_colors: 
+    type: int
+    domain: "[2, 10]"
+    diff_factor: 1
+  # color_names:
+  #   formula: get_faker(num_colors,'color')
+  costs: 
+    formula: "[[random.randint(1, 20) for _ in range(num_colors)] for _ in range(num_houses)]"
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请问粉刷完所有房子的最低成本是多少？
+    ans_formula: minCostII(costs)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 假如有一排房子共有{num_houses}幢，每个房子可以被粉刷成{num_colors}种颜色中的一种。房子粉刷成不同颜色的花费成本也是不同的。你需要粉刷所有的房子并且使其相邻的两个房子颜色不能相同。每个房子粉刷成不同颜色的花费以一个 {num_houses} x {num_colors} 的矩阵costs表示。例如，costs[0][0] 表示第 0 幢房子粉刷成 0 号颜色的成本；costs[1][2] 表示第 1 幢房子粉刷成 2 号颜色的成本，以此类推。若成本矩阵costs为{str(costs)}，{q1}

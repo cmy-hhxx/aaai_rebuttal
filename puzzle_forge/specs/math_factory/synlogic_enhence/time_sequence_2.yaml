@@ -1,0 +1,106 @@
+# -----------------------------
+# 自定义操作符 引入外部Python函数
+# -----------------------------
+custom_operator:
+  make_instance: time_sequence_2.py
+  compute_max_meeting: time_sequence_2.py
+  format_schedules_text: time_sequence_2.py
+  validate_instance: time_sequence_2.py
+  rand_work_windows: time_sequence_2.py
+
+# -----------------------------
+# 随机变量定义
+# -----------------------------
+variables:
+  # 工作日全集
+  weekdays_base:
+    formula: "['Mon', 'Tue', 'Wed', 'Thu', 'Fri']"
+
+  # 本题使用的天数
+  days_num:
+    type: int
+    domain: "[3, 5]"
+    diff_factor: 1
+
+  # 实际使用的工作日 子集 且按原顺序排序
+  days:
+    formula: "sorted(__import__('random').sample(weekdays_base, days_num), key=weekdays_base.index)"
+
+  # 起始时间粒度 分钟
+  granularity:
+    formula: "[10, 15, 20, 30, 60][__import__('random').randint(0, 4)]"
+    diff_factor: -1
+
+  # 候选起点计数策略
+  candidate_policy:
+    formula: "['ceil_left', 'all_grid', 'midpoint'][__import__('random').randint(0, 2)]"
+
+  # 参与者人数
+  participants_num:
+    type: int
+    domain: "[3, 6]"
+    diff_factor: 1
+
+  # 必到参与者人数
+  required_num:
+    type: int
+    domain: "[1, participants_num - 1]"
+    diff_factor: 1
+
+  # 最少参会总人数阈值
+  min_total:
+    type: int
+    domain: "[required_num + 1, participants_num]"
+    diff_factor: 1
+
+  # 每天的工作时间窗口 字典 day -> (start, end)
+  work_windows:
+    formula: "rand_work_windows(days)"
+
+  # 生成实例 姓名 与 个人日程 与 角色
+  instance:
+    formula: "make_instance(participants_num, days, work_windows, granularity, candidate_policy, required_num, min_total)"
+
+  # 姓名列表
+  names:
+    formula: "instance['names']"
+
+  # 必到名单
+  required_names:
+    formula: "instance['required']"
+
+  # 可选名单
+  optional_names:
+    formula: "instance['optional']"
+
+  # 日程映射 姓名 -> 每日 free 或 busy 列表
+  schedules:
+    formula: "instance['schedules']"
+
+  # 规则中文解释文本 供题面渲染
+  policy_text:
+    formula: "('每个共同空闲区间仅统计一个候选起点 为将该区间左端点按粒度向上取整 若不小于右端点则该区间无候选' if candidate_policy == 'ceil_left' else ('每个共同空闲区间内统计所有与粒度对齐且落在区间内的起点 对每个起点自该时刻起连续向右延伸 直至到达该共同空闲区间右端或可选覆盖人数不足的首个时刻 取较早者为终点 以此得到该起点的可达时长' if candidate_policy == 'all_grid' else '每个共同空闲区间仅统计一个候选起点 为该区间中点按粒度四舍五入到最近时间 若该时间不落入区间内则向内侧调整到最近可行起点 中点与两侧等距时取靠前时间'))"
+
+  # 题面友好文本
+  schedule_text:
+    formula: "format_schedules_text(names, schedules, days, work_windows, granularity, candidate_policy, required_names, min_total)"
+
+# -----------------------------
+# 不进行Z3求解 直接计算模式
+# -----------------------------
+calc_solution: false
+
+# -----------------------------
+# 提问与答案
+# -----------------------------
+queries:
+  q1:
+    desc: '请按格式给出答案 形如[最长分钟数, 选项数, 日编号] 日编号按1开始 对应上方工作日顺序 示例[120, 2, 3]'
+    ans_formula: 'compute_max_meeting(schedules, days, work_windows, granularity, candidate_policy, required_names, min_total)'
+    ans_text: "str(_ans)"
+    ans_assertion: 'validate_instance(schedules, days, work_windows, granularity, candidate_policy, required_names, min_total) and isinstance(_ans, list) and len(_ans) == 3 and isinstance(_ans[0], int) and _ans[0] > 0 and isinstance(_ans[1], int) and _ans[1] >= 1 and isinstance(_ans[2], int) and 1 <= _ans[2] <= len(days)'
+
+# -----------------------------
+# 题面描述
+# -----------------------------
+desc: '有若干位参与者需要在指定的工作日共同安排一次会议 会议必须完全落在各自当天的工作时间窗口内 起始时间必须按{granularity}分钟粒度对齐 候选起点规则为 {policy_text} 本题设定角色与人数阈值 所有标注为必到的参与者必须全程在场 且会议的总参会人数不少于{min_total}人 可选参与者可自由选择是否出席 只要满足人数阈值即可 共同空闲区间指在同一工作日内全部必到参与者于该日工作时间窗口内的共同空闲交集 候选起点仅在这些共同空闲区间内产生 对于每个候选起点 自该起点起连续向右延伸 在不超过共同空闲区间右端的范围内 以可选覆盖人数不足的首个时刻为终点 该起点的可达时长为起点到终点的时长 期间需满足全部必到者始终空闲 且可选参与者中同时空闲的人数足以使总在场人数不少于{min_total}人 全局最长会议时长定义为在全部工作日与候选起点中可达时长的最大值 选项数定义为在达到该全局最长时长的唯一工作日内能达到该时长的候选起点个数 题目保证达到全局最长时长的工作日唯一 所有时间单位均为分钟 时段采用左闭右开约定 下为全部参与者在所选工作日内的空闲与忙碌信息及每日工作时间窗口 与必到与可选名单 以及空闲忙碌记法说明 请据此求解 答案格式为[最长分钟数, 选项数, 日编号] 日编号按1开始 对应上方工作日顺序 示例[120, 2, 3]\n{schedule_text}\n{q1}'

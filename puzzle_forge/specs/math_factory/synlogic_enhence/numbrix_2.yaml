@@ -1,0 +1,228 @@
+# =========================
+# 可参数化 Numbrix 生成框架（逆向生成：先解完整路径 -> 选取线索/规则 -> 再验证唯一解）
+# 扩展：方向线索、行和提示、单调提示、棋盘奇偶约束、段方向提示、区域和提示、拐点提示
+# 使用 Z3 符号求解模式，post_generation 提取完整解并固化规则，保证唯一性与高阶推理
+# =========================
+
+# -------------------------
+# 自定义算子（必须在 numbrix_2.py 中定义）
+# -------------------------
+custom_operator:
+  build_neighbors: numbrix_2.py
+  choose_anchors: numbrix_2.py
+  clue_bounds_min: numbrix_2.py
+  clue_bounds_max: numbrix_2.py
+  adj_pair_cap: numbrix_2.py
+  choose_clue_positions: numbrix_2.py
+  dir_bounds_min: numbrix_2.py
+  dir_bounds_max: numbrix_2.py
+  choose_direction_clues: numbrix_2.py
+  expand_dir_clues: numbrix_2.py
+  row_bounds_min: numbrix_2.py
+  row_bounds_max: numbrix_2.py
+  choose_row_sums: numbrix_2.py
+  monotonic_cap: numbrix_2.py
+  choose_monotonic_lines: numbrix_2.py
+  decide_parity_enable: numbrix_2.py
+  seg_bounds_min: numbrix_2.py
+  seg_bounds_max: numbrix_2.py
+  seg_len_min: numbrix_2.py
+  seg_len_max: numbrix_2.py
+  choose_orient_segments: numbrix_2.py
+  region_bounds_max: numbrix_2.py
+  choose_region_sums: numbrix_2.py
+  turn_bounds_max: numbrix_2.py
+  choose_turn_hints: numbrix_2.py
+  # 约束构造器（替换 YAML 超长内联表达式，避免括号错配）
+  build_core_adjacency: numbrix_2.py
+  build_parity_core: numbrix_2.py
+  build_parity_lock: numbrix_2.py
+  build_dir_constraints: numbrix_2.py
+  build_row_sum_constraints: numbrix_2.py
+  build_monotone_constraints: numbrix_2.py
+  build_segment_constraints_row: numbrix_2.py
+  build_segment_constraints_col: numbrix_2.py
+  build_region_sum_constraints: numbrix_2.py
+  build_turn_constraints: numbrix_2.py
+
+# -------------------------
+# 变量定义（全部参数化，无硬编码）
+# -------------------------
+variables:
+  size:
+    type: int
+    domain: "[5, 7]"
+    diff_factor: 1
+  n:
+    formula: "size * size"
+    diff_factor: 1
+  rows:
+    formula: "list(range(size))"
+    diff_factor: 0
+  cols:
+    formula: "list(range(size))"
+    diff_factor: 0
+  rows_key:
+    formula: "[str(i) for i in rows]"
+    diff_factor: 0
+  cols_key:
+    formula: "[str(j) for j in cols]"
+    diff_factor: 0
+  neighbors:
+    formula: "build_neighbors(size)"
+    diff_factor: 0
+  anchor_num:
+    type: int
+    domain: "[1, 1]"
+    diff_factor: 0
+  anchor_triples:
+    formula: "choose_anchors(size, n, anchor_num)"
+    diff_factor: 0
+  min_clues:
+    formula: "clue_bounds_min(size)"
+    diff_factor: -1
+  max_clues:
+    formula: "clue_bounds_max(size)"
+    diff_factor: -1
+  max_adj_pair:
+    formula: "adj_pair_cap(size)"
+    diff_factor: 0
+  min_dir_clues:
+    formula: "dir_bounds_min(size)"
+    diff_factor: 0
+  max_dir_clues:
+    formula: "dir_bounds_max(size)"
+    diff_factor: 0
+  min_row_hints:
+    formula: "row_bounds_min(size)"
+    diff_factor: 0
+  max_row_hints:
+    formula: "row_bounds_max(size)"
+    diff_factor: 0
+  max_mono_hints:
+    formula: "monotonic_cap(size)"
+    diff_factor: 0
+  parity_on:
+    formula: "decide_parity_enable(size)"
+    diff_factor: 0
+  min_seg_hints:
+    formula: "seg_bounds_min(size)"
+    diff_factor: 0
+  max_seg_hints:
+    formula: "seg_bounds_max(size)"
+    diff_factor: 0
+  min_seg_len:
+    formula: "seg_len_min(size)"
+    diff_factor: 0
+  max_seg_len:
+    formula: "seg_len_max(size)"
+    diff_factor: 0
+  max_region_hints:
+    formula: "region_bounds_max(size)"
+    diff_factor: 0
+  max_turn_hints:
+    formula: "turn_bounds_max(size)"
+    diff_factor: 0
+  ans_example:
+    formula: "[[i * size + j + 1 for j in range(size)] for i in range(size)]"
+    diff_factor: 0
+
+# -------------------------
+# 符号定义（每个格子一个整数属性 value）
+# -------------------------
+symbols:
+  cells_s:
+    source:
+    - rows_key
+    - cols_key
+    attr:
+    - value
+    type:
+    - int
+    desc:
+    - 'Cell ({_rows_key},{_cols_key}) contains an integer in [1..{n}]'
+
+# -------------------------
+# 约束条件（第一阶段：生成一条完整路径解）
+# -------------------------
+conditions:
+  value_domain:
+    formula: "And([And(v >= 1, v <= n) for v in cells_s.get('value')])"
+    desc: 'Each cell value is between 1 and {n} inclusive'
+  all_distinct:
+    formula: "Distinct(cells_s.get('value'))"
+    desc: 'All cell values are pairwise distinct'
+  consecutive_adjacency:
+    formula: "build_core_adjacency(size, n, neighbors, cells_s)"
+    desc: 'For any cell not holding n, one of its orthogonal neighbors holds exactly its value+1'
+  anchor_fix:
+    formula: "And([cells_s[(str(i), str(j))].get('value') == v for (i, j, v) in anchor_triples])"
+    desc: 'A few anchor values are fixed to break symmetry (1 is fixed at a corner)'
+  parity_core:
+    formula: "build_parity_core(size, parity_on, anchor_triples, cells_s)"
+    desc: 'Chessboard parity pruning when enabled'
+
+# -------------------------
+# 后生成步骤：提取完整答案并固化线索与扩展规则
+# -------------------------
+post_generation:
+  post_gen_vars:
+    ans_grid: '[[get_value(_sol, cells_s[(str(i), str(j))].get("value")) for j in range(size)] for i in range(size)]'
+    clue_pos: "choose_clue_positions(size, ans_grid, min_clues, max_clues, max_adj_pair)"
+    clues: "[(i, j, ans_grid[i][j]) for (i, j) in clue_pos]"
+    given_count: "len(clue_pos)"
+    start_parity: "(anchor_triples[0][0] + anchor_triples[0][1]) % 2"
+    dir_clues: "choose_direction_clues(size, ans_grid, min_dir_clues, max_dir_clues)"
+    dir_vecs: "expand_dir_clues(dir_clues)"
+    row_hints: "choose_row_sums(size, ans_grid, min_row_hints, max_row_hints)"
+    mono_hints: "choose_monotonic_lines(size, ans_grid, max_mono_hints)"
+    seg_hints: "choose_orient_segments(size, ans_grid, min_seg_hints, max_seg_hints, min_seg_len, max_seg_len)"
+    region_hints: "choose_region_sums(size, ans_grid, max_region_hints)"
+    turn_hints: "choose_turn_hints(size, ans_grid, max_turn_hints)"
+    parity_desc: "('棋盘奇偶约束已启用：以数值 1 的位置为起点进行双色标记（黑格填奇数、白格填偶数）。' if parity_on else '本题未启用棋盘奇偶约束。')"
+  post_gen_conditions:
+    fixed_clues:
+      formula: 'And([cells_s[(str(c[0]), str(c[1]))].get("value") == c[2] for c in clues])'
+      desc: 'Pre-filled clue cells match their given numbers'
+    dir_constraints:
+      formula: "build_dir_constraints(size, dir_vecs, cells_s)"
+      desc: 'Directional successor constraints for selected values'
+    row_sum_constraints:
+      formula: "build_row_sum_constraints(size, row_hints, cells_s)"
+      desc: 'Row-sum hints must hold'
+    monotone_constraints:
+      formula: "build_monotone_constraints(size, mono_hints, cells_s)"
+      desc: 'Monotonicity hints along rows or columns'
+    parity_constraints:
+      formula: "(build_parity_lock(size, start_parity, cells_s) if parity_on else True)"
+      desc: 'Chessboard parity constraint when enabled'
+    segment_orientation_constraints:
+      formula: "build_segment_constraints_row(size, seg_hints, cells_s)"
+      desc: 'Segment orientation hints (horizontal segments)'
+    segment_orientation_constraints_v:
+      formula: "build_segment_constraints_col(size, seg_hints, cells_s)"
+      desc: 'Segment orientation hints (vertical segments)'
+    region_sum_constraints:
+      formula: "build_region_sum_constraints(region_hints, cells_s)"
+      desc: 'Region sum hints over small rectangles'
+    turn_constraints:
+      formula: "build_turn_constraints(size, turn_hints, cells_s)"
+      desc: 'Turn hints enforce perpendicular adjacency of v-1 and v+1'
+
+# -------------------------
+# 查询（输出完整网格；唯一性断言确保题目唯一解）
+# -------------------------
+queries:
+  q1:
+    desc: '请根据给定的线索与规则填满一个 {size}×{size} 的 Numbrix 网格。基础规则：在网格中填入 1..{n}，每个数字恰好出现一次；对任意 k ∈ [1..{n}-1]，k 与 k+1 必须在正交方向上相邻。坐标为零基 (行,列)。为了打破对称，数值 1 已固定在某个角上。已给出线索数量为 {given_count}，线索零基坐标三元组列表 (i,j,v)：{clues}。附加规则：方向线索列表 [(v,dir)] 形式 {dir_clues}（v+1 在 v 的指定方向紧邻格；U=上、D=下、L=左、R=右）；行和提示列表 [(row,sum)] 形式 {row_hints}；单调提示列表 [(kind,idx,dir)] 形式 {mono_hints}（kind=row/col，dir=inc/dec 分别表示严格单调递增/严格单调递减）；段方向提示列表 [(start,end,ori)] 形式 {seg_hints}（[start..end] 内每一步遵循 ori，其中 row=水平、col=竖直）；区域和提示列表 [(i0,j0,h,w,sum)] 形式 {region_hints}（以 (i0,j0) 为左上角、大小为 h×w 的小矩形和为 sum）；拐点提示列表 [v] 形式 {turn_hints}（1<v<{n} 时，v 为方向改变点）。{parity_desc}请输出完整网格，答案格式为 Python 二维列表（{size} 行，每行 {size} 个整数），例如：{ans_example}。'
+    ans_formula: "[[get_value(_solutions[0], cells_s[(str(i), str(j))].get('value')) for j in range(size)] for i in range(size)]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+# -------------------------
+# 计算解、唯一性早停与整体题面描述
+# -------------------------
+calc_solution: true
+max_solution: 2
+
+desc: '这是一个可变规模的 Numbrix 谜题：网格大小为 {size}×{size}（共 {n} 个格子）。基础规则：填入 1..{n} 且每个数字唯一；任意相邻数 k 与 k+1 必须正交相邻；坐标采用零基 (行,列)。锚点：数值 1 已固定在某个角上（用于打破对称）。已给出线索三元组列表 (i,j,v)：{clues}。附加规则如下：方向线索 {dir_clues}（v+1 在 v 的指定方向：U=上、D=下、L=左、R=右）；行和提示 {row_hints}；单调提示 {mono_hints}（inc/dec 表示严格递增/严格递减）；段方向提示 {seg_hints}（[start..end] 内每一步遵循 ori，其中 row=水平、col=竖直）；区域和提示 {region_hints}；拐点提示 {turn_hints}（对 1<v<{n}，v 是方向改变点）；{parity_desc}请按 Python 二维列表输出答案，示例：{ans_example}。\n{q1}'

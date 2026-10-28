@@ -1,0 +1,119 @@
+# =================================================================
+# 自定义操作符：引用外部Python文件中的函数（文件名与问题名一致）
+# =================================================================
+custom_operator:
+  compute_available_clothes: object_counting_2.py
+  compute_available_vehicles: object_counting_2.py
+  compute_diff: object_counting_2.py
+  compute_ratio: object_counting_2.py
+  compute_totals_list: object_counting_2.py
+  validate_instance: object_counting_2.py
+  compute_thr_vehicle: object_counting_2.py
+  compute_thr_clothes: object_counting_2.py
+  compute_wh_cap: object_counting_2.py
+  clothes_rule_name: object_counting_2.py
+  vehicles_rule_name: object_counting_2.py
+
+# =================================================================
+# 问题参数（随机化）；至少一个变量包含diff_factor用于难度评估
+# =================================================================
+variables:
+  # 服装入库基础数量
+  tops_in:
+    formula: 'randint(60, 240)'
+    diff_factor: 1
+  pants_in:
+    formula: 'randint(40, 220)'
+  shoes_in:
+    formula: 'randint(30, 180)'
+
+  # 服装可选调整项
+  shoes_returned:
+    formula: 'randint(0, shoes_in // 2)'
+  shoes_damaged:
+    formula: 'randint(0, shoes_in // 3)'
+  tops_borrowed:
+    formula: 'randint(0, tops_in // 2)'
+  pants_reserved:
+    formula: 'randint(0, pants_in // 2)'
+
+  # 车辆采购基础数量
+  vans_bought:
+    formula: 'randint(6, 30)'
+  suv_bought:
+    formula: 'randint(8, 40)'
+  sedan_bought:
+    formula: 'randint(10, 50)'
+
+  # 车辆可选调整项
+  sedan_borrowed:
+    formula: 'randint(0, sedan_bought // 3)'
+    diff_factor: -1
+  suv_scrapped:
+    formula: 'randint(0, suv_bought // 3)'
+  vans_borrowed_var:
+    formula: 'randint(0, vans_bought // 2)'
+
+  # 抽样的规则代码（服装与车辆）
+  clothes_rule_code:
+    formula: 'randint(0, 3)'
+    diff_factor: 1
+  vehicles_rule_code:
+    formula: 'randint(0, 2)'
+
+  # 规则中文名称
+  clothes_rule_text:
+    formula: 'clothes_rule_name(clothes_rule_code)'
+  vehicles_rule_text:
+    formula: 'vehicles_rule_name(vehicles_rule_code)'
+
+  # 为题面展示的具体数量说明文本（车辆可能含两项）
+  clothes_adjust_value:
+    formula: 'shoes_returned if clothes_rule_code == 0 else (shoes_damaged if clothes_rule_code == 1 else (tops_borrowed if clothes_rule_code == 2 else pants_reserved))'
+  vehicles_adjust_text:
+    formula: "['报废' + str(suv_scrapped) + '辆SUV，借出' + str(sedan_borrowed) + '辆轿车','借出' + str(vans_borrowed_var) + '辆厢式车','借出' + str(sedan_borrowed) + '辆轿车，与报废' + str(suv_scrapped) + '辆SUV'][vehicles_rule_code]"
+
+  # 阈值与仓储上限（用于题面给定具体数值）
+  thr_vehicle_value:
+    formula: 'compute_thr_vehicle(vans_bought, suv_bought, sedan_bought)'
+  thr_clothes_value:
+    formula: 'compute_thr_clothes(tops_in, pants_in, shoes_in)'
+  wh_cap_value:
+    formula: 'compute_wh_cap(tops_in, pants_in, shoes_in, vans_bought, suv_bought, sedan_bought)'
+
+  # 安全复核提示文本
+  safety_review_text:
+    formula: "('已触发车辆安全复核额外停运1辆SUV' if (vehicles_rule_code in [0,2] and suv_scrapped > 0) else '本期未触发车辆安全复核')"
+
+# =================================================================
+# 直接计算模式：不使用Z3
+# =================================================================
+calc_solution: false
+
+# =================================================================
+# 三个问答：绝对差、服装占比、两类可用件数二元组
+# =================================================================
+queries:
+  # 问题1：两类数量差的绝对值
+  q1:
+    desc: '问题一 当前可用的服装与车辆件数的差的绝对值是多少请以整数形式给出例如 12'
+    ans_formula: compute_diff(tops_in, pants_in, shoes_in, shoes_returned, vans_bought, suv_bought, sedan_bought, sedan_borrowed, suv_scrapped, clothes_rule_code, tops_borrowed, pants_reserved, shoes_damaged, vehicles_rule_code, vans_borrowed_var)
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_instance(tops_in, pants_in, shoes_in, shoes_returned, vans_bought, suv_bought, sedan_bought, sedan_borrowed, suv_scrapped, clothes_rule_code, tops_borrowed, pants_reserved, shoes_damaged, vehicles_rule_code, vans_borrowed_var)'
+  # 问题2：服装占比（最简分数）
+  q2:
+    desc: '问题二 服装占比即服装数量与服装加车辆总数之比是多少请以最简分数字符串形式给出例如 2/5'
+    ans_formula: compute_ratio(tops_in, pants_in, shoes_in, shoes_returned, vans_bought, suv_bought, sedan_bought, sedan_borrowed, suv_scrapped, clothes_rule_code, tops_borrowed, pants_reserved, shoes_damaged, vehicles_rule_code, vans_borrowed_var)
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_instance(tops_in, pants_in, shoes_in, shoes_returned, vans_bought, suv_bought, sedan_bought, sedan_borrowed, suv_scrapped, clothes_rule_code, tops_borrowed, pants_reserved, shoes_damaged, vehicles_rule_code, vans_borrowed_var)'
+  # 问题3：分别给出目前可用的服装与车辆件数二元组
+  q3:
+    desc: '问题三 分别给出目前可用的服装与车辆件数请以Python元组形式按顺序输出例如 (132, 27)'
+    ans_formula: compute_totals_list(tops_in, pants_in, shoes_in, shoes_returned, vans_bought, suv_bought, sedan_bought, sedan_borrowed, suv_scrapped, clothes_rule_code, tops_borrowed, pants_reserved, shoes_damaged, vehicles_rule_code, vans_borrowed_var)
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_instance(tops_in, pants_in, shoes_in, shoes_returned, vans_bought, suv_bought, sedan_bought, sedan_borrowed, suv_scrapped, clothes_rule_code, tops_borrowed, pants_reserved, shoes_damaged, vehicles_rule_code, vans_borrowed_var)'
+
+# =================================================================
+# 题面描述：包含环境信息、规则与答案格式要求（严格的步骤顺序与非负口径）
+# =================================================================
+desc: '影视剧组资产本期数据 服装部入库上衣{tops_in}件 裤装{pants_in}件 运动鞋{shoes_in}双 服装本期采用的唯一局部规则为{clothes_rule_text} 对应数量为{clothes_adjust_value} 车辆部采购厢式车{vans_bought}辆 SUV{suv_bought}辆 轿车{sedan_bought}辆 车辆本期采用的唯一局部规则为{vehicles_rule_text} 具体为{vehicles_adjust_text} 本期车辆安全复核规则 若采用的车辆规则包含SUV报废环节且报废数大于0 则额外有1辆SUV进入复核暂不可用 本期状态为{safety_review_text} 联动阈值 车辆损失阈值为{thr_vehicle_value} 服装损失阈值为{thr_clothes_value} 仓储上限 服装总可用件数不得超过仓储上限{wh_cap_value} 所有扣减与调回均不产生负值 任何减少操作不超过当前可用数量与入库或采购上限 规则应用顺序如下\n步骤1 局部规则先对服装与车辆分别生效\n步骤2 若满足车辆安全复核条件 则SUV额外减少1辆\n步骤3 若车辆损失达到或超过车辆损失阈值 则上衣调回不超过该阈值件 实际调回量不超过上衣借出数量与入库上限 若服装损失达到或超过服装损失阈值 则厢式车调回不超过该阈值辆 实际调回量不超过厢式车借出数量与采购上限\n步骤4 若服装总可用件数超过仓储上限 则按先扣鞋再扣上衣再扣裤装的顺序扣减直至不超过上限\n计算口径 仅计算目前仍由本剧组掌握且可用的服装与车辆件数 以上规则依次生效 问题说明与答案格式 问题一 输出纯整数不含空格例如 12 问题二 输出最简分数字符串不含空格例如 2/5 问题三 输出Python元组逗号后包含一个空格例如 (100, 20) {q1}\n{q2}\n{q3}'

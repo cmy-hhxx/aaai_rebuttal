@@ -1,0 +1,51 @@
+custom_operator:
+  gen_unique_island_puzzle: number_wall_0.py
+  grid_to_json: number_wall_0.py
+
+variables:
+  # 固定网格大小为 5x5，便于高效进行完全搜索与唯一性检验
+  rows:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+  cols:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+
+  # 逆向生成：先随机生成满足所有规则的最终解（墙 A、岛 X 拓扑，墙整体连通、无 2x2 墙、无整行/整列全墙等），
+  # 再对每个岛随机放置唯一数字（数字=岛面积），形成题面 initial_grid（其余岛格为 'X'、墙为 'A'），
+  # 最后通过内部回溯求解器验证唯一性（不唯一则重试）。
+  puzzle:
+    formula: gen_unique_island_puzzle(rows, cols)
+
+  # 题面（数字=岛面积提示；X=未知格；A=墙）
+  initial_grid:
+    formula: puzzle['initial']
+  # 唯一解（用于最终答案输出，结构与题面一致：数字 / X / A）
+  solution_grid:
+    formula: puzzle['solution']
+  # 题面 ASCII 展示文本
+  grid_text:
+    formula: puzzle['grid_text']
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "在回答的最后，请输出一个二维列表的解决方案网格。"
+    ans_formula: solution_grid
+    ans_text: grid_to_json(_ans)
+    ans_assertion: 'True'
+
+# 题面描述（规则明确化，统一解的表示规范）：
+# - X 表示未标注的未知格（最终将被确定为岛格或墙 A）；A 表示墙；每个岛恰有一个数字提示，且数字值等于该岛的面积（包含该数字格）。
+# - 解中约定：数字格保留数字；同一岛内的其他格用 'X' 表示；墙用 'A' 表示；所有非墙格最终都必须完全划归某个岛。
+# - 岛格仅以上下左右方式连通，斜对角不计连通。
+# - 不同岛之间不能以上下左右方向直接相接（必须被墙 A 分隔）；斜对角相邻允许。
+# - 墙 A 不允许出现 2×2 全 A 的方块（更大矩形若包含 2×2 全墙子块亦不允许）。
+# - 墙 A 必须整体通过上下左右方式连通。
+# - 本题随机生成并保证唯一解，同时避免整行/整列全为墙的平凡结构，以提升推理空间。
+desc: "放置墙壁（标记为'A'）将网格分割成岛屿。每个岛屿必须恰好包含一个数字，且岛屿中的格子数必须等于该数字（包含数字格）。\n\n网格：\n{grid_text}\n\n规则（明确化）：\n- X 表示未标注的未知格（最终将被确定为岛或墙 A），数字为岛面积提示（每岛恰有一个数字），A 表示墙。\n- 解答网格中：数字格保留数字；同一岛内的其他格用 'X' 表示；墙用 'A' 表示；所有非墙格最终都必须归属于某个岛。\n- 岛内格子需通过水平或垂直方式连通，斜对角不计连通。\n- 不同岛之间不能通过水平或垂直方向相接触（必须被墙 A 隔开）；斜对角接触允许。\n- 墙 A 不能出现 2×2 全 A 方块（更大矩形若包含 2×2 全墙子块亦不允许）。\n- 墙 A 必须整体通过上下左右方式连通。\n- 本题随机生成并保证唯一解，同时避免整行/整列全为墙的平凡结构，以提升推理空间。\n\n{q1}"

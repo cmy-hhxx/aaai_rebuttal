@@ -1,0 +1,124 @@
+custom_operator:
+  function_1: buggy_tables_0.py
+  function_2: buggy_tables_0.py
+  function_make_rules: buggy_tables_0.py
+  function_calibrate_rules: buggy_tables_0.py
+  function_verify_unique: buggy_tables_0.py
+
+calc_solution: false
+
+variables:
+  columns:
+    formula: "['date','campaign_id','impressions','clicks','spend_usd','conversions','avg_session_duration_sec','bounce_rate_pct','device_type','country','page_load_ms','emails_sent','emails_opened','sms_sent','sms_responses','ad_position','promo_code_used','inventory_level','competitor_price_usd','cpc_usd','roas','return_visits','channel_group','season']"
+
+  rng_seed:
+    formula: "randint(0, 10**9)"
+
+  row_count:
+    formula: "randint(20, 36)"
+
+  impressions_min:
+    formula: "randint(50, 300)"
+  impressions_span:
+    formula: "randint(800, 4000)"
+  impressions_max:
+    formula: "impressions_min + impressions_span"
+
+  ctr_min:
+    formula: "randint(5, 40) / 1000"
+  ctr_extra:
+    formula: "randint(20, 120) / 1000"
+  ctr_max:
+    formula: "ctr_min + ctr_extra"
+
+  conv_min_pct:
+    formula: "randint(0, 20) / 100"
+  conv_extra_pct:
+    formula: "randint(5, 30) / 100"
+  conv_max_pct:
+    formula: "conv_min_pct + conv_extra_pct"
+
+  cpc_min:
+    formula: "randint(10, 250) / 100"
+  cpc_extra:
+    formula: "randint(10, 350) / 100"
+  cpc_max:
+    formula: "cpc_min + cpc_extra"
+
+  page_load_normal_max:
+    formula: "randint(3500, 6500)"
+  page_load_outlier_max:
+    formula: "randint(8000, 16000)"
+  outlier_prob_page:
+    formula: "randint(5, 30) / 100"
+
+  bounce_normal_max:
+    formula: "randint(60, 90)"
+  bounce_outlier_max:
+    formula: "randint(95, 140)"
+  outlier_prob_bounce:
+    formula: "randint(5, 30) / 100"
+
+  emails_sent_max:
+    formula: "randint(400, 2200)"
+  sms_sent_max:
+    formula: "randint(200, 1400)"
+  inventory_max:
+    formula: "randint(200, 1000)"
+
+  competitor_price_min:
+    formula: "randint(5, 60)"
+  competitor_price_max:
+    formula: "competitor_price_min + randint(60, 180)"
+
+  roas_max:
+    formula: "randint(50, 150) / 10"
+  return_visits_max:
+    formula: "randint(150, 500)"
+
+  include_CN_prob:
+    formula: "randint(10, 40) / 100"
+  device_empty_prob:
+    formula: "randint(1, 12) / 100"
+
+  gen_params:
+    formula: "{'rng_seed': rng_seed, 'impressions_min': impressions_min, 'impressions_max': impressions_max, 'ctr_min': ctr_min, 'ctr_max': ctr_max, 'conv_min_pct': conv_min_pct, 'conv_max_pct': conv_max_pct, 'cpc_min': cpc_min, 'cpc_max': cpc_max, 'page_load_normal_max': page_load_normal_max, 'page_load_outlier_max': page_load_outlier_max, 'outlier_prob_page': outlier_prob_page, 'bounce_normal_max': bounce_normal_max, 'bounce_outlier_max': bounce_outlier_max, 'outlier_prob_bounce': outlier_prob_bounce, 'emails_sent_max': emails_sent_max, 'sms_sent_max': sms_sent_max, 'inventory_max': inventory_max, 'competitor_price_min': competitor_price_min, 'competitor_price_max': competitor_price_max, 'roas_max': roas_max, 'return_visits_max': return_visits_max, 'include_CN_prob': include_CN_prob, 'device_empty_prob': device_empty_prob}"
+
+  rules_config_raw:
+    formula: "function_make_rules(rng_seed, gen_params)"
+
+  data_bundle:
+    formula: "function_1(columns, row_count, gen_params)"
+
+  col_data:
+    formula: "data_bundle['col_data']"
+
+  rows_for_display:
+    formula: "data_bundle['display_rows']"
+
+  rules_config_final:
+    formula: "function_calibrate_rules(columns, col_data, row_count, rules_config_raw)"
+
+  display_header:
+    formula: "str(rows_for_display[0])"
+
+  display_rows_body:
+    formula: "'\\n'.join([str(r) for r in rows_for_display[1:]])"
+
+  rules_text:
+    formula: "rules_config_final['rules_text']"
+
+  metrics_text:
+    formula: "rules_config_final['metrics_text']"
+
+  answer_format_text:
+    formula: "'答案格式: 保留两位小数的数值字符串, 如 12.34。'"
+
+queries:
+  q1:
+    desc: '请依据题面所给的随机规则、IQR去极值设定与比率定义，完成筛选与转换后，给出两个样本方差之差（保留两位小数，始终两位；若任一方差不可计算则输出 0.00）。'
+    ans_formula: "function_2(columns, col_data, row_count, rules_config_final)"
+    ans_text: "_ans"
+    ans_assertion: "function_verify_unique(columns, col_data, row_count, rules_config_final, _ans)"
+
+desc: '电商营销活动高阶推理题：共有 {row_count} 行(含表头)与 24 列，按行主序保存；存储时每列 j(0 索引)底部额外附加 j+1 个随机值，这些尾部值必须从一切计算中排除。下方给出前 {row_count} 行(包含表头行 0)：\\n{display_header}\\n{display_rows_body}\\n筛选与处理规则：若某字段缺失则判为不满足；原子规则经聚合器组合为最终过滤器。IQR 去极值支持多个字段与方向；稳定性分数基于标准化多字段的线性复合并经 Sigmoid 转换，剔除低稳定记录。统一采用先筛后算，再按定义计算比率与样本方差。\\n规则明细：\\n{rules_text}\\n比率定义与阈值：\\n{metrics_text}\\n{answer_format_text}\\n请输出 var(比率A) 与 var(比率B) 的绝对差，四舍五入到 2 位并始终显示两位。{q1}'

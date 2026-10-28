@@ -1,0 +1,114 @@
+# ------------------------------------------------------------
+# 自定义算子：外部Python文件中必须定义同名函数
+custom_operator:
+  build_submarine_instance: einsteins_riddle_2.py
+
+# ------------------------------------------------------------
+# 变量：规模、位置、池、规则数量与生成载荷
+variables:
+  # 隔舱数量，支持多样化规模（难度正相关）
+  pos_num:
+    type: int
+    domain: "[5, 8]"
+    diff_factor: 1
+
+  # 基础规则数量，增强推理链条长度（难度正相关）
+  base_rule_num:
+    type: int
+    domain: "[12, 16]"
+    diff_factor: 1
+
+  # 位置列表与键
+  positions:
+    formula: "list(range(1, pos_num + 1))"
+  pos_keys:
+    formula: "[str(i) for i in positions]"
+
+  # 奇偶位置自动计算
+  odd_positions:
+    formula: "[i for i in positions if i % 2 == 1]"
+  even_positions:
+    formula: "[i for i in positions if i % 2 == 0]"
+
+  # 名称池（将从池中采样pos_num个）
+  function_pool:
+    formula: "['导航', '声呐', '推进', '武器', '医疗', '通信', '侦察', '火控', '电力', '补给', '调度', '保障']"
+  equipment_pool:
+    formula: "['控制台', '处理器', '泵组', '鱼雷架', '医械', '天线阵', '电源柜', '传感器阵', '伺服', '稳压器', '变频器']"
+  safety_pool:
+    formula: "['一级', '二级', '三级', '四级', '五级', '特别', '甲级', '乙级', '丙级']"
+  rank_pool:
+    formula: "['少尉', '中尉', '上尉', '少校', '中校', '上校', '军士长', '准尉']"
+
+  # 额外排除型约束数量，值越大通常更容易唯一解（难度负相关）
+  extra_excl_num:
+    type: int
+    domain: "[3, 7]"
+    diff_factor: -1
+
+  # 初始锚定数量，下调以减少显见线索（难度负相关）
+  anchor_base_count:
+    type: int
+    domain: "[2, 3]"
+    diff_factor: -1
+
+  # 通过自定义算子生成唯一解实例与文本线索（内部进行Z3求解与唯一性验证）
+  payload:
+    formula: "build_submarine_instance(pos_num, positions, pos_keys, odd_positions, even_positions, function_pool, equipment_pool, safety_pool, rank_pool, extra_excl_num, anchor_base_count, base_rule_num)"
+
+  # 从payload解析用于题面展示的数据
+  functions:
+    formula: "payload['functions']"
+  equipments:
+    formula: "payload['equipments']"
+  safeties:
+    formula: "payload['safeties']"
+  ranks:
+    formula: "payload['ranks']"
+  target_func:
+    formula: "payload['target_func']"
+
+  # 展示字符串
+  functions_str:
+    formula: "', '.join(functions)"
+  equipments_str:
+    formula: "', '.join(equipments)"
+  safeties_str:
+    formula: "', '.join(safeties)"
+  ranks_str:
+    formula: "', '.join(ranks)"
+
+  # 规则与线索文本（统一去重结果）
+  base_lines_str:
+    formula: "'\\n'.join(payload['base_lines'])"
+  extra_func_equip_lines_str:
+    formula: "'\\n'.join(payload['extra_func_equip_lines'])"
+  extra_rank_safe_lines_str:
+    formula: "'\\n'.join(payload['extra_rank_safe_lines'])"
+  extra_func_rank_lines_str:
+    formula: "'\\n'.join(payload['extra_func_rank_lines'])"
+  extra_equip_safe_lines_str:
+    formula: "'\\n'.join(payload['extra_equip_safe_lines'])"
+  anchor_lines_str:
+    formula: "'\\n'.join(payload['anchor_lines'])"
+
+  # 标准答案：目标职能所在位置（整数）
+  target_pos:
+    formula: "payload['target_pos']"
+
+# ------------------------------------------------------------
+# 求解在Python中完成，DSL不进行Z3计算
+calc_solution: false
+
+# ------------------------------------------------------------
+# 问题与答案（严格整数格式）
+queries:
+  q1:
+    desc: '哪个隔舱是{target_func}职能 请输出一个整数表示隔舱编号例如 4'
+    ans_formula: target_pos
+    ans_text: 'str(_ans)'
+    ans_assertion: 'isinstance(target_pos, int) and (target_pos in positions)'
+
+# ------------------------------------------------------------
+# 题干描述（不包含生成逻辑，仅呈现可解的规则与线索）
+desc: '有{pos_num}个隔舱从左到右编号为1至{pos_num} 每类属性的候选项数量与隔舱数量一致且各候选项恰好分配给一个隔舱且不重复 每个隔舱恰好对应一个职能一个设备一个安全等级一个值班军衔 邻接指相邻两个隔舱 左右指位置编号的大小关系 奇数位指编号是奇数 偶数位指编号是偶数 相距k位定义为两者编号差的绝对值等于k 在A与B之间指A与B分列两侧该对象编号处于其间 可选职能包括{functions_str} 设备包括{equipments_str} 安全等级包括{safeties_str} 军衔包括{ranks_str} 已知如下规则与线索 请逐条结合推理：\n{base_lines_str}\n{extra_func_equip_lines_str}\n{extra_rank_safe_lines_str}\n{extra_func_rank_lines_str}\n{extra_equip_safe_lines_str}\n此外给出若干锚定线索：\n{anchor_lines_str}\n{q1}'

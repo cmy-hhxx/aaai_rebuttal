@@ -1,0 +1,71 @@
+# 多蛇迷宫（修正版，高复杂泛化，唯一解验证稳定版）—逆向生成：先造答案，再派生题面与规则文本并验证唯一性
+custom_operator:
+  gen_instance: numbrix_0.py
+
+variables:
+  n:
+    type: int
+    domain: "[7, 9]"
+    diff_factor: 2
+
+  seq_min:
+    type: int
+    domain: "[2, 3]"
+    diff_factor: 1
+  seq_max:
+    type: int
+    domain: "[seq_min, 4]"
+    diff_factor: 1
+
+  label_ratio:
+    formula: "randint(10, 30) / 100"
+    diff_factor: 0
+  clue_ratio:
+    formula: "randint(10, 18) / 100"
+    diff_factor: 0
+
+  timeout_ms:
+    formula: "randint(90000, 150000)"
+    diff_factor: 0
+
+  seed:
+    formula: "randint(1, 10**9)"
+    diff_factor: 0
+
+  instance:
+    formula: "gen_instance(n, seq_min, seq_max, label_ratio, clue_ratio, timeout_ms, seed)"
+    diff_factor: 3
+
+  final_grid:
+    formula: "instance['final_grid']"
+    diff_factor: 0
+  puzzle_grid:
+    formula: "instance['puzzle_grid']"
+    diff_factor: 0
+  splits:
+    formula: "instance['splits']"
+    diff_factor: 0
+  rules_text:
+    formula: "instance['rules_text']"
+    diff_factor: 0
+  counts:
+    formula: "instance['counts']"
+    diff_factor: 0
+  uniqueness_passed:
+    formula: "instance['unique']"
+    diff_factor: 0
+
+  puzzle_grid_str:
+    formula: "str(puzzle_grid)"
+    diff_factor: 0
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请按格式输出最终的数字网格（答案格式：Python二维列表，仅包含数字）。'
+    ans_formula: final_grid
+    ans_text: "str(final_grid)"
+    ans_assertion: "uniqueness_passed == True"
+
+desc: '多蛇迷宫 n×n 高阶版：{rules_text} 初始网格为 {puzzle_grid_str}。{q1}'

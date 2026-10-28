@@ -1,0 +1,429 @@
+# =========================
+# 海洋科考船逻辑谜题（Zebra风格）唯一解增强版（精炼相对约束）
+# =========================
+
+# 自定义操作符：用于打乱各类别取值
+custom_operator:
+  shuffle_list: zebra_puzzle_1.py
+
+# =========================
+# 变量定义
+# =========================
+variables:
+  # 船数量（固定为5以便设置经典Zebra结构）
+  p_num:
+    type: int
+    domain: '[5, 5]'
+    diff_factor: 1
+
+  # 位置列表
+  positions:
+    formula: 'list(range(1, p_num + 1))'
+
+  # 五类属性集合，打乱以生成多样化题目
+  colors:
+    formula: 'shuffle_list(["Black", "White", "Blue", "Red", "Green"])'
+  missions:
+    formula: 'shuffle_list(["Coral", "Deep-sea", "Ice", "Plankton", "Seismic"])'
+  samples:
+    formula: 'shuffle_list(["Algae", "Crustaceans", "Microbes", "Minerals", "Gas Hydrates"])'
+  nationalities:
+    formula: 'shuffle_list(["Korean", "Indian", "British", "Chilean", "Swedish"])'
+  coffees:
+    formula: 'shuffle_list(["Light", "Medium", "Dark", "Decaf", "Espresso"])'
+
+  # 文本拼接辅助
+  comma_space:
+    formula: '", "'
+  middle_pos:
+    formula: '(p_num + 1) // 2'
+
+  # 示例用一个国籍名（答案格式示例用）
+  example_nat:
+    formula: 'nationalities[0]'
+
+  # 仅保留一个国籍位置锚点（类似经典Zebra的固定位置线索）
+  anchor_nat_name:
+    formula: 'nationalities[4]'
+
+# =========================
+# 符号：每个取值映射到一个位置1..p_num
+# =========================
+symbols:
+  pos_color:
+    source:
+    - colors
+    type: int
+    desc: '{_colors}对应的位置'
+  pos_mission:
+    source:
+    - missions
+    type: int
+    desc: '{_missions}对应的位置'
+  pos_sample:
+    source:
+    - samples
+    type: int
+    desc: '{_samples}对应的位置'
+  pos_nat:
+    source:
+    - nationalities
+    type: int
+    desc: '{_nationalities}对应的位置'
+  pos_coffee:
+    source:
+    - coffees
+    type: int
+    desc: '{_coffees}对应的位置'
+
+# =========================
+# 基础约束：范围与两两不同
+# =========================
+conditions:
+  range_pos_color:
+    formula: 'And([And(pos_color[c] >= 1, pos_color[c] <= p_num) for c in colors])'
+    desc: '颜色位置在有效范围内'
+  range_pos_mission:
+    formula: 'And([And(pos_mission[m] >= 1, pos_mission[m] <= p_num) for m in missions])'
+    desc: '任务位置在有效范围内'
+  range_pos_sample:
+    formula: 'And([And(pos_sample[s] >= 1, pos_sample[s] <= p_num) for s in samples])'
+    desc: '样本位置在有效范围内'
+  range_pos_nat:
+    formula: 'And([And(pos_nat[n] >= 1, pos_nat[n] <= p_num) for n in nationalities])'
+    desc: '国籍位置在有效范围内'
+  range_pos_coffee:
+    formula: 'And([And(pos_coffee[k] >= 1, pos_coffee[k] <= p_num) for k in coffees])'
+    desc: '咖啡位置在有效范围内'
+
+  distinct_color:
+    formula: 'Distinct([pos_color[c] for c in colors])'
+    desc: '每种颜色对应不同位置'
+  distinct_mission:
+    formula: 'Distinct([pos_mission[m] for m in missions])'
+    desc: '每种任务对应不同位置'
+  distinct_sample:
+    formula: 'Distinct([pos_sample[s] for s in samples])'
+    desc: '每种样本对应不同位置'
+  distinct_nat:
+    formula: 'Distinct([pos_nat[n] for n in nationalities])'
+    desc: '每种国籍对应不同位置'
+  distinct_coffee:
+    formula: 'Distinct([pos_coffee[k] for k in coffees])'
+    desc: '每种咖啡对应不同位置'
+
+# =========================
+# 先解后约束：从基准解中提取线索，控制数量与类型以兼顾深度与唯一性
+# =========================
+post_generation:
+  post_gen_vars:
+    # 固定一个国籍位置锚点（由第一阶段解唯一确定）
+    anchor_nat_pos: 'get_value(_sol, pos_nat[anchor_nat_name])'
+
+    # 各类别 取值->位置 的映射
+    pos_nat_map: '{n: get_value(_sol, pos_nat[n]) for n in nationalities}'
+    pos_color_map: '{c: get_value(_sol, pos_color[c]) for c in colors}'
+    pos_mission_map: '{m: get_value(_sol, pos_mission[m]) for m in missions}'
+    pos_sample_map: '{s: get_value(_sol, pos_sample[s]) for s in samples}'
+    pos_coffee_map: '{k: get_value(_sol, pos_coffee[k]) for k in coffees}'
+
+    # 各类别按位置排序后的列表（从左到右）
+    n_sorted: 'sorted(nationalities, key=lambda x: pos_nat_map[x])'
+    c_sorted: 'sorted(colors, key=lambda x: pos_color_map[x])'
+    m_sorted: 'sorted(missions, key=lambda x: pos_mission_map[x])'
+    s_sorted: 'sorted(samples, key=lambda x: pos_sample_map[x])'
+    k_sorted: 'sorted(coffees, key=lambda x: pos_coffee_map[x])'
+
+    # 便于描述的别名：按位置从左到右依次为1..5
+    n1: 'n_sorted[0]'
+    n2: 'n_sorted[1]'
+    n3: 'n_sorted[2]'
+    n4: 'n_sorted[3]'
+    n5: 'n_sorted[4]'
+
+    c1: 'c_sorted[0]'
+    c2: 'c_sorted[1]'
+    c3: 'c_sorted[2]'
+    c4: 'c_sorted[3]'
+    c5: 'c_sorted[4]'
+
+    m1: 'm_sorted[0]'
+    m2: 'm_sorted[1]'
+    m3: 'm_sorted[2]'
+    m4: 'm_sorted[3]'
+    m5: 'm_sorted[4]'
+
+    s1: 's_sorted[0]'
+    s2: 's_sorted[1]'
+    s3: 's_sorted[2]'
+    s4: 's_sorted[3]'
+    s5: 's_sorted[4]'
+
+    k1: 'k_sorted[0]'
+    k2: 'k_sorted[1]'
+    k3: 'k_sorted[2]'
+    k4: 'k_sorted[3]'
+    k5: 'k_sorted[4]'
+
+    # 介于线索
+    color_between_two_nats_name: 'c3'
+
+    # 左右关系与相邻关系线索（各一组）
+    left_coffee_mission_pair_list: '[(k, m) for k in coffees for m in missions if pos_coffee_map[k] < pos_mission_map[m]]'
+    left_coffee_name: '(left_coffee_mission_pair_list[0][0] if len(left_coffee_mission_pair_list) > 0 else k2)'
+    right_mission_name: '(left_coffee_mission_pair_list[0][1] if len(left_coffee_mission_pair_list) > 0 else m4)'
+
+    adj_mission_coffee_list: '[(m, k) for m in missions for k in coffees if abs(pos_mission_map[m] - pos_coffee_map[k]) == 1]'
+    adj_mission_name: '(adj_mission_coffee_list[0][0] if len(adj_mission_coffee_list) > 0 else m3)'
+    adj_coffee_name: '(adj_mission_coffee_list[0][1] if len(adj_mission_coffee_list) > 0 else k4)'
+
+    adj_nat_sample_list: '[(n, s) for n in nationalities for s in samples if abs(pos_nat_map[n] - pos_sample_map[s]) == 1]'
+    adj_nat_name: '(adj_nat_sample_list[0][0] if len(adj_nat_sample_list) > 0 else n5)'
+    adj_sample_name: '(adj_nat_sample_list[0][1] if len(adj_nat_sample_list) > 0 else s4)'
+
+    # 间隔线索
+    gap_nat_pair_list: '[(a, b) for a in nationalities for b in nationalities if a != b and abs(pos_nat_map[a] - pos_nat_map[b]) >= 2]'
+    gap_nat_a: '(gap_nat_pair_list[0][0] if len(gap_nat_pair_list) > 0 else n1)'
+    gap_nat_b: '(gap_nat_pair_list[0][1] if len(gap_nat_pair_list) > 0 else n3)'
+
+    # 右侧关系
+    coffee_right_color_list: '[(k, c) for k in coffees for c in colors if pos_coffee_map[k] > pos_color_map[c]]'
+    right_coffee_name: '(coffee_right_color_list[0][0] if len(coffee_right_color_list) > 0 else k5)'
+    left_color_name: '(coffee_right_color_list[0][1] if len(coffee_right_color_list) > 0 else c2)'
+
+    # 中位颜色线索
+    mid_color_name: 'c3'
+
+    # 任务与咖啡的精确位差（方向保证为右侧）
+    mission_chain_left: 'm_sorted[1]'
+    mission_chain_right: 'm_sorted[3]'
+    mission_chain_diff: 'pos_mission_map[mission_chain_right] - pos_mission_map[mission_chain_left]'
+    mission_chain_steps: 'mission_chain_diff'
+
+    coffee_chain_left: 'k_sorted[1]'
+    coffee_chain_right: 'k_sorted[3]'
+    coffee_chain_diff: 'pos_coffee_map[coffee_chain_right] - pos_coffee_map[coffee_chain_left]'
+    coffee_chain_steps: 'coffee_chain_diff'
+
+    # 国籍与样本的精确位差及方向（以解为准）
+    nat_sample_a: 'n2'
+    nat_sample_b: 's1'
+    nat_sample_diff: 'pos_nat_map[nat_sample_a] - pos_sample_map[nat_sample_b]'
+    nat_sample_dir: "('右侧' if nat_sample_diff > 0 else '左侧')"
+    nat_sample_steps: 'abs(nat_sample_diff)'
+
+    # 跨类别同位关系（已有三条）
+    mission_color_pair_list: '[(m, c) for m in missions for c in colors if pos_mission_map[m] == pos_color_map[c]]'
+    pair_mission_color_m: 'mission_color_pair_list[0][0]'
+    pair_mission_color_c: 'mission_color_pair_list[0][1]'
+
+    sample_coffee_pair_list: '[(s, k) for s in samples for k in coffees if pos_sample_map[s] == pos_coffee_map[k]]'
+    pair_sample_coffee_s: 'sample_coffee_pair_list[0][0]'
+    pair_sample_coffee_k: 'sample_coffee_pair_list[0][1]'
+
+    color_sample_pair_list: '[(c, s) for c in colors for s in samples if pos_color_map[c] == pos_sample_map[s]]'
+    pair_color_sample_c: 'color_sample_pair_list[0][0]'
+    pair_color_sample_s: 'color_sample_pair_list[0][1]'
+
+    # 唯一性增强：额外任务-颜色同位对（若存在第二对则使用，否则沿用第一对）
+    pair_mission_color_m2: '(mission_color_pair_list[1][0] if len(mission_color_pair_list) > 1 else mission_color_pair_list[0][0])'
+    pair_mission_color_c2: '(mission_color_pair_list[1][1] if len(mission_color_pair_list) > 1 else mission_color_pair_list[0][1])'
+
+    # 新增：国籍在颜色左侧的一条约束（温和增强唯一性）
+    nat_left_color_list: '[(n, c) for n in nationalities for c in colors if pos_nat_map[n] < pos_color_map[c]]'
+    nat_left_name: '(nat_left_color_list[0][0] if len(nat_left_color_list) > 0 else n2)'
+    right_color2_name: '(nat_left_color_list[0][1] if len(nat_left_color_list) > 0 else c4)'
+
+    # 新增：国籍-颜色同位、国籍-咖啡同位、任务-样本同位（唯一性增强且题面可见）
+    nat_color_pair_list: '[(n, c) for n in nationalities for c in colors if pos_nat_map[n] == pos_color_map[c]]'
+    pair_nat_color_n: 'nat_color_pair_list[0][0]'
+    pair_nat_color_c: 'nat_color_pair_list[0][1]'
+
+    nat_coffee_pair_list: '[(n, k) for n in nationalities for k in coffees if pos_nat_map[n] == pos_coffee_map[k]]'
+    pair_nat_coffee_n: 'nat_coffee_pair_list[0][0]'
+    pair_nat_coffee_k: 'nat_coffee_pair_list[0][1]'
+
+    mission_sample_pair_list: '[(m, s) for m in missions for s in samples if pos_mission_map[m] == pos_sample_map[s]]'
+    pair_mission_sample_m: 'mission_sample_pair_list[0][0]'
+    pair_mission_sample_s: 'mission_sample_pair_list[0][1]'
+
+    # 查询目标（基于解生成两个查询目标）
+    tg_coffee: 'k3'
+    tg_mission: 'm2'
+
+    # =========================
+    # 唯一性增强的新增线索参数
+    # =========================
+    coffee_edge_left_name: 'k1'
+    coffee_edge_right_name: 'k5'
+    sample_mid_name: 's3'
+
+    color_nat_adj_list: '[(c, n) for c in colors for n in nationalities if abs(pos_color_map[c] - pos_nat_map[n]) == 1]'
+    cadj_color_name: '(color_nat_adj_list[0][0] if len(color_nat_adj_list) > 0 else c2)'
+    cadj_nat_name: '(color_nat_adj_list[0][1] if len(color_nat_adj_list) > 0 else n3)'
+
+    mission_between_colors_triplet_list: '[(m, cl, cr) for m in missions for cl in colors for cr in colors if pos_color_map[cl] < pos_mission_map[m] and pos_mission_map[m] < pos_color_map[cr]]'
+    between_mission_name: '(mission_between_colors_triplet_list[0][0] if len(mission_between_colors_triplet_list) > 0 else m3)'
+    between_left_color_name: '(mission_between_colors_triplet_list[0][1] if len(mission_between_colors_triplet_list) > 0 else c2)'
+    between_right_color_name: '(mission_between_colors_triplet_list[0][2] if len(mission_between_colors_triplet_list) > 0 else c4)'
+
+    nat_coffee_diff_list: '[(n, k, pos_nat_map[n] - pos_coffee_map[k]) for n in nationalities for k in coffees if pos_nat_map[n] != pos_coffee_map[k]]'
+    nat_coffee_d_name: '(nat_coffee_diff_list[0][0] if len(nat_coffee_diff_list) > 0 else n4)'
+    nat_coffee_d_kname: '(nat_coffee_diff_list[0][1] if len(nat_coffee_diff_list) > 0 else k2)'
+    nat_coffee_d_diff: '(nat_coffee_diff_list[0][2] if len(nat_coffee_diff_list) > 0 else 1)'
+    nat_coffee_d_dir: "('右侧' if nat_coffee_d_diff > 0 else '左侧')"
+    nat_coffee_d_steps: 'abs(nat_coffee_d_diff)'
+
+    adj_mission_name_2: '(adj_mission_coffee_list[1][0] if len(adj_mission_coffee_list) > 1 else adj_mission_name)'
+    adj_coffee_name_2: '(adj_mission_coffee_list[1][1] if len(adj_mission_coffee_list) > 1 else adj_coffee_name)'
+
+    nat_left_mission_list: '[(n, m) for n in nationalities for m in missions if pos_nat_map[n] < pos_mission_map[m]]'
+    nat_left_mission_nname: '(nat_left_mission_list[0][0] if len(nat_left_mission_list) > 0 else n1)'
+    nat_left_mission_mname: '(nat_left_mission_list[0][1] if len(nat_left_mission_list) > 0 else m5)'
+
+    sample_right_color_list: '[(s, c) for s in samples for c in colors if pos_sample_map[s] > pos_color_map[c]]'
+    sample_right_name: '(sample_right_color_list[0][0] if len(sample_right_color_list) > 0 else s2)'
+    color_left_name2: '(sample_right_color_list[0][1] if len(sample_right_color_list) > 0 else c1)'
+
+  post_gen_conditions:
+    # 国籍位置锚点（仅一条）
+    anchor_nat_cond:
+      formula: 'pos_nat[anchor_nat_name] == anchor_nat_pos'
+      desc: '{anchor_nat_name}总工位于第{anchor_nat_pos}位'
+
+    # 边界与中位颜色（各一条）
+    edge_left_color:
+      formula: 'pos_color[c1] == 1'
+      desc: '{c1}颜色的船在最左'
+    edge_right_color:
+      formula: 'pos_color[c5] == p_num'
+      desc: '{c5}颜色的船在最右'
+    middle_color_anchor:
+      formula: 'pos_color[mid_color_name] == middle_pos'
+      desc: '第{middle_pos}位的船体颜色是{mid_color_name}'
+
+    # 介于
+    color_between_two_nats:
+      formula: 'Or(And(pos_nat[n1] < pos_color[color_between_two_nats_name], pos_color[color_between_two_nats_name] < pos_nat[n5]), And(pos_nat[n5] < pos_color[color_between_two_nats_name], pos_color[color_between_two_nats_name] < pos_nat[n1]))'
+      desc: '{color_between_two_nats_name}颜色的船位于{n1}与{n5}之间'
+
+    # 左右与相邻（各一条）
+    coffee_left_of_mission:
+      formula: 'pos_coffee[left_coffee_name] < pos_mission[right_mission_name]'
+      desc: '喝{left_coffee_name}咖啡的船在执行{right_mission_name}任务的船左侧某处'
+    mission_adjacent_to_coffee:
+      formula: 'Or(pos_mission[adj_mission_name] - pos_coffee[adj_coffee_name] == 1, pos_coffee[adj_coffee_name] - pos_mission[adj_mission_name] == 1)'
+      desc: '执行{adj_mission_name}任务的船与喝{adj_coffee_name}咖啡的船相邻'
+    nat_adjacent_to_sample:
+      formula: 'Or(pos_nat[adj_nat_name] - pos_sample[adj_sample_name] == 1, pos_sample[adj_sample_name] - pos_nat[adj_nat_name] == 1)'
+      desc: '{adj_nat_name}与采集{adj_sample_name}相邻'
+
+    # 至少隔一条船
+    nat_gap:
+      formula: 'Or(pos_nat[gap_nat_a] - pos_nat[gap_nat_b] >= 2, pos_nat[gap_nat_b] - pos_nat[gap_nat_a] >= 2)'
+      desc: '{gap_nat_a}与{gap_nat_b}之间至少隔一条船'
+
+    # 右侧关系（至少一条）
+    coffee_right_of_color:
+      formula: 'pos_coffee[right_coffee_name] > pos_color[left_color_name]'
+      desc: '喝{right_coffee_name}咖啡的船在{left_color_name}颜色的船右侧某处'
+
+    # 精确位差（两条，方向保证为右侧）
+    mission_chain_pos_diff:
+      formula: 'pos_mission[mission_chain_right] - pos_mission[mission_chain_left] == mission_chain_diff'
+      desc: '{mission_chain_right}任务在{mission_chain_left}任务的右侧相隔{mission_chain_steps}位'
+    coffee_chain_pos_diff:
+      formula: 'pos_coffee[coffee_chain_right] - pos_coffee[coffee_chain_left] == coffee_chain_diff'
+      desc: '{coffee_chain_right}咖啡在{coffee_chain_left}咖啡的右侧相隔{coffee_chain_steps}位'
+
+    # 国籍与样本的精确位差及方向
+    nat_sample_exact_gap:
+      formula: 'pos_nat[nat_sample_a] - pos_sample[nat_sample_b] == nat_sample_diff'
+      desc: '{nat_sample_a}在采集{nat_sample_b}的船的{nat_sample_dir}{nat_sample_steps}位'
+
+    # 跨类别同位关系（已有三条）
+    mission_color_same_pos:
+      formula: 'pos_mission[pair_mission_color_m] == pos_color[pair_mission_color_c]'
+      desc: '执行{pair_mission_color_m}任务的船体颜色是{pair_mission_color_c}'
+    mission_color_same_pos_2:
+      formula: 'pos_mission[pair_mission_color_m2] == pos_color[pair_mission_color_c2]'
+      desc: '执行{pair_mission_color_m2}任务的船体颜色是{pair_mission_color_c2}'
+    sample_coffee_same_pos:
+      formula: 'pos_sample[pair_sample_coffee_s] == pos_coffee[pair_sample_coffee_k]'
+      desc: '采集{pair_sample_coffee_s}的船喝{pair_sample_coffee_k}咖啡'
+    color_sample_same_pos:
+      formula: 'pos_color[pair_color_sample_c] == pos_sample[pair_color_sample_s]'
+      desc: '{pair_color_sample_c}颜色的船采集{pair_color_sample_s}'
+
+    # 新增：国籍在颜色左侧的一条约束
+    nat_left_of_color:
+      formula: 'pos_nat[nat_left_name] < pos_color[right_color2_name]'
+      desc: '{nat_left_name}所在的船在{right_color2_name}颜色的船左侧某处'
+
+    # 新增：三条同位约束以增强唯一性（题面公开）
+    nat_color_same_pos:
+      formula: 'pos_nat[pair_nat_color_n] == pos_color[pair_nat_color_c]'
+      desc: '{pair_nat_color_n}所在的船体颜色是{pair_nat_color_c}'
+    nat_coffee_same_pos:
+      formula: 'pos_nat[pair_nat_coffee_n] == pos_coffee[pair_nat_coffee_k]'
+      desc: '{pair_nat_coffee_n}所在的船喝{pair_nat_coffee_k}咖啡'
+    mission_sample_same_pos:
+      formula: 'pos_mission[pair_mission_sample_m] == pos_sample[pair_mission_sample_s]'
+      desc: '执行{pair_mission_sample_m}任务的船采集{pair_mission_sample_s}'
+
+    # =========================
+    # 唯一性增强的新增线索（题面公开）
+    # =========================
+    edge_left_coffee:
+      formula: 'pos_coffee[coffee_edge_left_name] == 1'
+      desc: '喝{coffee_edge_left_name}咖啡的船在最左'
+    edge_right_coffee:
+      formula: 'pos_coffee[coffee_edge_right_name] == p_num'
+      desc: '喝{coffee_edge_right_name}咖啡的船在最右'
+    middle_sample_anchor:
+      formula: 'pos_sample[sample_mid_name] == middle_pos'
+      desc: '第{middle_pos}位的船采集{sample_mid_name}'
+
+    color_adjacent_to_nat:
+      formula: 'Or(pos_color[cadj_color_name] - pos_nat[cadj_nat_name] == 1, pos_nat[cadj_nat_name] - pos_color[cadj_color_name] == 1)'
+      desc: '{cadj_color_name}颜色的船与{cadj_nat_name}相邻'
+
+    mission_between_two_colors:
+      formula: 'And(pos_color[between_left_color_name] < pos_mission[between_mission_name], pos_mission[between_mission_name] < pos_color[between_right_color_name])'
+      desc: '{between_mission_name}任务的船位于{between_left_color_name}与{between_right_color_name}之间'
+
+    nat_coffee_exact_gap_2:
+      formula: 'pos_nat[nat_coffee_d_name] - pos_coffee[nat_coffee_d_kname] == nat_coffee_d_diff'
+      desc: '{nat_coffee_d_name}所在的船在喝{nat_coffee_d_kname}咖啡的船的{nat_coffee_d_dir}{nat_coffee_d_steps}位'
+
+    mission_adjacent_to_coffee_2:
+      formula: 'Or(pos_mission[adj_mission_name_2] - pos_coffee[adj_coffee_name_2] == 1, pos_coffee[adj_coffee_name_2] - pos_mission[adj_mission_name_2] == 1)'
+      desc: '执行{adj_mission_name_2}任务的船与喝{adj_coffee_name_2}咖啡的船相邻'
+
+    nat_left_of_mission:
+      formula: 'pos_nat[nat_left_mission_nname] < pos_mission[nat_left_mission_mname]'
+      desc: '{nat_left_mission_nname}所在的船在执行{nat_left_mission_mname}任务的船左侧某处'
+
+    sample_right_of_color:
+      formula: 'pos_sample[sample_right_name] > pos_color[color_left_name2]'
+      desc: '采集{sample_right_name}的船在{color_left_name2}颜色的船右侧某处'
+
+# =========================
+# 问题（答案为国籍英文名，每行一个）
+# =========================
+queries:
+  q1:
+    desc: '谁喝{tg_coffee}'
+    ans_formula: '[n for n in nationalities if get_value(_solutions[0], pos_nat[n]) == get_value(_solutions[0], pos_coffee[tg_coffee])][0]'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+  q2:
+    desc: '谁做{tg_mission}任务'
+    ans_formula: '[n for n in nationalities if get_value(_solutions[0], pos_nat[n]) == get_value(_solutions[0], pos_mission[tg_mission])][0]'
+    ans_text: '{_ans}'
+    ans_assertion: 'len(_solutions) == 1'
+
+# =========================
+# 题面描述（包含答案格式说明与示例）
+# =========================
+desc: '有{p_num}艘海洋科考船按从左到右排列位置为1到{p_num} 每条船有且仅有一种船体颜色一种执行任务一种采集样本一位总工国籍与一种咖啡 每一类属性的取值恰好各用一次并与位置一一对应 取值如下 颜色集合为{comma_space.join(colors)} 任务集合为{comma_space.join(missions)} 样本集合为{comma_space.join(samples)} 国籍集合为{comma_space.join(nationalities)} 咖啡集合为{comma_space.join(coffees)} 以及以下全部具体线索 每条线索中的颜色任务样本国籍与咖啡均指某一个具体取值\n{anchor_nat_cond}\n{edge_left_color}\n{edge_right_color}\n{middle_color_anchor}\n{color_between_two_nats}\n{coffee_left_of_mission}\n{mission_adjacent_to_coffee}\n{nat_adjacent_to_sample}\n{nat_gap}\n{coffee_right_of_color}\n{mission_chain_pos_diff}\n{coffee_chain_pos_diff}\n{nat_sample_exact_gap}\n{mission_color_same_pos}\n{mission_color_same_pos_2}\n{sample_coffee_same_pos}\n{color_sample_same_pos}\n{nat_left_of_color}\n{nat_color_same_pos}\n{nat_coffee_same_pos}\n{mission_sample_same_pos}\n{edge_left_coffee}\n{edge_right_coffee}\n{middle_sample_anchor}\n{color_adjacent_to_nat}\n{mission_between_two_colors}\n{nat_coffee_exact_gap_2}\n{mission_adjacent_to_coffee_2}\n{nat_left_of_mission}\n{sample_right_of_color}\n请依据所有线索进行推理并回答以下问题\n{q1}\n{q2}\n答案格式 每个问题分别单独一行输出该国籍英文名 示例\n{example_nat}\n{example_nat}\n'

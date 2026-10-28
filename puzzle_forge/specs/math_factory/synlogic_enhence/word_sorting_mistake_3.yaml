@@ -1,0 +1,130 @@
+# ---------------------------------------------------------------
+# 高阶泛化造题框架（纯计算模式，逻辑多步、含唯一性验证）
+# ---------------------------------------------------------------
+# 自定义操作符：全部函数均在 word_sorting_mistake_3.py 中定义并引入
+# ---------------------------------------------------------------
+custom_operator:
+  generate_words: word_sorting_mistake_3.py
+  choose_step_num: word_sorting_mistake_3.py
+  build_error_weights: word_sorting_mistake_3.py
+  choose_error_step_n: word_sorting_mistake_3.py
+  render_steps_verified: word_sorting_mistake_3.py
+  find_first_mistake_dynamic: word_sorting_mistake_3.py
+  validate_unique_first_error: word_sorting_mistake_3.py
+  compute_hash_value: word_sorting_mistake_3.py
+  compute_hash_value_v2: word_sorting_mistake_3.py
+  format_final_answer: word_sorting_mistake_3.py
+  assert_q2_consistency: word_sorting_mistake_3.py
+  assert_q2_consistency_v2: word_sorting_mistake_3.py
+  assert_final_bundle: word_sorting_mistake_3.py
+
+# ---------------------------------------------------------------
+# 变量区：参数随机化与渲染控制
+# ---------------------------------------------------------------
+variables:
+  # 单词数量（越多越难）
+  word_num:
+    type: int
+    domain: "[10, 18]"
+    diff_factor: 1
+  # 单词长度下限
+  word_len_low:
+    type: int
+    domain: "[3, 6]"
+  # 单词长度上限
+  word_len_high:
+    type: int
+    domain: "[8, 12]"
+  # 是否强制首字母多样性
+  ensure_distinct:
+    type: bool
+    domain: "[True, False]"
+  # 首字母种类至少多少种（若 ensure_distinct 为 True 则生效）
+  min_distinct:
+    type: int
+    domain: "[3, 6]"
+
+  # 步骤数范围（最终从[min,max]中随机一个；至少5步以保证信息密度）
+  step_min:
+    type: int
+    domain: "[5, 5]"
+    diff_factor: 1
+  step_max:
+    type: int
+    domain: "[6, 7]"
+    diff_factor: 1
+
+  # 是否强制存在错误步骤（True 则必有且仅有一个错误步）
+  must_error:
+    type: bool
+    domain: "[True, False]"
+
+  # 错误步权重：index0=无错误, index1..indexN=第i步出错
+  weight_no_error:
+    type: int
+    domain: "[1, 3]"
+  weight_s1:
+    type: int
+    domain: "[1, 3]"
+  weight_s2:
+    type: int
+    domain: "[1, 3]"
+  weight_s3:
+    type: int
+    domain: "[1, 3]"
+  weight_s4:
+    type: int
+    domain: "[1, 3]"
+  weight_s5:
+    type: int
+    domain: "[1, 3]"
+
+  # 计算哈希的模数（从固定集合中选取，题面将明确给出）
+  hash_mod:
+    type: int
+    domain: "[83, 89, 97, 101]"
+
+  # 随机生成单词列表
+  words:
+    formula: generate_words(word_num, word_len_low, word_len_high, ensure_distinct, min_distinct)
+  # 展示用的描述
+  words_desc:
+    formula: "'', '.join(words)".replace('', '')  # 防止解析器误判，等价于 ', '.join(words)
+
+  # 确定步骤数
+  step_count:
+    formula: choose_step_num(step_min, step_max)
+  # 构造错误权重列表（长度=step_count+1；0表示无错误）
+  error_weights:
+    formula: build_error_weights(step_count, weight_no_error, weight_s1, weight_s2, weight_s3, weight_s4, weight_s5)
+  # 选择错误发生在哪一步（0 表示无错误；若 must_error=True 则必不为0）
+  step_error_idx:
+    formula: choose_error_step_n(error_weights, must_error)
+
+  # 渲染可变步骤文本（列表，含唯一性校验；且“校验码”步骤仅出现一次）
+  step_texts:
+    formula: render_steps_verified(words, step_count, step_error_idx, hash_mod)
+  # 组装题干步骤文本（单行中使用 \n）
+  steps_desc:
+    formula: "'\\n'.join(step_texts)"
+
+# ---------------------------------------------------------------
+# 纯计算模式（不使用Z3符号求解）
+# ---------------------------------------------------------------
+calc_solution: false
+
+# ---------------------------------------------------------------
+# 查询区：仅输出统一评测口径的最终答案(单行)
+# ---------------------------------------------------------------
+queries:
+  # Q_final：统一评测口径的最终答案(单行)
+  q_final:
+    desc: '最终提交: 请将两个答案合并为单行字符串, 格式为 Q1=<答案1>====Q2=<答案2>。示例: Q1=No====Q2=42。'
+    ans_formula: format_final_answer(words, step_texts, hash_mod)
+    ans_text: '{_ans}'
+    ans_assertion: assert_final_bundle(words, step_texts, hash_mod, _ans)
+
+# ---------------------------------------------------------------
+# 题面描述（单行、仅使用单引号；必要信息完整且不泄漏生成逻辑）
+# ---------------------------------------------------------------
+desc: '你是单词处理专家。给定单词列表 [ {words_desc} ]。某位解题者基于该列表进行了若干步推理（每一步的规则已在对应行给出；术语与规则提示: 字母位次 a=1,...,z=26; 元音集合 [a, e, i, o, u]; 排序中的平局一律按字典序升序打破; 步骤种类包括 [映射, 排序, 分组, 筛选, 长度映射, 摘要, 交叉核对, 摘要核对, 校验码]）。步骤文本可能包含错误且若存在则仅有一个, 需找出首个错误:\n{steps_desc}\n请回答两个问题——问题1: 是否存在错误？输出首个错误步骤编号; 若所有步骤均正确则输出 No。问题2: 计算“独立校验码 H2”的值(定义: H2=sum((首字母位次+末字母位次)×长度) 对 {hash_mod} 取模, 模数取自固定集合 [83, 89, 97, 101])。答案格式说明: Q1 仅输出 No 或整数(如 No 或 2); Q2 仅输出整数(如 42)。最终提交: 请按 Q1=<答案1>====Q2=<答案2> 的格式输出, 示例: Q1=No====Q2=42。'

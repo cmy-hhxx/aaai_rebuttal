@@ -1,0 +1,131 @@
+custom_operator:
+  function_1: calcudoko_0.py
+  function_2: calcudoko_0.py
+variables:
+  n:
+    formula: "2 * randint(2, 4)"
+    diff_factor: 0
+  seed:
+    formula: "randint(1, 10**9)"
+    diff_factor: 0
+  prep_data:
+    formula: "function_1(n, randint(2, 4), randint(n, 2*n), seed)"
+    diff_factor: 0
+  base_grid:
+    formula: "prep_data['grid']"
+    diff_factor: 0
+  cages:
+    formula: "prep_data['cages']"
+    diff_factor: 0
+  ineqs:
+    formula: "prep_data['ineqs']"
+    diff_factor: 0
+  prop_rules:
+    formula: "prep_data['prop_rules']"
+    diff_factor: 0
+  row_lin_rules:
+    formula: "prep_data['row_lin_rules']"
+    diff_factor: 0
+  col_lin_rules:
+    formula: "prep_data['col_lin_rules']"
+    diff_factor: 0
+  block_sum_rules:
+    formula: "prep_data['block_sum_rules']"
+    diff_factor: 0
+  chain_ineqs:
+    formula: "prep_data['chain_ineqs']"
+    diff_factor: 0
+  diag:
+    formula: "prep_data['diag']"
+    diff_factor: 0
+  enable_parity:
+    formula: "prep_data['enable_parity']"
+    diff_factor: 0
+  cages_text_long:
+    formula: "prep_data['texts']['cages_long']"
+    diff_factor: 0
+  ineq_text_long:
+    formula: "prep_data['texts']['ineq_long']"
+    diff_factor: 0
+  props_text_long:
+    formula: "prep_data['texts']['props_long']"
+    diff_factor: 0
+  row_lin_text_long:
+    formula: "prep_data['texts']['row_lin_long']"
+    diff_factor: 0
+  col_lin_text_long:
+    formula: "prep_data['texts']['col_lin_long']"
+    diff_factor: 0
+  block_sum_text_long:
+    formula: "prep_data['texts']['block_sum_long']"
+    diff_factor: 0
+  chain_text_long:
+    formula: "prep_data['texts']['chain_long']"
+    diff_factor: 0
+  diag_text_long:
+    formula: "prep_data['texts']['diag_long']"
+    diff_factor: 0
+  parity_text:
+    formula: "prep_data['texts']['parity']"
+    diff_factor: 0
+  cell_ids:
+    formula: "[f'R{r}C{c}' for r in range(1, n+1) for c in range(1, n+1)]"
+    diff_factor: 0
+  cell_map:
+    formula: "{(r, c): f'R{r}C{c}' for r in range(1, n+1) for c in range(1, n+1)}"
+    diff_factor: 0
+symbols:
+  x:
+    source:
+    - cell_ids
+    type: int
+    desc: "Cell {_cell_ids} holds an integer in [1..n]"
+conditions:
+  value_domain:
+    formula: "And([And(x[id] >= 1, x[id] <= n) for id in cell_ids])"
+    desc: '每个格子取值在1到n之间'
+  row_distinct:
+    formula: "And([Distinct([x[cell_map[(r, c)]] for c in range(1, n+1)]) for r in range(1, n+1)])"
+    desc: '每一行的数字互不重复'
+  col_distinct:
+    formula: "And([Distinct([x[cell_map[(r, c)]] for r in range(1, n+1)]) for c in range(1, n+1)])"
+    desc: '每一列的数字互不重复'
+  row_odd_even_balance:
+    formula: "True if not enable_parity else And([Sum([If((x[cell_map[(r, c)]] % 2) == 1, 1, 0) for c in range(1, n+1)]) == n // 2 for r in range(1, n+1)])"
+    desc: '若启用：每一行奇数与偶数各恰好n/2'
+  col_odd_even_balance:
+    formula: "True if not enable_parity else And([Sum([If((x[cell_map[(r, c)]] % 2) == 1, 1, 0) for r in range(1, n+1)]) == n // 2 for c in range(1, n+1)])"
+    desc: '若启用：每一列奇数与偶数各恰好n/2'
+  ineqs_cond:
+    formula: "And([ (x[i['lhs']] > x[i['rhs']]) if i['op']=='gt' else (x[i['lhs']] < x[i['rhs']]) for i in ineqs ])"
+    desc: '相邻格不等号（大于/小于）'
+  cages_cond:
+    formula: "And([ (Sum([x[c] for c in cg['cells']]) == cg['target']) if cg['op']=='add' else ((x[cg['cells'][0]] * x[cg['cells'][1]] == cg['target']) if cg['op']=='mul' and len(cg['cells'])==2 else ((Or(x[cg['cells'][0]] - x[cg['cells'][1]] == cg['target'], x[cg['cells'][1]] - x[cg['cells'][0]] == cg['target'])) if cg['op']=='sub' and len(cg['cells'])==2 else ((Or(x[cg['cells'][0]] == cg['target'] * x[cg['cells'][1]], x[cg['cells'][1]] == cg['target'] * x[cg['cells'][0]])) if cg['op']=='div' and len(cg['cells'])==2 else (x[cg['cells'][0]] == cg['target'])))) for cg in cages])"
+    desc: '笼子规则：加法/乘法/差/整除/单格'
+  prop_rules_cond:
+    formula: "And([ (Sum([If(x[id]==v,1,0) for v in pr['set']]) >= 1) if pr['type']=='in_set' else ((And([x[id] != v for v in pr['set']])) if pr['type']=='not_in_set' else ((x[id] % 2 == 1) if (pr['type']=='parity' and pr['parity']=='odd') else ((x[id] % 2 == 0) if (pr['type']=='parity' and pr['parity']=='even') else ((And(x[id] >= pr['lo'], x[id] <= pr['hi'])) if pr['type']=='range' else True)))) for pr in prop_rules for id in pr['cells']])"
+    desc: '属性规则：集合/排除/奇偶/范围'
+  row_lin_cond:
+    formula: "And([ Sum([x[cell_map[(rr['row'], c)]] * rr['weights'][c-1] for c in range(1, n+1)]) == rr['target'] for rr in row_lin_rules ])"
+    desc: '加权行和约束'
+  col_lin_cond:
+    formula: "And([ Sum([x[cell_map[(r, cc['col'])]] * cc['weights'][r-1] for r in range(1, n+1)]) == cc['target'] for cc in col_lin_rules ])"
+    desc: '加权列和约束'
+  block_sum_cond:
+    formula: "And([ Sum([x[id] for id in br['cells']]) == br['target'] for br in block_sum_rules ])"
+    desc: '2×2区块和约束'
+  chain_ineqs_cond:
+    formula: "And([ And([ (x[g['cells'][k]] > x[g['cells'][k+1]]) if g['ops'][k]=='gt' else (x[g['cells'][k]] < x[g['cells'][k+1]]) for k in range(0, len(g['cells'])-1) ]) for g in chain_ineqs ])"
+    desc: '链式相邻大小关系'
+  diag_cond:
+    formula: "True if len(diag)==0 else (Sum([x[id] for id in diag[0]['cells']]) == diag[0]['target'])"
+    desc: '主对角线和（若启用）'
+calc_solution: true
+max_solution: 6000
+queries:
+  q1:
+    desc: '任务：请根据题述规则完成n×n矩阵填数。答案格式说明：以二维列表形式输出。术语说明：sum为和，diff为两格的绝对差，prod为两格乘积，div为较大值除以较小值的整数商，parity为奇偶（odd/奇，even/偶），range为取值范围[lo..hi]，链式不等如A > B < C表示两条关系同时成立。'
+    ans_formula: str(base_grid)
+    ans_text: "_ans"
+    ans_assertion: "len(_solutions) == 1"
+desc: '行星科学观测矩阵（高阶泛化）：网格为n×n（n为偶数）。需满足：行列拉丁方不重复；{parity_text}。现给出全部约束细则：笼子[{cages_text_long}]；不等号[{ineq_text_long}]；属性[{props_text_long}]；加权行和[{row_lin_text_long}]；加权列和[{col_lin_text_long}]；2×2区块和[{block_sum_text_long}]；链式不等[{chain_text_long}]；{diag_text_long}。\n{q1}'

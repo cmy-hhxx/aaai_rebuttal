@@ -1,0 +1,241 @@
+# 扩展后的随机化版集市摊位逻辑题（Einstein风格，优化版）
+# 目标：通过端点与中位 相邻 偏移 映射与等式构建多步推理结构，保留唯一性验证与多样性
+custom_operator:
+  who_has_gufa: einsteins_riddle_1.py
+  unique_gufa_consistent: einsteins_riddle_1.py
+  rand_int: einsteins_riddle_1.py
+  pick_one: einsteins_riddle_1.py
+  pick_one_except: einsteins_riddle_1.py
+  pick_k: einsteins_riddle_1.py
+  pick_k_with_must: einsteins_riddle_1.py
+  pick_distinct_pair: einsteins_riddle_1.py
+  gen_partial_bijection: einsteins_riddle_1.py
+  pick_pairs_distinct: einsteins_riddle_1.py
+  gen_partial_bijection_with_pair: einsteins_riddle_1.py
+  gen_partial_bijection_with_pair_anchor: einsteins_riddle_1.py
+  pick_pairs_distinct_avoid_pairs: einsteins_riddle_1.py
+  pick_pair_distinct_from: einsteins_riddle_1.py
+  pick_pair_avoid_pairs_as_list: einsteins_riddle_1.py
+  pick_pair_disjoint_from_pair: einsteins_riddle_1.py
+
+# 变量：规模 词库 抽样与文本片段 辅助变量与偏移控制 锚点增强
+variables:
+  stall_num:
+    type: int
+    domain: "[5, 5]"
+    diff_factor: 1
+
+  product_pool:
+    formula: "['蜂蜜', '手工皂', '陶器', '干果', '香料', '花茶', '果酱', '腌菜', '牛奶', '蜡烛', '布包', '木雕', '银饰', '奶酪', '米酒']"
+  color_pool:
+    formula: "['黄', '蓝', '红', '白', '绿', '紫', '橙', '黑', '灰', '粉']"
+  payment_pool:
+    formula: "['现金', '刷卡', '移动支付', '代币', '组合', '转账', '二维码', '网络支付']"
+  slogan_pool:
+    formula: "['纯天然', '手作', '古法', '家传', '独家', '新鲜直供', '工坊出品', '匠心', '祖传', '限量']"
+
+  target_slogan:
+    formula: "pick_one(slogan_pool)"
+  products:
+    formula: "pick_k(product_pool, stall_num)"
+  colors:
+    formula: "pick_k(color_pool, stall_num)"
+  payments:
+    formula: "pick_k(payment_pool, stall_num)"
+  slogans:
+    formula: "pick_k_with_must(slogan_pool, stall_num, target_slogan)"
+
+  product_desc:
+    formula: "'、'.join(products)"
+  color_desc:
+    formula: "'、'.join(colors)"
+  payment_desc:
+    formula: "'、'.join(payments)"
+  slogan_desc:
+    formula: "'、'.join(slogans)"
+
+  # 支付-颜色映射数量：在1或2之间随机
+  pc_pair_count:
+    formula: "rand_int(1, 2)"
+  # 商品-颜色等式对数量：保持1，深度可控
+  prod_color_eq_count:
+    formula: "rand_int(1, 1)"
+
+  leftmost_color:
+    formula: "pick_one(colors)"
+  leftmost_payment:
+    formula: "pick_one(payments)"
+  rightmost_slogan:
+    formula: "pick_one(slogans)"
+  mid_pos:
+    formula: "(stall_num + 1) // 2"
+  middle_color:
+    formula: "pick_one_except(colors, leftmost_color)"
+  # 锚点：商品最左 与 支付中位（两者不同）
+  leftmost_product:
+    formula: "pick_one(products)"
+  middle_payment:
+    formula: "pick_one_except(payments, leftmost_payment)"
+
+  # 支付-颜色映射：包含左端点配对，并优先保证中位-中位一致
+  pc_pairs:
+    formula: "gen_partial_bijection_with_pair_anchor(payments, colors, pc_pair_count, leftmost_payment, leftmost_color, middle_color, middle_payment)"
+  # 商品-颜色等式对：避开[leftmost_product, middle_color]降低冲突
+  prod_color_pairs:
+    formula: "pick_pairs_distinct_avoid_pairs(products, colors, prod_color_eq_count, [[leftmost_product, middle_color]])"
+  slogan_color_eq_pair:
+    formula: "pick_pairs_distinct(slogans, colors, 1)"
+  # 商品-口号等式与商品-支付等式（支付等式避开[leftmost_product, middle_payment]）
+  prod_slogan_eq_pair:
+    formula: "pick_pairs_distinct(products, slogans, 1)"
+  prod_payment_eq_pair:
+    formula: "pick_pairs_distinct_avoid_pairs(products, payments, 1, [[leftmost_product, middle_payment]])"
+
+  slogan_color_adj_pair:
+    formula: "pick_pair_distinct_from(slogans, colors, slogan_color_eq_pair[0])"
+  prod_slogan_neq_pair:
+    formula: "pick_pair_distinct_from(products, slogans, prod_slogan_eq_pair[0])"
+  prod_payment_dyn_pair:
+    formula: "pick_pair_disjoint_from_pair(products, payments, prod_payment_eq_pair[0])"
+
+  # 偏移对与偏移量
+  offset_pair_pc:
+    formula: "pick_pair_avoid_pairs_as_list(products, colors, prod_color_pairs + [[leftmost_product, middle_color]])"
+  gap_pc:
+    formula: "rand_int(1, 2)"
+  triple_products:
+    formula: "pick_k(products, 3)"
+  triple_products_desc:
+    formula: "'、'.join(triple_products)"
+
+  pc_pairs_desc:
+    formula: "'、'.join([p[0] + '在' + p[1] for p in pc_pairs])"
+  prod_color_pairs_desc:
+    formula: "'、'.join([p[0] + '在' + p[1] for p in prod_color_pairs])"
+
+# 符号：每个元素对应所在摊位位置（1..stall_num）
+symbols:
+  pos_product:
+    source:
+    - products
+    type: int
+    desc: '{_products}所在位置'
+  pos_color:
+    source:
+    - colors
+    type: int
+    desc: '{_colors}所在位置'
+  pos_payment:
+    source:
+    - payments
+    type: int
+    desc: '{_payments}所在位置'
+  pos_slogan:
+    source:
+    - slogans
+    type: int
+    desc: '{_slogans}所在位置'
+
+# 约束：基础域与互异 动态线索 相邻 固定端点与中位 可控映射与等式 偏移与三元严格序
+conditions:
+  product_pos_range:
+    formula: And([And(pos_product[p] >= 1, pos_product[p] <= stall_num) for p in products])
+    desc: '每个商品所在位置在1到{stall_num}之间'
+  product_pos_distinct:
+    formula: Distinct([pos_product[p] for p in products])
+    desc: '所有商品位置互不相同'
+  color_pos_range:
+    formula: And([And(pos_color[c] >= 1, pos_color[c] <= stall_num) for c in colors])
+    desc: '每个顶篷颜色所在位置在1到{stall_num}之间'
+  color_pos_distinct:
+    formula: Distinct([pos_color[c] for c in colors])
+    desc: '所有颜色位置互不相同'
+  payment_pos_range:
+    formula: And([And(pos_payment[pm] >= 1, pos_payment[pm] <= stall_num) for pm in payments])
+    desc: '每个支付方式所在位置在1到{stall_num}之间'
+  payment_pos_distinct:
+    formula: Distinct([pos_payment[pm] for pm in payments])
+    desc: '所有支付方式位置互不相同'
+  slogan_pos_range:
+    formula: And([And(pos_slogan[s] >= 1, pos_slogan[s] <= stall_num) for s in slogans])
+    desc: '每个口号所在位置在1到{stall_num}之间'
+  slogan_pos_distinct:
+    formula: Distinct([pos_slogan[s] for s in slogans])
+    desc: '所有口号位置互不相同'
+
+  # 动态线索：颜色紧邻
+  color_left_adjacent_dyn:
+    source:
+    - colors
+    amount:
+    - '2'
+    domain: "[1, 1]"
+    formula: And(pos_color[_sym[0][0]] + 1 == pos_color[_sym[0][1]], pos_color[_sym[0][1]] != pos_color[leftmost_color])
+    desc: '{_sym[0][0]}在{_sym[0][1]}左边紧邻处'
+
+  # 固定端点与中位信息
+  color_leftmost:
+    formula: pos_color[leftmost_color] == 1
+    desc: '{leftmost_color}在最左边'
+  payment_leftmost:
+    formula: pos_payment[leftmost_payment] == 1
+    desc: '{leftmost_payment}在最左边'
+  slogan_rightmost:
+    formula: pos_slogan[rightmost_slogan] == stall_num
+    desc: '{rightmost_slogan}在最右边'
+  color_middle:
+    formula: pos_color[middle_color] == mid_pos
+    desc: '{middle_color}在中间位置'
+  product_leftmost:
+    formula: pos_product[leftmost_product] == 1
+    desc: '{leftmost_product}在最左边'
+  payment_middle:
+    formula: pos_payment[middle_payment] == mid_pos
+    desc: '{middle_payment}在中间位置'
+
+  # 可控随机映射与等式
+  payment_color_mapping:
+    formula: And([pos_payment[pc_pairs[i][0]] == pos_color[pc_pairs[i][1]] for i in range(pc_pair_count)])
+    desc: '支付与顶篷颜色的对应关系如下 {pc_pairs_desc}'
+  product_color_eqs:
+    formula: And([pos_product[prod_color_pairs[i][0]] == pos_color[prod_color_pairs[i][1]] for i in range(prod_color_eq_count)])
+    desc: '部分商品在对应颜色摊位如下 {prod_color_pairs_desc}'
+  slogan_color_eq:
+    formula: pos_slogan[slogan_color_eq_pair[0][0]] == pos_color[slogan_color_eq_pair[0][1]]
+    desc: '{slogan_color_eq_pair[0][0]}在{slogan_color_eq_pair[0][1]}摊位'
+  product_slogan_eq:
+    formula: pos_product[prod_slogan_eq_pair[0][0]] == pos_slogan[prod_slogan_eq_pair[0][1]]
+    desc: '{prod_slogan_eq_pair[0][0]}的口号是{prod_slogan_eq_pair[0][1]}'
+  prod_payment_eq:
+    formula: pos_product[prod_payment_eq_pair[0][0]] == pos_payment[prod_payment_eq_pair[0][1]]
+    desc: '{prod_payment_eq_pair[0][0]}在{prod_payment_eq_pair[0][1]}摊位'
+
+  # 由预选对生成的固定线索
+  prod_uses_payment_fixed:
+    formula: pos_product[prod_payment_dyn_pair[0]] == pos_payment[prod_payment_dyn_pair[1]]
+    desc: '{prod_payment_dyn_pair[0]}使用{prod_payment_dyn_pair[1]}支付'
+  prod_not_with_slogan_fixed:
+    formula: pos_product[prod_slogan_neq_pair[0]] != pos_slogan[prod_slogan_neq_pair[1]]
+    desc: '{prod_slogan_neq_pair[0]}与{prod_slogan_neq_pair[1]}不在同一摊'
+  slogan_color_adj_fixed:
+    formula: Or(pos_slogan[slogan_color_adj_pair[0]] == pos_color[slogan_color_adj_pair[1]] + 1, pos_slogan[slogan_color_adj_pair[0]] + 1 == pos_color[slogan_color_adj_pair[1]])
+    desc: '{slogan_color_adj_pair[0]}与{slogan_color_adj_pair[1]}相邻'
+
+  # 偏移与三元严格序
+  product_color_offset:
+    formula: pos_product[offset_pair_pc[0][0]] == pos_color[offset_pair_pc[0][1]] + gap_pc
+    desc: '{offset_pair_pc[0][0]}在{offset_pair_pc[0][1]}右边{gap_pc}位'
+  triple_product_strict_order:
+    formula: And(pos_product[triple_products[0]] < pos_product[triple_products[1]], pos_product[triple_products[1]] < pos_product[triple_products[2]])
+    desc: '{triple_products[0]}在{triple_products[1]}左边且{triple_products[1]}在{triple_products[2]}左边'
+
+# 问题：谁的口号是目标口号
+queries:
+  q1:
+    desc: '谁的口号是{target_slogan} 请以商品名称输出答案 示例输出 陶器'
+    ans_formula: who_has_gufa(products, slogans, pos_product, pos_slogan, _solutions[0], target_slogan)
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1 and unique_gufa_consistent(products, slogans, pos_product, pos_slogan, _solutions, target_slogan)'
+
+# 描述文本
+desc: '集市上有{stall_num}个从左到右编号为1到{stall_num}的摊位 每位摊主各有且仅有一种商品 一种顶篷颜色 一种支付方式 和一个招牌口号 且每种商品 每种颜色 每种支付方式 每条口号在所有摊位中均各出现一次 商品包括{product_desc} 顶篷颜色包括{color_desc} 支付方式包括{payment_desc} 口号包括{slogan_desc} 已知以下线索 请综合推理求解\n 1 {color_left_adjacent_dyn}\n 2 {color_leftmost}\n 3 {payment_leftmost}\n 4 {slogan_rightmost}\n 5 {color_middle}\n 6 {product_leftmost}\n 7 {payment_middle}\n 8 {payment_color_mapping}\n 9 {product_color_eqs}\n 10 {slogan_color_eq}\n 11 {product_slogan_eq}\n 12 {prod_payment_eq}\n 13 {prod_uses_payment_fixed}\n 14 {prod_not_with_slogan_fixed}\n 15 {slogan_color_adj_fixed}\n 16 {product_color_offset}\n 17 {triple_product_strict_order}\n 请回答 谁的口号是{target_slogan} 注意答案格式为商品名称 示例输出 陶器\n {q1}'

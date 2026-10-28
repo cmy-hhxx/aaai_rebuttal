@@ -1,0 +1,165 @@
+# -------------------------
+# 欠定线性方程组版：满行秩主方程 + 多类线索共同锁定唯一整数解
+# -------------------------
+
+# -------------------------
+# 自定义操作符
+# -------------------------
+custom_operator:
+  generate_var_names: blood_donation_puzzle_0.py
+  generate_solution_vector: blood_donation_puzzle_0.py
+  generate_full_rank_matrix: blood_donation_puzzle_0.py
+  compute_b: blood_donation_puzzle_0.py
+  format_equations: blood_donation_puzzle_0.py
+  format_example_list: blood_donation_puzzle_0.py
+  generate_linear_clues: blood_donation_puzzle_0.py
+  format_linear_clues: blood_donation_puzzle_0.py
+  generate_order_clues: blood_donation_puzzle_0.py
+  format_order_clues: blood_donation_puzzle_0.py
+  generate_mod_clues: blood_donation_puzzle_0.py
+  format_mod_clues: blood_donation_puzzle_0.py
+  generate_affine_clue: blood_donation_puzzle_0.py
+  format_affine_clue: blood_donation_puzzle_0.py
+  compute_k_bounds_low: blood_donation_puzzle_0.py
+  compute_k_bounds_high: blood_donation_puzzle_0.py
+
+# -------------------------
+# 变量定义
+# -------------------------
+variables:
+  var_count:
+    type: int
+    domain: "[2, 5]"
+    diff_factor: 1
+  lb:
+    type: int
+    domain: "[1, 4]"
+    diff_factor: -1
+  ub:
+    type: int
+    domain: "[lb + 4, lb + 10]"
+    diff_factor: 1
+  min_coef:
+    type: int
+    domain: "[1, 6]"
+  max_coef:
+    type: int
+    domain: "[min_coef + 3, min_coef + 10]"
+  # 欠定主方程行数：固定为 var_count - 1，满行秩
+  eq_num:
+    formula: "var_count - 1"
+    diff_factor: 1
+  var_names:
+    formula: "generate_var_names(var_count)"
+  solution_vec:
+    formula: "generate_solution_vector(var_count, lb, ub)"
+  A:
+    formula: "generate_full_rank_matrix(eq_num, var_count, min_coef, max_coef)"
+  b_list:
+    formula: "compute_b(A, solution_vec)"
+  equations_text:
+    formula: "format_equations(A, b_list, var_names)"
+  # 附加线性线索（至少1条，至多var_count条）
+  extra_eqs:
+    formula: "generate_linear_clues(var_count, solution_vec)"
+  extra_eq_count:
+    formula: "len(extra_eqs)"
+  extra_eqs_text:
+    formula: "format_linear_clues(extra_eqs, var_names)"
+  # 相对大小线索（0~1条）
+  order_clues:
+    formula: "generate_order_clues(var_count, solution_vec)"
+  order_clues_count:
+    formula: "len(order_clues)"
+  order_clues_text:
+    formula: "format_order_clues(order_clues, var_names)"
+  # 模余线索（1~2条）
+  mod_clues:
+    formula: "generate_mod_clues(var_count, solution_vec)"
+  mod_clues_count:
+    formula: "len(mod_clues)"
+  mod_clues_text:
+    formula: "format_mod_clues(mod_clues, var_names)"
+  # 模余线索的索引列表与倍数参数的上下界
+  mod_idx_list:
+    formula: "list(range(mod_clues_count))"
+  k_low_list:
+    formula: "compute_k_bounds_low(mod_clues, lb, ub)"
+  k_high_list:
+    formula: "compute_k_bounds_high(mod_clues, lb, ub)"
+  # 加权平移和线索（0或1条）
+  affine_clue:
+    formula: "generate_affine_clue(var_count, solution_vec)"
+  affine_clue_exists:
+    formula: "1 if affine_clue else 0"
+  affine_clue_text:
+    formula: "format_affine_clue(affine_clue, var_names)"
+  # 文本辅助
+  var_names_text:
+    formula: "', '.join(var_names)"
+  example_list:
+    formula: "format_example_list(var_count)"
+  clues_text:
+    formula: "('线性方程组如下：\\n' + equations_text) + ('\\n附加线性线索如下：\\n' + extra_eqs_text if extra_eq_count > 0 else '') + ('\\n相对大小线索如下：\\n' + order_clues_text if order_clues_count > 0 else '') + ('\\n模余线索如下：\\n' + mod_clues_text if mod_clues_count > 0 else '') + ('\\n加权平移和线索如下：\\n' + affine_clue_text if affine_clue_exists > 0 else '')"
+
+# -------------------------
+# 符号：未知数与模余倍数参数
+# -------------------------
+symbols:
+  var_s:
+    source:
+    - var_names
+    type: int
+    desc: '{_var_names}的值'
+  k_mod_s:
+    source:
+    - mod_idx_list
+    type: int
+    desc: '第{_mod_idx_list}条模余线索的倍数参数'
+
+# -------------------------
+# 约束条件
+# -------------------------
+conditions:
+  bounds:
+    formula: And([And(var_s[var_names[i]] >= lb, var_s[var_names[i]] <= ub) for i in range(var_count)])
+    desc: '未知数取值为从{lb}到{ub}的整数'
+  # 欠定主方程组：满行秩但行数少于变量数
+  lin_system:
+    formula: And([Sum([A[i][j] * var_s[var_names[j]] for j in range(var_count)]) == b_list[i] for i in range(eq_num)])
+    desc: '线性方程组成立'
+  # 附加线性线索
+  extra_linear_clues:
+    formula: And([Sum([extra_eqs[i]['coeffs'][j] * var_s[var_names[j]] for j in range(var_count)]) == extra_eqs[i]['rhs'] for i in range(extra_eq_count)]) if extra_eq_count > 0 else True
+    desc: '若存在附加线性线索则全部成立'
+  # 相对大小线索
+  order_relations:
+    formula: And([(And([var_s[var_names[order_clues[i]['idx']]] >= var_s[var_names[j]] for j in range(var_count)]) if order_clues[i]['type'] == 'max' else (And([var_s[var_names[order_clues[i]['idx']]] <= var_s[var_names[j]] for j in range(var_count)]) if order_clues[i]['type'] == 'min' else (var_s[var_names[order_clues[i]['i']]] < var_s[var_names[order_clues[i]['j']]] if order_clues[i]['type'] == 'lt' else (var_s[var_names[order_clues[i]['i']]] <= var_s[var_names[order_clues[i]['j']]] if order_clues[i]['type'] == 'le' else (var_s[var_names[order_clues[i]['i']]] > var_s[var_names[order_clues[i]['j']]] if order_clues[i]['type'] == 'gt' else (var_s[var_names[order_clues[i]['i']]] >= var_s[var_names[order_clues[i]['j']]]) ) ) ) )) for i in range(order_clues_count)]) if order_clues_count > 0 else True
+    desc: '若存在相对大小线索则全部成立'
+  # 模余线索线性化：S = rhs + m * k_i
+  mod_constraints:
+    formula: And([Sum([mod_clues[i]['coeffs'][j] * var_s[var_names[j]] for j in range(var_count)]) == (mod_clues[i]['rhs'] + mod_clues[i]['m'] * k_mod_s[mod_idx_list[i]]) for i in range(mod_clues_count)]) if mod_clues_count > 0 else True
+    desc: '若存在模余线索则全部成立'
+  # 倍数参数范围约束
+  k_bounds:
+    formula: And([And(k_mod_s[mod_idx_list[i]] >= k_low_list[i], k_mod_s[mod_idx_list[i]] <= k_high_list[i]) for i in range(mod_clues_count)]) if mod_clues_count > 0 else True
+    desc: '模余线索的倍数参数取值受限'
+  # 加权平移和线索
+  affine_sum_constraint:
+    formula: (Sum([affine_clue['s'][j] * var_s[var_names[j]] + affine_clue['t'][j] for j in range(var_count)]) == affine_clue['value']) if affine_clue_exists > 0 else True
+    desc: '若存在加权平移和线索则全部成立'
+
+# -------------------------
+# 题问：输出按变量顺序的整数解列表
+# -------------------------
+queries:
+  q1:
+    desc: '请给出未知数的整数解列表表达形式并按变量顺序排列'
+    ans_formula: "[get_value(_solutions[0], var_s[var_names[i]]) for i in range(var_count)]"
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# -------------------------
+# 题目描述
+# -------------------------
+desc: '有{var_count}个未知数，分别为{var_names_text}，它们是从{lb}到{ub}的整数。给出如下约束：\n{clues_text}\n请输出按变量顺序的整数解列表，格式示例为{example_list}。{q1}'

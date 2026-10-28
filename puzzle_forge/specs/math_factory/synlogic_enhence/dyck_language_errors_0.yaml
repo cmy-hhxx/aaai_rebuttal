@@ -1,0 +1,93 @@
+# 高阶泛化版：正向生成 + 策略随机化 + 复合推理 + 唯一解验证（隐藏于造题框架）
+custom_operator:
+  gen_policy: dyck_language_errors_0.py
+  build_policy_text: dyck_language_errors_0.py
+  build_query_text: dyck_language_errors_0.py
+  gen_instance: dyck_language_errors_0.py
+  parse_literal: dyck_language_errors_0.py
+  compose_answer: dyck_language_errors_0.py
+  validate_answer: dyck_language_errors_0.py
+  build_types_desc: dyck_language_errors_0.py
+  build_format_spec: dyck_language_errors_0.py
+  sample_pairs: dyck_language_errors_0.py
+
+variables:
+  # 目标长度范围（字符数）
+  min_len:
+    type: int
+    domain: "[12, 36]"
+  max_len:
+    type: int
+    domain: "[min_len + 12, min_len + 72]"
+
+  # 括号类型数量范围（2~4）
+  type_min:
+    type: int
+    domain: "[2, 4]"
+  type_max:
+    type: int
+    domain: "[type_min, 4]"
+
+  # 复杂度等级（影响生成策略的偏置与嵌套强度）
+  complexity_level:
+    type: int
+    domain: "[1, 3]"
+
+  # 目标深度范围（用于引导生成的最大嵌套层次）
+  desired_depth_min:
+    type: int
+    domain: "[2, 4]"
+  desired_depth_max:
+    type: int
+    domain: "[desired_depth_min + 1, desired_depth_min + 4]"
+
+  # 合法样例概率与错误类型偏好
+  legal_prob_pct:
+    type: int
+    domain: "[25, 75]"
+  unclosed_bias_pct:
+    type: int
+    domain: "[20, 60]"
+  mismatch_bias_pct:
+    type: int
+    domain: "[20, 60]"
+  illegal_bias_pct:
+    type: int
+    domain: "[10, 40]"
+
+  # 随机生成题目规则策略（索引、非法字符处理、末尾未闭合策略、类型子集、开括号偏置、
+  # 前缀约束、深度上限与错误位置比例、可读性最大长度、最小推理阈值）
+  policy:
+    formula: gen_policy(type_min, type_max, complexity_level, legal_prob_pct, unclosed_bias_pct, mismatch_bias_pct, illegal_bias_pct)
+
+  # 基于策略与长度/深度目标生成实例（安全字面量、类型、长度）
+  inst:
+    formula: gen_instance(min_len, max_len, desired_depth_min, desired_depth_max, policy)
+
+  # 安全字面量形式的括号序列（repr 字面量）
+  seq_lit:
+    formula: inst['seq_lit']
+
+  # 展示的长度
+  total_len:
+    formula: inst['length']
+
+  # 统一的规则文本与问句文本
+  rule_text:
+    formula: build_policy_text(policy)
+  format_spec:
+    formula: build_format_spec()
+  query_text:
+    formula: build_query_text(policy, format_spec)
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '{query_text}'
+    ans_formula: compose_answer(parse_literal(seq_lit), policy)
+    ans_text: str(_ans)
+    ans_assertion: validate_answer(parse_literal(seq_lit), _ans, policy, 180)
+
+# 题干：集中展示必要规则与序列
+desc: '题目环境：{rule_text} 序列长度为 [{total_len}]；括号序列为 [{seq_lit}]。{q1}'

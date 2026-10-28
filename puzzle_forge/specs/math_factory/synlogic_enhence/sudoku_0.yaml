@@ -1,0 +1,173 @@
+# High-complexity generalized Sudoku generator with composite constraints and implicit auxiliaries (reverse mode).
+# Each run produces a diverse 9x9 puzzle with guaranteed unique solution within time limit, under randomly selected composite rules.
+
+custom_operator:
+  function_1: sudoku_0.py
+  function_2: sudoku_0.py
+  gen_sudoku_pro: sudoku_0.py
+
+calc_solution: false
+
+variables:
+  size:
+    type: int
+    domain: "[9, 9]"
+  box_size:
+    type: int
+    domain: "[3, 3]"
+
+  clue_target:
+    type: int
+    domain: "[22, 42]"
+  symmetry:
+    type: bool
+    domain: "[True, False]"
+  seed:
+    type: int
+    domain: "[0, 1000000]"
+
+  diag_main:
+    type: bool
+    domain: "[True, False]"
+  diag_anti:
+    type: bool
+    domain: "[True, False]"
+  anti_knight:
+    type: bool
+    domain: "[True, False]"
+  anti_king:
+    type: bool
+    domain: "[True, False]"
+  non_consecutive:
+    type: bool
+    domain: "[True, False]"
+
+  use_cages:
+    type: bool
+    domain: "[True, False]"
+  use_thermos:
+    type: bool
+    domain: "[True, False]"
+  use_arrows:
+    type: bool
+    domain: "[True, False]"
+  use_parity:
+    type: bool
+    domain: "[True, False]"
+
+  cage_num:
+    type: int
+    domain: "[0, 6]"
+  cage_min_size:
+    type: int
+    domain: "[2, 3]"
+  cage_max_size:
+    type: int
+    domain: "[3, 5]"
+
+  thermo_num:
+    type: int
+    domain: "[0, 4]"
+  thermo_min_len:
+    type: int
+    domain: "[3, 3]"
+  thermo_max_len:
+    type: int
+    domain: "[3, 5]"
+
+  arrow_num:
+    type: int
+    domain: "[0, 4]"
+  arrow_min_len:
+    type: int
+    domain: "[2, 2]"
+  arrow_max_len:
+    type: int
+    domain: "[2, 3]"
+
+  parity_even_num:
+    type: int
+    domain: "[0, 10]"
+  parity_odd_num:
+    type: int
+    domain: "[0, 10]"
+
+  rows_idx:
+    formula: list(range(size))
+  cols_idx:
+    formula: list(range(size))
+  row_keys:
+    formula: "[str(i) for i in range(size)]"
+  col_keys:
+    formula: "[str(i) for i in range(size)]"
+
+  rules_cfg:
+    formula: "{'diag_main': diag_main, 'diag_anti': diag_anti, 'anti_knight': anti_knight, 'anti_king': anti_king, 'non_consecutive': non_consecutive}"
+  structures_cfg:
+    formula: "{'use_cages': use_cages, 'use_thermos': use_thermos, 'use_arrows': use_arrows, 'use_parity': use_parity, 'cage_num': cage_num, 'cage_min_size': cage_min_size, 'cage_max_size': cage_max_size, 'thermo_num': thermo_num, 'thermo_min_len': thermo_min_len, 'thermo_max_len': thermo_max_len, 'arrow_num': arrow_num, 'arrow_min_len': arrow_min_len, 'arrow_max_len': arrow_max_len, 'parity_even_num': parity_even_num, 'parity_odd_num': parity_odd_num}"
+
+  puzzle_pack:
+    formula: gen_sudoku_pro(size, box_size, clue_target, symmetry, rules_cfg, structures_cfg, seed)
+  givens:
+    formula: puzzle_pack['givens']
+  solution:
+    formula: puzzle_pack['solution']
+  rule_text:
+    formula: puzzle_pack['rule_text']
+  shapes_text:
+    formula: puzzle_pack['shapes_text']
+  # 将题面转换为文本（0 显示为 X），用于 desc 中插值，避免在 desc 中拼接和使用双引号
+  board_text:
+    formula: "'\\n'.join([''.join([str(x) if x != 0 else 'X' for x in row]) for row in givens])"
+
+symbols:
+  grid:
+    source:
+    - row_keys
+    - col_keys
+    type: int
+    desc: "Cell at row key {_row_keys}, column key {_col_keys}"
+
+conditions:
+  value_range:
+    formula: And([And(grid[(row_keys[r], col_keys[c])] >= 1, grid[(row_keys[r], col_keys[c])] <= size) for r in rows_idx for c in cols_idx])
+    desc: "每个单元格的数字在1到{size}之间"
+
+  givens_constraint:
+    formula: And([Or(givens[r][c] == 0, grid[(row_keys[r], col_keys[c])] == givens[r][c]) for r in rows_idx for c in cols_idx])
+    desc: "已知数字位置固定，0表示空白"
+
+  row_distinct:
+    formula: And([Distinct([grid[(row_keys[r], col_keys[c])] for c in cols_idx]) for r in rows_idx])
+    desc: "每一行的{size}个数字互不相同"
+  col_distinct:
+    formula: And([Distinct([grid[(row_keys[r], col_keys[c])] for r in rows_idx]) for c in cols_idx])
+    desc: "每一列的{size}个数字互不相同"
+  box_distinct:
+    formula: And([Distinct([grid[(row_keys[r], col_keys[c])] for r in range(br * box_size, br * box_size + box_size) for c in range(bc * box_size, bc * box_size + box_size)]) for br in range(0, size // box_size) for bc in range(0, size // box_size)])
+    desc: "每个{box_size}x{box_size}子网格的数字互不相同"
+
+  diag_main_cond:
+    formula: Implies(diag_main, Distinct([grid[(row_keys[i], col_keys[i])] for i in rows_idx]))
+    desc: "若启用主对角线规则，则主对角线上的数字互不相同"
+  diag_anti_cond:
+    formula: Implies(diag_anti, Distinct([grid[(row_keys[i], col_keys[size - 1 - i])] for i in rows_idx]))
+    desc: "若启用副对角线规则，则副对角线上的数字互不相同"
+  anti_knight_cond:
+    formula: Implies(anti_knight, And([grid[(row_keys[r], col_keys[c])] != grid[(row_keys[r + dr], col_keys[c + dc])] for r in rows_idx for c in cols_idx for dr, dc in [(1,2),(2,1),(-1,2),(-2,1),(1,-2),(2,-1),(-1,-2),(-2,-1)] if 0 <= r + dr < size and 0 <= c + dc < size]))
+    desc: "若启用反马步规则，则任何马步距离的两个格子不允许相同数字"
+  anti_king_cond:
+    formula: Implies(anti_king, And([grid[(row_keys[r], col_keys[c])] != grid[(row_keys[r + dr], col_keys[c + dc])] for r in rows_idx for c in cols_idx for dr, dc in [(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)] if 0 <= r + dr < size and 0 <= c + dc < size]))
+    desc: "若启用反王规则，则任何相邻（含对角）两个格子不允许相同数字"
+  non_consecutive_cond:
+    formula: Implies(non_consecutive, And([And(grid[(row_keys[r], col_keys[c])] - grid[(row_keys[r + dr], col_keys[c + dc])] != 1, grid[(row_keys[r], col_keys[c])] - grid[(row_keys[r + dr], col_keys[c + dc])] != -1) for r in rows_idx for c in cols_idx for dr, dc in [(-1,0),(1,0),(0,-1),(0,1)] if 0 <= r + dr < size and 0 <= c + dc < size]))
+    desc: "若启用不连续规则，则任意正交相邻两个格子的数字不相差1"
+
+queries:
+  q1:
+    desc: '请给出该数独的完整解，以嵌套元组形式表示(例如: ((1,2,3,4,5,6,7,8,9),(4,5,6,7,8,9,1,2,3),...))。'
+    ans_formula: "tuple(tuple(solution[r][c] for c in range(size)) for r in range(size))"
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+desc: '生成一个9x9数独谜题，0表示空格。基础规则: 每行、每列、每个3x3子网格的数字需在1到9且互不重复。变体规则说明: {rule_text}\n结构线索: {shapes_text}\n题面如下(以行显示): {board_text}\n请按嵌套元组格式提交答案(例如: ((1,2,3,4,5,6,7,8,9),(4,5,6,7,8,9,1,2,3),...))。\n{q1}'

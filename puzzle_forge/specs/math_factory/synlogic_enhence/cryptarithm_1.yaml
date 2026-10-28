@@ -1,0 +1,56 @@
+custom_operator:
+  function_1: cryptarithm_1.py
+  function_2: cryptarithm_1.py
+
+calc_solution: false
+
+variables:
+  # 单词长度
+  n:
+    type: int
+    domain: "[3, 7]"
+  # 允许运算类型集合（由 Python 随机选择其一）
+  allow_ops:
+    formula: "['ADD','SUB']"
+  # 模约束最大条数（Python 在 [2, max_mod_constraints] 内采样）
+  max_mod_constraints:
+    type: int
+    domain: "[2, 4]"
+  # 控制数字域规模（越小越快，仍保证多样性）
+  max_digits_used:
+    type: int
+    domain: "[6, 9]"
+  # 生成实例（逆向生成+唯一解验证）
+  gen_data:
+    formula: function_1(n, allow_ops, max_mod_constraints, max_digits_used)
+
+  # 展示字段（用于题面 desc 与题干插值）
+  equation_text:
+    formula: "gen_data['equation_text']"
+  constraints_text:
+    formula: "gen_data['constraints_text']"
+  w1:
+    formula: "gen_data['w1']"
+  w2:
+    formula: "gen_data['w2']"
+  w3:
+    formula: "gen_data['w3']"
+  digits_set_str:
+    formula: "gen_data['digits_set_str']"
+  op_cn:
+    formula: "gen_data['op_cn']"
+  count_name:
+    formula: "gen_data['count_name']"
+  rel_str:
+    formula: "gen_data['rel_str']"
+  k:
+    formula: "gen_data['k']"
+
+queries:
+  q1:
+    desc: '请按题面规则给出所有字母-数字映射和算式，格式：映射====纯数字算式，例如 C=8,H=9,L=3,O=1,P=6,V=7====8939 - 6973 = 1966。'
+    ans_formula: function_2(gen_data)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+
+desc: '高阶随机字母算式生成：{equation_text}。规则：{constraints_text}。说明：字母代表 {digits_set_str} 中的不同数字且词首字母不为 0；{op_cn}列运算的{count_name}次数{rel_str} {k}。位权计算均按右对齐到统一长度 L，不足位按 0 计。模 m 同余中的‘按出现次数计数’指：在三个单词中出现几次就计几次。答题格式：映射（如 A=1,B=2,...）====纯数字算式（如 123 - 45 = 78）。\n{q1}'

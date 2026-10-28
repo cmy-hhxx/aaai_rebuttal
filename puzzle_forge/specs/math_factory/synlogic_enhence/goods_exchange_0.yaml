@@ -1,0 +1,35 @@
+# YAML 文件保持上轮版本，无需更改
+custom_operator:
+  generate_game: goods_exchange_0.py
+
+calc_solution: false
+
+variables:
+  player_num:
+    type: int
+    domain: "[12, 20]"
+
+  exchange_num:
+    type: int
+    domain: "[10, 16]"
+
+  max_retry:
+    type: int
+    domain: "[300, 600]"
+
+  game_data:
+    formula: "generate_game(player_num, exchange_num, max_retry)"
+
+  story:
+    formula: "game_data['story']"
+  final_result:
+    formula: "game_data['final_result']"
+
+queries:
+  q1:
+    desc: '请推理出游戏结束时每位玩家手中的物品，并用 tuple 形式给出答案（示例：((''张三'',''红色书''),(''李四'',''蓝色手表''))）。'
+    ans_formula: final_result
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+desc: '{story} {q1}'

@@ -1,0 +1,53 @@
+custom_operator:
+  get_region_cells: star_placement_puzzle_2.py
+  get_adjacent_pairs: star_placement_puzzle_2.py
+  star_positions_json: star_placement_puzzle_2.py
+  generate_random_grid: star_placement_puzzle_2.py
+  json_dumps: star_placement_puzzle_2.py
+
+variables:
+  size: {formula: '4'}
+  grid_letters: {formula: 'generate_random_grid()'}
+  k_star: {formula: '1'}
+  include_diag: {type: bool, domain: '[False, True]'}
+
+  rows: {formula: 'list(range(size))'}
+  cols: {formula: 'list(range(size))'}
+  row_ids: {formula: '[str(r) for r in rows]'}
+  col_ids: {formula: '[str(c) for c in cols]'}
+
+  region_cells: {formula: 'get_region_cells(grid_letters)'}
+  region_cells_str: {formula: '{k:[(str(r),str(c)) for (r,c) in v] for k,v in region_cells.items()}'}
+  region_list: {formula: 'sorted(region_cells.keys())'}
+
+  adjacent_pairs: {formula: 'get_adjacent_pairs(size, include_diag)'}
+  adjacent_pairs_str: {formula: '[( (str(a[0]),str(a[1])), (str(b[0]),str(b[1])) ) for (a,b) in adjacent_pairs]'}
+
+post_generation:
+  post_gen_vars:
+    hint_pair: 'random.sample(region_list, 2)'
+    rules_txt: '"1. 每行、每列、每个区域各放1颗星；2. 星星彼此不得相邻" + ("（含对角线）" if include_diag else "（仅上下左右）") + "；3. 区域"+hint_pair[0]+"与区域"+hint_pair[1]+"共放置2颗星"'
+    sample_ans: 'json_dumps({l: [[1, idx+1]] for idx,l in enumerate(region_list)})'
+  post_gen_conditions:
+    pair_sum:
+      formula: 'Sum([If(star_s[rc],1,0) for rc in region_cells_str[hint_pair[0]]+region_cells_str[hint_pair[1]]]) == 2'
+
+symbols:
+  star_s:
+    source: [row_ids, col_ids]
+    type: Bool
+
+conditions:
+  row_unique: {formula: 'And([Sum([If(star_s[(str(r),str(c))],1,0) for c in cols])==1 for r in rows])'}
+  col_unique: {formula: 'And([Sum([If(star_s[(str(r),str(c))],1,0) for r in rows])==1 for c in cols])'}
+  region_unique: {formula: 'And([Sum([If(star_s[rc],1,0) for rc in region_cells_str[l]])==1 for l in region_list])'}
+  no_adjacent: {formula: 'And([Or(Not(star_s[p[0]]),Not(star_s[p[1]])) for p in adjacent_pairs_str])'}
+
+queries:
+  q1:
+    desc: '请给出答案（JSON 字符串，区域按字母序），例如示例。'
+    ans_formula: 'star_positions_json(_solutions[0], star_s, region_cells)'
+    ans_text: '_ans'
+    ans_assertion: 'len(_solutions)==1'
+
+desc: '以下为4×4分区网格（空格分隔、斜杠分行）：[{" / ".join([" ".join(r) for r in grid_letters])}]；{rules_txt}。示例：{sample_ans}。{q1}'

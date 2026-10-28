@@ -1,0 +1,35 @@
+variables:
+  n:
+    type: int
+    domain: "[3, 6]"
+    diff_factor: 0
+  high:
+    type: int
+    domain: "[1, 20]"
+    diff_factor: 0
+  lower:
+    type: int
+    domain: "[1, 20]"
+    diff_factor: 0
+  mean_score:
+    type: int
+    domain: "[50, 85]"
+    diff_factor: 0
+symbols:
+  vars:
+    source:
+    - "['score']"
+    type: real
+conditions:
+  non_negative_numbers:
+    formula: And([x > 0 for x in vars])
+  cond_equal:
+    formula: 1/n*(vars['score']+high)+(n-1)/n*(vars['score']-lower) == mean_score
+max_solution: 1
+queries:
+  q1:
+    desc: 求本次选拔的规定分数。请保留一位小数作答。
+    ans_formula: "[get_value(_model, vars['score']) for _model in _solutions]"
+    ans_text: str(round(_ans[0],1))
+    ans_assertion: 'True'
+desc: 数学特长班进行选拔考试，只要分数超过规定分数，就可以获得进入数学特长班的资格。已知有{n}分之1的学生获得了进入特长班的资格。且获得进入特长班资格的学生的平均分数比规定分数高{high}分，未获得特长班进入资格的学生平均分比规定分数少{lower}分，所有学生的平均分为{mean_score}分。{q1}

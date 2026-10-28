@@ -1,0 +1,263 @@
+# ============================================
+# 经典 Zebra 风格逻辑谜题（5房）稳定唯一解版本
+# 采用标准线索结构并随机洗牌标签，保证唯一解与大规模变体
+# ============================================
+
+# -------------------------
+# 自定义操作符：外部Python函数
+# -------------------------
+custom_operator:
+  gen_prefixed_labels: zebra_puzzle_0.py
+  pick_one: zebra_puzzle_0.py
+  pick_two_distinct: zebra_puzzle_0.py
+  shuffle_labels: zebra_puzzle_0.py
+
+# -------------------------
+# 变量
+# -------------------------
+variables:
+  # 房屋数量
+  house_num:
+    type: int
+    domain: '[5, 5]'
+    diff_factor: 1
+
+  # 位置列表
+  positions:
+    formula: 'list(range(1, house_num + 1))'
+
+  # 五类标签名 N C P D S
+  nat_names:
+    formula: 'gen_prefixed_labels("N", house_num)'
+  color_names:
+    formula: 'gen_prefixed_labels("C", house_num)'
+  pet_names:
+    formula: 'gen_prefixed_labels("P", house_num)'
+  drink_names:
+    formula: 'gen_prefixed_labels("D", house_num)'
+  smoke_names:
+    formula: 'gen_prefixed_labels("S", house_num)'
+
+  # 文本用拼接字符串
+  nat_desc:
+    formula: "', '.join(nat_names)"
+  color_desc:
+    formula: "', '.join(color_names)"
+  pet_desc:
+    formula: "', '.join(pet_names)"
+  drink_desc:
+    formula: "', '.join(drink_names)"
+  smoke_desc:
+    formula: "', '.join(smoke_names)"
+
+  # 中间位置
+  mid_pos:
+    formula: 'house_num // 2 + 1'
+
+  # 目标查询标签
+  target_drink:
+    formula: 'pick_one(drink_names)'
+  target_pet:
+    formula: 'pick_one(pet_names)'
+
+  # 为保证唯一解 随机洗牌角色到标签的映射
+  nat_roles:
+    formula: 'shuffle_labels(nat_names)'
+  color_roles:
+    formula: 'shuffle_labels(color_names)'
+  pet_roles:
+    formula: 'shuffle_labels(pet_names)'
+  drink_roles:
+    formula: 'shuffle_labels(drink_names)'
+  smoke_roles:
+    formula: 'shuffle_labels(smoke_names)'
+
+  # 将经典Zebra中的语义角色按固定索引映射到随机标签
+  # 国籍
+  english:
+    formula: 'nat_roles[0]'
+  spaniard:
+    formula: 'nat_roles[1]'
+  ukrainian:
+    formula: 'nat_roles[2]'
+  norwegian:
+    formula: 'nat_roles[3]'
+  japanese:
+    formula: 'nat_roles[4]'
+  # 颜色
+  red:
+    formula: 'color_roles[0]'
+  green:
+    formula: 'color_roles[1]'
+  ivory:
+    formula: 'color_roles[2]'
+  yellow:
+    formula: 'color_roles[3]'
+  blue:
+    formula: 'color_roles[4]'
+  # 宠物
+  dog:
+    formula: 'pet_roles[0]'
+  snails:
+    formula: 'pet_roles[1]'
+  fox:
+    formula: 'pet_roles[2]'
+  horse:
+    formula: 'pet_roles[3]'
+  zebra:
+    formula: 'pet_roles[4]'
+  # 饮料
+  coffee:
+    formula: 'drink_roles[0]'
+  tea:
+    formula: 'drink_roles[1]'
+  milk:
+    formula: 'drink_roles[2]'
+  orange:
+    formula: 'drink_roles[3]'
+  water:
+    formula: 'drink_roles[4]'
+  # 香烟
+  oldgold:
+    formula: 'smoke_roles[0]'
+  kools:
+    formula: 'smoke_roles[1]'
+  chesterfields:
+    formula: 'smoke_roles[2]'
+  luckystrike:
+    formula: 'smoke_roles[3]'
+  parliaments:
+    formula: 'smoke_roles[4]'
+
+# -------------------------
+# 符号：每个标签映射到所在房位的Int符号
+# -------------------------
+symbols:
+  pos_nat:
+    source:
+    - nat_names
+    type: int
+    desc: '{_nat_names} 的房屋位置未知'
+  pos_color:
+    source:
+    - color_names
+    type: int
+    desc: '{_color_names} 房屋的位置未知'
+  pos_pet:
+    source:
+    - pet_names
+    type: int
+    desc: '{_pet_names} 宠物所在房屋位置未知'
+  pos_drink:
+    source:
+    - drink_names
+    type: int
+    desc: '{_drink_names} 饮料所在房屋位置未知'
+  pos_smoke:
+    source:
+    - smoke_names
+    type: int
+    desc: '{_smoke_names} 香烟所在房屋位置未知'
+
+# -------------------------
+# 约束条件：范围、互异、经典Zebra线索（随机标签映射）
+# -------------------------
+conditions:
+  # --- 取值范围 ---
+  nat_in_range:
+    formula: And([And(x >= 1, x <= house_num) for x in pos_nat.to_list()])
+    desc: '每个国籍对应的房屋位置在 1 到 {house_num} 范围内'
+  color_in_range:
+    formula: And([And(x >= 1, x <= house_num) for x in pos_color.to_list()])
+    desc: '每个颜色对应的房屋位置在 1 到 {house_num} 范围内'
+  pet_in_range:
+    formula: And([And(x >= 1, x <= house_num) for x in pos_pet.to_list()])
+    desc: '每个宠物对应的房屋位置在 1 到 {house_num} 范围内'
+  drink_in_range:
+    formula: And([And(x >= 1, x <= house_num) for x in pos_drink.to_list()])
+    desc: '每种饮料对应的房屋位置在 1 到 {house_num} 范围内'
+  smoke_in_range:
+    formula: And([And(x >= 1, x <= house_num) for x in pos_smoke.to_list()])
+    desc: '每种香烟对应的房屋位置在 1 到 {house_num} 范围内'
+
+  # --- 各类内部互异（使用 Distinct） ---
+  nat_distinct:
+    formula: Distinct(pos_nat.to_list())
+    desc: '不同国籍位于不同房屋'
+  color_distinct:
+    formula: Distinct(pos_color.to_list())
+    desc: '不同颜色位于不同房屋'
+  pet_distinct:
+    formula: Distinct(pos_pet.to_list())
+    desc: '不同宠物位于不同房屋'
+  drink_distinct:
+    formula: Distinct(pos_drink.to_list())
+    desc: '不同饮料位于不同房屋'
+  smoke_distinct:
+    formula: Distinct(pos_smoke.to_list())
+    desc: '不同香烟位于不同房屋'
+
+  # --- 经典Zebra线索（使用随机标签映射） ---
+  c1_english_red:
+    formula: pos_nat[english] == pos_color[red]
+    desc: '{english} 住在 {red} 房屋'
+  c2_spaniard_dog:
+    formula: pos_nat[spaniard] == pos_pet[dog]
+    desc: '{spaniard} 养 {dog}'
+  c3_coffee_green:
+    formula: pos_drink[coffee] == pos_color[green]
+    desc: '{coffee} 在 {green} 房屋被饮用'
+  c4_ukrainian_tea:
+    formula: pos_nat[ukrainian] == pos_drink[tea]
+    desc: '{ukrainian} 喝 {tea}'
+  c5_green_right_of_ivory:
+    formula: pos_color[green] == pos_color[ivory] + 1
+    desc: '{green} 房屋在 {ivory} 房屋的紧右'
+  c6_oldgold_snails:
+    formula: pos_smoke[oldgold] == pos_pet[snails]
+    desc: '{oldgold} 的屋主养 {snails}'
+  c7_kools_yellow:
+    formula: pos_smoke[kools] == pos_color[yellow]
+    desc: '{kools} 在 {yellow} 房屋被抽'
+  c8_milk_middle:
+    formula: pos_drink[milk] == mid_pos
+    desc: '{milk} 在中间房被饮用'
+  c9_norwegian_first:
+    formula: pos_nat[norwegian] == 1
+    desc: '{norwegian} 住在第一间房'
+  c10_chesterfields_next_fox:
+    formula: Or(pos_smoke[chesterfields] == pos_pet[fox] + 1, pos_smoke[chesterfields] == pos_pet[fox] - 1)
+    desc: '{chesterfields} 的屋主与养 {fox} 的屋主相邻'
+  c11_kools_next_horse:
+    formula: Or(pos_smoke[kools] == pos_pet[horse] + 1, pos_smoke[kools] == pos_pet[horse] - 1)
+    desc: '{kools} 的屋主与养 {horse} 的屋主相邻'
+  c12_luckystrike_orange:
+    formula: pos_smoke[luckystrike] == pos_drink[orange]
+    desc: '{luckystrike} 的屋主喝 {orange}'
+  c13_japanese_parliaments:
+    formula: pos_nat[japanese] == pos_smoke[parliaments]
+    desc: '{japanese} 抽 {parliaments}'
+  c14_norwegian_next_blue:
+    formula: Or(pos_nat[norwegian] == pos_color[blue] + 1, pos_nat[norwegian] == pos_color[blue] - 1)
+    desc: '{norwegian} 与 {blue} 房屋相邻'
+
+# -------------------------
+# 提问与答案（合并为单一统一格式）
+# -------------------------
+queries:
+  q:
+    desc: '请一次性给出最终答案 按如下统一格式输出 不要包含额外文字 统一格式为 [[喝 {target_drink} 的房屋位置, 养 {target_pet} 的房屋位置], [按国籍标签从小到大排序的各自房屋位置列表]] 示例 [[3, 5], [3, 1, 5, 2, 4]]'
+    ans_formula: '[[get_value(_solutions[0], pos_drink[target_drink]), get_value(_solutions[0], pos_pet[target_pet])], [get_value(_solutions[0], pos_nat[n]) for n in nat_names]]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# -------------------------
+# 全局求解设置
+# -------------------------
+calc_solution: true
+max_solution: 6000
+
+# -------------------------
+# 题目文本
+# -------------------------
+desc: '有 {house_num} 栋房屋从 1 到 {house_num} 编号 每栋房屋恰好对应一项国籍颜色宠物饮料香烟五类标签 标签分别为\n国籍 {nat_desc}\n颜色 {color_desc}\n宠物 {pet_desc}\n饮料 {drink_desc}\n香烟 {smoke_desc}\n术语解释 中间房指编号为 {mid_pos} 的房屋 紧右指房号正好大一 相邻指房号相差一\n满足以下线索\n{c1_english_red}\n{c2_spaniard_dog}\n{c3_coffee_green}\n{c4_ukrainian_tea}\n{c5_green_right_of_ivory}\n{c6_oldgold_snails}\n{c7_kools_yellow}\n{c8_milk_middle}\n{c9_norwegian_first}\n{c10_chesterfields_next_fox}\n{c11_kools_next_horse}\n{c12_luckystrike_orange}\n{c13_japanese_parliaments}\n{c14_norwegian_next_blue}\n请一次性回答并严格按统一格式作答以便核对\n{q}'

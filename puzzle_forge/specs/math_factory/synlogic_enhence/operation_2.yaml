@@ -1,0 +1,59 @@
+custom_operator:
+  rand_choice: operation_2.py
+  rand_int: operation_2.py
+  rand_nonzero_int: operation_2.py
+  op_calc: operation_2.py
+  choose_extra_conds: operation_2.py
+
+variables:
+  bound:
+    formula: rand_int(25, 35)
+
+  operator_symbol:
+    formula: rand_choice(['⊙', '◎', '◇', '★'])
+  mode:
+    formula: rand_choice(['xpow_yabs', 'xpabs_ypow'])
+  power:
+    formula: rand_int(2, 4)
+
+  a:
+    formula: rand_nonzero_int(-bound, bound)
+  b:
+    formula: rand_nonzero_int(-bound, bound)
+
+  res_ab:
+    formula: op_calc(mode, power, a, b)
+  res_ba:
+    formula: op_calc(mode, power, b, a)
+  res_mix:
+    formula: op_calc(mode, power, a + b, a - b)
+
+  # 选取≥2 条附加性质(若不足则退而求其次, 至少 1 条), 保证唯一解
+  extra_info:
+    formula: choose_extra_conds(a, b, mode, power, res_ab, res_ba, res_mix, bound, 2)
+  extra_types:
+    formula: extra_info[0]
+  extra_desc:
+    formula: extra_info[1]
+
+  # 若有附加描述则加前缀, 否则留空
+  extra_clause:
+    formula: f'并且 {extra_desc}' if extra_desc else ''
+
+  op_desc:
+    formula: (f'x {operator_symbol} y = x**{power}*Abs(y)'
+              if mode == 'xpow_yabs'
+              else f'x {operator_symbol} y = Abs(x)*y**{power}')
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请写出有序对 (a,b)，如 (-3,5)'
+    ans_formula: f'({a},{b})'
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+
+desc: '在实数域上定义二元运算符 {operator_symbol} (该运算一般不满足交换律)，其规则为 {op_desc}。\n现有非零整数 a, b (范围 -{bound}≤a,b≤{bound}) 满足：\n(1) a {operator_symbol} b = {res_ab}\n(2) b {operator_symbol} a = {res_ba}\n(3) (a+b) {operator_symbol} (a-b) = {res_mix}\n{extra_clause}。\n请推理出 (a,b) 的唯一取值，并严格按照形如 (-3,5) 的格式作答 (括号、英文逗号均不可省略)。\n{q1}'

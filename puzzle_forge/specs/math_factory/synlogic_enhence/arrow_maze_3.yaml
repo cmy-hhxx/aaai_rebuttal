@@ -1,0 +1,153 @@
+# 正交激光反射网（可变尺寸，随机规则变体）——参数化造题框架（取向与反射约束聚焦版，完整规则渲染）
+# 生成模式：正向生成（随机布局 -> 计算数字 -> 隐藏镜子 -> 唯一性校验）
+# 注：本题为纯计算模式（不启用 Z3），所有逻辑由外部 Python 函数完成。
+
+custom_operator:
+  # 参数选择器（基础）
+  choose_src_num: arrow_maze_3.py
+  choose_rock_num: arrow_maze_3.py
+  choose_mirror_num: arrow_maze_3.py
+  choose_col_limit: arrow_maze_3.py
+  choose_adjacency: arrow_maze_3.py
+  choose_row_parity: arrow_maze_3.py
+  choose_cluster_limit: arrow_maze_3.py
+  # 参数选择器（新增高阶约束，提升触发率与兜底策略）
+  choose_orient_parity: arrow_maze_3.py
+  choose_source_turn_rows: arrow_maze_3.py
+  choose_exit_parity: arrow_maze_3.py
+  # 布局与检查
+  gen_layout: arrow_maze_3.py
+  permute_grid: arrow_maze_3.py
+  fill_numbers_limit: arrow_maze_3.py
+  hide_mirrors: arrow_maze_3.py
+  validate_unique_all: arrow_maze_3.py
+  validate_grid_all: arrow_maze_3.py
+  # 文本与序列化
+  grid_to_string: arrow_maze_3.py
+  grid_to_pylist: arrow_maze_3.py
+  rules_to_string: arrow_maze_3.py
+
+# 变量区：尺寸、随机种子、规则上限与数量参数（含随机规则变体与新增高阶约束）
+variables:
+  # 网格尺寸
+  size:
+    type: int
+    domain: "[6, 9]"
+    diff_factor: 1
+  # 每行镜子上限（在规则文本中展示）
+  row_limit:
+    type: int
+    domain: "[2, 3]"
+    diff_factor: 1
+  # 随机种子（布局）
+  seed:
+    type: int
+    domain: "[1, 1000000000]"
+  # 旋转（为保证约束一致性已禁用）
+  rotate_k:
+    type: int
+    domain: "[0, 0]"
+  # 行列置换种子（本版本不使用，仅保留接口一致性）
+  permute_seed:
+    type: int
+    domain: "[1, 1000000000]"
+
+  # 源数量（由函数随机选择）
+  src_num:
+    formula: choose_src_num(size, seed)
+    diff_factor: 1
+  # 陨石数量（释放镜子空间）
+  rock_num:
+    formula: choose_rock_num(size, src_num, seed + 101)
+  # 镜子数量（限制 <=12，以便唯一性枚举；下限提升至≥3）
+  mirror_num:
+    formula: choose_mirror_num(size, row_limit, src_num, rock_num, seed + 202)
+    diff_factor: 1
+
+  # 位置类内部约束（在规则文本中展示）
+  col_limit_pack:
+    formula: choose_col_limit(size, seed + 3031)
+  use_col_limit:
+    formula: col_limit_pack[0]
+  col_limit:
+    formula: col_limit_pack[1]
+  adjacency_enabled:
+    formula: choose_adjacency(seed + 3032)
+  row_parity_pack:
+    formula: choose_row_parity(size, seed + 3033)
+  row_parity_mode:
+    formula: row_parity_pack[0]
+  row_parity_rows:
+    formula: row_parity_pack[1]
+  cluster_limit:
+    formula: choose_cluster_limit(size, mirror_num, seed + 3034)
+
+  # 取向与反射相关约束（题面展示；提高触发率，且兜底保证至少一类取向约束）
+  orient_pack:
+    formula: choose_orient_parity(size, seed + 4041)
+  row_orient_mode:
+    formula: orient_pack[0]
+  row_orient_rows:
+    formula: orient_pack[1]
+  col_orient_mode:
+    formula: orient_pack[2]
+  col_orient_cols:
+    formula: orient_pack[3]
+  diag_orient_mode:
+    formula: orient_pack[4]
+
+  source_turn_pack:
+    formula: choose_source_turn_rows(size, seed + 4042)
+  source_turn_mode:
+    formula: source_turn_pack[0]
+  source_turn_rows:
+    formula: source_turn_pack[1]
+
+  exit_pack:
+    formula: choose_exit_parity(size, seed + 4043)
+  exit_mode:
+    formula: exit_pack[0]
+  exit_sides:
+    formula: exit_pack[1]
+
+  # 基础布局（含 整数源 '#', '/', '\'），遵循全部规则变体；生成阶段已做唯一性筛选与斜杠奇偶线性求解
+  base_grid:
+    formula: gen_layout(size, src_num, rock_num, mirror_num, row_limit, seed + 404, use_col_limit, col_limit, adjacency_enabled, row_parity_mode, row_parity_rows, cluster_limit, row_orient_mode, row_orient_rows, col_orient_mode, col_orient_cols, diag_orient_mode, source_turn_mode, source_turn_rows, exit_mode, exit_sides)
+
+  # 为保持几何邻接一致性，最终布局不再做行列置换/旋转
+  final_grid:
+    formula: permute_grid(base_grid, permute_seed, rotate_k)
+
+  # 将整数源赋值为四向路径总长度，得到数字网格（包含 int、'#'、'/'、'\' 与 '.'）
+  number_grid:
+    formula: fill_numbers_limit(final_grid, row_limit)
+
+  # 题面网格：镜子隐藏为 '?'
+  puzzle_grid:
+    formula: hide_mirrors(number_grid)
+
+  # 文本化
+  puzzle_str:
+    formula: grid_to_string(puzzle_grid)
+  # 完整输出位置类 + 取向/反射约束文本（与校验一致）
+  rule_str:
+    formula: rules_to_string(row_limit, use_col_limit, col_limit, adjacency_enabled, row_parity_mode, row_parity_rows, cluster_limit, row_orient_mode, row_orient_rows, col_orient_mode, col_orient_cols, diag_orient_mode, source_turn_mode, source_turn_rows, exit_mode, exit_sides)
+  answer_str:
+    formula: grid_to_pylist(number_grid)
+
+# 纯计算模式：不使用 Z3
+calc_solution: false
+
+# 查询：输出最终网格的 Python 列表字面量字符串
+queries:
+  # 单一问答，输出唯一解对应的完整网格字面量
+  q1:
+    # 说明：整数格（源）视为阻挡；不同源可共享格；仅 '?' 可填镜子；反斜杠在字符串中须写作 '\\\\'
+    desc: '请将最终{size}×{size}网格以单行 Python 列表字面量字符串输出；元素为数字、''#''、''/''、''\\''或 ''.''（空白可通行格），例如 [[1, ''.'', ''#''], [''#'', ''/'', 2]] 或 [[1, ''.'', ''#''], [''#'', ''\\\\'', 2]]（示例，非本题答案）。题面中以 ''?'' 标注的格为镜子位置，你只能在这些格中填入 ''/'' 或 ''\\''；其它非 ''?'' 位置必须保持不变。整数格即为激光源（源为阻挡，射线不可进入）；不同源的射线可以经过同一格，但同一源的任意两条射线不得经过同一格。行列编号均从1开始（行自上而下，列自左而右）。需同时满足：{rule_str}；每个源数字等于其四个正交方向射线路径长度之和（遇到陨石''#''、整数格或出界即终止，该步不计入长度；四向每一条射线均需进入至少一个可通行格）；射线遇镜子按规则折返（''/'' 将上→右、右→上、下→左、左→下；''\\'' 将上→左、左→上、下→右、右→下）。注意：字符串中的反斜杠镜子必须写作 ''\\\\''（两个反斜杠）。答案格式：单行 Python 列表字面量字符串，形如 [[3, ''.'', 0], [''#'', ''/'', 2]] 或 [[3, ''.'', 0], [''#'', ''\\\\'', 2]]（示例，非本题答案），需与标准答案完全一致。'
+    ans_formula: answer_str
+    ans_text: _ans
+    ans_assertion: 'validate_unique_all(number_grid, row_limit, use_col_limit, col_limit, adjacency_enabled, row_parity_mode, row_parity_rows, cluster_limit, row_orient_mode, row_orient_rows, col_orient_mode, col_orient_cols, diag_orient_mode, source_turn_mode, source_turn_rows, exit_mode, exit_sides)'
+
+# 题面描述：单行字符串，显式换行；文本需包含规则解释与答案格式说明
+# 说明：整数格为源（阻挡）；不同源可共享格；仅 '?' 可填镜子；puzzle_str 为单行内嵌的可视化（使用字面量 \n 分隔行）；反斜杠在字符串中须写作 '\\\\'
+desc: '正交激光反射网（完整规则版）：你看到的网格中，整数格表示激光源（数值为四向射线路径长度总和），''#'' 为陨石阻挡，''?'' 为待填镜子，镜子只能为斜杠''/''或反斜杠''\\''，''.'' 表示空白可通行格。反射规则：''/'' 将上→右、右→上、下→左、左→下；''\\'' 将上→左、左→上、下→右、右→下。需满足以下全部约束：{rule_str}；同源四射线不相交；不同源的射线可以经过同一格；遇陨石''#''、整数格或出界即终止（该步不计入长度；四向每一条射线均需进入至少一个可通行格）。镜子的位置已用 ''?'' 明示，非 ''?'' 位置不得改动。行列编号均从1开始（行自上而下，列自左而右）。下为题面网格（''?'' 为待填镜子，非 ''?'' 位置不得修改）：\n{puzzle_str}\n答案格式：请输出单行 Python 列表字面量字符串（注意：反斜杠镜子须写作 ''\\\\''），例如 [[1, ''.'', ''#''], [''#'', ''/'', 2]] 或 [[1, ''.'', ''#''], [''#'', ''\\\\'', 2]]（示例，非本题答案），需与标准答案完全一致。'

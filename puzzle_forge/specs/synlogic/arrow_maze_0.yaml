@@ -1,0 +1,55 @@
+custom_operator:
+  # 生成箭头迷宫的函数 (沿用原生成逻辑，但不再强制唯一)
+  generate_arrow_maze: customs/arrow_maze_0.py
+  # 新增：计算解的数量的函数
+  get_solution_count: customs/arrow_maze_0.py
+
+variables:
+  # 迷宫尺寸
+  grid_size_n:
+    type: int
+    domain: "[4, 8]" # 建议稍微减小尺寸，因为计算全解比较耗时
+    diff_factor: 1
+  grid_size_m:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1  
+  
+  # 生成迷宫数据
+  maze_data:
+    formula: generate_arrow_maze(1, 10000, grid_size_n, grid_size_m, 0.0, 0.0)
+  
+  # 提取初始网格（带数字和X）
+  initial_grid:
+    formula: maze_data[0].metadata['maze'] if maze_data else [["X" for _ in range(5)] for _ in range(5)]
+  
+  # 计算该迷宫所有可能的解的数量
+  solution_count:
+    formula: get_solution_count(initial_grid)
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "请回答可能的方案总数（填写一个整数）："
+    ans_formula: solution_count
+    ans_text: str(_ans)
+    # 直接比对整数值即可，无需复杂的网格验证
+    ans_assertion: _ans == solution_count
+
+desc: |
+  你需要分析一个 {grid_size_m}行 x {grid_size_n}列 的箭头迷宫。
+  
+  规则如下：
+  1. X 表示空白格子，数字表示射线箭头串的起点。
+  2. 你需要在空白格子中填入箭头（↑、↓、←、→、↖、↗、↘、↙）。
+  3. 每个数字指示从该位置发出的所有射线箭头串的总长度。
+  4. **所有箭头都必须是某条射线的组成部分（即每个箭头都要能回溯到一个数字源头，不能存在孤立的箭头）。**
+  
+  初始网格如下：
+  {initial_grid}
+  
+  **问题：请计算有多少种不同的填充方案可以满足上述所有数字的约束条件？**
+  （如果只有一种解，请回答 1；如果有多种解，请回答具体的数量。）

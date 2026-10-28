@@ -1,0 +1,307 @@
+# =========================
+# 多源传感器融合校验（强化抽象规则版：多层复合约束 + 唯一解验证）
+# =========================
+
+# -------------------------
+# 自定义操作符（从外部 Python 引入）
+# -------------------------
+custom_operator:
+  gen_sensor_instance: math_path_3.py
+
+# -------------------------
+# 变量定义（参数由 Python 随机生成并解包）
+# -------------------------
+variables:
+  # 问号数量（固定为 7）
+  slot_num:
+    type: int
+    domain: '[7, 7]'
+
+  # 生成 7 个占位符标识（如 A1..A7），用于作为符号字典的键
+  slots:
+    formula: generate_letters(slot_num)
+
+  # 统一随机生成一个实例的参数包（隐藏解不暴露）
+  seed:
+    formula: gen_sensor_instance()
+
+  # 全局范围
+  value_lo:
+    formula: 'seed["vmin"]'
+  value_hi:
+    formula: 'seed["vmax"]'
+
+  # 区间上下界与是否启用
+  b_lo:
+    formula: 'seed["b_lo"]'
+  b_hi:
+    formula: 'seed["b_hi"]'
+  c_lo:
+    formula: 'seed["c_lo"]'
+  c_hi:
+    formula: 'seed["c_hi"]'
+  d_lo:
+    formula: 'seed["d_lo"]'
+  d_hi:
+    formula: 'seed["d_hi"]'
+  f_lo:
+    formula: 'seed["f_lo"]'
+  f_hi:
+    formula: 'seed["f_hi"]'
+  g_lo:
+    formula: 'seed["g_lo"]'
+  g_hi:
+    formula: 'seed["g_hi"]'
+
+  use_b_range:
+    formula: 'seed["use_b_range"]'
+  use_c_range:
+    formula: 'seed["use_c_range"]'
+  use_d_range:
+    formula: 'seed["use_d_range"]'
+  use_f_range:
+    formula: 'seed["use_f_range"]'
+  use_g_range:
+    formula: 'seed["use_g_range"]'
+
+  # q,t 的范围
+  qt_min:
+    formula: 'seed["qt_min"]'
+  qt_max:
+    formula: 'seed["qt_max"]'
+
+  # 主等式系数与目标值
+  main_a1:
+    formula: 'seed["main_a1"]'
+  main_a2:
+    formula: 'seed["main_a2"]'
+  main_a3:
+    formula: 'seed["main_a3"]'
+  main_a4:
+    formula: 'seed["main_a4"]'
+  target_value:
+    formula: 'seed["target"]'
+
+  # 偶奇规则（列表）
+  parity_idx:
+    formula: 'seed["parity_idx"]'
+  parity_val:
+    formula: 'seed["parity_val"]'
+  parity_rule_num:
+    formula: 'seed["parity_rule_num"]'
+
+  # 正性规则
+  positivity_idx:
+    formula: 'seed["positivity_idx"]'
+  pos_count:
+    formula: 'seed["pos_count"]'
+
+  # 唯一解约束辅助量（权重与两类和）
+  weights:
+    formula: 'seed["weights"]'
+  sum_total:
+    formula: 'seed["sum_total"]'
+  checksum_total:
+    formula: 'seed["checksum_total"]'
+  weights_desc:
+    formula: "', '.join([str(w) for w in weights])"
+
+  # 新增复合约束常数
+  pairsum_bf:
+    formula: 'seed["pairsum_bf"]'
+  pairsum_cg:
+    formula: 'seed["pairsum_cg"]'
+  ad_sum:
+    formula: 'seed["ad_sum"]'
+  qt_sum:
+    formula: 'seed["qt_sum"]'
+  mod_M:
+    formula: 'seed["mod_M"]'
+  mod_V:
+    formula: 'seed["mod_V"]'
+  l1_bound:
+    formula: 'seed["l1_bound"]'
+  nonneg_target:
+    formula: 'seed["nonneg_target"]'
+
+  # 文本片段（预渲染）
+  desc_parity:
+    formula: 'seed["desc_parity"]'
+  desc_ranges:
+    formula: 'seed["desc_ranges"]'
+  desc_positivity:
+    formula: 'seed["desc_positivity"]'
+  desc_main:
+    formula: 'seed["desc_main"]'
+  desc_pairsum:
+    formula: 'seed["desc_pairsum"]'
+  desc_ad:
+    formula: 'seed["desc_ad"]'
+  desc_qtsum:
+    formula: 'seed["desc_qtsum"]'
+  desc_modlin:
+    formula: 'seed["desc_modlin"]'
+  desc_l1:
+    formula: 'seed["desc_l1"]'
+  desc_nonneg:
+    formula: 'seed["desc_nonneg"]'
+  desc_denom:
+    formula: 'seed["desc_denom"]'
+
+# -------------------------
+# 符号定义
+# -------------------------
+symbols:
+  # x[slot]：每个占位符的整数取值（对应 7 个问号 a..g）
+  x:
+    source:
+    - slots
+    type: int
+    desc: '{_slots} 的取值'
+
+  # 辅助单元：显式引入整数商/余数/商
+  # q 为 e/f 的整数商；t 为 (a+b*c)/d 的整数商；r 为 (a+b*c)%d 的正余数
+  aux:
+    source:
+    - "['K']"
+    attr:
+    - q
+    - t
+    - r
+    type:
+    - int
+    - int
+    - int
+    desc:
+    - '整数商 q'
+    - '整数商 t'
+    - '正余数 r'
+
+# -------------------------
+# 约束条件
+# -------------------------
+conditions:
+  # 全局取值范围 [value_lo, value_hi]
+  value_bounds:
+    formula: 'And([And(x[s] >= value_lo, x[s] <= value_hi) for s in slots])'
+    desc: '每个占位符的值均在 [value_lo, value_hi] 范围内'
+
+  # 偶奇约束（按规则列表统一施加）
+  parity_constraints:
+    formula: 'And([If(parity_val[i] == 0, x[slots[parity_idx[i]]] % 2 == 0, x[slots[parity_idx[i]]] % 2 == 1) for i in range(parity_rule_num)])'
+    desc: '按规则限定若干变量的偶奇性'
+
+  # 正性约束（可能为空集）
+  positivity_constraints:
+    formula: 'Implies(pos_count > 0, And([x[slots[positivity_idx[i]]] > 0 for i in range(pos_count)]))'
+    desc: '部分变量需为正整数（若有）'
+
+  # 额外范围收紧（使用 Implies 包裹，按启用标志生效）
+  b_range:
+    formula: 'Implies(use_b_range, And(x[slots[1]] >= b_lo, x[slots[1]] <= b_hi))'
+    desc: '若启用，则 b 在 [b_lo, b_hi]'
+  c_range:
+    formula: 'Implies(use_c_range, And(x[slots[2]] >= c_lo, x[slots[2]] <= c_hi))'
+    desc: '若启用，则 c 在 [c_lo, c_hi]'
+  d_range:
+    formula: 'Implies(use_d_range, And(x[slots[3]] >= d_lo, x[slots[3]] <= d_hi))'
+    desc: '若启用，则 d 在 [d_lo, d_hi]'
+  f_range:
+    formula: 'Implies(use_f_range, And(x[slots[5]] >= f_lo, x[slots[5]] <= f_hi))'
+    desc: '若启用，则 f 在 [f_lo, f_hi]'
+  g_range:
+    formula: 'Implies(use_g_range, And(x[slots[6]] >= g_lo, x[slots[6]] <= g_hi))'
+    desc: '若启用，则 g 在 [g_lo, g_hi]'
+
+  # 正除数
+  denom_positive:
+    formula: 'And(x[slots[3]] > 0, x[slots[5]] > 0)'
+    desc: 'd 与 f 为正整数'
+
+  # 整除关系 e = f * q
+  division_link:
+    formula: 'x[slots[4]] == x[slots[5]] * aux["K"].get("q")'
+    desc: 'e 能被 f 整除（存在整数商 q，使得 e = f * q）'
+
+  # 余数表示：a + b*c = d*t + r
+  remainder_link:
+    formula: 'x[slots[0]] + x[slots[1]] * x[slots[2]] == x[slots[3]] * aux["K"].get("t") + aux["K"].get("r")'
+    desc: '(a + b * c) 可表示为 d * t + r 的形式'
+
+  # 余数范围：0 < r < d
+  remainder_bounds:
+    formula: 'And(aux["K"].get("r") > 0, aux["K"].get("r") < x[slots[3]])'
+    desc: '余数 r 为正，且小于 d'
+
+  # q 与 t 的范围
+  qt_bounds:
+    formula: 'And(And(aux["K"].get("q") >= qt_min, aux["K"].get("q") <= qt_max), And(aux["K"].get("t") >= qt_min, aux["K"].get("t") <= qt_max))'
+    desc: '整数商 q 与 t 的取值范围均在 [qt_min, qt_max]'
+
+  # 主等式：r + a1*q*g + a2*q + a3*g + a4 = target_value
+  main_equation:
+    formula: 'aux["K"].get("r") + main_a1 * aux["K"].get("q") * x[slots[6]] + main_a2 * aux["K"].get("q") + main_a3 * x[slots[6]] + main_a4 == target_value'
+    desc: '主等式按随机模板生成并固定为等于 target_value'
+
+  # 总和等式与加权和等式（强约束，保证唯一性）
+  sum_equals:
+    formula: 'Sum([x[s] for s in slots]) == sum_total'
+    desc: '七个变量的和等于 sum_total'
+  checksum_equals:
+    formula: 'Sum([weights[i] * x[slots[i]] for i in range(slot_num)]) == checksum_total'
+    desc: '加权和等于 checksum_total（权重按 a..g 顺序分别为 weights）'
+
+  # ------------- 新增复合约束（多层逻辑） -------------
+  # 成对和约束
+  bf_pairsum:
+    formula: 'x[slots[1]] + x[slots[5]] == pairsum_bf'
+    desc: 'b + f 的和为 pairsum_bf'
+  cg_pairsum:
+    formula: 'x[slots[2]] + x[slots[6]] == pairsum_cg'
+    desc: 'c + g 的和为 pairsum_cg'
+
+  # 交叉和约束
+  ad_sum_cond:
+    formula: 'x[slots[0]] + x[slots[3]] == ad_sum'
+    desc: 'a + d 的和为 ad_sum'
+
+  # 商和之和约束
+  qt_sum_cond:
+    formula: 'aux["K"].get("q") + aux["K"].get("t") == qt_sum'
+    desc: 'q + t 的和为 qt_sum'
+
+  # 线性同余约束
+  modlin_cond:
+    formula: '(x[slots[0]] + 2 * x[slots[1]] + 3 * x[slots[2]] + 4 * x[slots[3]]) % mod_M == mod_V'
+    desc: '线性同余：(a + 2*b + 3*c + 4*d) % mod_M = mod_V'
+
+  # L1 绝对值等式（用 If 实现 abs）
+  l1_bound_cond:
+    formula: 'If(x[slots[1]] >= 0, x[slots[1]], -x[slots[1]]) + If(x[slots[2]] >= 0, x[slots[2]], -x[slots[2]]) + If(x[slots[6]] >= 0, x[slots[6]], -x[slots[6]]) == l1_bound'
+    desc: '|b| + |c| + |g| 等于常数 l1_bound（其中 |x| 表示绝对值）'
+
+  # 非负计数约束：[b,c,f,g] 中非负个数恰为 nonneg_target
+  nonneg_count_cond:
+    formula: 'Sum([If(x[slots[i]] >= 0, 1, 0) for i in [1, 2, 5, 6]]) == nonneg_target'
+    desc: '[b,c,f,g] 集合中的非负数个数恰为 nonneg_target'
+
+# -------------------------
+# 解数量上限（唯一解验收）与求解模式
+# -------------------------
+calc_solution: true
+max_solution: 6000
+
+# -------------------------
+# 查询：输出唯一一组满足约束的解
+# -------------------------
+queries:
+  q1:
+    desc: '请给出一组满足上述全部约束的整数解 [a, b, c, d, e, f, g]。答案格式：严格使用 Python 列表，如 [1, 2, 3, 4, 5, 6, 7]'
+    ans_formula: '[get_value(_solutions[0], x[slots[0]]), get_value(_solutions[0], x[slots[1]]), get_value(_solutions[0], x[slots[2]]), get_value(_solutions[0], x[slots[3]]), get_value(_solutions[0], x[slots[4]]), get_value(_solutions[0], x[slots[5]]), get_value(_solutions[0], x[slots[6]])]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# -------------------------
+# 整体描述（题面）
+# -------------------------
+desc: '场景：多源传感器融合校验（强化抽象规则版）。\n设 7 个整数依次为 a,b,c,d,e,f,g。令 q 为 e 除以 f 的整数商（e = f * q），t 为 (a + b * c) 除以 d 的整数商，r 为 (a + b * c) 对 d 的正余数（0 < r < d）。现需满足以下条件：\n1) 偶奇性：{desc_parity}；\n2) 正性约束：{desc_positivity}；\n3) 区间限制：{desc_ranges}；\n4) 存在整数 q,t,r，使 a + b * c = d * t + r 且 0 < r < d；并且 e 能被 f 整除（e = f * q）；且 {desc_denom}；\n5) 主等式：{desc_main}；\n6) 全局范围均在 [{value_lo}, {value_hi}]；\n7) q,t ∈ [{qt_min}, {qt_max}]；\n8) 七数之和等于 {sum_total}；\n9) 加权和等于 {checksum_total}，其中权重向量对应 [a..g] 依次为 [{weights_desc}]；\n10) 成对和：{desc_pairsum}；\n11) 交叉和：{desc_ad}；\n12) 商和之和：{desc_qtsum}；\n13) 线性同余：{desc_modlin}；\n14) 绝对值约束：{desc_l1}（其中 |x| 表示绝对值）；\n15) 非负计数：{desc_nonneg}。\n问题：求出满足全部条件的 [a, b, c, d, e, f, g]。答案格式：请严格使用 Python 列表（例如 [1, 2, 3, 4, 5, 6, 7]）。'

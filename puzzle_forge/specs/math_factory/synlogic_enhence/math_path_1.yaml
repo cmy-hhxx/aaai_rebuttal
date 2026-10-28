@@ -1,0 +1,207 @@
+# ==============================================================
+# 逆向生成与泛化：线性取模模板 + 随机线索池 → 固化参数 → 再次求解并保证唯一解
+# ==============================================================
+
+# 1) 自定义操作符（所有被调用的函数均在 math_path_1.py 中定义）
+custom_operator:
+  pick_k_distinct: math_path_1.py
+  choose_two_coeffs: math_path_1.py
+  choose_template: math_path_1.py
+  pick_clues: math_path_1.py
+  order_chain_text: math_path_1.py
+  build_pattern_string: math_path_1.py
+  build_expr_string: math_path_1.py
+  eval_expr_value: math_path_1.py
+  build_clues_text: math_path_1.py
+  build_sample_answer: math_path_1.py
+  choose_mod_base: math_path_1.py
+  compute_linmod_value: math_path_1.py
+  build_linmod_text: math_path_1.py
+
+# 2) 原子参数与控制变量（充分泛化）
+variables:
+  # 模除常数的范围（确保非零）
+  div_low:
+    type: int
+    domain: '[2, 3]'
+  div_high:
+    type: int
+    domain: '[8, 9]'
+  # 四个互异除数（对应第4/5/7/8位）
+  divs:
+    formula: 'pick_k_distinct(div_low, div_high, 4, [])'
+  d_const:
+    formula: 'divs[0]'
+  e_const:
+    formula: 'divs[1]'
+  g_const:
+    formula: 'divs[2]'
+  h_const:
+    formula: 'divs[3]'
+  # 两个与除数互异的乘法系数
+  mul_pair:
+    formula: 'choose_two_coeffs(2, 9, divs)'
+  mul1:
+    formula: 'mul_pair[0]'
+  mul2:
+    formula: 'mul_pair[1]'
+  # 表达式模板选择（1/2/3）
+  template_id:
+    formula: 'choose_template()'
+  # 序关系方向（严格递增或严格递减）
+  order_descending:
+    type: bool
+    domain: '[True, False]'
+  # 线索数量与集合（从候选集中抽取，避免显见组合）
+  clue_k:
+    type: int
+    domain: '[2, 4]'
+    diff_factor: -1
+  clue_set:
+    formula: 'pick_clues(clue_k)'
+  # 位置名称
+  pos_names:
+    formula: "['p1','p2','p3','p4','p5','p6','p7','p8']"
+  # 序关系涉及的未知位（固定为 p1,p2,p3,p6，保持题面清晰）
+  unknown_pos:
+    formula: "['p1','p2','p3','p6']"
+
+# 3) 符号：每个位置一个整数符号（0-9）
+symbols:
+  digits_s:
+    source:
+    - pos_names
+    type: int
+    desc: '{_pos_names} 位置的数字'
+
+# 4) 第一阶段约束：值域/互异/常数固定/非零/序关系（不绑定主表达式与线索）
+conditions:
+  digit_range:
+    formula: 'And([And(x >= 0, x <= 9) for x in digits_s.to_list()])'
+    desc: '每个问号代表 0-9 中的一个数字'
+  fix_divisors_constants:
+    formula: 'And(digits_s["p4"] == d_const, digits_s["p5"] == e_const, digits_s["p7"] == g_const, digits_s["p8"] == h_const)'
+    desc: '第4/5/7/8个位置为固定的非零常数'
+  non_zero_divisors:
+    formula: 'And(digits_s["p4"] != 0, digits_s["p5"] != 0, digits_s["p7"] != 0, digits_s["p8"] != 0)'
+    desc: '作为模除的除数（第4、5、7、8位）必须非零'
+  all_digits_distinct:
+    formula: 'Distinct(digits_s.to_list())'
+    desc: '八个位置上的数字两两不同'
+  p6_nonzero:
+    formula: 'digits_s["p6"] != 0'
+    desc: '第6个位置的数字不为 0'
+  order_chain_seed:
+    formula: 'If(order_descending, And(digits_s["p1"] > digits_s["p2"], digits_s["p2"] > digits_s["p3"], digits_s["p3"] > digits_s["p6"]), And(digits_s["p1"] < digits_s["p2"], digits_s["p2"] < digits_s["p3"], digits_s["p3"] < digits_s["p6"]))'
+    desc: '四个未知位置满足严格单调（升/降）'
+
+# 5) 二阶段注入：固化模板文本、目标值与线索
+post_generation:
+  post_gen_vars:
+    # 取第一阶段一组可行解
+    p1: 'get_value(_sol, digits_s["p1"])'
+    p2: 'get_value(_sol, digits_s["p2"])'
+    p3: 'get_value(_sol, digits_s["p3"])'
+    p4: 'get_value(_sol, digits_s["p4"])'
+    p5: 'get_value(_sol, digits_s["p5"])'
+    p6: 'get_value(_sol, digits_s["p6"])'
+    p7: 'get_value(_sol, digits_s["p7"])'
+    p8: 'get_value(_sol, digits_s["p8"])'
+    # 计算目标值（按线性化模板）
+    tgt: 'eval_expr_value(template_id, p1, p2, p3, d_const, e_const, p6, g_const, h_const, mul1, mul2)'
+    # 构造题面展示的表达式模式字符串（问号版本，问号依次代表 p1,p2,p3,p6）
+    pattern_text: 'build_pattern_string(template_id, d_const, e_const, g_const, h_const, mul1, mul2)'
+    # 序关系文本
+    order_text: 'order_chain_text(unknown_pos, order_descending)'
+    # 预计算线索数值（基础线索）
+    sum12: 'p1 + p2'
+    sum23: 'p2 + p3'
+    sum36: 'p3 + p6'
+    diff12: 'p1 - p2'
+    diff23: 'p2 - p3'
+    # 线索显隐（由 clue_set 决定）
+    reveal_sum12: '"sum12" in clue_set'
+    reveal_sum23: '"sum23" in clue_set'
+    reveal_sum36: '"sum36" in clue_set'
+    reveal_diff12: '"diff12" in clue_set'
+    reveal_diff23: '"diff23" in clue_set'
+    reveal_par1: '"par1" in clue_set'
+    reveal_par3: '"par3" in clue_set'
+    # parity 单点
+    par1_even: 'p1 % 2 == 0'
+    par3_even: 'p3 % 2 == 0'
+    # parity 扩展：p1 与 p6 同/不同奇偶；p1,p2,p3,p6 中恰有2个偶数
+    reveal_par16: '"par16" in clue_set'
+    reveal_even2: '"even2" in clue_set'
+    par16_same: '((p1 + p6) % 2 == 0)'
+    p2_even: 'p2 % 2 == 0'
+    p6_even: 'p6 % 2 == 0'
+    # 线性同余线索参数与文本
+    reveal_linmod: '"linmod" in clue_set'
+    lin_base_pair: 'choose_mod_base(d_const, e_const, g_const, h_const)'
+    lin_base: 'lin_base_pair[0]'
+    lin_coeffs: 'lin_base_pair[1]'
+    lin_val: 'compute_linmod_value(lin_coeffs, p1, p2, p3, p6, lin_base)'
+    lin_text: 'build_linmod_text(lin_coeffs, lin_base, lin_val)'
+    lin_c1: 'lin_coeffs[0]'
+    lin_c2: 'lin_coeffs[1]'
+    lin_c3: 'lin_coeffs[2]'
+    lin_c4: 'lin_coeffs[3]'
+    # 线索文本（统一汇总）
+    clues_text: 'build_clues_text(clue_set, sum12, sum23, sum36, diff12, diff23, p1, p2, p3, p6, par1_even, par3_even, par16_same, lin_text)'
+    # 示例答案（用于题干格式说明）
+    sample_ans: 'build_sample_answer(template_id, d_const, e_const, g_const, h_const, mul1, mul2, tgt)'
+  post_gen_conditions:
+    # 主表达式恒等（按模板分段，线性化版本）
+    equation_holds_final:
+      formula: 'Or(And(template_id == 1, digits_s["p1"] - digits_s["p2"] + (((((digits_s["p3"] % d_const) * mul1) % e_const + digits_s["p6"] * mul2) % g_const) % h_const) == tgt), And(template_id == 2, digits_s["p1"] - digits_s["p2"] + ((((digits_s["p3"] * mul1 + digits_s["p6"] * mul2) % e_const) % g_const) % h_const) == tgt), And(template_id == 3, digits_s["p1"] + digits_s["p2"] - ((((digits_s["p3"] * mul1) % d_const + (digits_s["p6"] * mul2) % g_const) % h_const)) == tgt))'
+      desc: '表达式 {pattern_text} 等于 {tgt}'
+    # 终局单调序关系（与题面一致再次固化）
+    order_chain_final:
+      formula: 'If(order_descending, And(digits_s["p1"] > digits_s["p2"], digits_s["p2"] > digits_s["p3"], digits_s["p3"] > digits_s["p6"]), And(digits_s["p1"] < digits_s["p2"], digits_s["p2"] < digits_s["p3"], digits_s["p3"] < digits_s["p6"]))'
+      desc: '四个未知位置满足严格单调：{order_text}'
+    # 线索条件（仅对“公开”的线索启用）——基础
+    sum12_cond:
+      formula: 'Implies(reveal_sum12, digits_s["p1"] + digits_s["p2"] == sum12)'
+      desc: '线索：p1+p2={sum12}'
+    sum23_cond:
+      formula: 'Implies(reveal_sum23, digits_s["p2"] + digits_s["p3"] == sum23)'
+      desc: '线索：p2+p3={sum23}'
+    sum36_cond:
+      formula: 'Implies(reveal_sum36, digits_s["p3"] + digits_s["p6"] == sum36)'
+      desc: '线索：p3+p6={sum36}'
+    diff12_cond:
+      formula: 'Implies(reveal_diff12, digits_s["p1"] - digits_s["p2"] == diff12)'
+      desc: '线索：p1-p2={diff12}'
+    diff23_cond:
+      formula: 'Implies(reveal_diff23, digits_s["p2"] - digits_s["p3"] == diff23)'
+      desc: '线索：p2-p3={diff23}'
+    par1_cond:
+      formula: 'Implies(reveal_par1, If(par1_even, digits_s["p1"] % 2 == 0, digits_s["p1"] % 2 == 1))'
+      desc: '线索：p1 的奇偶性已知'
+    par3_cond:
+      formula: 'Implies(reveal_par3, If(par3_even, digits_s["p3"] % 2 == 0, digits_s["p3"] % 2 == 1))'
+      desc: '线索：p3 的奇偶性已知'
+    # 线索条件（仅对“公开”的线索启用）——扩展
+    par16_cond:
+      formula: 'Implies(reveal_par16, If(par16_same, digits_s["p1"] % 2 == digits_s["p6"] % 2, digits_s["p1"] % 2 != digits_s["p6"] % 2))'
+    even2_cond:
+      formula: 'Implies(reveal_even2, If(digits_s["p1"] % 2 == 0, 1, 0) + If(digits_s["p2"] % 2 == 0, 1, 0) + If(digits_s["p3"] % 2 == 0, 1, 0) + If(digits_s["p6"] % 2 == 0, 1, 0) == 2)'
+      desc: '线索：p1,p2,p3,p6中恰有2个偶数'
+    linmod_cond:
+      formula: 'Implies(reveal_linmod, ((lin_c1 * digits_s["p1"] + lin_c2 * digits_s["p2"] + lin_c3 * digits_s["p3"] + lin_c4 * digits_s["p6"]) % lin_base == lin_val))'
+      desc: '线索：线性同余约束'
+
+# 6) 问题与答案（固定输出格式与示例）
+queries:
+  q1:
+    desc: '请将每个问号替换为合适的数字，使表达式成立：{pattern_text} = {tgt}。说明：问号自左至右依次代表 p1、p2、p3、p6；符号“%”表示整数取模运算（a % b 为 a 除以 b 的非负余数）。已知：第4、5、7、8位固定为 {d_const}、{e_const}、{g_const}、{h_const}；第6位不为 0；八位数字取 0-9 且互不相同；四个未知位 p1,p2,p3,p6 满足严格单调关系 {order_text}。公开线索：{clues_text}。答案格式：请提交与示例完全一致的等式字符串（包括空格、括号与等号），例如：{sample_ans}'
+    ans_formula: 'build_expr_string(template_id, p1, p2, p3, d_const, e_const, p6, g_const, h_const, mul1, mul2, tgt)'
+    ans_text: '_ans'
+    ans_assertion: 'len(_solutions) == 1'
+
+# 7) 全局生成控制：限制解枚举（多解直接丢弃）
+max_solution: 1
+
+# 8) 题面描述（单行，避免暴露内部生成逻辑）
+desc: '现给出表达式：{pattern_text} = {tgt}。条件：问号自左至右依次代表 p1、p2、p3、p6；第4、5、7、8位固定为 {d_const}、{e_const}、{g_const}、{h_const}；第6位不为 0；八位数字取 0-9 且互不相同；四个未知位 p1,p2,p3,p6 满足 {order_text}。另：符号“%”为整数取模。公开线索：{clues_text}。\n{q1}'

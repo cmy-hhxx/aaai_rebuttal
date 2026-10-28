@@ -1,0 +1,94 @@
+# =========================================
+# Markdown 括号/反引号规则随机化（进阶版，双代码片段可选 + 唯一解校验）
+# =========================================
+# 自定义操作符声明（外部 Python 文件，函数均在 dyck_language_reasoning_errors_2.py 中定义）
+custom_operator:
+  first_error_step_general: dyck_language_reasoning_errors_2.py
+  tokens_positions: dyck_language_reasoning_errors_2.py
+  rint: dyck_language_reasoning_errors_2.py
+  min2: dyck_language_reasoning_errors_2.py
+  rbool: dyck_language_reasoning_errors_2.py
+  make_rule_config: dyck_language_reasoning_errors_2.py
+  generate_markdown_instance_general: dyck_language_reasoning_errors_2.py
+  generate_markdown_instance_advanced: dyck_language_reasoning_errors_2.py
+  enumerate_violations: dyck_language_reasoning_errors_2.py
+  verify_unique_answer: dyck_language_reasoning_errors_2.py
+
+# 变量定义（多维随机化，支持两个代码片段与首次违规位置控制）
+variables:
+  # 片段数量与首次违规所在片段
+  span_num:
+    formula: rint(1, 2)
+  violation_span:
+    formula: rint(1, span_num)
+
+  # 第一段（代码片段1）前后的长度控制
+  pre_plain_max:
+    formula: rint(2, 12)
+  pre_plain_len:
+    formula: rint(0, pre_plain_max)
+  code1_pre_max:
+    formula: rint(0, 10)
+  code1_post_max:
+    formula: rint(0, 8)
+  code1_pre_len:
+    formula: rint(0, code1_pre_max)
+  code1_post_len:
+    formula: rint(0, code1_post_max)
+  close_code1:
+    formula: rbool()
+
+  # 两个片段之间的普通区间
+  between_plain_max:
+    formula: rint(0, 10)
+  between_plain_len:
+    formula: rint(0, between_plain_max)
+
+  # 第二段（代码片段2）前后的长度控制（若 span_num=1 则忽略）
+  code2_pre_max:
+    formula: rint(0, 10)
+  code2_post_max:
+    formula: rint(0, 8)
+  code2_pre_len:
+    formula: rint(0, code2_pre_max)
+  code2_post_len:
+    formula: rint(0, code2_post_max)
+  close_code2:
+    formula: rbool()
+
+  # 文末普通区间长度
+  post_plain_max:
+    formula: rint(0, 12)
+  post_plain_len:
+    formula: rint(0, post_plain_max)
+
+  # 规则配置（括号计数集、禁用集、反引号长度N与文本描述）
+  rule_cfg:
+    formula: make_rule_config()
+
+  # 生成实例（字符串与黄金答案，进阶双片段，确保分隔反引号相邻且总片段数∈{1,2}）
+  inst:
+    formula: generate_markdown_instance_advanced(pre_plain_len, code1_pre_len, code1_post_len, between_plain_len, code2_pre_len, code2_post_len, post_plain_len, close_code1, span_num == 2, close_code2, violation_span, rule_cfg)
+
+  input_str:
+    formula: "inst['text']"
+
+  golden_step:
+    formula: "inst['first_error_step']"
+
+  rule_text:
+    formula: "rule_cfg['text']"
+
+# 直接计算模式（无需 SMT）
+calc_solution: false
+
+# 查询：输出首次违规的步骤编号（全局唯一）
+queries:
+  q1:
+    desc: '规则说明：{rule_text}。\n输入：{input_str}\n请输出“第一次出现在代码片段内部、且属于代码片段内禁用集合的括号字符”的步骤编号；若不存在任何违规，请输出 -1。答案格式：一个整数，例如 7；若无违规则为 -1。'
+    ans_formula: first_error_step_general(input_str, rule_cfg)
+    ans_text: 'str(_ans)'
+    ans_assertion: 'verify_unique_answer(input_str, rule_cfg, _ans) and _ans == golden_step'
+
+# 整体题面描述
+desc: '场景：Markdown 计数与禁用规则推理（进阶版）。你需要根据题面规则逐字符计数并找出首次违反“代码片段内禁用集合”的位置编号，返回一个整数作为答案（示例：7；若无违规则为 -1）。{q1}'

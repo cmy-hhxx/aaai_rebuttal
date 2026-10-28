@@ -1,0 +1,112 @@
+# ================================================================
+# PuzzleClone Specification
+# Generator : 【镜之空域】复杂逻辑随机生成 (Unique-Solution)
+# ================================================================
+
+custom_operator:
+  generate_maze: arrow_maze_1.py
+  rand_bool: arrow_maze_1.py
+  select_clues: arrow_maze_1.py
+
+variables:
+  n:
+    type: int
+    domain: "[5, 7]"
+
+  max_len:
+    type: int
+    domain: "[9, 15]"
+
+  num_cnt:
+    type: int
+    domain: "[2, 5]"
+
+  mirror_density:
+    type: float
+    domain: "[0.10, 0.35]"
+
+  mirror_mode:
+    type: enum
+    domain: "['slash','backslash','both']"
+
+  unique_numbers:
+    formula: "rand_bool()"
+
+  # 问题类型 0:方向串 1:最短坐标 2:对角箭头数
+  q_type:
+    formula: "generate_random_list(1, 'int', [0, 2])[0]"
+
+  # 候选线索
+  raw_clue_types:
+    formula: "generate_random_list(3, 'int', [0, 3], cond=['lambda l: len(set(l))==len(l)'])"
+
+  # 过滤与问法冲突并限制条数
+  clue_types:
+    formula: "select_clues(q_type, raw_clue_types)"
+
+  # ---------------- 生成迷宫 ----------------
+  maze:
+    formula: "generate_maze(n, num_cnt, mirror_density, max_len, mirror_mode, unique_numbers, q_type, clue_types)"
+
+  grid:
+    formula: "maze['grid']"
+  num_positions:
+    formula: "maze['num_positions']"
+  numbers:
+    formula: "maze['numbers']"
+  answers:
+    formula: "maze['answers']"
+  answer_str:
+    formula: "'===='.join(answers)"
+  min_idx:
+    formula: "maze['min_idx']"
+  diag_cnt:
+    formula: "maze['diag_cnt']"
+  clues_text:
+    formula: "'；'.join(maze['clues'])"
+
+  # ---------------- 展示辅助 ----------------
+  pos_desc:
+    formula: "'，'.join([f\"[{p[0]},{p[1]}]\" for p in num_positions])"
+
+  mirror_desc:
+    formula: "({'slash':'仅[/]','backslash':'仅[\\\\]','both':'[/]与[\\\\]'}[mirror_mode])"
+
+  question_desc:
+    formula: >
+      ('请给出依次位于'+pos_desc+'的数字格的箭头方向(使用U,D,L,R,UL,UR,DL,DR表示)，按顺序以====连接。'
+       if q_type==0 else
+       ('请写出最短射线路径数字格的坐标，格式为[行,列](行列0起始，按行优先顺序)。'
+        if q_type==1 else
+        '请给出所有对角方向箭头的总数量。'))
+
+  correct_answer:
+    formula: >
+      (answer_str if q_type==0 else
+       ('['+str(num_positions[min_idx][0])+','+str(num_positions[min_idx][1])+']'
+        if q_type==1 else
+        str(diag_cnt)))
+
+  answer_example:
+    formula: >
+      ('UL====D====R' if q_type==0 else
+       ('[2,3]' if q_type==1 else
+        '3'))
+
+  grid_display:
+    formula: "'\\n'.join(['[ ' + ' '.join(row) + ' ]' for row in grid])"
+
+# ---------------------------------------------------------------
+# queries
+# ---------------------------------------------------------------
+queries:
+  q_main:
+    desc: "{question_desc}"
+    ans_formula: correct_answer
+    ans_text: "str(correct_answer)"
+    ans_assertion: "True"
+
+# ---------------------------------------------------------------
+# description
+# ---------------------------------------------------------------
+desc: '【镜之空域】给定一张边长为{n}的光线迷宫。规则：[X]为可放置八向箭头的空格；镜面符号使用{mirror_desc}进行反射；数字n表示该格射线(可多次反射)经过的格子总数(含起点及停止格)；射线遇到边界或另一数字格即停止且射线最多经过{max_len}格。初始网格如下:\n{grid_display}\n额外线索：{clues_text}\n{q_main}\n【答案格式说明】请按照示例书写：{answer_example}'

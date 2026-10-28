@@ -1,0 +1,27 @@
+custom_operator: 
+    findKthSmallest: customs/findkthsmallest.py
+variables:
+  n: 
+    type: int
+    domain: "[1, 15]"
+    diff_factor: 1
+  k: 
+    type: int
+    domain: "[1, 1000]"
+    diff_factor: 1
+  upper_bound: 
+    type: int
+    domain: "[25, 25]"
+    diff_factor: 1
+  coins:
+    formula: "[random.randint(1, upper_bound) for _ in range(n)]"
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请问使用这些硬币能制造的第{k}小的金额是多少？例如，coins=[3,6,9]，给定的硬币可以制造以下金额：3元硬币产生3的倍数：3, 6, 9, 12, 15等。6元硬币产生6的倍数：6, 12, 18, 24等。9元硬币产生9的倍数：9, 18, 27, 36等。所有硬币合起来可以产生：3, 6, 9, 12, 15等。第3小的金额为9元。
+    ans_formula: findKthSmallest(coins,k)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 有一个整数数组 coins={str(coins)} 表示不同面额的硬币。假设有无限量的每种面额的硬币。但是，不能 组合使用不同面额的硬币。{q1}

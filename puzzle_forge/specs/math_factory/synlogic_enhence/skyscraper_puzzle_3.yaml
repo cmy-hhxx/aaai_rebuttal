@@ -1,0 +1,160 @@
+custom_operator:
+  function_1: skyscraper_puzzle_3.py
+  build_diag_constraint: skyscraper_puzzle_3.py
+  build_visibility_constraints_masked: skyscraper_puzzle_3.py
+  compute_sides: skyscraper_puzzle_3.py
+  construct_seed_grid: skyscraper_puzzle_3.py
+  choose_diagonal_type: skyscraper_puzzle_3.py
+  choose_sides: skyscraper_puzzle_3.py
+  choose_sides_mask: skyscraper_puzzle_3.py
+  choose_fixed_count: skyscraper_puzzle_3.py
+  choose_fixed_from_seed: skyscraper_puzzle_3.py
+  choose_rule_budget: skyscraper_puzzle_3.py
+  generate_rules: skyscraper_puzzle_3.py
+  build_dynamic_rules: skyscraper_puzzle_3.py
+  generate_composite_spec: skyscraper_puzzle_3.py
+  build_composite_constraints: skyscraper_puzzle_3.py
+  format_sides_desc_masked: skyscraper_puzzle_3.py
+  format_fixed_desc: skyscraper_puzzle_3.py
+  format_rules_desc: skyscraper_puzzle_3.py
+  format_composite_desc: skyscraper_puzzle_3.py
+  choose_pin_num: skyscraper_puzzle_3.py
+  select_pin_positions: skyscraper_puzzle_3.py
+
+variables:
+  # 维度随机：保证可生成大量不同规模的实例
+  n:
+    type: int
+    domain: "[4, 7]"
+
+  # 符号键采用字符串，避免键串化问题
+  rows_keys:
+    formula: "['R' + str(i) for i in range(1, n + 1)]"
+  cols_keys:
+    formula: "['C' + str(i) for i in range(1, n + 1)]"
+
+  # 对角线趋势类型：无/主对角线严格递增（避免不可满足的组合）
+  diagonal_type:
+    formula: choose_diagonal_type()
+
+  # 随机选择可见度侧与其掩码（仅对掩码为 True 的位置给出线索）
+  sides_to_use:
+    formula: choose_sides()
+  sides_masks:
+    formula: choose_sides_mask(sides_to_use, n)
+  left_mask:
+    formula: "sides_masks['left']"
+  right_mask:
+    formula: "sides_masks['right']"
+  top_mask:
+    formula: "sides_masks['top']"
+  bottom_mask:
+    formula: "sides_masks['bottom']"
+
+  # 构造可行种子网格（拉丁 + 可选主对角线递增）
+  seed_grid:
+    formula: construct_seed_grid(n, diagonal_type)
+
+  # 从种子网格计算四侧可见度
+  sides:
+    formula: compute_sides(seed_grid)
+  left_c:
+    formula: "sides['left']"
+  right_c:
+    formula: "sides['right']"
+  top_c:
+    formula: "sides['top']"
+  bottom_c:
+    formula: "sides['bottom']"
+
+  # 随机固定格子
+  fixed_count:
+    formula: choose_fixed_count(n)
+  fixed:
+    formula: choose_fixed_from_seed(seed_grid, fixed_count)
+
+  # 随机内部规则预算与生成
+  rule_budget:
+    formula: choose_rule_budget(n)
+  rules:
+    formula: generate_rules(seed_grid, rule_budget)
+
+  # 复合高阶约束规格
+  composite_spec:
+    formula: generate_composite_spec(seed_grid)
+
+  # 唯一解钉扎参数与位置
+  uniq_pin_num:
+    formula: choose_pin_num(n)
+  pin_positions:
+    formula: select_pin_positions(n, uniq_pin_num)
+
+  # 文本描述辅助
+  diag_text:
+    formula: "('主对角线严格递增' if diagonal_type == 'main_inc' else '无对角线趋势')"
+  sides_desc:
+    formula: format_sides_desc_masked(sides_to_use, left_c, right_c, top_c, bottom_c, left_mask, right_mask, top_mask, bottom_mask)
+  fixed_list_desc:
+    formula: format_fixed_desc(fixed)
+  rules_desc:
+    formula: format_rules_desc(rules, n)
+  composite_desc:
+    formula: format_composite_desc(composite_spec)
+
+symbols:
+  # SMT 网格符号，键为 (row_key, col_key)
+  grid:
+    source:
+    - rows_keys
+    - cols_keys
+    type: int
+    desc: "Height at position (_rows_keys, _cols_keys)"
+
+conditions:
+  # 值域与拉丁约束
+  row_col_all_diff_and_domain:
+    formula: function_1(grid, rows_keys, cols_keys, n)
+    desc: "每行与每列均由 [1..{n}] 的不重复数字组成。"
+
+  # 条件对角线趋势
+  diagonal_constraint:
+    formula: build_diag_constraint(grid, rows_keys, cols_keys, n, diagonal_type)
+    desc: "对角线趋势：{diag_text}。"
+
+  # 按侧与掩码施加可见度约束
+  visibility_constraints:
+    formula: build_visibility_constraints_masked(grid, rows_keys, cols_keys, left_c, right_c, top_c, bottom_c, sides_to_use, left_mask, right_mask, top_mask, bottom_mask)
+    desc: "对选定侧且掩码为 True 的行/列施加可见度约束。"
+
+  # 随机内部规则约束（由种子网格反推，保证一致）
+  dynamic_rules_constraints:
+    formula: build_dynamic_rules(grid, rows_keys, cols_keys, rules)
+    desc: "应用随机内部规则（比较、峰值、首尾关系、两格和等）。"
+
+  # 复合高阶约束（棋盘和差、对角线和关系、蛇形路径相对、行列和目标、成块和目标等）
+  composite_constraints:
+    formula: build_composite_constraints(grid, rows_keys, cols_keys, composite_spec)
+    desc: "应用复合高阶约束以提升推理深度。"
+
+  # 固定格子线索
+  fixed_values:
+    formula: And([grid[('R' + str(r), 'C' + str(c))] == v for (r, c), v in fixed.items()])
+    desc: "满足所有给出的固定格子取值。"
+
+post_generation:
+  # 第一次求解后，从 _sol 中抽取钉扎值，并追加约束以收缩为唯一解
+  post_gen_vars:
+    pin_vals: "[get_value(_sol, grid[('R' + str(r), 'C' + str(c))]) for (r, c) in pin_positions]"
+  post_gen_conditions:
+    pin_eq:
+      formula: And([grid[('R' + str(rc[0]), 'C' + str(rc[1]))] == pin_vals[i] for i, rc in enumerate(pin_positions)])
+      desc: "唯一性钉扎：将若干关键格固定为第一次解的取值。"
+
+queries:
+  q1:
+    desc: '高阶 Skyscraper 题：网格尺寸 {n}×{n}，{diag_text}。可见度线索（按侧与掩码，未给出以 _ 表示）：{sides_desc}。额外规则：{rules_desc}。复合约束：{composite_desc}。固定格子：{fixed_list_desc}。答案格式说明：请输出 {n}×{n} 的 Python 二维列表（例如 [[1,2,...],[...],...]），与网格行列顺序一致。'
+    ans_formula: "[[get_value(_solutions[0], grid[(rows_keys[r_i], cols_keys[c_i])]) for c_i in range(n)] for r_i in range(n)]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: 'Skyscraper 高阶泛化框架：尺寸 {n}×{n}；{diag_text}；可见度侧与掩码为 {sides_desc}；随机内部规则为 {rules_desc}；复合高阶约束为 {composite_desc}；固定格子为 {fixed_list_desc}。答案格式：列表的列表，形如 [[...],[...],...]。'

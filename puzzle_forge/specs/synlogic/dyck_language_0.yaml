@@ -1,0 +1,39 @@
+custom_operator:
+  # 生成随机合法的括号前缀串（支持 () [] {} <>），保证无非法关闭；默认确保未完全闭合
+  generate_random_prefix: dyck_language_0.py
+  # 将前缀补全为合法且正确闭合的Dyck语言串（仅在末尾追加必要的右括号）
+  complete_sequence: dyck_language_0.py
+  # 校验括号序列是否为合法且正确闭合的Dyck语言串
+  validate_sequence: dyck_language_0.py
+
+variables:
+  # 随机设定前缀最小长度，保证题面规模与多样性
+  min_len:
+    type: int
+    domain: "[5, 20]"
+    diff_factor: 1
+  # 随机设定前缀最大长度（相对min_len增加3-10）
+  max_len:
+    type: int
+    domain: "[min_len + 3, min_len + 10]"
+    diff_factor: 1
+  # 随机生成合法括号前缀（支持四类括号；确保至少有未闭合的打开括号，使答案非空且唯一）
+  initial_seq:
+    formula: generate_random_prefix(min_len, max_len)
+
+symbols: {}
+conditions: {}
+# 本题采用正向生成：先随机产生输入，再通过自定义函数求解与验证
+calc_solution: false
+
+queries:
+  q1:
+    desc: "请输出补全后的完整括号序列。"
+    # 根据前缀进行唯一补全
+    ans_formula: complete_sequence(initial_seq)
+    ans_text: _ans
+    # 断言：补全结果必须为合法Dyck串，且以原始前缀开头（唯一性由栈匹配补全确保）
+    ans_assertion: "validate_sequence(_ans) and _ans.startswith(initial_seq)"
+
+# 注意：desc 是 Python f-string（无需显式前缀），其中出现的字面量花括号须用双花括号转义以避免“empty expression not allowed”错误
+desc: "Complete the following sequence to ensure all brackets are properly closed. Supported bracket types include: parentheses (), square brackets [], curly braces {{}} , angle brackets <>.\n{initial_seq}\n\nPlease output the complete sequence directly. Example format:\n<()[]> answer: ([][][{{}}])\n{q1}"

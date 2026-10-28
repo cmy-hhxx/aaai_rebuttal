@@ -1,0 +1,193 @@
+custom_operator:
+  generate_hard_instance: star_placement_puzzle_0.py
+  build_regions: star_placement_puzzle_0.py
+  build_cell_keys: star_placement_puzzle_0.py
+  build_neighbors_with_type: star_placement_puzzle_0.py
+  function_1: star_placement_puzzle_0.py
+  function_2: star_placement_puzzle_0.py
+
+variables:
+  # 随机网格大小，保证至少可生成 200+ 多样题目
+  grid_size:
+    type: int
+    domain: "[3, 7]"
+
+  # 复杂实例正向生成：包含区域划分、解、规则画像与高阶约束参数，以及中文描述文本
+  hard_instance:
+    formula: generate_hard_instance(grid_size)
+
+  # 区域网格与字母
+  region_grid:
+    formula: "hard_instance['region_grid']"
+  letters:
+    formula: "hard_instance['letters']"
+
+  # 解（0-based 坐标列表）
+  solution_cells_0b:
+    formula: "hard_instance['solution_cells']"
+
+  # 题面展示用的区域网格字符串（单行、方括号与单引号）
+  region_grid_desc:
+    formula: "'[' + ', '.join(['[' + ', '.join([\"'\" + x + \"'\" for x in row]) + ']' for row in region_grid]) + ']'"
+
+  # 规则画像（基础与辅助）
+  adjacency_type:
+    formula: "hard_instance['adjacency_type']"
+  row_relation:
+    formula: "hard_instance['row_relation']"
+  row_quota:
+    formula: "hard_instance['row_quota']"
+  col_relation:
+    formula: "hard_instance['col_relation']"
+  col_quota:
+    formula: "hard_instance['col_quota']"
+  region_relation:
+    formula: "hard_instance['region_relation']"
+  region_quota:
+    formula: "hard_instance['region_quota']"
+
+  # 辅助约束启用标志
+  parity_enabled:
+    formula: "hard_instance['parity_enabled']"
+  modulo_enabled:
+    formula: "hard_instance['modulo_enabled']"
+  hemisphere_enabled:
+    formula: "hard_instance['hemisphere_enabled']"
+
+  # 辅助约束参数与描述
+  parity_letters:
+    formula: "hard_instance.get('parity_letters', [])"
+  parity_target:
+    formula: "hard_instance.get('parity_target', 0)"
+  prime1:
+    formula: "hard_instance.get('prime1', 2)"
+  prime2:
+    formula: "hard_instance.get('prime2', 3)"
+  modulus_m:
+    formula: "hard_instance.get('modulus_m', 5)"
+  modulo_target:
+    formula: "hard_instance.get('modulo_target', 0)"
+  hemisphere_letters:
+    formula: "hard_instance.get('hemisphere_letters', [])"
+  top_half_flag:
+    formula: "hard_instance.get('top_half_flag', True)"
+  hemisphere_target:
+    formula: "hard_instance.get('hemisphere_target', 0)"
+
+  # 中文描述文本（人类可读）
+  row_rule_desc_text:
+    formula: "hard_instance['row_rule_desc_text']"
+  col_rule_desc_text:
+    formula: "hard_instance['col_rule_desc_text']"
+  region_rule_desc_text:
+    formula: "hard_instance['region_rule_desc_text']"
+  adjacency_desc_text:
+    formula: "hard_instance['adjacency_desc_text']"
+  parity_desc_text:
+    formula: "hard_instance['parity_desc_text']"
+  modulo_desc_text:
+    formula: "hard_instance['modulo_desc_text']"
+  hemisphere_desc_text:
+    formula: "hard_instance['hemisphere_desc_text']"
+
+  # 构建区域信息：字母分组与坐标映射
+  regions_info:
+    formula: build_regions(region_grid)
+  region_groups:
+    formula: "regions_info['groups']"
+  cell_to_letter:
+    formula: "regions_info['cell_to_letter']"
+
+  # 构建字符串键及坐标映射
+  cell_key_info:
+    formula: build_cell_keys(grid_size)
+  rows_str:
+    formula: "cell_key_info['rows_str']"
+  cols_str:
+    formula: "cell_key_info['cols_str']"
+  cells_keys:
+    formula: "cell_key_info['cells_keys']"
+  coord_to_key:
+    formula: "cell_key_info['coord_to_key']"
+  key_to_coord:
+    formula: "cell_key_info['key_to_coord']"
+
+  # 区域的字符串键集合
+  region_groups_keys:
+    formula: "dict((L, [coord_to_key[c] for c in region_groups[L]]) for L in letters)"
+
+  # 相邻（按类型）字符串键对列表
+  neighbor_pairs_keys:
+    formula: build_neighbors_with_type(grid_size, adjacency_type)
+
+  # 行列索引映射与权重映射（用于复合约束计算）
+  row_index_map:
+    formula: "dict((k, key_to_coord[k][0]) for k in cells_keys)"
+  col_index_map:
+    formula: "dict((k, key_to_coord[k][1]) for k in cells_keys)"
+  weight_map:
+    formula: "dict((k, row_index_map[k]*prime1 + col_index_map[k]*prime2) for k in cells_keys)"
+
+  # 辅助约束所涉及的键集合
+  parity_keys:
+    formula: "[k for L in parity_letters for k in region_groups_keys[L]]"
+  hemisphere_keys:
+    formula: "[k for L in hemisphere_letters for k in region_groups_keys[L]]"
+
+symbols:
+  # 每个单元布尔符号，表示是否放置星星。键为 ('R{i}','C{j}')
+  stars_s:
+    source:
+    - rows_str
+    - cols_str
+    type: Bool
+    desc: '单元({_rows_str},{_cols_str})是否放置星星'
+
+conditions:
+  # 行约束：根据 relation 与 quota 构造（此处生成器固定 eq 1，但保留表达式的一般性）
+  row_condition:
+    formula: "And([ (Sum([If(stars_s[(rows_str[i], cols_str[j])], 1, 0) for j in range(grid_size)]) == row_quota) if row_relation == 'eq' else (Sum([If(stars_s[(rows_str[i], cols_str[j])], 1, 0) for j in range(grid_size)]) <= row_quota) if row_relation == 'le' else (Sum([If(stars_s[(rows_str[i], cols_str[j])], 1, 0) for j in range(grid_size)]) >= row_quota) for i in range(grid_size)])"
+    desc: '行规则: {row_rule_desc_text}'
+  # 列约束
+  col_condition:
+    formula: "And([ (Sum([If(stars_s[(rows_str[i], cols_str[j])], 1, 0) for i in range(grid_size)]) == col_quota) if col_relation == 'eq' else (Sum([If(stars_s[(rows_str[i], cols_str[j])], 1, 0) for i in range(grid_size)]) <= col_quota) if col_relation == 'le' else (Sum([If(stars_s[(rows_str[i], cols_str[j])], 1, 0) for i in range(grid_size)]) >= col_quota) for j in range(grid_size)])"
+    desc: '列规则: {col_rule_desc_text}'
+  # 区域约束
+  region_condition:
+    formula: "And([ (Sum([If(stars_s[k], 1, 0) for k in region_groups_keys[L]]) == region_quota) if region_relation == 'eq' else (Sum([If(stars_s[k], 1, 0) for k in region_groups_keys[L]]) <= region_quota) if region_relation == 'le' else (Sum([If(stars_s[k], 1, 0) for k in region_groups_keys[L]]) >= region_quota) for L in letters])"
+    desc: '区域规则: {region_rule_desc_text}'
+  # 相邻约束：按邻接类型生成的键对
+  adjacency_condition:
+    formula: "And([Not(And(stars_s[p[0]], stars_s[p[1]])) for p in neighbor_pairs_keys])"
+    desc: '相邻规则: {adjacency_desc_text}'
+  # 复合约束1：奇偶约束（禁用时自动为真）
+  parity_condition:
+    formula: "Implies(parity_enabled, (Sum([If(stars_s[k], row_index_map[k], 0) for k in parity_keys]) % 2 == parity_target))"
+    desc: '奇偶约束: {parity_desc_text}'
+  # 复合约束2：加权模约束（禁用时自动为真）
+  modulo_condition:
+    formula: "Implies(modulo_enabled, ((Sum([If(stars_s[k], weight_map[k], 0) for k in cells_keys]) % modulus_m) == modulo_target))"
+    desc: '加权模约束: {modulo_desc_text}'
+  # 复合约束3：半区计数约束（禁用时自动为真）
+  hemisphere_condition:
+    formula: "Implies(hemisphere_enabled, (Sum([If(And(stars_s[k], row_index_map[k] < (grid_size // 2) if top_half_flag else row_index_map[k] >= (grid_size // 2)), 1, 0) for k in hemisphere_keys]) == hemisphere_target))"
+    desc: '半区计数约束: {hemisphere_desc_text}'
+
+post_generation:
+  # 使用生成的解并锁定为唯一解
+  post_gen_vars:
+    star_true_cells: "solution_cells_0b"
+    star_true_keys: "[coord_to_key[c] for c in star_true_cells]"
+  post_gen_conditions:
+    lock_solution:
+      formula: And([stars_s[k] == (k in star_true_keys) for k in cells_keys])
+      desc: '锁定星星配置为生成的唯一解'
+
+queries:
+  q1:
+    desc: '星星放置挑战：在 n×n 的分区网格中放置星星。规则说明：{row_rule_desc_text}; {col_rule_desc_text}; {region_rule_desc_text}; {adjacency_desc_text}。此外，还存在以下复合约束：{parity_desc_text}; {modulo_desc_text}; {hemisphere_desc_text}。网格规模为 n={grid_size}，区域网格为: {region_grid_desc}。请按字母顺序输出各区域的星星坐标，坐标为 1-based，答案格式为字典，如 A:(r,c);B:(r,c);...（先写行号较小者，行号相同则列号较小者）。'
+    ans_formula: "dict(sorted([(cell_to_letter[(c[0], c[1])], (c[0]+1, c[1]+1)) for c in star_true_cells], key=lambda x: x[0]))"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: '高阶星星放置问题：给定一个 n×n 的分区网格与一组规则（基础与复合），在网格中放置星星使之满足所有约束。请阅读题干说明与区域网格，并给出各字母区域的星星坐标。{q1}'

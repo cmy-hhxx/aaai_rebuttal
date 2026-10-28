@@ -1,0 +1,115 @@
+custom_operator:
+  # 生成经随机对称变换后的蛇形(哈密顿)解网格
+  gen_serpentine_with_transform: customs/numbrix_0.py
+  # 基于解网格，生成线索集合（值、行、列列表），保证包含足够锚点以利于唯一性
+  gen_clues_from_grid:  customs/numbrix_0.py
+  # 将线索转为2D网格（None表示空位）
+  build_clue_grid:  customs/numbrix_0.py
+  # 将2D网格渲染为ASCII文本
+  render_grid_text:  customs/numbrix_0.py
+
+variables:
+  # 网格边长随机取5~7，题目多样化；解与约束均按size自适应
+  size:
+    type: int
+    domain: "[5, 7]"
+    diff_factor: 1
+
+  n_sq:
+    formula: size * size
+  numbers:
+    formula: "list(range(1, n_sq + 1))"
+
+  # 先随机构造一个可行的完整解（蛇形填充+随机旋转/翻转）
+  sol_grid:
+    formula: gen_serpentine_with_transform(size)
+
+  # 基于解网格提取线索（尽量多的锚点，提高唯一性；仍保留大量空格）
+  clues_pack:
+    formula: gen_clues_from_grid(sol_grid)
+
+  # 线索的值与坐标（0基）
+  clues:
+    formula: "clues_pack['vals']"
+  clue_rows:
+    formula: "clues_pack['rows']"
+  clue_cols:
+    formula: "clues_pack['cols']"
+
+  # 构造只含线索的网格，以及其ASCII文本描述
+  clue_grid:
+    formula: build_clue_grid(size, clues, clue_rows, clue_cols)
+  grid_text:
+    formula: render_grid_text(clue_grid)
+
+symbols:
+  # 为每个数字n定义唯一位置(r,c)
+  pos:
+    source:
+    - numbers
+    attr:
+    - r
+    - c
+    type:
+    - int
+    - int
+    desc:
+    - "数值{_sym[0]}的行坐标是{_value}"
+    - "数值{_sym[0]}的列坐标是{_value}"
+
+conditions:
+  # 位置取值域
+  coord_domain:
+    formula: "And([And(pos[n].get('r') >= 0, pos[n].get('r') < size, pos[n].get('c') >= 0, pos[n].get('c') < size) for n in numbers])"
+    desc: "每个数字的行列坐标均在0..{size-1}的范围内"
+
+  # 位置唯一
+  all_positions_distinct:
+    formula: "And([Or(pos[numbers[i]].get('r') != pos[numbers[j]].get('r'), pos[numbers[i]].get('c') != pos[numbers[j]].get('c')) for i in range(n_sq) for j in range(i + 1, n_sq)])"
+    desc: "所有数字占据的单元格两两不同"
+
+  # 固定线索
+  fix_clues:
+    formula: "And([And(pos[clues[i]].get('r') == clue_rows[i], pos[clues[i]].get('c') == clue_cols[i]) for i in range(len(clues))])"
+    desc: "已知线索数字固定在给定单元格"
+
+  # 连续数字正交相邻（曼哈顿距离为1）
+  consecutive_adjacent:
+    formula: "And([Or(And(pos[k].get('r') == pos[k + 1].get('r'), Or(pos[k].get('c') + 1 == pos[k + 1].get('c'), pos[k].get('c') == pos[k + 1].get('c') + 1)), And(pos[k].get('c') == pos[k + 1].get('c'), Or(pos[k].get('r') + 1 == pos[k + 1].get('r'), pos[k].get('r') == pos[k + 1].get('r') + 1))) for k in range(1, n_sq)])"
+    desc: "相差为1的数字必须在网格中共享一条边"
+
+# 只保留唯一解的题目
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请在所有'X'中填入适当数字，并以Python格式的二维列表(列表的列表)输出完成的{size}×{size}网格。"
+    # 将唯一解映射为二维数组：在每个(r,c)单元找出其对应数字
+    ans_formula: "[[ next(k for k in numbers if get_value(_solutions[0], pos[k].get('r')) == r and get_value(_solutions[0], pos[k].get('c')) == c) for c in range(size)] for r in range(size)]"
+    ans_text: str(_ans)
+    ans_assertion: "len(_solutions) == 1"
+
+desc: |
+  考虑这个 {size}×{size} 的 Numbrix 谜题网格。你需要在网格中放置从 1 到 {n_sq} 的数字，使得连续的数字总是正交相邻。
+  1. 规则：
+    1) 从 1 到 {n_sq} 的每个数字必须恰好出现一次。
+    2) 相差为 1 的数字必须放置在共享一条边的单元格中。
+    3) 一些单元格已经包含作为线索的数字。
+  2. 输入（X 表示空单元）：
+  {grid_text}
+
+  Grid size: {size}×{size}
+  Numbers range: 1 to {n_sq}
+  3. 任务：
+    - 在所有标记为'X'的空单元格中填入从 1 到 {n_sq} 的适当数字。
+    - 确保连续的数字总是正交相邻。
+    - 以Python格式的二维列表(列表的列表)输出完成的网格。
+  4. 示例输出格式：
+  [
+      [1, 2, 3, 4],
+      [8, 7, 6, 5],
+      [9, 10, 11, 12],
+      [16, 15, 14, 13]
+  ]
+
+  {q1}

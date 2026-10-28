@@ -1,0 +1,184 @@
+# =========================
+# 自定义算子：全部在 time_sequence_3.py 中定义
+# =========================
+custom_operator:
+  choose_step: time_sequence_3.py
+  choose_align_unit: time_sequence_3.py
+  rand_inclusive: time_sequence_3.py
+  align_to_step: time_sequence_3.py
+  pick_multiple: time_sequence_3.py
+  pick_len_bounds: time_sequence_3.py
+  gen_intervals: time_sequence_3.py
+  format_intervals: time_sequence_3.py
+  format_time: time_sequence_3.py
+  compute_longest: time_sequence_3.py
+  choose_align_unit_unique: time_sequence_3.py
+  get_longest_duration: time_sequence_3.py
+  choose_min_target: time_sequence_3.py
+
+# =========================
+# 变量定义：全量参数化与随机化
+# =========================
+variables:
+  # 步长与工作日时间
+  step:
+    formula: choose_step()
+    diff_factor: -1
+  day_start_min:
+    formula: align_to_step(rand_inclusive(480, 600), step)
+  total_dur_min:
+    type: int
+    domain: "[420, 540]"
+  total_dur_max:
+    type: int
+    domain: "[total_dur_min + 60, total_dur_min + 240]"
+  day_end_min:
+    formula: align_to_step(day_start_min + rand_inclusive(total_dur_min, total_dur_max), step)
+    diff_factor: 1
+
+  # 规则参数范围与具体取值（均为步长整数倍）
+  switch_min:
+    type: int
+    domain: "[10, 30]"
+  switch_max:
+    type: int
+    domain: "[switch_min, 45]"
+  switch_cost:
+    formula: pick_multiple(step, switch_min, switch_max)
+
+  splice_min:
+    type: int
+    domain: "[5, 20]"
+  splice_max:
+    type: int
+    domain: "[splice_min, 30]"
+  splice_cost:
+    formula: pick_multiple(step, splice_min, splice_max)
+
+  cancel_min:
+    type: int
+    domain: "[10, 30]"
+  cancel_max:
+    type: int
+    domain: "[cancel_min, 40]"
+  cancel_limit:
+    formula: pick_multiple(step, cancel_min, cancel_max)
+
+  # 随机化拼接与切换次数上限
+  splice_times:
+    type: int
+    domain: "[0, 2]"
+  max_switches:
+    type: int
+    domain: "[0, 2]"
+
+  # 每组外景与内景的空闲段数量范围与取值
+  ext_cnt_min:
+    type: int
+    domain: "[2, 3]"
+  ext_cnt_max:
+    type: int
+    domain: "[ext_cnt_min, 5]"
+  int_cnt_min:
+    type: int
+    domain: "[2, 3]"
+  int_cnt_max:
+    type: int
+    domain: "[int_cnt_min, 5]"
+
+  dir_ext_cnt:
+    formula: rand_inclusive(ext_cnt_min, ext_cnt_max)
+  dir_int_cnt:
+    formula: rand_inclusive(int_cnt_min, int_cnt_max)
+  cam_ext_cnt:
+    formula: rand_inclusive(ext_cnt_min, ext_cnt_max)
+  cam_int_cnt:
+    formula: rand_inclusive(int_cnt_min, int_cnt_max)
+  light_ext_cnt:
+    formula: rand_inclusive(ext_cnt_min, ext_cnt_max)
+  light_int_cnt:
+    formula: rand_inclusive(int_cnt_min, int_cnt_max)
+
+  # 段长度的槽数上下界（通用范围）
+  len_slots_low_min:
+    type: int
+    domain: "[3, 6]"
+  len_slots_high_max:
+    type: int
+    domain: "[len_slots_low_min + 3, len_slots_low_min + 9]"
+
+  # 各组外景与内景段长度上下界（分钟）
+  dir_ext_len_bounds:
+    formula: pick_len_bounds(step, len_slots_low_min, len_slots_high_max)
+  dir_int_len_bounds:
+    formula: pick_len_bounds(step, len_slots_low_min, len_slots_high_max)
+  cam_ext_len_bounds:
+    formula: pick_len_bounds(step, len_slots_low_min, len_slots_high_max)
+  cam_int_len_bounds:
+    formula: pick_len_bounds(step, len_slots_low_min, len_slots_high_max)
+  light_ext_len_bounds:
+    formula: pick_len_bounds(step, len_slots_low_min, len_slots_high_max)
+  light_int_len_bounds:
+    formula: pick_len_bounds(step, len_slots_low_min, len_slots_high_max)
+
+  # 各组外景与内景空闲段（列表[[start,end],...]）
+  dir_ext_free:
+    formula: gen_intervals(day_start_min, day_end_min, dir_ext_cnt, dir_ext_len_bounds[0], dir_ext_len_bounds[1], step)
+  dir_int_free:
+    formula: gen_intervals(day_start_min, day_end_min, dir_int_cnt, dir_int_len_bounds[0], dir_int_len_bounds[1], step)
+  cam_ext_free:
+    formula: gen_intervals(day_start_min, day_end_min, cam_ext_cnt, cam_ext_len_bounds[0], cam_ext_len_bounds[1], step)
+  cam_int_free:
+    formula: gen_intervals(day_start_min, day_end_min, cam_int_cnt, cam_int_len_bounds[0], cam_int_len_bounds[1], step)
+  light_ext_free:
+    formula: gen_intervals(day_start_min, day_end_min, light_ext_cnt, light_ext_len_bounds[0], light_ext_len_bounds[1], step)
+  light_int_free:
+    formula: gen_intervals(day_start_min, day_end_min, light_int_cnt, light_int_len_bounds[0], light_int_len_bounds[1], step)
+
+  # 对齐单位：基于当前参数优选可产生唯一起点的对齐单位
+  align_unit:
+    formula: choose_align_unit_unique(step, day_start_min, day_end_min, switch_cost, cancel_limit, splice_cost, dir_ext_free, dir_int_free, cam_ext_free, cam_int_free, light_ext_free, light_int_free, splice_times, max_switches)
+    diff_factor: 1
+
+  # 展示文本
+  start_text:
+    formula: format_time(day_start_min)
+  end_text:
+    formula: format_time(day_end_min)
+  dir_ext_desc:
+    formula: format_intervals(dir_ext_free)
+  dir_int_desc:
+    formula: format_intervals(dir_int_free)
+  cam_ext_desc:
+    formula: format_intervals(cam_ext_free)
+  cam_int_desc:
+    formula: format_intervals(cam_int_free)
+  light_ext_desc:
+    formula: format_intervals(light_ext_free)
+  light_int_desc:
+    formula: format_intervals(light_int_free)
+
+  # 最低目标会议时长：依据当前可行最长时长设定，确保答案断言通过
+  min_target:
+    formula: choose_min_target(get_longest_duration(day_start_min, day_end_min, step, switch_cost, cancel_limit, splice_cost, dir_ext_free, dir_int_free, cam_ext_free, cam_int_free, light_ext_free, light_int_free, align_unit, splice_times, max_switches))
+    diff_factor: 1
+
+# =========================
+# 直接计算模式：答案由自定义算子计算
+# =========================
+calc_solution: false
+
+# =========================
+# 问题与答案
+# =========================
+queries:
+  q1:
+    desc: '在给定空闲时间与规则下安排联合会议 工作日为 {start_text} 至 {end_text} 开始时刻必须落在工作日范围内且与步长对齐 并且相对于00:00为每{align_unit}分钟的整数倍 例如当对齐单位为{align_unit}时只能在每{align_unit}分钟的整数倍开始 可在外景或内景开始 最多允许{max_switches}次场景切换 每次切换持续{switch_cost}分钟并计入会议时长 且在缓冲期间导演摄影灯光三组只要分别在外或内任一场景可用即视为可用 导演可取消不超过{cancel_limit}分钟采访以将导演忙碌视为可用 该额度按步长格数计数不足一格忽略 摄影总共可至多{splice_times}次拼接 每次可跳过连续不超过{splice_cost}分钟的摄影忙碌格 跳过不计入会议时长 且跳过不能跨越导演或灯光忙碌或其他不可用格 起始时间选项个数的统计口径为在工作日内所有满足对齐网格的起始时刻中能达到最长会议时长的不同起始时刻数量 只按开始时刻计数不区分起始场景 答案格式为两个整数以逗号分隔且不含空格 示例 60,1'
+    ans_formula: 'compute_longest(day_start_min, day_end_min, step, switch_cost, cancel_limit, splice_cost, dir_ext_free, dir_int_free, cam_ext_free, cam_int_free, light_ext_free, light_int_free, align_unit, splice_times, max_switches)'
+    ans_text: "str(_ans[0]) + ',' + str(_ans[1])"
+    ans_assertion: '_ans[0] >= min_target and _ans[1] == 1'
+
+# =========================
+# 描述模板：题面信息与规则
+# =========================
+desc: '电影拍摄日程对齐 工作日开始时间为 {start_text} 结束时间为 {end_text} 步长为每{step}分钟 所有时间计算按步长离散 所有给出的空闲时间段均为左闭右开且起止与步长对齐 会议开始时刻必须落在工作日范围内且与步长对齐 并且相对于00:00为每{align_unit}分钟的整数倍 例如当对齐单位为{align_unit}时只能在每{align_unit}分钟的整数倍开始 可在外景或内景开始 最多允许{max_switches}次场景切换 每次切换持续{switch_cost}分钟并计入会议时长 且在缓冲期间导演摄影灯光三组只要分别在外或内任一场景可用即视为可用 导演可取消不超过{cancel_limit}分钟采访以将导演忙碌视为可用 该额度按步长格数计数不足一格忽略 摄影总共可至多{splice_times}次拼接 每次可跳过连续不超过{splice_cost}分钟的摄影忙碌格 跳过不计入会议时长 且跳过不能跨越导演或灯光忙碌或其他不可用格 现给出各组空闲段 外景与内景时间段列表如下 导演 外景 {dir_ext_desc} 内景 {dir_int_desc} 摄影 外景 {cam_ext_desc} 内景 {cam_int_desc} 灯光 外景 {light_ext_desc} 内景 {light_int_desc} 请回答 {q1}'

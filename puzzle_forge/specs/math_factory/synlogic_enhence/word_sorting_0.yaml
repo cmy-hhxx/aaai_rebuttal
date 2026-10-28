@@ -1,0 +1,75 @@
+custom_operator:
+  # 规则生成与比较器相关操作（全部由 word_sorting_0.py 提供）
+  op_gen_rules: word_sorting_0.py
+  op_gen_words: word_sorting_0.py
+  op_choose_tiebreak: word_sorting_0.py
+  op_choose_order: word_sorting_0.py
+  op_choose_comparator_mode: word_sorting_0.py
+  op_sort_composite: word_sorting_0.py
+  op_build_rule_text: word_sorting_0.py
+  op_verify_by_rules: word_sorting_0.py
+  op_verify_unique: word_sorting_0.py
+
+# 正向生成：随机输入 -> 计算答案
+variables:
+  # 随机生成的单词数量与长度范围
+  words_num:
+    type: int
+    domain: "[7, 12]"
+  min_len:
+    type: int
+    domain: "[3, 7]"
+  max_len:
+    type: int
+    domain: "[min_len + 1, min_len + 6]"
+  # 生成唯一的随机英文小写单词
+  words:
+    formula: "op_gen_words(words_num, min_len, max_len)"
+
+  # 规则数量（2~5），引入多元复合与隐式辅助变量
+  rule_num:
+    type: int
+    domain: "[2, 5]"
+  rules:
+    # 规则生成需要参考 words（用于 dynamic_anchor 的频次统计）
+    formula: "op_gen_rules(rule_num, words)"
+
+  # 排序方向与并列长度规则
+  order_type:
+    formula: "op_choose_order()"
+  length_tiebreak:
+    formula: "op_choose_tiebreak()"
+
+  # 复合比较模式：根据可用维度与规则自适应随机选择
+  comparator_mode:
+    formula: "op_choose_comparator_mode(rules)"
+
+  # 文案分隔符与展示文本
+  sep:
+    formula: "', '"
+  words_text:
+    formula: "sep.join(words)"
+
+  # 计算排序结果与其文本形式
+  sorted_words:
+    formula: "op_sort_composite(words, rules, order_type, length_tiebreak, comparator_mode)"
+  sorted_words_text:
+    formula: "sep.join(sorted_words)"
+
+  # 规则说明文本（单行、含答案格式提示）
+  rule_text:
+    formula: "op_build_rule_text(rules, order_type, length_tiebreak, comparator_mode)"
+
+# 无需约束求解器，直接用函数计算答案
+calc_solution: false
+
+queries:
+  q1:
+    desc: '答案为:'
+    ans_formula: sorted_words_text
+    ans_text: "_ans"
+    # 唯一性与一致性双重校验（3分钟内极快完成）
+    ans_assertion: "op_verify_by_rules(words, sorted_words, rules, order_type, length_tiebreak, comparator_mode) and op_verify_unique(words, rules, order_type, length_tiebreak, comparator_mode)"
+
+# 单行题目描述；花括号仅用于变量插值；不使用双引号；文本解释规则与答案格式
+desc: '请根据以下多层比较与排序规则完成题目：{rule_text}；给定待排序的单词列表为 [ {words_text} ]；请按规则并以 {order_type} 序输出结果；同秩时采用 {length_tiebreak} 作为更大者；答案格式为按顺序完整列出，使用逗号+空格分隔，例如: alpha, beta, gamma。{q1}'

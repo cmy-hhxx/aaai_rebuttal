@@ -1,0 +1,74 @@
+custom_operator:
+  function_1: object_properties_0.py
+  function_2: object_properties_0.py
+  gen_initial_boxes: object_properties_0.py
+  gen_rules_config: object_properties_0.py
+  gen_query_config: object_properties_0.py
+  render_rules_text: object_properties_0.py
+  render_query_text: object_properties_0.py
+  choose_one: object_properties_0.py
+  choose_one_excluding: object_properties_0.py
+  verify_unique_answer: object_properties_0.py
+
+variables:
+  # 属性枚举池（可扩展）
+  volumes_list:
+    formula: "['超小','小','中','大','超大','超超大']"
+  origins:
+    formula: "['地球','火星','天狼','织女','半人马','木卫二','木星','水星','海王星']"
+  materials:
+    formula: "['钛','玻璃','布','合金','陶瓷','碳纤','塑料','复合材']"
+  rads:
+    formula: "['无','阿尔法','伽马','中微子','贝塔']"
+  categories:
+    formula: "['工具','药剂','口粮','样品','能源芯片','零件','仪器']"
+  colors:
+    formula: "['蓝','红','黑','金','银','紫','绿','白']"
+
+  # 初始货箱规模
+  box_num:
+    type: int
+    domain: "[14, 30]"
+
+  # 随机初始清单
+  initial_boxes:
+    formula: gen_initial_boxes(box_num, volumes_list, origins, materials, rads, categories, colors)
+
+  # 随机规则配置（序列与守卫随机，含去重与联动）
+  rules_config:
+    formula: gen_rules_config(volumes_list, origins, materials, rads, categories, colors)
+
+  # 应用规则得到最终清单
+  final_boxes:
+    formula: function_1(initial_boxes, volumes_list, rules_config)
+
+  # 反冗余的查询配置（避免恒真/恒假）
+  query_config:
+    formula: gen_query_config(volumes_list, origins, materials, rads, categories, colors)
+
+  # 统计答案
+  ans_count:
+    formula: function_2(final_boxes, query_config)
+
+  # 唯一性与质量验证（非平凡性、规则生效，限时保证）
+  unique_ok:
+    formula: verify_unique_answer(initial_boxes, volumes_list, rules_config, query_config)
+
+  # 展示字符串
+  initial_list_str:
+    formula: "'\\n'.join([str(i+1) + ' ' + b['volume'] + ' ' + b['origin'] + ' ' + b['material'] + ' ' + b['rad'] + ' ' + b['cat'] + ' ' + b['color'] for i, b in enumerate(initial_boxes)])"
+  rules_text:
+    formula: render_rules_text(rules_config)
+  query_text:
+    formula: render_query_text(query_config)
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '{query_text}'
+    ans_formula: ans_count
+    ans_text: str(_ans)
+    ans_assertion: 'unique_ok and _ans >= 0'
+
+desc: '太空港货舱清单追踪(高阶泛化)。你需要跟踪体积、原产、材质、辐射、类别、颜色等属性，并按照给出的规则对清单进行加工。体积降档顺序为(超小 < 小 < 中 < 大 < 超大 < 超超大)。若规则中出现校验值守卫，则守卫的校验值定义为(体积索引 + 材质索引 + 颜色索引)对给定模数取模的结果；索引从0开始，按枚举池出现顺序计数。初始清单(每行：编号 体积 原产 材质 辐射 类别 颜色)：\\n{initial_list_str}\\n规则如下：\\n{rules_text}\\n问题：{query_text}。请用整数答案格式回答，例如 17。{q1}'

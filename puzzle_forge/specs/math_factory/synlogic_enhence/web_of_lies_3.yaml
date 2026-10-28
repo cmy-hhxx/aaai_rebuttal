@@ -1,0 +1,214 @@
+# 高校实验室与机房（高级泛化版2.0：多层规则、局部与跨房约束、唯一解验证）
+# 变更要点：
+# - 明确答案中 focus 列表按姓名字典序升序排列，避免评测歧义
+# - 移除“显见线索” true_count 输出项，改为输出 lead_truth
+# - 增强同室模板人名约束：a_name、b_name 均不同于说话者
+# - 保持唯一解验证与 200+ 生成能力
+
+custom_operator:
+  build_answer: web_of_lies_3.py
+  build_answer_focus_and_lead: web_of_lies_3.py
+  choose_indices: web_of_lies_3.py
+  choose_distinct_from: web_of_lies_3.py
+  gen_room_labels: web_of_lies_3.py
+  exclude_by_indices: web_of_lies_3.py
+  render_ring_desc: web_of_lies_3.py
+  render_personal_desc: web_of_lies_3.py
+  count_true: web_of_lies_3.py
+  render_balance_desc: web_of_lies_3.py
+  render_contrast_desc: web_of_lies_3.py
+  render_lead_rule_desc: web_of_lies_3.py
+  render_observer_rule_desc: web_of_lies_3.py
+
+variables:
+  # 房间与人员规模
+  room_num:
+    type: int
+    domain: '[3, 5]'
+  cap:
+    type: int
+    domain: '[2, 2]'
+  people_num:
+    formula: room_num * cap
+
+  # 房间与人员命名
+  rooms:
+    formula: gen_room_labels(room_num)
+  room_order_desc:
+    formula: '" -> ".join(rooms)'
+  names:
+    formula: generate_letters(people_num)
+
+  # 锚点（用于打破对称，题面公布）
+  anchor_count:
+    type: int
+    domain: '[2, 3]'
+  anchors_idx:
+    formula: choose_indices(people_num, anchor_count)
+  anchor_rooms_idx:
+    formula: choose_indices(room_num, anchor_count)
+
+  # 特定角色（用于模板交叉约束）
+  lead_idx:
+    formula: anchors_idx[0]
+  lead_name:
+    formula: names[lead_idx]
+  observer_idx:
+    formula: choose_distinct_from(people_num, 1, anchors_idx)[0]
+  observer_name:
+    formula: names[observer_idx]
+
+  # 关注房间（回答中要求）
+  focus_room_idx:
+    formula: choose_indices(room_num, 1)[0]
+
+  # 观察者陈述方向（随机布尔）
+  observer_orient:
+    type: bool
+    domain: '[False, True]'
+
+  # 对比与平衡规则的房间选择
+  balance_count:
+    type: int
+    domain: '[1, 2]'
+  balance_rooms_idx:
+    formula: choose_indices(room_num, balance_count)
+  contrast_rooms_idx:
+    formula: choose_indices(room_num, 2)
+
+  # 文本辅助（纯渲染）
+  ring_desc:
+    formula: render_ring_desc(rooms)
+  balance_desc:
+    formula: render_balance_desc(rooms, balance_rooms_idx)
+  contrast_desc:
+    formula: render_contrast_desc(rooms[contrast_rooms_idx[0]], rooms[contrast_rooms_idx[1]])
+  lead_rule_desc:
+    formula: render_lead_rule_desc(lead_name)
+  observer_rule_desc:
+    formula: render_observer_rule_desc(observer_name, rooms[focus_room_idx], observer_orient)
+
+  # 全局真实人数目标（题面公布）
+  truth_total_target:
+    type: int
+    domain: '[1, people_num - 1]'
+
+  # 统一陈述模板域（除lead与observer外均在此列表中一人一条）
+  tmpl_codes:
+    formula: '[0, 1, 2]' # 0: 指认lead在某房且lead说谎；1: 链式（相对说话者房间的下一间）；2: 两人同室
+  others_count:
+    formula: people_num - 2
+  speakers_pool:
+    formula: exclude_by_indices(names, [lead_idx, observer_idx])
+
+symbols:
+  # 房间分配：每个 (person, room) 一个布尔符号
+  assign:
+    source:
+    - names
+    - rooms
+    type: bool
+    desc: '{_names} 在 {_rooms}'
+
+  # 每人一句话真假属性
+  truth_s:
+    source:
+    - names
+    type: bool
+    desc: '{_names} 的陈述为真'
+
+conditions:
+  # 每人恰在一个房间
+  one_room_each:
+    formula: 'And([Sum([If(assign[(p, r)], 1, 0) for r in rooms]) == 1 for p in names])'
+    desc: '每个参与者恰在一个房间'
+
+  # 每个房间恰有 cap 人
+  room_capacity:
+    formula: 'And([Sum([If(assign[(p, r)], 1, 0) for p in names]) == cap for r in rooms])'
+    desc: '每个房间的人数与容量一致'
+
+  # 锚点位置成立（题面公布）
+  anchors_fix:
+    formula: 'And([assign[(names[anchors_idx[i]], rooms[anchor_rooms_idx[i]])] for i in range(anchor_count)])'
+    desc: '题面公布的锚点位置成立'
+
+  # 锚点真话混合：恰有一名锚点说真话
+  anchors_truth_mixed:
+    formula: 'Sum([If(truth_s[names[anchors_idx[i]]], 1, 0) for i in range(anchor_count)]) == 1'
+    desc: '在锚点人选中，恰有一人说真话'
+
+  # lead 的局部规则：其所在房间的上一间恰有一人说真话（环状）
+  lead_local_rule:
+    formula: 'truth_s[lead_name] == And([Implies(assign[(lead_name, rooms[i])], (Sum([If(assign[(pp, rooms[((i - 1 + room_num) % room_num)])], If(truth_s[pp], 1, 0), 0) for pp in names]) == 1)) for i in range(room_num)])'
+    desc: '{lead_rule_desc}'
+
+  # 观察者关于关注房间的规则（orient 控制“恰有一人说真话”或“真假相同”）
+  observer_rule:
+    formula: 'truth_s[observer_name] == If(observer_orient, (Sum([If(assign[(pp, rooms[focus_room_idx])], If(truth_s[pp], 1, 0), 0) for pp in names]) == 1), Or((Sum([If(assign[(pp, rooms[focus_room_idx])], If(truth_s[pp], 1, 0), 0) for pp in names]) == 0), (Sum([If(assign[(pp, rooms[focus_room_idx])], If(truth_s[pp], 1, 0), 0) for pp in names]) == cap)))'
+    desc: '{observer_rule_desc}'
+
+  # 统一陈述：除lead与observer外的所有人各一条（模板混合）
+  speeches:
+    source:
+    - speakers_pool     # 说话者
+    - tmpl_codes        # 模板代码
+    - names             # a_name（用于同室模板）
+    - names             # b_name（用于同室模板）
+    - rooms             # claim_room（用于模板0）
+    - '[False, True]'   # orient（用于链式方向）
+    amount:
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    domain: '[others_count, others_count]'
+    domain_cond: true
+    dim_cond:
+    - [2, 3]
+    formula: 'truth_s[_sym[0][0]] == If((_sym[1][0] == 0), And([assign[(lead_name, _sym[4][0])], Not(truth_s[lead_name])]), If((_sym[1][0] == 1), And([Implies(assign[(_sym[0][0], rooms[i])], If(_sym[5][0], (Sum([If(assign[(pp, rooms[((i + 1) % room_num)])], If(truth_s[pp], 1, 0), 0) for pp in names]) == 1), Or((Sum([If(assign[(pp, rooms[((i + 1) % room_num)])], If(truth_s[pp], 1, 0), 0) for pp in names]) == 0), (Sum([If(assign[(pp, rooms[((i + 1) % room_num)])], If(truth_s[pp], 1, 0), 0) for pp in names]) == cap)))) for i in range(room_num)]), (Sum([If(And(assign[(_sym[2][0], r)], assign[(_sym[3][0], r)]), 1, 0) for r in rooms]) == 1)))'
+    desc: '{render_personal_desc(_sym[0][0], _sym[1][0], _sym[2][0], _sym[3][0], _sym[4][0], _sym[5][0], lead_name)}'
+    custom_cond:
+    # 保证同室模板的两人不同（dim 级；fields 映射为 [a_name, b_name]）
+    - scope: dim
+      fields: [2, 3]
+      constraint: 'lambda l: l[0][0][0] != l[0][1][0]'
+    # 说话者在 domain 内唯一
+    - scope: domain
+      fields: [0]
+      constraint: 'lambda l: len(set([l[i][0][0][0] for i in range(len(l))])) == len(l)'
+    # 额外：同室模板人名均不同于说话者（避免自指）
+    - scope: dim
+      fields: [0, 2]
+      constraint: 'lambda l: l[0][0][0] != l[0][1][0]'
+    - scope: dim
+      fields: [0, 3]
+      constraint: 'lambda l: l[0][0][0] != l[0][1][0]'
+
+  # 平衡规则：选中的房间中恰有一人说真话
+  balance_truth:
+    formula: 'And([Sum([If(assign[(pp, rooms[balance_rooms_idx[i]])], If(truth_s[pp], 1, 0), 0) for pp in names]) == 1 for i in range(balance_count)])'
+    desc: '{balance_desc}'
+
+  # 对比规则：两间房间真话人数不同
+  truth_contrast:
+    formula: 'Not(Sum([If(assign[(pp, rooms[contrast_rooms_idx[0]])], If(truth_s[pp], 1, 0), 0) for pp in names]) == Sum([If(assign[(pp, rooms[contrast_rooms_idx[1]])], If(truth_s[pp], 1, 0), 0) for pp in names]))'
+    desc: '{contrast_desc}'
+
+  # 全局真实人数约束（题面公布）
+  truth_total_exact:
+    formula: 'Sum([If(truth_s[p], 1, 0) for p in names]) == truth_total_target'
+    desc: '共有 {truth_total_target} 人在陈述中说真话'
+
+max_solution: 1
+
+queries:
+  q1:
+    desc: '问题：请返回一个字典，包含两项：focus（关注房间内两人的列表，按姓名字典序升序排列；每个元素为(姓名, 布尔)表示其是否说真话）与 lead_truth（布尔，表示 lead 的陈述真假）。格式示例：{{''focus'': [(''A1'', False), (''B2'', True)], ''lead_truth'': True}}'
+    ans_formula: 'build_answer_focus_and_lead([(p, get_value(_solutions[0], truth_s[p])) for p in names if get_value(_solutions[0], assign[(p, rooms[focus_room_idx])])], get_value(_solutions[0], truth_s[lead_name]))'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+desc: '场景：共有 {room_num} 个房间（按顺序：{room_order_desc}），每个房间恰有 {cap} 人；共有 {people_num} 人：{", ".join(names)}。已知锚点位置：{"; ".join([names[anchors_idx[i]] + " 位于 " + rooms[anchor_rooms_idx[i]] for i in range(anchor_count)])}。{ring_desc}。此外，锚点中恰有一人说真话；{balance_desc}；{contrast_desc}。以下两条陈述为特定角色所述：{lead_rule_desc}；{observer_rule_desc}。其余每位各发表一条陈述如下：{speeches}\n并且，{truth_total_exact}。回答格式：返回一个字典，包含 focus（关注房间内两人的列表，按姓名字典序升序排列；每个元素为(姓名, 布尔)表示其是否说真话）与 lead_truth（布尔，表示 lead 的陈述真假）。示例：{{''focus'': [(''A1'', False), (''B2'', True)], ''lead_truth'': True}}\n{q1}'

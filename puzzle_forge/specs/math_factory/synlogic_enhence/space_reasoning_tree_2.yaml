@@ -1,0 +1,88 @@
+# 扩展后的外部函数直接计算模式（calc_solution: false），唯一答案为最终组合字符串
+custom_operator:
+  # 基础树生成与描述
+  gen_tree: space_reasoning_tree_2.py
+  render_children_desc: space_reasoning_tree_2.py
+  # 规则生成与描述（含多阶段过滤、父级属性步骤与 XOR 选择；顺序稳定）
+  gen_rule_config: space_reasoning_tree_2.py
+  render_rule_desc: space_reasoning_tree_2.py
+  # 相关叔辈与有效堂兄弟的计算与格式化输出
+  relevant_uncles_list_py: space_reasoning_tree_2.py
+  filtered_cousins_list_str: space_reasoning_tree_2.py
+  filtered_cousins_count: space_reasoning_tree_2.py
+  filtered_cousins_list_py: space_reasoning_tree_2.py
+  # 上限检查（与 YAML 断言配合）
+  filtered_cousins_limit_ok: space_reasoning_tree_2.py
+  # 全局一致性与唯一解验证
+  validate_puzzle: space_reasoning_tree_2.py
+  validate_unique: space_reasoning_tree_2.py
+  # 展示辅助：父级列表按字典序输出
+  parents_sorted_py: space_reasoning_tree_2.py
+  # 组合最终答案字符串（'<q1>====<q2>====<q3>'）
+  compose_final_answer: space_reasoning_tree_2.py
+
+# ==============================
+# 全量参数化的可随机变量
+# ==============================
+variables:
+  # 父级数量（根的孩子数，至少3个以保证存在叔辈与堂兄弟集合）
+  parent_num:
+    type: int
+    domain: "[3, 6]"
+  # 每个父级的孩子数下限（至少2）
+  child_min:
+    type: int
+    domain: "[2, 3]"
+  # 每个父级的孩子数上限（不小于 child_min；若抽到不满足，Python 会自动修正）
+  child_max:
+    type: int
+    domain: "[4, 6]"
+  # 名称池大小（用于随机生成唯一名称，确保有足够多的实体）
+  name_pool_size:
+    type: int
+    domain: "[60, 200]"
+  # 树数据字典（根名称、父级列表、各父级孩子映射、目标父级与目标节点、总节点数）
+  tree_data:
+    formula: gen_tree(parent_num, child_min, child_max, name_pool_size)
+  # 根名称
+  root_name:
+    formula: "tree_data['root_name']"
+  # 父级列表（根的直接孩子，展示用：按字典序、单引号、方括号）
+  parents_py:
+    formula: parents_sorted_py(tree_data)
+  # 目标父级
+  parent_of_target:
+    formula: "tree_data['parent_of_target']"
+  # 目标节点
+  target_node:
+    formula: "tree_data['target_node']"
+  # 总节点数
+  total_nodes:
+    formula: "tree_data['total_nodes']"
+  # 每个父级孩子的文字描述（单行，孩子名按字典序升序）
+  children_desc:
+    formula: render_children_desc(tree_data)
+  # 随机生成的规则配置（叔辈选择与多阶段堂兄弟过滤管线，必含父级属性与孩子属性步骤；步骤顺序稳定且顺序无关）
+  rule_cfg:
+    formula: gen_rule_config(tree_data)
+  # 规则的自然语言描述（单行，含排序与口径说明；异或标志定义明确；顺序无关）
+  rule_desc:
+    formula: render_rule_desc(tree_data, rule_cfg)
+
+# 直接计算模式，不进行 Z3 解算
+calc_solution: false
+
+# ==============================
+# 问答：仅保留最终答案查询，玩家需提交统一格式的单行字符串
+# ==============================
+queries:
+  q_final:
+    desc: '请提交最终答案字符串, 由三部分以====连接: 第一部分为有效堂兄弟名称的逗号+空格分隔字符串(按字典序升序, 若空写none), 第二部分为有效堂兄弟数量(整数), 第三部分为相关叔辈的Python列表字符串(方括号+单引号, 按字典序升序, 若无则[]); 示例: ''a, b====2====[''叔甲'', ''叔乙'']'' 或 ''none====0====[]''。'
+    ans_formula: compose_final_answer(tree_data, rule_cfg)
+    ans_text: "_ans"
+    ans_assertion: "validate_puzzle(tree_data, rule_cfg) and validate_unique(tree_data, rule_cfg) and filtered_cousins_count(tree_data, rule_cfg) >= 1 and filtered_cousins_limit_ok(tree_data, rule_cfg, 6)"
+
+# ==============================
+# 单行题面描述（外层用单引号，显式 \n 换行；不含双引号；集合示例使用方括号）
+# ==============================
+desc: '你被给定一个有{total_nodes}个节点的树结构; 根节点为{root_name}; 其直接孩子为{parents_py}; 兄弟关系定义为共享同一父节点; 堂兄弟定义为其父节点不同但二者的父节点同为根的孩子; 本题采用以下规则定义相关叔辈与有效堂兄弟: {rule_desc}; 对每个父级的孩子如下: {children_desc}; 目标节点为{target_node}, 其父级为{parent_of_target}; 本题保证有效堂兄弟至少1个且不超过6个; 请按如下三步先分别计算中间结果, 再组合为最终答案(最终只需提交组合后的单行答案字符串):\n(1) 有效堂兄弟名称的逗号+空格分隔字符串(按字典序升序), 若结果为空写 none; 示例: a, b, c 或 none。\n(2) 有效堂兄弟数量(整数), 示例: 3。\n(3) 相关叔辈的列表字符串(方括号+单引号, 按字典序升序), 若没有则输出[]; 示例: [''叔甲'', ''叔乙''] 或 []。\n最终作答请严格将上述三部分答案按顺序使用====连接为一个单行字符串提交; 示例: ''a, b====3====[''叔甲'', ''叔乙'']''。'

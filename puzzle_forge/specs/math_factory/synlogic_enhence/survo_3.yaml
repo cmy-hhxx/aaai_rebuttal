@@ -1,0 +1,31 @@
+custom_operator:
+  ctx: survo_3.py
+
+variables:
+  team_num:            { formula: ctx('team_num') }
+  teams:               { formula: ctx('teams') }
+  max_points:          { formula: ctx('max_points') }
+  upper_scores:        { formula: ctx('upper_scores') }
+  hidden_pairs:        { formula: ctx('hidden_pairs') }
+  reveal_pairs:        { formula: ctx('reveal_pairs') }
+  row_total_known_teams:   { formula: ctx('row_total_known_teams') }
+  row_total_known_values:  { formula: ctx('row_total_known_values') }
+  target_pair:         { formula: ctx('target_pair') }
+  ask_home:            { formula: ctx('ask_home') }
+  home_or_away:        { formula: "'主场' if ask_home else '客场'" }
+  target_score:        { formula: ctx('target_score') }
+  reveal_desc:         { formula: ctx('reveal_desc') }
+  row_total_desc:      { formula: ctx('row_total_desc') }
+  warn_line:           { formula: ctx('warn_line') }
+  unique_verified:     { formula: ctx('unique_verified') }
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '{target_pair[0]} 对 {target_pair[1]} 的 {home_or_away} 得分是多少？请仅填写一个整数，例如 3'
+    ans_formula: target_score
+    ans_text: str(_ans)
+    ans_assertion: unique_verified
+
+desc: '共有 {team_num} 支球队 [{", ".join(teams)}] 进行循环赛，计分规则：主队得分与客队得分之和恒等于 {max_points}。已知主场得分：{reveal_desc}。另公布部分主场总积分 [{row_total_desc}]，提示：{warn_line}行总积分可能有误。其余比赛得分以 X 表示。请回答 {target_pair[0]} 对 {target_pair[1]} 的 {home_or_away} 得分。答案格式：整数，例如 3'

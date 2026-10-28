@@ -1,0 +1,87 @@
+# ================================================================
+#  Puzzle Specification — Topological-Unique (fully rendered)
+# ================================================================
+
+custom_operator:
+  random_choice:           word_sorting_3.py
+  pick_random_letters:     word_sorting_3.py
+  build_custom_alphabet:   word_sorting_3.py
+  gen_random_words:        word_sorting_3.py
+  custom_sort_words:       word_sorting_3.py
+  generate_order_clues:    word_sorting_3.py
+
+# ------------------------------------------------
+# 1. Variables
+# ------------------------------------------------
+variables:
+  word_count:
+    type: int
+    domain: "[5, 7]"
+
+  letters_to_move_num:
+    type: int
+    domain: "[2, 4]"
+
+  move_position:
+    formula: random_choice(['front', 'end'])
+
+  sort_order:
+    formula: random_choice(['asc', 'desc'])
+
+  is_desc:
+    formula: sort_order == 'desc'
+
+  letters_to_move:
+    formula: pick_random_letters(letters_to_move_num)
+
+  custom_alphabet:
+    formula: build_custom_alphabet(letters_to_move, move_position)
+
+  words_list:
+    formula: gen_random_words(word_count, 4, 9)
+
+  sorted_words:
+    formula: custom_sort_words(words_list, custom_alphabet, is_desc)
+
+  order_clues:
+    # Generate 3~(word_count-2) clues guaranteeing uniqueness
+    formula: generate_order_clues(sorted_words, 3, word_count - 2)
+
+  clues_pairs:
+    formula: order_clues['pairs']
+
+  clues_desc:
+    formula: order_clues['desc']
+
+  # ---- Text helpers ----
+  words_text:
+    formula: "', '.join(words_list)"
+
+  letters_text:
+    formula: "', '.join(letters_to_move)"
+
+  position_desc:
+    formula: "'开头' if move_position == 'front' else '末尾'"
+
+  order_desc:
+    formula: "'降序' if sort_order == 'desc' else '升序'"
+
+# ------------------------------------------------
+# 2. Disable global SMT solving (handled in clue generator)
+# ------------------------------------------------
+calc_solution: false
+
+# ------------------------------------------------
+# 3. Query
+# ------------------------------------------------
+queries:
+  q1:
+    desc: '请给出唯一的最终排序（单行，元素以逗号+空格分隔），示例：alpha, beta, gamma'
+    ans_formula: "', '.join(sorted_words)"
+    ans_text: _ans
+    ans_assertion: 'True'          # Skip global uniqueness assertion
+
+# ------------------------------------------------
+# 4. Description
+# ------------------------------------------------
+desc: '将字母 {letters_text} 移到字母表的{position_desc}，其余字母保持原顺序，并按{order_desc}比较字母大小。未排序单词列表为 [{words_text}]。\n线索（“位于…之前”表示在最终序列中更靠左）：\n{clues_desc}\n请推理得到唯一的完整排序，并按如下格式（无花括号）填写答案：word1, word2, …, word{word_count} {q1}'

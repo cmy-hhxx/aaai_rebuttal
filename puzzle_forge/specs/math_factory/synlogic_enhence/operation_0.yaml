@@ -1,0 +1,112 @@
+# 题型：泛化扩增（正向生成）
+# 目标：随机操作符与混合约束，评分唯一选择，保证高阶推理与唯一答案；不暴露内部验证逻辑。
+# 说明：
+# - 两个独立操作符 ⊙L 与 ⊙R：op(x,y)=(Abs(x)或x)^px * (Abs(y)或y)^py，四元规则随机。
+# - 主方程：(t - a) ⊙L (b - t) = k * (t ⊙R c)
+# - 硬约束：区间、距离、比值（相对 b 与 d），随机 1–3 条，参数偏置避免显见无解。
+# - 评分函数：S(t)=w1*|t - b| + w2*|t - d| + w3*|t|；满足硬约束的实根中，以评分最小选答案；并列（≤score_tol）取较小 t。
+# - 自定义 Python 完成求解与唯一验证（calc_solution:false）。
+
+custom_operator:
+  function_1: operation_0.py
+  function_2: operation_0.py
+
+variables:
+  # 主参数（提升 a=0 的概率，保障 t=0 为候选解）
+  a:
+    formula: "(0 if randint(0,1)==0 else (1 if randint(0,1)==0 else -1)*randint(1,8))"
+    diff_factor: 1
+  b:
+    formula: "((1 if randint(0,1)==0 else -1)*randint(0,12))"
+    diff_factor: 1
+  k:
+    type: int
+    domain: "[1, 9]"
+    diff_factor: 1
+  c:
+    formula: "((1 if randint(0,1)==0 else -1)*randint(0,9))"
+    diff_factor: 1
+
+  # 辅助参数与评分权重（提升评分选择的稳定性）
+  d:
+    formula: "((1 if randint(0,1)==0 else -1)*randint(0,10))"
+  w1:
+    type: int
+    domain: "[1, 6]"
+  w2:
+    type: int
+    domain: "[1, 6]"
+  w3:
+    type: int
+    domain: "[1, 6]"
+
+  # 时间与容忍度
+  tlimit:
+    formula: "1.5 + randint(0,10)/10.0"   # 1.5 ~ 2.5s
+  score_tol:
+    formula: "1e-6"
+  verify_tol:
+    formula: "1e-7"
+
+  # 操作符 ⊙L（左侧）
+  use_abs_x_left:
+    formula: "randint(0,1) == 1"
+  use_abs_y_left:
+    formula: "randint(0,1) == 1"
+  px_left:
+    type: int
+    domain: "[1, 2]"
+  py_left:
+    type: int
+    domain: "[1, 2]"
+
+  # 操作符 ⊙R（右侧）
+  use_abs_x_right:
+    formula: "randint(0,1) == 1"
+  use_abs_y_right:
+    formula: "randint(0,1) == 1"
+  px_right:
+    type: int
+    domain: "[1, 2]"
+  py_right:
+    type: int
+    domain: "[1, 2]"
+
+  # 随机硬约束数量与类型（至少 1 条，最多 3 条）
+  c_num:
+    type: int
+    domain: "[1, 3]"
+  c_types:
+    formula: "[['interval','dist_le','dist_ge','ratio_le'][randint(0,3)] for _ in range(c_num)]"
+
+  # 约束参数偏置：提高常见候选（如 t=0 或 t≈b,d）进入可行域的概率，避免显见无解
+  # - interval: L,U 针对随机基点 p∈{0,b,d}，宽度 W∈[2,6]
+  # - dist_*: R ∈ [max(1,randint(1,8)), max(1,randint(3,10))]（更宽松）
+  # - ratio_le: R = (randint(1,6))/max(1,randint(1,3))（小数，更易满足）
+  c_params:
+    formula: "[( ( ( [0, b, d][randint(0,2)] - randint(2,6), [0, b, d][randint(0,2)] + randint(2,6) ) ) if c_types[i]=='interval' else ( (randint(3,10),) if c_types[i] in ['dist_le','dist_ge'] else ( (randint(1,6)/max(1,randint(1,3)),) ) ) ) for i in range(c_num)]"
+
+  # 文本描述（生成操作符与约束可读文本）
+  left_op_desc:
+    formula: "('Abs(x)' if use_abs_x_left else 'x') + '^' + str(px_left) + ' * ' + ('Abs(y)' if use_abs_y_left else 'y') + '^' + str(py_left)"
+  right_op_desc:
+    formula: "('Abs(x)' if use_abs_x_right else 'x') + '^' + str(px_right) + ' * ' + ('Abs(y)' if use_abs_y_right else 'y') + '^' + str(py_right)"
+  constraint_lines:
+    formula: "[( '区间限制: t 属于 [' + str(c_params[i][0]) + ', ' + str(c_params[i][1]) + ']' ) if c_types[i]=='interval' else ( '距离限制: |t - ' + str(b) + '| <= ' + str(c_params[i][0]) if c_types[i]=='dist_le' else ( '距离限制: |t - ' + str(b) + '| >= ' + str(c_params[i][0]) if c_types[i]=='dist_ge' else '比值限制: |t - ' + str(b) + '| / (1 + |t - ' + str(d) + '|) <= ' + str(c_params[i][0]) ) ) for i in range(c_num)]"
+  rules_desc:
+    formula: "'; '.join(constraint_lines)"
+  lead_word:
+    formula: "['定义','约定','说明'][randint(0,2)]"
+  intro_text:
+    formula: "lead_word + '：操作符 ⊙L 与 ⊙R 的规则分别为 (' + left_op_desc + ') 与 (' + right_op_desc + ')'"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '按答案格式填写：t = 数值（保留6位小数），否则直接输出 无实数解。'
+    ans_formula: 'function_1(a, b, c, k, d, w1, w2, w3, tlimit, score_tol, verify_tol, use_abs_x_left, use_abs_y_left, px_left, py_left, use_abs_x_right, use_abs_y_right, px_right, py_right, c_num, c_types, c_params)'
+    ans_text: 'function_2(_ans, a, b, c, k, d, w1, w2, w3, score_tol, verify_tol, use_abs_x_left, use_abs_y_left, px_left, py_left, use_abs_x_right, use_abs_y_right, px_right, py_right, c_num, c_types, c_params)'
+    ans_assertion: 'True'
+
+desc: '高阶分段方程与约束优化；{intro_text}。主方程：(t - {a}) ⊙L ({b} - t) = {k} * (t ⊙R {c})。硬约束如下：[{rules_desc}]。评分函数：S(t) = {w1}*|t - {b}| + {w2}*|t - {d}| + {w3}*|t|；在满足所有硬约束的实根中，以 S(t) 最小的 t 作为唯一答案；若评分并列（≤score_tol），取较小的 t。答案格式：请填写 t = 数值（保留6位小数）。\n{q1}'

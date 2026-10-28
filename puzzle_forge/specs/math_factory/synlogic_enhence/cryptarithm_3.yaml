@@ -1,0 +1,256 @@
+# =================================================================
+# Custom operators: external Python helpers for flexible alphametics
+# =================================================================
+custom_operator:
+  # Bridge placeholders (must exist per Note 1)
+  function_1: cryptarithm_3.py
+  function_2: cryptarithm_3.py
+  # Core builders and constraints
+  make_number: cryptarithm_3.py
+  in_set: cryptarithm_3.py
+  sum_has_parity: cryptarithm_3.py
+  gen_cryptarithm_words: cryptarithm_3.py
+  collect_used_letters: cryptarithm_3.py
+  get_leading_letters: cryptarithm_3.py
+  pick_result_length: cryptarithm_3.py
+  gen_parity_clues: cryptarithm_3.py
+  pick_lead_pair: cryptarithm_3.py
+  build_clue_text: cryptarithm_3.py
+  parity_constraint: cryptarithm_3.py
+  lead_ineq_constraint: cryptarithm_3.py
+  result_sum_parity_constraint: cryptarithm_3.py
+  # Generalized clue operators
+  gen_digit_band_clues: cryptarithm_3.py
+  digit_band_constraint: cryptarithm_3.py
+  gen_letter_ineqs: cryptarithm_3.py
+  letter_ineq_constraint: cryptarithm_3.py
+  gen_add_parity_clues: cryptarithm_3.py
+  add_parity_constraint: cryptarithm_3.py
+  word_to_string: cryptarithm_3.py
+  # Column carry and advanced clues
+  compute_max_len: cryptarithm_3.py
+  column_addition_constraints: cryptarithm_3.py
+  gen_carry_clues: cryptarithm_3.py
+  carry_clue_constraint: cryptarithm_3.py
+  gen_pair_sum_clues: cryptarithm_3.py
+  pair_sum_constraint: cryptarithm_3.py
+  gen_pair_diff_clues: cryptarithm_3.py
+  pair_diff_constraint: cryptarithm_3.py
+  pick_anchor: cryptarithm_3.py
+  anchor_prime_constraint: cryptarithm_3.py
+  # Clean letter pool and parity randomizer
+  alphabet_pool: cryptarithm_3.py
+  random_parity: cryptarithm_3.py
+
+# =================================================================
+# Variables: randomized template, words, and human-readable texts
+# =================================================================
+variables:
+  # 加数数量：2 或 3
+  add_num:
+    type: int
+    domain: '[2, 3]'
+  # 每个词的最小长度；加数长度在 [len_min, len_min+2] 内
+  len_min:
+    type: int
+    domain: '[3, 5]'
+  # 每个加数的长度
+  len_addends:
+    formula: generate_random_list(add_num, 'int', [len_min, len_min + 2])
+  # 结果词长度：从 max(addends) 或 +1 中随机选
+  len_result:
+    formula: pick_result_length(len_addends)
+  # 列最大长度（列加法按结果长度展开）
+  max_len:
+    formula: compute_max_len(len_addends, len_result)
+  # 字母池大小与字母池（使用单字符大写字母）
+  n_pool:
+    type: int
+    domain: '[8, 10]'
+  letter_pool:
+    formula: alphabet_pool(n_pool)
+  # 生成各词（最后一个为结果词）
+  words:
+    formula: gen_cryptarithm_words(letter_pool, add_num, len_addends, len_result)
+  # 方便拆分
+  add_words:
+    formula: 'words[:-1]'
+  result_word:
+    formula: 'words[-1]'
+  # 已用字母与首字母
+  used_letters:
+    formula: collect_used_letters(words)
+  lead_letters:
+    formula: get_leading_letters(words)
+  # 奇偶提示：随机选若干字母（至少 1 条）
+  parity_clues_count:
+    type: int
+    domain: '[1, 3]'
+  parity_clues:
+    formula: gen_parity_clues(used_letters, parity_clues_count)
+  # 领先字母不等式提示（可能为 None）
+  lead_pair:
+    formula: pick_lead_pair(lead_letters)
+  # 结果词的数字和奇偶提示开关与值
+  use_result_sum_parity:
+    type: bool
+    domain: '[True, False]'
+  result_sum_parity:
+    formula: random_parity()
+  # 扩展：一般字母不等式提示数量与具体内容（降低上限避免显见线索）
+  extra_letter_ineq_count:
+    type: int
+    domain: '[0, 2]'
+  extra_letter_ineqs:
+    formula: gen_letter_ineqs(used_letters, extra_letter_ineq_count)
+  # 扩展：位数区间提示（low: [0-4], high: [5-9]；降低上限）
+  digit_band_clues_count:
+    type: int
+    domain: '[0, 1]'
+  digit_band_clues:
+    formula: gen_digit_band_clues(used_letters, digit_band_clues_count)
+  # 扩展：加数词数字和奇偶提示（降低上限）
+  add_parity_clues_count:
+    type: int
+    domain: '[0, 1]'
+  add_parity_clues:
+    formula: gen_add_parity_clues(add_words, add_parity_clues_count)
+  # 新增：列索引（用于 carry 的符号源）
+  col_indices:
+    formula: range(0, max_len)
+  # 新增：进位提示（降低上限；避免显见线索，排除列 0）
+  carry_clues_count:
+    type: int
+    domain: '[0, 1]'
+  carry_clues:
+    formula: gen_carry_clues(max_len, add_num, carry_clues_count)
+  # 新增：两字母和提示（降低上限）
+  pair_sum_clues_count:
+    type: int
+    domain: '[0, 1]'
+  pair_sum_clues:
+    formula: gen_pair_sum_clues(used_letters, pair_sum_clues_count)
+  # 新增：两字母差提示（降低上限）
+  pair_diff_clues_count:
+    type: int
+    domain: '[0, 1]'
+  pair_diff_clues:
+    formula: gen_pair_diff_clues(used_letters, pair_diff_clues_count)
+  # 新增：锚点素数提示（可选）
+  use_anchor_prime:
+    type: bool
+    domain: '[True, False]'
+  anchor_letter:
+    formula: pick_anchor(used_letters)
+  # 文本渲染：各词的字符串形式
+  add_word_strs:
+    formula: '[word_to_string(w) for w in add_words]'
+  add_str:
+    formula: '" + ".join([word_to_string(w) for w in add_words])'
+  res_str:
+    formula: 'word_to_string(result_word)'
+  # 文本渲染：线索统一合并（单行，以分号分隔；carry 线索仅显示非零列）
+  clue_text:
+    formula: build_clue_text(parity_clues, lead_pair, use_result_sum_parity, result_sum_parity, res_str, extra_letter_ineqs, digit_band_clues, add_parity_clues, add_word_strs, pair_sum_clues, pair_diff_clues, carry_clues, anchor_letter, use_anchor_prime)
+
+# =================================================================
+# Symbols: map each used letter to an unknown digit; per-column carries
+# =================================================================
+symbols:
+  # 字母到数字的映射（唯一数字）
+  d:
+    source:
+    - used_letters
+    type: int
+    desc: '{_used_letters} is assigned a digit'
+  # 列进位：索引为从右到左的列编号（0 为个位列；carry[k] 为进入第 k 列的进位）
+  carry:
+    source:
+    - col_indices
+    type: int
+    desc: 'Carry into column {_col_indices}'
+
+# =================================================================
+# Conditions: domain, distinct, nonzero leads, equation, carry linkage, and clues
+# =================================================================
+conditions:
+  # 每个字母对应的数字范围
+  digit_domain:
+    formula: And([And(d[ch] >= 0, d[ch] <= 9) for ch in used_letters])
+    desc: 'Every letter maps to a digit from 0 to 9'
+  # 所有首字母非零
+  leading_nonzero:
+    formula: And([d[ch] > 0 for ch in lead_letters])
+    desc: 'Leading letters of all words are nonzero'
+  # 所有字母对应不同数字
+  all_distinct:
+    formula: gen_event_count_condition([d[ch] for ch in used_letters], 'distinct')
+    desc: 'All letters correspond to distinct digits'
+  # 加数之和等于结果（整体等式）
+  sum_equation:
+    formula: Sum([make_number([d[ch] for ch in w]) for w in add_words]) == make_number([d[ch] for ch in result_word])
+    desc: 'The sum of the addend words equals the result word'
+  # 列加法与进位约束（逐列约束）
+  column_addition:
+    formula: column_addition_constraints(d, add_words, result_word, carry, add_num)
+    desc: 'Column-wise addition with carries holds for every column (units is column 0)'
+  # 进位值提示（上限已降低；不包含列 0）
+  carry_clues_cond:
+    formula: carry_clue_constraint(carry, carry_clues)
+    desc: 'Selected nonzero-index columns have fixed carry-into values'
+  # 字母奇偶性提示
+  parity_clues_cond:
+    formula: parity_constraint(d, parity_clues)
+    desc: 'Selected letters satisfy their parity requirements'
+  # 两个首字母的不等式提示（若存在）
+  lead_ineq_cond:
+    formula: lead_ineq_constraint(d, lead_pair)
+    desc: 'A strict inequality holds between two leading letters as stated'
+  # 结果词数字和奇偶提示（可选）
+  result_sum_parity_cond:
+    formula: result_sum_parity_constraint(d, result_word, result_sum_parity) if use_result_sum_parity else True
+    desc: 'The digit sum of the result word has the specified parity (if present)'
+  # 扩展：一般字母不等式提示（上限已降低）
+  extra_letter_ineq_cond:
+    formula: letter_ineq_constraint(d, extra_letter_ineqs)
+    desc: 'Additional pairwise inequalities between letters hold'
+  # 扩展：位数区间提示（上限已降低）
+  digit_band_cond:
+    formula: digit_band_constraint(d, digit_band_clues)
+    desc: 'Selected letters belong to specified digit bands (low [0-4] or high [5-9])'
+  # 扩展：加数词数字和奇偶提示（上限已降低）
+  add_parity_cond:
+    formula: add_parity_constraint(d, add_words, add_parity_clues)
+    desc: 'Digit-sum parity holds for the selected addend words'
+  # 新增：两字母和提示（上限已降低）
+  pair_sum_cond:
+    formula: pair_sum_constraint(d, pair_sum_clues)
+    desc: 'Selected letter pairs have fixed digit sums'
+  # 新增：两字母差提示（上限已降低）
+  pair_diff_cond:
+    formula: pair_diff_constraint(d, pair_diff_clues)
+    desc: 'Selected letter pairs have fixed digit differences'
+  # 新增：锚点素数提示（可选）
+  anchor_prime_cond:
+    formula: anchor_prime_constraint(d, anchor_letter) if use_anchor_prime else True
+    desc: 'Anchor letter is constrained to prime digit if present'
+
+# =================================================================
+# Solver limits: keep enumeration moderate for speed
+# =================================================================
+max_solution: 2000
+
+# =================================================================
+# Query: ask for the numeric value of the result word (single evaluable output)
+# =================================================================
+queries:
+  q1:
+    desc: 'What is the numeric value of the result word?'
+    ans_formula: 'make_number([get_value(_solutions[0], d[ch]) for ch in result_word])'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# =================================================================
+# Description: user-facing puzzle statement (single line, single quotes)
+# =================================================================
+desc: 'Alphametic puzzle: compute {add_str} = {res_str}. Each letter maps to a unique digit from 0–9 (no two letters share a digit), and this mapping is consistent across all words; leading letters are nonzero. Addition uses base-10 column arithmetic from the units (rightmost) column indexed 0, with carries propagating left; carry into column k means the incoming carry from column k-1, and carry into column 0 is 0. Here, digit sum of WORD means the sum of the digits assigned to its letters; a digit band [0-4] or [5-9] restricts a single letter to those digits. Clues: [{clue_text}]. Provide the value of {res_str} as an integer; answer format: a single non-negative integer without leading zeros (e.g., 10652). {q1}'

@@ -1,0 +1,45 @@
+# 造题框架：Dyck语言推理错误检测（高阶复合断言版，直接计算模式）
+custom_operator:
+  # 生成实例与工具函数（均在 dyck_language_reasoning_errors_1.py 中定义）
+  generate_instance: dyck_language_reasoning_errors_1.py
+  scenario_get: dyck_language_reasoning_errors_1.py
+  join_thoughts: dyck_language_reasoning_errors_1.py
+  detect_reasoning_errors: dyck_language_reasoning_errors_1.py
+  format_output: dyck_language_reasoning_errors_1.py
+  validate_instance_with_string: dyck_language_reasoning_errors_1.py
+
+# =========================
+# 变量：由Python侧生成的场景数据（包含随机规则与随机错误）
+# =========================
+variables:
+  # 整体场景字典，包含 input_str、thoughts、rules_desc、answer_list、answer_str
+  scenario:
+    formula: 'generate_instance()'
+  input_str:
+    formula: "scenario_get(scenario, 'input_str')"
+  raw_thoughts:
+    formula: "scenario_get(scenario, 'thoughts')"
+  thoughts_desc:
+    formula: 'join_thoughts(raw_thoughts)'
+  rules_desc:
+    formula: "scenario_get(scenario, 'rules_desc')"
+  answer_str:
+    formula: "scenario_get(scenario, 'answer_str')"
+
+# 直接计算模式：不使用Z3
+calc_solution: false
+
+# =========================
+# 查询（答案为严格格式的Python列表字符串）
+# =========================
+queries:
+  q1:
+    desc: '请输出所有存在推理错误的步骤编号，按升序排列。答案格式：使用Python列表表示，如 [] 或 [3,7,11]。'
+    ans_formula: 'format_output(detect_reasoning_errors(input_str, raw_thoughts))'
+    ans_text: '{_ans}'
+    ans_assertion: 'validate_instance_with_string(input_str, raw_thoughts, _ans)'
+
+# =========================
+# 题干描述（单行，包含规则与格式说明）
+# =========================
+desc: '你是一位精通Dyck语言的专家，需要检查括号序列的推理步骤是否符合Dyck语言规则。输入（非括号字符将被忽略）：{input_str}。规则：{rules_desc}。思考过程（逐步展示，步骤之间以竖线分隔）：{thoughts_desc}。问题：找出所有存在推理错误的步骤编号。答案格式说明：请使用Python列表字符串输出所有错误步骤编号，按升序排列；例如 [] 或 [3,7,11]。{q1}'

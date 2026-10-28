@@ -1,0 +1,19 @@
+custom_operator: 
+    largestNumber: customs/maxnumber.py
+variables:
+    num_numbers: 
+      type: int
+      domain: "[2, 10]"
+      diff_factor: 1
+    num_lists:
+      formula: '[randint(1,99) for _ in range(num_numbers)]'
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+    q1:
+      desc: 若非负整数组为{'、'.join(str(item) for item in num_lists)}，则重排组成的最大整数为？
+      ans_formula: largestNumber(num_lists)
+      ans_text: str(_ans)
+      ans_assertion: 'True'
+desc: 给定一组非负整数，重新排列每个数的顺序（每个数不可拆分）使之组成一个最大的整数。例如3、30、34、5、9重排后的最大整数为9534330。{q1}

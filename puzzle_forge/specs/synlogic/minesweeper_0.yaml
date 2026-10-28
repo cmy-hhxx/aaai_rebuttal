@@ -1,0 +1,46 @@
+custom_operator:
+  # 生成随机的4x4扫雷局面（含数字与X），并确保“一步逻辑”下答案非空且唯一触发
+  gen_minesweeper_grid: customs/minesweeper_0.py
+  # 基于“一步逻辑”计算所有必为地雷的坐标列表
+  find_definite_mines: customs/minesweeper_0.py
+  # 统计“一步逻辑”中能触发“全部相邻X为雷”的数字格数量（仅计入相邻X数量>0的触发格）
+  count_forcing_cells: customs/minesweeper_0.py
+
+variables:
+  # 网格尺寸固定为4x4
+  n_rows:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+  n_cols:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+
+  # 随机生成的扫雷网格：'X' 表示未知，整数表示该格周围8邻域地雷数（题面视为给定信息）
+  grid:
+    formula: gen_minesweeper_grid(n_rows, n_cols)
+
+  # 题干展示所用文本
+  grid_lines:
+    formula: "['  '.join([str(c) for c in row]) for row in grid]"
+  grid_text:
+    formula: "'\\n'.join(grid_lines)"
+
+# 本题直接用自定义函数计算答案，无需符号与约束
+symbols: {}
+conditions: {}
+
+# 直接计算答案，不使用SMT
+calc_solution: false
+
+queries:
+  q1:
+    desc: "根据当前信息，确定所有必定包含地雷的未揭示单元格（X）。以坐标列表的形式输出所有必定是地雷的单元格，格式为(行, 列)的元组列表。"
+    ans_formula: find_definite_mines(grid)
+    ans_text: str(_ans)
+    # 唯一性与有效性校验：必须恰有1个触发格，且答案非空
+    ans_assertion: "count_forcing_cells(grid) == 1 and len(_ans) > 0"
+
+# 题干描述，含随机生成的网格，答案唯一且可由一步逻辑推出
+desc: "考虑这个 {n_rows} x {n_cols} 的扫雷网格。你需要根据当前信息，确定所有必定包含地雷的未揭示单元格。\n1. 规则：\n  1. 数字（0-8）表示周围8个相邻单元格中地雷的数量。\n  2. 标记为X的单元格是未揭示的。\n  3. 使用一步逻辑推理，确定哪些X单元格必定是地雷（当某个数字格的数值等于其相邻未揭示格的数量时，这些未揭示格全为地雷）。\n2. 输入：\n{grid_text}\n\n3. 任务：\n  - 根据当前信息，确定所有必定包含地雷的未揭示单元格（X）。\n  - 以坐标列表的形式输出所有必定是地雷的单元格，格式为(行, 列)的元组列表。\n4. 示例输出格式：\n[(0, 1), (2, 3), (3, 0)]\n将所有必定为地雷的单元格组成一个列表。列表中的坐标必须按字典序（lexicographical order）排序，即：先按 row 从小到大排序；若 row 相同，再按 column 从小到大排序。仅输出排序后的坐标列表，不包含额外说明。\n{q1}"

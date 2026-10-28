@@ -1,0 +1,66 @@
+custom_operator:
+  generate_sudoku: sudoku_1.py
+  pick_one: sudoku_1.py
+  rule_phrase_gen: sudoku_1.py
+  cage_phrase_gen: sudoku_1.py
+  extra_rule_phrase: sudoku_1.py          # 生成对角线 / anti-knight 文字
+
+variables:
+  clue_num:
+    type: int
+    domain: "[20, 35]"
+
+  blank_char:
+    formula: "pick_one(['X', '_', '.', '0'])"
+
+  diag_flag:
+    formula: "pick_one([True, False])"
+
+  antiknight_flag:
+    formula: "pick_one([True, False])"
+
+  cage_num:
+    type: int
+    domain: "[3, 6]"
+  cage_size_min:
+    type: int
+    domain: "[2, 3]"
+  cage_size_max:
+    type: int
+    domain: "[3, 4]"
+
+  sudoku_data:
+    formula: "generate_sudoku(clue_num, blank_char, cage_num, (cage_size_min, cage_size_max), diag_flag, antiknight_flag)"
+
+  puzzle_rows:
+    formula: "sudoku_data['puzzle_rows']"
+  solution_grid:
+    formula: "sudoku_data['solution']"
+  cages_desc:
+    formula: "cage_phrase_gen(sudoku_data['cages'], blank_char)"
+  puzzle_display:
+    formula: "'\\n'.join(puzzle_rows)"
+
+  intro_phrase:
+    formula: "pick_one(['Below is a challenging variant of Sudoku:', 'Try to crack this advanced Sudoku puzzle:', 'Can you solve this high-level Sudoku?'])"
+  question_phrase:
+    formula: "pick_one(['Provide your answer as a tuple of 9 tuples.', 'Reply with the solved 9×9 grid in tuple-of-tuples format.', 'Return the full solution grid formatted as ((row1),...,(row9)).'])"
+  rule_phrase:
+    formula: "rule_phrase_gen(blank_char)"
+  extra_rules_phrase:
+    formula: "extra_rule_phrase(diag_flag, antiknight_flag)"
+  example_phrase:
+    formula: "'For example: ((1,2,3,4,5,6,7,8,9),(4,5,6,7,8,9,1,2,3),...)'"
+  coord_note:
+    formula: "'Note: Cell coordinates are given as (row,column) with rows and columns numbered 1-9 from top-left.'"
+
+queries:
+  q1:
+    desc: '{question_phrase} {example_phrase}'
+    ans_formula: "solution_grid"
+    ans_text: "str(solution_grid)"
+    ans_assertion: "True"
+
+calc_solution: false
+
+desc: '{intro_phrase} {rule_phrase}{extra_rules_phrase} The following special cage sums must hold:\n- {cages_desc}\n{coord_note}\nGrid:\n{puzzle_display}\n{question_phrase} {example_phrase}'

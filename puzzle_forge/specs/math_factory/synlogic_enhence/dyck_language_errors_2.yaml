@@ -1,0 +1,77 @@
+# ================================================================
+# Complex Bracket Puzzle (v4) – 任务固定为 pos_type
+# ================================================================
+custom_operator:
+  sample_bracket_types: dyck_language_errors_2.py
+  generate_bracket_problem: dyck_language_errors_2.py
+  generate_answer: dyck_language_errors_2.py
+  generate_question_desc: dyck_language_errors_2.py
+  validate_answer: dyck_language_errors_2.py
+  is_unique_answer: dyck_language_errors_2.py
+  gen_policy: dyck_language_errors_2.py
+
+calc_solution: false
+
+variables:
+  num_types:
+    type: int
+    domain: "[2, 4]"
+
+  types:
+    formula: sample_bracket_types(num_types)
+
+  min_len:
+    type: int
+    domain: "[20, 60]"
+
+  max_extra:
+    type: int
+    domain: "[0, 60]"
+
+  p_valid:
+    type: float
+    domain: "[0.1, 0.35]"
+
+  depth_limit:
+    type: int
+    domain: "[4, 8]"
+
+  problem:
+    formula: generate_bracket_problem(min_len, min_len + max_extra, p_valid, types, depth_limit)
+
+  seq:
+    formula: "problem['seq']"
+
+  first_error_pos:
+    formula: "problem['first_error_pos']"
+
+  is_valid:
+    formula: "problem['is_valid']"
+
+  error_type:
+    formula: "problem['error_type']"
+
+  task:                 # 固定任务
+    formula: "'pos_type'"
+
+  answer:
+    formula: generate_answer(task, first_error_pos, is_valid, error_type)
+
+  question_desc:
+    formula: generate_question_desc(task)
+
+  types_str:
+    formula: "', '.join(types)"
+# ----------------------------------------------------------------
+# Query
+# ----------------------------------------------------------------
+queries:
+  q1:
+    desc: '{question_desc}'
+    ans_formula: answer
+    ans_text: str(_ans)
+    ans_assertion: "is_unique_answer(seq, task, _ans) and validate_answer(seq, task, _ans)"
+# ----------------------------------------------------------------
+# Description
+# ----------------------------------------------------------------
+desc: '在一次代码审查中，你发现一段使用{num_types}种括号对([{types_str}])的复杂表达式。请根据下列要求回答问题：\n{question_desc}\n括号序列：{seq}\n'

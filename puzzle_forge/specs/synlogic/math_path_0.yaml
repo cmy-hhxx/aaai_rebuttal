@@ -1,0 +1,59 @@
+custom_operator:
+  gen_instance: math_path_0.py
+  count_ab: math_path_0.py
+
+variables:
+  seed:
+    type: int
+    domain: "[1, 1000000]"
+  diff_level:
+    type: int
+    domain: "[1, 3]"
+    diff_factor: 1
+
+  pack:
+    formula: gen_instance(seed, diff_level)
+
+  a:
+    formula: pack['a']
+  b:
+    formula: pack['b']
+  c:
+    formula: pack['c']
+  d:
+    formula: pack['d']
+  e:
+    formula: pack['e']
+  f:
+    formula: pack['f']
+  g:
+    formula: pack['g']
+  h:
+    formula: pack['h']
+  K:
+    formula: pack['K']
+  M:
+    formula: pack['M']
+  target:
+    formula: pack['target']
+  ab_count:
+    formula: pack['ab_count']
+  expression_str:
+    formula: pack['expr']
+
+  # 冗余校验：独立在 YAML 层重算 (a,b) 解的数量，双重保障唯一性
+  ab_count_check:
+    formula: count_ab(K, M, c, d, e, f, g, h, target)
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "例如：[[6 - 0 + (((( 3 % 9) * 1) % 5) * 3 % 7) % 7 % 8 = 8]]。"
+    ans_formula: "'[[' + expression_str + ']]'"
+    ans_text: _ans
+    ans_assertion: "ab_count == 1 and ab_count_check == 1 and d >= 2 and e >= 2 and g >= 2 and h >= 2 and M >= 2 and len(set([a,b,c,d,e,f,g,h])) == 8 and target == (a - b + (((((c % d) * f) % e) * K % M) % g % h))"
+
+desc: "给定表达式：a - b + ((((c % d) * f) % e) * K % M) % g % h = {target}；其中 K = {K}、M = {M}、c = {c}、d = {d}、e = {e}、f = {f}、g = {g}、h = {h}；a..h 为 0-9 的互不相同数字，且 d,e,g,h,M 均不小于 2。按括号顺序计算。请仅输出 [[完整表达式]]。{q1}"

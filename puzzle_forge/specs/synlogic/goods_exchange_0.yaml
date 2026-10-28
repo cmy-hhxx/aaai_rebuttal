@@ -1,0 +1,85 @@
+custom_operator:
+  # 生成唯一的人名（支持中文/英文）
+  gen_names: goods_exchange_0.py
+  # 生成唯一的物品列表（颜色+类型）
+  gen_items: goods_exchange_0.py
+  # 初始一一分配（随机打乱形成双射）
+  allocate_initial_pairs: goods_exchange_0.py
+  # 构造仅由“交换”组成的操作序列及一致的句式（按顺序执行）
+  build_exchange_sequence: goods_exchange_0.py
+  # 顺序模拟交换步骤以得到最终分配（唯一答案）
+  simulate_exchanges: goods_exchange_0.py
+  # 答案格式化为tuple字符串（按玩家顺序）
+  format_tuple_answer: goods_exchange_0.py
+  # 随机选择语言环境（避免使用不支持的str类型）
+  choose_locale: goods_exchange_0.py
+
+variables:
+  # 玩家数量（容器规模参数）
+  player_num:
+    type: int
+    domain: "[8, 40]"
+    diff_factor: 1
+
+  # 物品数量与玩家数量一致（一人一物）
+  item_num:
+    formula: player_num
+    diff_factor: 0
+
+  # 语言环境（通过自定义函数选择 zh_CN / en_US）
+  name_locale:
+    formula: choose_locale()
+    diff_factor: 0
+
+  # 交换步骤总数（仅包含“交换”动作，按顺序执行）
+  step_count:
+    type: int
+    domain: "[5, 20]"
+    diff_factor: 1
+
+  # 生成实体
+  names:
+    formula: gen_names(player_num, name_locale)
+  items:
+    formula: gen_items(item_num)
+
+  # 初始分配（双射）
+  initial_pairs:
+    formula: allocate_initial_pairs(names, items)
+
+  # 构造交换序列与统一句式描述（仅交换）
+  exchange_bundle:
+    formula: build_exchange_sequence(names, items, initial_pairs, step_count)
+  exchange_steps:
+    formula: exchange_bundle[0]
+  exchange_descriptions:
+    formula: exchange_bundle[1]
+
+  # 顺序模拟得到唯一答案
+  final_pairs:
+    formula: simulate_exchanges(names, initial_pairs, exchange_steps)
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "请计算游戏结束时各玩家拥有的物品。 请在回答的最后使用tuple格式输出结果。例如：(('甲','红色书'),('乙','蓝色手表'))"
+    ans_formula: format_tuple_answer(final_pairs, names)
+    ans_text: _ans
+    # 唯一性与闭环校验：最终必须保持严格一一对应
+    ans_assertion: "len(final_pairs) == player_num and len(set([p for p,_ in final_pairs])) == player_num and len(set([it for _,it in final_pairs])) == item_num"
+
+desc: >
+  规则说明：
+  1) 每位玩家在任何时刻始终只有1件物品；
+  2) 题中仅当出现“交换/互换”动作时，持有物才会改变；所有交换按给出的顺序逐条执行；
+  3) 以下给出的初始分配与交换步骤是完整的、可唯一推导最终结果的信息。
+
+  共有 {player_num} 名玩家：{('、'.join(names))}。
+  物品清单：{('、'.join(items))}。
+  初始分配为：{('；'.join([f"{n}拥有{it}" for (n, it) in initial_pairs]))}。
+  按顺序执行以下 {step_count} 次交换：
+  {('；'.join(exchange_descriptions))}。
+  {q1}

@@ -1,0 +1,41 @@
+custom_operator:
+  format_cn_bool_list: web_of_lies_0.py
+  generate_truth_values: web_of_lies_0.py
+  generate_statements: web_of_lies_0.py
+
+variables:
+  place_num:
+    type: int
+    domain: "[4, 7]"
+
+  location_names:
+    formula: get_faker(place_num, 'street_name', 'zh_CN')
+
+  person_names:
+    formula: get_faker(place_num, 'name', 'zh_CN')
+
+  truth_values:
+    formula: generate_truth_values(place_num)
+
+  statements_text:
+    formula: generate_statements(truth_values, location_names, person_names)
+
+  statements_join:
+    formula: "' '.join(statements_text)"
+
+  query_indices:
+    formula: "random.sample(range(place_num), random.randint(3, place_num))"
+
+  query_loc_desc:
+    formula: "', '.join([location_names[i] for i in query_indices])"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请判断在 [{query_loc_desc}] 这些地点的人是否说真话，并按顺序写出用中文“是/否”构成的列表（用英文逗号+空格分隔，例如：是, 否, 是）。'
+    ans_formula: "format_cn_bool_list([truth_values[i] for i in query_indices])"
+    ans_text: "format_cn_bool_list([truth_values[i] for i in query_indices])"
+    ans_assertion: 'True'
+
+desc: '在这个问题中，每个人要么永远说真话，要么永远说谎话。以下给出了他们的发言：{statements_join}\n请仔细推理后回答下列问题。\n问题：{q1}'

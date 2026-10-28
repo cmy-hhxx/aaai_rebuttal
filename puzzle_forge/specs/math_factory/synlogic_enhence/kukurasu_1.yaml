@@ -1,0 +1,197 @@
+# ================================================================
+# Kakurasu 高阶泛化生成框架（逆向生成 + 规则族随机化 + 复合约束）
+# 阶段1：仅结构约束，得到一个可行网格
+# 阶段2：从解计算目标，随机选择目标族回填，强制唯一解
+# 所有参数与规则族均可随机化，文本自动生成，题目高逻辑密度与可玩性
+# ================================================================
+custom_operator:
+  gen_obstacles: kukurasu_1.py
+  pick_row_ones_count: kukurasu_1.py
+  pick_row_range: kukurasu_1.py
+  gen_weights: kukurasu_1.py
+  choose_family_flags: kukurasu_1.py
+  choose_alpha_beta: kukurasu_1.py
+  gen_regions: kukurasu_1.py
+
+variables:
+  n:
+    type: int
+    domain: "[5, 8]"
+  rows:
+    formula: "list(range(1, n + 1))"
+  cols:
+    formula: "list(range(1, n + 1))"
+  rows_str:
+    formula: "[str(i) for i in range(1, n + 1)]"
+  cols_str:
+    formula: "[str(j) for j in range(1, n + 1)]"
+
+  max_obstacles:
+    type: int
+    domain: "[0, n // 2]"
+  obstacles:
+    formula: "gen_obstacles(n, max_obstacles)"
+
+  # 行计数模式（exact 或 range）通过布尔控制：True 表示 exact，False 表示 range
+  row_mode_exact:
+    type: bool
+    domain: "[False, True]"
+  row_ones_num:
+    formula: "pick_row_ones_count(n)"
+  row_min_max:
+    formula: "pick_row_range(n)"
+  row_min:
+    formula: "row_min_max[0]"
+  row_max:
+    formula: "row_min_max[1]"
+
+  # 可选列上界（避免列过密）
+  add_col_cap:
+    type: bool
+    domain: "[False, True]"
+  col_cap_lb:
+    formula: "max(1, n // 3)"
+  col_cap_ub:
+    formula: "max(1, (n + 1) // 2)"
+  col_cap_max:
+    type: int
+    domain: "[col_cap_lb, col_cap_ub]"
+
+  # 权重序列（自然序列或随机排列）
+  do_permute_row:
+    type: bool
+    domain: "[False, True]"
+  do_permute_col:
+    type: bool
+    domain: "[False, True]"
+  w_row:
+    formula: "gen_weights(n, do_permute_row)"
+  w_col:
+    formula: "gen_weights(n, do_permute_col)"
+
+  # 目标族开关统一生成，至少启用 3 个，行/列加权至少启用其一
+  family_flags:
+    formula: "choose_family_flags()"
+  use_row_weight_sums:
+    formula: "family_flags[0]"
+  use_col_weight_sums:
+    formula: "family_flags[1]"
+  use_main_diag:
+    formula: "family_flags[2]"
+  use_anti_diag:
+    formula: "family_flags[3]"
+  use_total_ones:
+    formula: "family_flags[4]"
+  use_adj_h:
+    formula: "family_flags[5]"
+  use_adj_v:
+    formula: "family_flags[6]"
+  use_global_mixed:
+    formula: "family_flags[7]"
+  use_regions:
+    formula: "family_flags[8]"
+
+  # 对角线权重模式索引：0=index, 1=row, 2=col
+  main_diag_mode_idx:
+    type: int
+    domain: "[0, 2]"
+  anti_diag_mode_idx:
+    type: int
+    domain: "[0, 2]"
+
+  # 混合权重参数
+  alpha_beta:
+    formula: "choose_alpha_beta()"
+  alpha:
+    formula: "alpha_beta[0]"
+  beta:
+    formula: "alpha_beta[1]"
+
+  # 区域划分及模式
+  max_regions:
+    type: int
+    domain: "[1, 3]"
+  regions:
+    formula: "gen_regions(n, max_regions)"
+  region_target_is_exact:
+    type: bool
+    domain: "[False, True]"
+
+symbols:
+  cell:
+    source:
+    - rows_str
+    - cols_str
+    type: Bool
+    desc: "The cell at ({_rows_str}, {_cols_str}) is 1 (True) or not (False)."
+
+# 阶段 1：结构性约束
+conditions:
+  forbid_obstacles:
+    formula: "And([Not(cell[(str(r), str(c))]) for (r, c) in obstacles])"
+    desc: "Obstacle cells must not contain a '1'."
+  row_count_rule:
+    formula: "(And([Sum([If(cell[(str(i), str(j))], 1, 0) for j in cols]) == row_ones_num for i in rows]) if row_mode_exact else And([And(Sum([If(cell[(str(i), str(j))], 1, 0) for j in cols]) >= row_min, Sum([If(cell[(str(i), str(j))], 1, 0) for j in cols]) <= row_max) for i in rows]))"
+    desc: "Per-row ones rule (exact or range)."
+  col_cap_optional:
+    formula: "(True if not add_col_cap else And([Sum([If(cell[(str(i), str(j))], 1, 0) for i in rows]) <= col_cap_max for j in cols]))"
+    desc: "Optional per-column upper bound on the number of ones."
+
+# 阶段 2：从阶段 1 解计算目标并回填
+post_generation:
+  post_gen_vars:
+    row_targets: "[sum([w_col[j-1] for j in cols if get_value(_sol, cell[(str(i), str(j))])]) for i in rows]"
+    col_targets: "[sum([w_row[i-1] for i in rows if get_value(_sol, cell[(str(i), str(j))])]) for j in cols]"
+    diag_target: "sum([((i) if main_diag_mode_idx == 0 else (w_row[i-1] if main_diag_mode_idx == 1 else w_col[i-1])) for i in rows if get_value(_sol, cell[(str(i), str(i))])])"
+    anti_diag_target: "sum([((i) if anti_diag_mode_idx == 0 else (w_row[i-1] if anti_diag_mode_idx == 1 else w_col[(n - i)])) for i in rows if get_value(_sol, cell[(str(i), str(n + 1 - i))])])"
+    total_ones_target: "sum([1 for i in rows for j in cols if get_value(_sol, cell[(str(i), str(j))])])"
+    horiz_adj_pairs_target: "sum([1 for i in rows for j in cols[:-1] if (get_value(_sol, cell[(str(i), str(j))]) and get_value(_sol, cell[(str(i), str(j + 1))]))])"
+    vert_adj_pairs_target: "sum([1 for i in rows[:-1] for j in cols if (get_value(_sol, cell[(str(i), str(j))]) and get_value(_sol, cell[(str(i + 1), str(j))]))])"
+    global_mixed_target: "sum([alpha * i + beta * j for i in rows for j in cols if get_value(_sol, cell[(str(i), str(j))])])"
+    region_counts: "[sum([1 for i in range(r1, r2 + 1) for j in range(c1, c2 + 1) if get_value(_sol, cell[(str(i), str(j))])]) for (r1, c1, r2, c2) in regions]"
+    region_minmax: "[[max(0, cnt - 1), min((r2 - r1 + 1) * (c2 - c1 + 1), cnt + 1)] for cnt, (r1, c1, r2, c2) in zip(region_counts, regions)]"
+    final_rule_text: "'; '.join([ '障碍格: ' + str(obstacles) ] + (['行规则: 每行恰有 ' + str(row_ones_num) + ' 个 1'] if row_mode_exact else ['行规则: 每行的 1 的数量在区间 [' + str(row_min) + ',' + str(row_max) + ']']) + ([] if not add_col_cap else ['列上界: 每列最多 ' + str(col_cap_max) + ' 个 1']) + ([] if not use_row_weight_sums else ['行加权和(按列权重 ' + str(w_col) + ')的目标为 ' + str(row_targets)]) + ([] if not use_col_weight_sums else ['列加权和(按行权重 ' + str(w_row) + ')的目标为 ' + str(col_targets)]) + ([] if not use_main_diag else ['主对角线权重模式 ' + ['index','row','col'][main_diag_mode_idx] + ' 的目标为 ' + str(diag_target)]) + ([] if not use_anti_diag else ['副对角线权重模式 ' + ['index','row','col'][anti_diag_mode_idx] + ' 的目标为 ' + str(anti_diag_target)]) + ([] if not use_total_ones else ['全局 1 的数量为 ' + str(total_ones_target)]) + ([] if not use_adj_h else ['水平方向相邻成对为 1 的对数为 ' + str(horiz_adj_pairs_target)]) + ([] if not use_adj_v else ['竖直方向相邻成对为 1 的对数为 ' + str(vert_adj_pairs_target)]) + ([] if not use_global_mixed else ['混合权重和, 公式 alpha*i+beta*j, 其中 alpha=' + str(alpha) + ', beta=' + str(beta) + ', 目标值 ' + str(global_mixed_target)]) + ([] if not use_regions else ['区域 ' + str(regions) + ' 的目标模式 ' + ('精确' if region_target_is_exact else '区间') + ', 计数 ' + str(region_counts) + ' 或允许范围 ' + str(region_minmax)]) )"
+
+  post_gen_conditions:
+    row_weighted_sum:
+      formula: "(True if not use_row_weight_sums else And([Sum([If(cell[(str(i), str(j))], w_col[j-1], 0) for j in cols]) == row_targets[i - 1] for i in rows]))"
+      desc: "Row weighted sums with column weights (optional)."
+    col_weighted_sum:
+      formula: "(True if not use_col_weight_sums else And([Sum([If(cell[(str(i), str(j))], w_row[i-1], 0) for i in rows]) == col_targets[j - 1] for j in cols]))"
+      desc: "Column weighted sums with row weights (optional)."
+    main_diagonal_sum:
+      formula: "(True if not use_main_diag else Sum([If(cell[(str(i), str(i))], ((w_col[i-1]) if main_diag_mode_idx == 2 else ((w_row[i-1]) if main_diag_mode_idx == 1 else i)), 0) for i in rows]) == diag_target)"
+      desc: "Main diagonal weighted-sum (optional)."
+    anti_diagonal_sum:
+      formula: "(True if not use_anti_diag else Sum([If(cell[(str(i), str(n + 1 - i))], ((w_col[(n - i)]) if anti_diag_mode_idx == 2 else ((w_row[i-1]) if anti_diag_mode_idx == 1 else i)), 0) for i in rows]) == anti_diag_target)"
+      desc: "Anti-diagonal weighted-sum (optional)."
+    total_ones_eq:
+      formula: "(True if not use_total_ones else Sum([If(cell[(str(i), str(j))], 1, 0) for i in rows for j in cols]) == total_ones_target)"
+      desc: "Total number of ones equals target (optional)."
+    horiz_adj_pairs_eq:
+      formula: "(True if not use_adj_h else Sum([If(And(cell[(str(i), str(j))], cell[(str(i), str(j + 1))]), 1, 0) for i in rows for j in cols[:-1]]) == horiz_adj_pairs_target)"
+      desc: "Horizontal adjacent pairs count equals target (optional)."
+    vert_adj_pairs_eq:
+      formula: "(True if not use_adj_v else Sum([If(And(cell[(str(i), str(j))], cell[(str(i + 1), str(j))]), 1, 0) for i in rows[:-1] for j in cols]) == vert_adj_pairs_target)"
+      desc: "Vertical adjacent pairs count equals target (optional)."
+    global_mixed_sum:
+      formula: "(True if not use_global_mixed else Sum([If(cell[(str(i), str(j))], alpha * i + beta * j, 0) for i in rows for j in cols]) == global_mixed_target)"
+      desc: "Global mixed linear weighted-sum equals target (optional)."
+    region_exact:
+      formula: "(True if (not use_regions or not region_target_is_exact) else And([Sum([If(cell[(str(i), str(j))], 1, 0) for i in range(r1, r2 + 1) for j in range(c1, c2 + 1)]) == region_counts[idx] for idx, (r1, c1, r2, c2) in enumerate(regions)]))"
+      desc: "Exact region counts per rectangle (optional)."
+    region_range:
+      formula: "(True if (not use_regions or region_target_is_exact) else And([And(Sum([If(cell[(str(i), str(j))], 1, 0) for i in range(r1, r2 + 1) for j in range(c1, c2 + 1)]) >= region_minmax[idx][0], Sum([If(cell[(str(i), str(j))], 1, 0) for i in range(r1, r2 + 1) for j in range(c1, c2 + 1)]) <= region_minmax[idx][1]) for idx, (r1, c1, r2, c2) in enumerate(regions)]))"
+      desc: "Range-bounded region counts per rectangle (optional)."
+
+# 唯一解限制
+max_solution: 1
+
+queries:
+  q1:
+    desc: '请以二维列表形式输出完成网格, 元素为字符串 1, X 或 #。行列索引从 1 开始。# 表示障碍格, 1 表示放置灯具, 其余用 X 表示。答案格式示例: [[X,X,1],[#,X,1],...]。'
+    ans_formula: "[['#' if (i, j) in obstacles else ('1' if get_value(_solutions[0], cell[(str(i), str(j))]) else 'X') for j in cols] for i in rows]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: '智慧城市照明布局 Kakurasu（高阶规则版）：在 {n}×{n} 网格中填 1 与 X, 障碍格输出为 #。行加权和等于该行中所有为 1 的格子对应的列权重之和, 列加权和等于该列中所有为 1 的格子对应的行权重之和; 主/副对角线可按 index 或按行权重或按列权重计值; 相邻对数是指水平或竖直方向上相邻的两个格子同时为 1 的对的数量; 区域是若干互不重叠的矩形。下列规则说明给出了本题实例实际启用的目标与取值, 请据此求出唯一满足条件的网格并按二维列表格式输出。规则说明: {final_rule_text}. {q1}'

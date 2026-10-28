@@ -1,0 +1,161 @@
+# Parameterized cryptarithm generator with linear hints and unique-solution verification
+# 改进要点：
+# - 在题面文本中明确说明：单词即 base-b 数字，重复字母表示相同数字。
+# - 固定值提示最多 1 个，且不使用任何首字母；其余线索做互斥与去重，避免显见线索与重复线索。
+# - 仿射线索排除首字母与已固定字母，且系数互素，至多 1 条，避免一步定值。
+# - checksum 改为字母子集的线性校验，避免过强约束。
+# - 始终以 'Additional hints: ...' 输出附加线索。
+# - 保持唯一解验证与多样性。
+
+custom_operator:
+  # 生成完整实例（模板、词、提示、文本）
+  gen_cryptarithm_spec: cryptarithm_2.py
+  # 提取唯一字母
+  extract_letters: cryptarithm_2.py
+  # 最大词长
+  get_max_len: cryptarithm_2.py
+  # 基数幂列表 [b^0, b^1, ...]
+  gen_powers: cryptarithm_2.py
+  # 提示汇总文本（始终以 Additional hints 开头）
+  build_extra_text: cryptarithm_2.py
+  # 题面文本生成（包含字母集合、首字母集合与等式；明确单词即 base-b 数字）
+  build_story_text: cryptarithm_2.py
+  # 首字母集合
+  get_leading_letters: cryptarithm_2.py
+  # 答案格式说明文本（按本题字母顺序生成示例）
+  build_answer_guide: cryptarithm_2.py
+
+variables:
+  # 随机进制（8~12）
+  base:
+    type: int
+    domain: '[8, 12]'
+  # 生成规格：词、系数、提示与故事文本（内部已保证一致性）
+  spec:
+    formula: gen_cryptarithm_spec(base)
+  # 词列表（操作数与结果；与 coeffs 对齐）
+  words:
+    formula: 'spec["words"]'
+  # 线性方程系数（LHS 正，RHS 负）
+  coeffs:
+    formula: 'spec["coeffs"]'
+  # 使用到的字母（按字母序）
+  letters:
+    formula: extract_letters(words)
+  # 首字母集合（按字母序）
+  leading_letters:
+    formula: get_leading_letters(words)
+  # 偶数/奇数提示集（已与固定值等线索互斥）
+  even_letters:
+    formula: 'spec["even_letters"]'
+  odd_letters:
+    formula: 'spec["odd_letters"]'
+  # 固定字母取值；大小关系；和/差/子集提示（均已做互斥与去重）
+  fixed_pairs:
+    formula: 'spec["fixed_pairs"]'
+  gt_pairs:
+    formula: 'spec["gt_pairs"]'
+  sum_pairs:
+    formula: 'spec["sum_pairs"]'
+  gap_pairs:
+    formula: 'spec["gap_pairs"]'
+  subset_hints:
+    formula: 'spec["subset_hints"]'
+  # 基于字母子集的线性校验（checksum）与局部仿射约束（affine；排除首字母与固定字母）
+  checksum_pairs:
+    formula: 'spec["checksum_pairs"]'
+  checksum_value:
+    formula: 'spec["checksum_value"]'
+  affine_pairs:
+    formula: 'spec["affine_pairs"]'
+  # 人类可读表达式文本
+  expression_text:
+    formula: 'spec["text_expr"]'
+  # 单行题面文本（包含单词即 base-b 数字的明确说明；不包含答案格式说明）
+  story_text:
+    formula: 'spec["story_text"]'
+  # 最大词长与幂（转译为线性组合）
+  max_len:
+    formula: get_max_len(words)
+  pow_b:
+    formula: gen_powers(base, max_len)
+  # 偶数/奇数数字集合（便于约束）
+  even_digits:
+    formula: '[i for i in range(0, base) if i % 2 == 0]'
+  odd_digits:
+    formula: '[i for i in range(0, base) if i % 2 == 1]'
+  # 答案格式说明（包含字母顺序与示例）
+  answer_guide:
+    formula: build_answer_guide(letters)
+
+symbols:
+  # 字母到数字的唯一映射（0..base-1）
+  assign:
+    source:
+    - letters
+    type: int
+    desc: 'digit assigned to {_letters}'
+
+conditions:
+  # 基本范围约束
+  digit_range:
+    formula: 'And([And(assign[l] >= 0, assign[l] < base) for l in letters])'
+    desc: 'each letter maps to a digit in [0, base-1]'
+  # 全异约束
+  all_different:
+    formula: 'And([assign[letters[i]] != assign[letters[j]] for i in range(len(letters)) for j in range(i + 1, len(letters))])'
+    desc: 'all letter-digit assignments are pairwise distinct'
+  # 首字母非零
+  leading_nonzero:
+    formula: 'And([assign[L] != 0 for L in leading_letters])'
+    desc: 'leading letters are nonzero'
+  # 偶数/奇数提示
+  even_hint:
+    formula: 'And([Or([assign[L] == d for d in even_digits]) for L in even_letters])'
+    desc: 'even-letter hints hold'
+  odd_hint:
+    formula: 'And([Or([assign[L] == d for d in odd_digits]) for L in odd_letters])'
+    desc: 'odd-letter hints hold'
+  # 固定字母取值（最多 1 个，且不含首字母）
+  fixed_hint:
+    formula: 'And([assign[p[0]] == p[1] for p in fixed_pairs])'
+    desc: 'fixed letters equal specified digits'
+  # 字母大小关系
+  order_hint:
+    formula: 'And([assign[p[0]] > assign[p[1]] for p in gt_pairs])'
+    desc: 'letter order hints hold'
+  # 和值约束：L1+L2==s
+  sum_pairs_hint:
+    formula: 'And([assign[p[0]] + assign[p[1]] == p[2] for p in sum_pairs])'
+    desc: 'sum-pairs hints hold'
+  # 间隔约束：A-B>=g
+  gap_pairs_hint:
+    formula: 'And([assign[p[0]] - assign[p[1]] >= p[2] for p in gap_pairs])'
+    desc: 'gap-pairs hints hold'
+  # 子集约束：L in digits_list（首字母不会出现在 subset_hints 中）
+  subset_hint:
+    formula: 'And([Or([assign[p[0]] == d for d in p[1]]) for p in subset_hints])'
+    desc: 'subset hints hold'
+  # 基于子集的线性校验（checksum）：Sum(assign[L] * w) == value
+  checksum_cond:
+    formula: 'Sum([assign[p[0]] * p[1] for p in checksum_pairs]) == checksum_value'
+    desc: 'subset checksum holds'
+  # 局部仿射对约束（排除首字母与固定字母，系数互素；至多 1 条）：a*X + b*Y == t
+  affine_pairs_cond:
+    formula: 'And([assign[p[0]] * p[2] + assign[p[1]] * p[3] == p[4] for p in affine_pairs])'
+    desc: 'local affine equation holds'
+  # 核心线性方程：sum_i coeffs[i] * value(words[i]) == 0
+  core_equation:
+    formula: 'Sum([coeffs[i] * Sum([assign[ch] * pow_b[pos] for pos, ch in enumerate(list(reversed(words[i])))]) for i in range(len(words))]) == 0'
+    desc: 'the encoded equation holds under base'
+
+queries:
+  # 标准答案格式（唯一解验证）
+  q1:
+    desc: '{answer_guide}'
+    ans_formula: 'chr(44).join([str(l)+chr(58)+str(get_value(_solutions[0], assign[l])) for l in letters])'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# 单行题面描述：包含规则、首字母与额外提示，不重复答案格式说明
+desc: '{story_text} {q1}'

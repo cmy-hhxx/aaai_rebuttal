@@ -1,0 +1,60 @@
+# ==============================================================
+# Complex 24-Point Puzzle Generator (debugged, high-complexity)
+# ==============================================================
+
+custom_operator:
+  compute_value:   game_of_24_2.py
+  gen_rules:       game_of_24_2.py
+  get_rule_desc:   game_of_24_2.py
+  check_rules:     game_of_24_2.py
+  unique_solution: game_of_24_2.py
+  gen_instance:    game_of_24_2.py
+
+# ---------------------- Random parameters ----------------------
+variables:
+  num_pool_min:
+    type: int
+    domain: '[1, 5]'
+  num_pool_max:
+    type: int
+    domain: '[10, 15]'
+  num_count:
+    type: int
+    domain: '[4, 5]'
+  ops_pool:
+    formula: "['+', '-', '*', '/']"
+  target:
+    type: int
+    domain: '[15, 45]'
+
+  # --------- Composite logical rules -------------
+  rules_num:
+    type: int
+    domain: '[1, 3]'
+  rule_ids:
+    formula: gen_rules(rules_num)
+  rule_texts:
+    formula: get_rule_desc(rule_ids)
+  rules_sentence:
+    formula: "'；'.join(rule_texts)"
+
+# ---------------- Generate concrete instance -------------------
+  instance:
+    formula: gen_instance(num_pool_min, num_pool_max, num_count, ops_pool, target, rule_ids)
+  nums:
+    formula: instance['nums']
+  ops:
+    formula: instance['ops']
+
+calc_solution: false
+
+# ------------------------- Queries -----------------------------
+queries:
+  q1:
+    desc: '请写出你的解答，答案需为字典格式 key分别为nums:[...]和ops:[...]。'
+    ans_formula: instance
+    ans_text: 'str(instance)'
+    ans_assertion: "compute_value(nums, ops) == target and check_rules(nums, ops, rule_ids) and unique_solution(nums, ops_pool, target, rule_ids)"
+
+# --------------------- Final description -----------------------
+desc: '给定数字 {nums}，请在运算符 {ops_pool} 中选择 {num_count - 1} 个并按原顺序依次插入 (不可用括号) 进行计算，使得结果恰为 {target}，并满足以下附加规则：{rules_sentence}。请将答案写成字典格式 (nums:[...], ops:[...], steps:[...])，其中 steps 记录每一步的中间结果。{q1}'

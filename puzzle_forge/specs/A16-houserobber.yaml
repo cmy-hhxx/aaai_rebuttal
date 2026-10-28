@@ -1,0 +1,19 @@
+custom_operator: 
+    max_money: customs/houserobber.py
+variables:
+    num_houses: 
+      type: int
+      domain: "[2, 50]"
+      diff_factor: 1
+    houses_money:
+      formula: '[randint(1,30) for _ in range(num_houses)]'
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+    q1:
+      desc: 请计算不触动警报装置的情况下 ，一夜之内能够偷窃到的最高金额是多少？
+      ans_formula: max_money(houses_money)
+      ans_text: str(_ans)
+      ans_assertion: 'True'
+desc: 你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。每个房屋存放金额分别为{'、'.join(str(money) for money in houses_money)}，{q1}

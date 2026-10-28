@@ -1,0 +1,81 @@
+# =========================
+# PuzzleClone specification (direct computation mode)
+# Parametric Museum Relations (multi-goal, mutually-exclusive clue rendering, uniqueness preserved)
+# =========================
+
+# ---- Custom operators implemented in space_reasoning_tree_3.py ----
+custom_operator:
+  # 生成完整场景(树结构+线索+目标与答案)
+  gen_space_scenario: space_reasoning_tree_3.py
+  # 基于公开线索计算答案；不可判定则返回 'unknown'
+  compute_answer_from_scenario: space_reasoning_tree_3.py
+  # 场景唯一性校验：答案非空且关键节点完整性满足
+  validate_uniqueness_generic: space_reasoning_tree_3.py
+  # 将线索格式化为无双引号、无花括号的多行文本(以 \n 连接，返回字面 '\n')
+  format_facts_text: space_reasoning_tree_3.py
+  # 答案格式校验：'unknown' 或 'X数字' 的去重、字典序、逗号分隔
+  validate_answer_format: space_reasoning_tree_3.py
+
+# ---- Variables: seeds, bounds, and generated scenario ----
+variables:
+  # 随机种子
+  seed:
+    type: int
+    domain: "[1, 1000000]"
+    diff_factor: 0
+
+  # 节点数量上下界
+  min_nodes:
+    type: int
+    domain: "[8, 10]"
+    diff_factor: 1
+  max_nodes:
+    type: int
+    domain: "[min_nodes + 2, min_nodes + 3]"
+    diff_factor: 1
+
+  # 分支度上下界
+  deg_min:
+    type: int
+    domain: "[1, 2]"
+    diff_factor: 0
+  deg_max:
+    type: int
+    domain: "[deg_min + 1, deg_min + 2]"
+    diff_factor: 1
+
+  # 生成场景(包含公开线索、目标关系与答案)，内部有界重试，唯一、非空且文本一致
+  scenario:
+    formula: "gen_space_scenario(seed, min_nodes, max_nodes, deg_min, deg_max)"
+
+  # 便于模板化渲染的派生字段
+  nodes_num:
+    formula: "scenario['nodes_num']"
+    diff_factor: 0
+  target_item:
+    formula: "scenario['target']"
+    diff_factor: 0
+  relation_name:
+    formula: "scenario['relation_name']"
+    diff_factor: 0
+  facts_text:
+    formula: "scenario['facts_text']"
+    diff_factor: 0
+  preface:
+    formula: "scenario['preface']"
+    diff_factor: 0
+
+# ---- 不使用符号求解：全部由自定义函数直接计算 ----
+calc_solution: false
+
+# ---- Query: 直接读取场景内预计算答案，并校验唯一性与答案格式 ----
+queries:
+  q1:
+    # 问题描述(答案格式在题干 preface 中已给出)
+    desc: '请给出你的答案。'
+    ans_formula: "scenario['answer']"
+    ans_text: 'str(_ans)'
+    ans_assertion: "validate_uniqueness_generic(scenario) and validate_answer_format(scenario['answer'])"
+
+# ---- 单行题面描述：不含双引号与花括号；换行以 \n 表示(内部 facts_text 已返回字面 '\n') ----
+desc: '{preface}\n{facts_text}\n请回答: {q1}'

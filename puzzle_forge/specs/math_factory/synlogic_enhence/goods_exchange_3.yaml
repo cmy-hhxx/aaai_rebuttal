@@ -1,0 +1,57 @@
+custom_operator:
+  # 生成与执行
+  generate_scenario: goods_exchange_3.py
+  run_exchange: goods_exchange_3.py
+  # 文本化辅助
+  plan_to_text: goods_exchange_3.py
+  assignments_to_text: goods_exchange_3.py
+  constraints_to_text: goods_exchange_3.py
+  answer_format_example: goods_exchange_3.py
+  # 新增：避免在 formula 中使用 join
+  list_join: goods_exchange_3.py
+  groups_to_text: goods_exchange_3.py
+
+# 变量：一次性生成完整随机场景并拆解
+variables:
+  scenario:
+    formula: generate_scenario()
+  persons:
+    formula: 'scenario["persons"]'
+  devices:
+    formula: 'scenario["devices"]'
+  initial_assignments:
+    formula: 'scenario["initial_assignments"]'
+  groups:
+    formula: 'scenario["groups"]'
+  rules:
+    formula: 'scenario["rules"]'
+  swap_plan:
+    formula: 'scenario["swap_plan"]'
+
+  # 文本片段
+  persons_order_text:
+    formula: list_join(persons)
+  devices_text:
+    formula: list_join(devices)
+  groups_text:
+    formula: groups_to_text(persons, groups)
+  init_assign_text:
+    formula: assignments_to_text(initial_assignments)
+  constraints_text:
+    formula: constraints_to_text(rules, groups)
+  plan_text:
+    formula: plan_to_text(swap_plan)
+  ans_example:
+    formula: answer_format_example()
+
+# 直接计算模式
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请给出最终配件归属（按上方“人员顺序”输出，元素为“姓名-设备”的字符串），答案格式为 Python tuple 的字符串表示，例如：{ans_example}（实际作答时请完整列出全部人员对应项，不要包含“...”。）'
+    ans_formula: run_exchange(persons, devices, initial_assignments, rules, groups, swap_plan)
+    ans_text: 'str(_ans)'
+    ans_assertion: 'True'
+
+desc: '城市急救站设备配件轮换（高阶泛化版）。\n题目环境：共有 {len(persons)} 名值班人员，按输出顺序为：{persons_order_text}；分组信息：{groups_text}。本局设备清单：{devices_text}。初始分配（人-设备）：{init_assign_text}。\n规则说明：{constraints_text}\n交换过程：{plan_text}\n问题：根据以上规则与过程，计算所有交换执行后的最终归属，并按“人员顺序”输出答案。{q1}'

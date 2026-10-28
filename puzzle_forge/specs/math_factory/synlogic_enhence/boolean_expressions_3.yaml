@@ -1,0 +1,58 @@
+# =========================================
+# 自定义操作符：引用外部 Python 文件中的函数
+# =========================================
+custom_operator:
+  build_instance: boolean_expressions_3.py
+  get_answer_codes_from_instance: boolean_expressions_3.py
+  validate_instance: boolean_expressions_3.py
+
+# =========================================
+# 变量定义（参数化与实例构建）
+# =========================================
+variables:
+  # 选项数量目标值（难度因子正相关：选项越多，判断与组合越复杂）
+  target_opts:
+    type: int
+    domain: '[4, 7]'
+    diff_factor: 1
+
+  # 构建完整实例（包含 a,b,c,E，陈述文本与真值、选项数、展示块等）
+  instance:
+    formula: 'build_instance(target_opts)'
+
+  # 展示所需的变量解包
+  a_value:
+    formula: 'instance["a"]'
+  b_value:
+    formula: 'instance["b"]'
+  c_value:
+    formula: 'instance["c"]'
+  E_list:
+    formula: 'instance["E"]'
+  E_text:
+    formula: "', '.join([str(x) for x in E_list])"
+  opt_num:
+    formula: 'instance["opt_num"]'
+  stmts_block:
+    formula: 'instance["stmts_block"]'
+
+# =========================================
+# 采用直接计算模式，不进行Z3求解
+# =========================================
+calc_solution: false
+
+# =========================================
+# 问题与答案
+# =========================================
+queries:
+  q1:
+    desc: '答案格式要求：请返回一个由整数构成的列表，列出所有为真的陈述编号；编号从1到{opt_num}；列表需按从小到大升序排列且不得重复；若不存在为真陈述则输出 []；示例 [1, 3]\n请给出所有为真的陈述编号列表'
+    ans_formula: 'get_answer_codes_from_instance(instance)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_instance(instance)'
+
+# =========================================
+# 问题整体叙述（包含选项与提问）
+# 注意：desc 内部禁止使用英文引号，集合花括号采用双花括号转义
+# =========================================
+desc: '设有整数 a 等于{a_value}，b 等于{b_value}，c 等于{c_value}；E 为集合 {{ {E_text} }}。\n共有 {opt_num} 条复合陈述，可能涉及但不限于且、或、非、恰有一个、蕴含、当且仅当、质数、奇偶性、绝对值、最大公因数、取余、集合的最大值与最小值等术语；其中质数指大于1且仅能被1与自身整除的整数；偶数指能被2整除的整数；绝对值表示一个数到零的距离；最大公因数为两个整数的公因数之中最大的整数；集合的最大值与最小值分别为其中的最大元素与最小元素。\n以下为陈述列表，请逐条判断其真假：\n{stmts_block}\n{q1}'

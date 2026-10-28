@@ -1,0 +1,233 @@
+# ================================================================
+# 高阶双权 Kakurasu（含障碍）——高度泛化规格（逆向生成 + 多层复合规则）
+# 条件族、数量、操作符、目标均随机生成；保证唯一解与时间效率。
+# ================================================================
+custom_operator:
+  function_1: kukurasu_0.py
+  function_2: kukurasu_0.py
+
+variables:
+  # --- 随机范围控制（不硬编码） ---
+  n_min:
+    type: int
+    domain: "[4, 7]"
+  n_max:
+    type: int
+    domain: "[n_min, n_min + 3]"
+  weight_min:
+    type: int
+    domain: "[1, 6]"
+  weight_max:
+    type: int
+    domain: "[weight_min + 2, weight_min + 8]"
+  ob_ratio_min:
+    type: float
+    domain: "[0.0, 0.25]"
+  ob_ratio_max:
+    type: float
+    domain: "[ob_ratio_min, ob_ratio_min + 0.25]"
+  distinct_weights:
+    type: bool
+    domain: "[True, False]"
+  rule_aggressiveness:
+    type: int
+    domain: "[3, 8]"
+  max_tries:
+    type: int
+    domain: "[200, 600]"
+  max_time_sec:
+    type: int
+    domain: "[60, 180]"
+  seed_opt:
+    formula: "None"
+
+  # --- 由Python算子生成完整参数与规则集 ---
+  params:
+    formula: "function_2(n_min, n_max, weight_min, weight_max, ob_ratio_min, ob_ratio_max, max_tries, distinct_weights, rule_aggressiveness, max_time_sec, seed_opt)"
+
+  # --- 解包（供约束与描述使用） ---
+  n:
+    formula: "params['n']"
+  rows:
+    formula: "list(range(1, n + 1))"
+  cols:
+    formula: "list(range(1, n + 1))"
+  rows_s:
+    formula: "params['rows_s']"
+  cols_s:
+    formula: "params['cols_s']"
+  Wc:
+    formula: "params['Wc']"
+  Wr:
+    formula: "params['Wr']"
+  obstacles:
+    formula: "params['obstacles']"
+
+  # 加权行/列规则
+  row_ops:
+    formula: "params['row_ops']"
+  row_targets:
+    formula: "params['row_targets']"
+  row_mask:
+    formula: "params['row_mask']"
+  col_ops:
+    formula: "params['col_ops']"
+  col_targets:
+    formula: "params['col_targets']"
+  col_mask:
+    formula: "params['col_mask']"
+
+  # 行/列 ones 计数规则
+  rowcnt_ops:
+    formula: "params['rowcnt_ops']"
+  rowcnt_targets:
+    formula: "params['rowcnt_targets']"
+  rowcnt_mask:
+    formula: "params['rowcnt_mask']"
+  colcnt_ops:
+    formula: "params['colcnt_ops']"
+  colcnt_targets:
+    formula: "params['colcnt_targets']"
+  colcnt_mask:
+    formula: "params['colcnt_mask']"
+
+  # 行/列混合线性规则：a*加权和 + b*个数
+  row_blend_mask:
+    formula: "params['row_blend_mask']"
+  row_blend_ops:
+    formula: "params['row_blend_ops']"
+  row_blend_targets:
+    formula: "params['row_blend_targets']"
+  row_a:
+    formula: "params['row_a']"
+  row_b:
+    formula: "params['row_b']"
+  col_blend_mask:
+    formula: "params['col_blend_mask']"
+  col_blend_ops:
+    formula: "params['col_blend_ops']"
+  col_blend_targets:
+    formula: "params['col_blend_targets']"
+  col_a:
+    formula: "params['col_a']"
+  col_b:
+    formula: "params['col_b']"
+
+  # 子块规则（列表）
+  blocks_wcol:
+    formula: "params['blocks_wcol']"
+  blocks_wrow:
+    formula: "params['blocks_wrow']"
+  blocks_cnt:
+    formula: "params['blocks_cnt']"
+
+  # 对角线规则（列表；每类型最多1条）
+  diag_main_wcol:
+    formula: "params['diag_main_wcol']"
+  diag_main_wrow:
+    formula: "params['diag_main_wrow']"
+  diag_main_cnt:
+    formula: "params['diag_main_cnt']"
+  diag_anti_wcol:
+    formula: "params['diag_anti_wcol']"
+  diag_anti_wrow:
+    formula: "params['diag_anti_wrow']"
+  diag_anti_cnt:
+    formula: "params['diag_anti_cnt']"
+
+  # 全局 ones 规则
+  global_mask:
+    formula: "params['global_mask']"
+  global_op:
+    formula: "params['global_op']"
+  global_target:
+    formula: "params['global_target']"
+
+  # 规则文本汇总（用于题面展示）
+  rule_lines:
+    formula: "params['rule_lines']"
+  rule_text:
+    formula: "'; '.join(rule_lines)"
+
+# ================================================================
+# 符号：网格布置变量（字符串键）
+# ================================================================
+symbols:
+  cells:
+    source:
+    - rows_s
+    - cols_s
+    type: bool
+    desc: "Cell at row {_rows_s}, col {_cols_s} is selected"
+
+# ================================================================
+# 约束：障碍、加权/计数/混合、子块、对角线、全局（全部参数化）
+# ================================================================
+conditions:
+  obstacle_cells_must_be_empty:
+    formula: "And([Not(cells[(str(r), str(c))]) for (r, c) in obstacles])"
+    desc: 'Obstacles at coordinates equal {obstacles} must be # and cannot contain 1'
+
+  weighted_row_rules:
+    formula: "And([make_expr(row_ops[i-1], Sum([If(cells[(str(i), str(j))], Wc[j-1], 0) for j in cols]), row_targets[i-1]) for i in rows if row_mask[i-1]])"
+    desc: 'Weighted row rules via row_ops/row_targets/row_mask'
+
+  weighted_col_rules:
+    formula: "And([make_expr(col_ops[j-1], Sum([If(cells[(str(i), str(j))], Wr[i-1], 0) for i in rows]), col_targets[j-1]) for j in cols if col_mask[j-1]])"
+    desc: 'Weighted column rules via col_ops/col_targets/col_mask'
+
+  row_count_rules:
+    formula: "And([make_expr(rowcnt_ops[i-1], Sum([If(cells[(str(i), str(j))], 1, 0) for j in cols]), rowcnt_targets[i-1]) for i in rows if rowcnt_mask[i-1]])"
+    desc: 'Row ones-count rules via rowcnt_ops/rowcnt_targets/rowcnt_mask'
+
+  col_count_rules:
+    formula: "And([make_expr(colcnt_ops[j-1], Sum([If(cells[(str(i), str(j))], 1, 0) for i in rows]), colcnt_targets[j-1]) for j in cols if colcnt_mask[j-1]])"
+    desc: 'Column ones-count rules via colcnt_ops/colcnt_targets/colcnt_mask'
+
+  row_blend_rules:
+    formula: "And([make_expr(row_blend_ops[i-1], row_a[i-1] * Sum([If(cells[(str(i), str(j))], Wc[j-1], 0) for j in cols]) + row_b[i-1] * Sum([If(cells[(str(i), str(j))], 1, 0) for j in cols]), row_blend_targets[i-1]) for i in rows if row_blend_mask[i-1]])"
+    desc: 'Row blended linear rules a*weighted_sum + b*count'
+
+  col_blend_rules:
+    formula: "And([make_expr(col_blend_ops[j-1], col_a[j-1] * Sum([If(cells[(str(i), str(j))], Wr[i-1], 0) for i in rows]) + col_b[j-1] * Sum([If(cells[(str(i), str(j))], 1, 0) for i in rows]), col_blend_targets[j-1]) for j in cols if col_blend_mask[j-1]])"
+    desc: 'Column blended linear rules a*weighted_sum + b*count'
+
+  block_rules_wcol:
+    formula: "And([make_expr(b[3], Sum([If(cells[(str(i), str(j))], Wc[j-1], 0) for i in range(b[0], b[0] + b[2]) for j in range(b[1], b[1] + b[2])]), b[4]) for b in blocks_wcol])"
+    desc: 'Block rules on column-weight sums within k×k sub-squares'
+
+  block_rules_wrow:
+    formula: "And([make_expr(b[3], Sum([If(cells[(str(i), str(j))], Wr[i-1], 0) for i in range(b[0], b[0] + b[2]) for j in range(b[1], b[1] + b[2])]), b[4]) for b in blocks_wrow])"
+    desc: 'Block rules on row-weight sums within k×k sub-squares'
+
+  block_rules_cnt:
+    formula: "And([make_expr(b[3], Sum([If(cells[(str(i), str(j))], 1, 0) for i in range(b[0], b[0] + b[2]) for j in range(b[1], b[1] + b[2])]), b[4]) for b in blocks_cnt])"
+    desc: 'Block rules on ones-count within k×k sub-squares'
+
+  diag_main_rules:
+    formula: "And([And([make_expr(d[0], Sum([If(cells[(str(i), str(i))], Wc[i-1], 0) for i in rows]), d[1]) for d in diag_main_wcol]), And([make_expr(d[0], Sum([If(cells[(str(i), str(i))], Wr[i-1], 0) for i in rows]), d[1]) for d in diag_main_wrow]), And([make_expr(d[0], Sum([If(cells[(str(i), str(i))], 1, 0) for i in rows]), d[1]) for d in diag_main_cnt])])"
+    desc: 'Main diagonal rules on column/row weights or ones-count'
+
+  diag_anti_rules:
+    formula: "And([And([make_expr(d[0], Sum([If(cells[(str(i), str(n + 1 - i))], Wc[n - i], 0) for i in rows]), d[1]) for d in diag_anti_wcol]), And([make_expr(d[0], Sum([If(cells[(str(i), str(n + 1 - i))], Wr[i-1], 0) for i in rows]), d[1]) for d in diag_anti_wrow]), And([make_expr(d[0], Sum([If(cells[(str(i), str(n + 1 - i))], 1, 0) for i in rows]), d[1]) for d in diag_anti_cnt])])"
+    desc: 'Anti-diagonal rules on column/row weights or ones-count'
+
+  global_count_rule:
+    formula: "(make_expr(global_op, Sum([If(cells[(str(i), str(j))], 1, 0) for i in rows for j in cols]), global_target) if global_mask else And([]))"
+    desc: 'Optional global ones-count rule if enabled'
+
+# ================================================================
+# 查询与答案（开放题，唯一解）
+# ================================================================
+queries:
+  q1:
+    desc: '请根据题面规则完成双权 Kakurasu 填充：每格填入 1 或 X，障碍格为 #；满足所有已给出的规则。答案格式：使用二维列表的字符串表示，例如 [[1, X], [X, #]]；注意每个元素应为字符串 1、X 或 #。请输出完整 n×n 网格的二维列表字符串。'
+    ans_formula: "[['#' if (i, j) in obstacles else ('1' if get_value(_solutions[0], cells[(str(i), str(j))]) else 'X') for j in cols] for i in rows]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+# ================================================================
+# 题面描述（单行、单引号、\n 控制换行；花括号仅作变量插值）
+# 提示：eq 表示等于，le 表示不超过，ge 表示至少；混合线性规则指 a*加权和 + b*1 的个数。
+# ================================================================
+desc: '在一个 n×n 阵列上进行双权 Kakurasu（含障碍）填充：每格填入 1 或 X，障碍格为 #；行加权和采用列权重 Wc，列加权和采用行权重 Wr。规则由多个族随机生成，可能包含加权和、1 的计数、混合线性规则、子块约束与对角线约束；所有规则的操作符为 eq、le、ge，分别表示等于、不超过、至少。以下是本题的规则清单：{rule_text}。参数：n = {n}，Wc = {Wc}，Wr = {Wr}，障碍坐标(行,列，从1计) = {obstacles}。答案格式请按二维列表字符串填写，元素为 1、X 或 #。\n{q1}'

@@ -1,0 +1,60 @@
+# --------------------------
+# 字母方阵与多源全局线索谜题 —— 去除生成侧阈值暴露版
+# --------------------------
+
+# 自定义算子（文件名与函数名一一对应）
+custom_operator:
+  build_unique_signature_puzzle: wordscapes_2.py
+  join_list: wordscapes_2.py
+
+# 变量定义（随机化与派生）
+variables:
+  # 方阵大小（4或5），难度正相关
+  grid_size:
+    type: int
+    domain: "[4, 5]"
+    diff_factor: 1
+  # 生成唯一解且避免显见线索的题目数据包
+  puzzle:
+    formula: build_unique_signature_puzzle(grid_size)
+  # 公开给玩家的行线索、列线索、全局线索与候选集合
+  row_clues:
+    formula: "puzzle['row_clues']"
+  col_clues:
+    formula: "puzzle['col_clues']"
+  global_clues:
+    formula: "puzzle['global_clues']"
+  bank:
+    formula: "puzzle['bank']"
+  # 标准答案（只在校验与出题内部使用）
+  diag_original:
+    formula: "puzzle['diag_original']"
+  diag_shift:
+    formula: "puzzle['diag_shift']"
+  anti_original:
+    formula: "puzzle['anti_original']"
+  anti_shift:
+    formula: "puzzle['anti_shift']"
+  # 文本渲染所需的串
+  row_desc:
+    formula: join_list(row_clues)
+  col_desc:
+    formula: join_list(col_clues)
+  global_desc:
+    formula: join_list(global_clues)
+  bank_desc:
+    formula: join_list(bank)
+
+# 直接计算模式（无Z3）
+calc_solution: false
+
+# 查询：合并为单个固定格式答案，竖线分隔
+queries:
+  q:
+    desc: '请按主对角线原始|主对角线移位加一|反对角线移位加一的格式输出答案 使用单个竖线|作为分隔符 其中移位加一指按字母表循环右移一位 将Z视为A 三段均须为长度为{grid_size}且仅含A到Z的大写字母且无空格 示例 若为4则 ABCD|BCDE|EDCB 若为5则 ABCDE|BCDEF|FEDCB'
+    ans_formula: "puzzle['diag_original'] + '|' + puzzle['diag_shift'] + '|' + puzzle['anti_shift']"
+    ans_text: "str(_ans)"
+    ans_assertion: "_ans == puzzle['diag_original'] + '|' + puzzle['diag_shift'] + '|' + puzzle['anti_shift'] and len(_ans.split('|')) == 3 and all(len(seg) == grid_size for seg in _ans.split('|')) and all(all(('A' <= ch and ch <= 'Z') for ch in seg) for seg in _ans.split('|'))"
+
+# 描述（题面，仅包含可见线索与规则；候选集合为统一列表，注意为单行使用\\n换行）
+desc: '字母方阵谜题 给定一个{grid_size}乘{grid_size}的字母方阵 每一行与每一列的字符串必须从下方候选集合中选取 且长度为{grid_size} 且所有行互不相同 所有列互不相同 Rk表示第k行 Ck表示第k列 k从1起始 线索类型含义如下 SIG 表示将该行或该列字符串按字母排序后的结果 PREk 表示该行或该列字符串的前k个字母 SUFk 表示该行或该列字符串的后k个字母 其中k满足1≤k<{grid_size} 例如 WATER 的 SIG 为 AERTW PRE2 为 WA SUF2 为 ER 另有全局线索用于描述方阵整体结构 可能包含 DIAGSIG=XXXX 表示主对角线的字母排序得到 XXXX 以及 ANTI_VOW=k 表示反对角线上共有k个元音字母 元音字母集为 AEIOU ROWi_VOW=k 表示第i行共有k个元音字母 其中i按1起始编号 CORNERSIG=XXXX 表示四个角上的字母排序得到 XXXX 你只能从统一候选集合中选择行与列 且列同样必须从候选集合中选取 并与其他列互不相同 以下线索均为部分信息 需要综合使用才能还原方阵 在满足所有线索与规则的前提下该方阵有且仅有一个解 你的任务是在满足上述规则和所有线索的前提下复原唯一的方阵 然后回答下列问题 答案必须以单个竖线分隔的三段固定格式输出 三段依次为主对角线原始 主对角线移位加一 反对角线移位加一 其中移位加一指按字母表循环右移一位 将Z视为A 三段均为长度为{grid_size}且仅含A到Z的大写字母且不含空格 示例 若为4则 ABCD|BCDE|EDCB 若为5则 ABCDE|BCDEF|FEDCB\\n已知 请按从上到下 从左到右理解如下条目\\n- 行线索 自上而下 为 {row_desc}\\n- 列线索 自左而右 为 {col_desc}\\n- 全局线索 为 {global_desc}\\n- 候选集合 为 {bank_desc}\\n请在满足所有规则的前提下复原唯一的方阵 然后回答如下问题\\n{q}'

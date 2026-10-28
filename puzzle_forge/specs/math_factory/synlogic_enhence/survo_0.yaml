@@ -1,0 +1,132 @@
+custom_operator:
+  function_1: survo_0.py
+  function_2: survo_0.py
+  build_extra_cond: survo_0.py
+  cell_value: survo_0.py
+  format_rules_text: survo_0.py
+  make_row_display: survo_0.py
+
+variables:
+  base_min:
+    type: int
+    domain: "[1, 12]"
+  base_max:
+    type: int
+    domain: "[base_min + 8, base_min + 24]"
+
+  specs:
+    formula: "function_1(base_min, base_max)"
+
+  unknown_keys:
+    formula: "specs['unknown_keys']"
+  known_map:
+    formula: "specs['known_map']"
+  row_positions:
+    formula: "specs['row_positions']"
+  row1_a:
+    formula: "specs['row_ops']['r1']['a']"
+  row1_b:
+    formula: "specs['row_ops']['r1']['b']"
+  row2_a:
+    formula: "specs['row_ops']['r2']['a']"
+  row2_b:
+    formula: "specs['row_ops']['r2']['b']"
+  row3_a:
+    formula: "specs['row_ops']['r3']['a']"
+  row3_b:
+    formula: "specs['row_ops']['r3']['b']"
+
+  r1_last:
+    formula: "specs['r1_last']"
+  r2_last:
+    formula: "specs['r2_last']"
+  r3_last:
+    formula: "specs['r3_last']"
+  col1_sum:
+    formula: "specs['col1_sum']"
+  col2_sum:
+    formula: "specs['col2_sum']"
+  col3_sum:
+    formula: "specs['col3_sum']"
+  total_sum:
+    formula: "specs['total_sum']"
+  extra_specs:
+    formula: "specs['extra_specs']"
+  extra_num:
+    formula: "len(specs['extra_specs'])"
+
+  available_nums:
+    formula: "function_2(list(specs['X_values'].values()))"
+
+  rules_text:
+    formula: "format_rules_text(specs['row_ops'], specs['row_positions'])"
+  extra_text:
+    formula: "'; '.join([e['desc'] for e in specs['extra_specs']])"
+  row1_display:
+    formula: "make_row_display(specs['row_positions']['r1'], specs['known_map'], specs['unknown_keys'], specs['r1_last'])"
+  row2_display:
+    formula: "make_row_display(specs['row_positions']['r2'], specs['known_map'], specs['unknown_keys'], specs['r2_last'])"
+  row3_display:
+    formula: "make_row_display(specs['row_positions']['r3'], specs['known_map'], specs['unknown_keys'], specs['r3_last'])"
+  last_row_display:
+    formula: "str([col1_sum, col2_sum, col3_sum, total_sum])"
+
+  ans_values:
+    formula: "[specs['X_values'][k] for k in specs['unknown_keys']]"
+
+symbols:
+  X:
+    source:
+    - unknown_keys
+    type: int
+    desc: "未知值位于位置 {_unknown_keys}"
+
+conditions:
+  domain_membership:
+    formula: And([Or([X[k] == n for n in available_nums]) for k in unknown_keys])
+    desc: "四个未知数均取自可用数字集合且每个仅使用一次"
+  all_distinct:
+    formula: And([X[unknown_keys[i]] != X[unknown_keys[j]] for i in range(len(unknown_keys)) for j in range(i + 1, len(unknown_keys))])
+    desc: "四个未知数两两不相等"
+
+  row1_rule_linear:
+    formula: row1_a[0] * cell_value(row_positions['r1'][0], X, known_map) + row1_a[1] * cell_value(row_positions['r1'][1], X, known_map) + row1_a[2] * cell_value(row_positions['r1'][2], X, known_map) + row1_b == r1_last
+    desc: "行1采用线性规则，满足该行最后一列等式"
+  row2_rule_linear:
+    formula: row2_a[0] * cell_value(row_positions['r2'][0], X, known_map) + row2_a[1] * cell_value(row_positions['r2'][1], X, known_map) + row2_a[2] * cell_value(row_positions['r2'][2], X, known_map) + row2_b == r2_last
+    desc: "行2采用线性规则，满足该行最后一列等式"
+  row3_rule_linear:
+    formula: row3_a[0] * cell_value(row_positions['r3'][0], X, known_map) + row3_a[1] * cell_value(row_positions['r3'][1], X, known_map) + row3_a[2] * cell_value(row_positions['r3'][2], X, known_map) + row3_b == r3_last
+    desc: "行3采用线性规则，满足该行最后一列等式"
+
+  col1_sum_check:
+    formula: cell_value('r1c1', X, known_map) + cell_value('r2c1', X, known_map) + cell_value('r3c1', X, known_map) == col1_sum
+    desc: "第1列普通和校验"
+  col2_sum_check:
+    formula: cell_value('r1c2', X, known_map) + cell_value('r2c2', X, known_map) + cell_value('r3c2', X, known_map) == col2_sum
+    desc: "第2列普通和校验"
+  col3_sum_check:
+    formula: cell_value('r1c3', X, known_map) + cell_value('r2c3', X, known_map) + cell_value('r3c3', X, known_map) == col3_sum
+    desc: "第3列普通和校验"
+
+  total_sum_check:
+    formula: r1_last + r2_last + r3_last == total_sum
+    desc: "右下角为前三行最后一列之和"
+
+  extra_dynamic:
+    source:
+    - "extra_specs"
+    domain: "[extra_num, extra_num]"
+    formula: build_extra_cond(_sym[0], X, known_map, row_positions, unknown_keys)
+    desc: "{_sym[0]['desc']}"
+
+queries:
+  q_fill:
+    desc: '未知数 X 所在位置为 {unknown_keys}。请按这些位置的顺序给出它们的值，并用====连接。例如: v1====v2====v3====v4。'
+    ans_formula: ans_values
+    ans_text: "'===='.join([str(v) for v in _ans])"
+    ans_assertion: "len(_solutions) == 1"
+
+calc_solution: true
+
+desc: '这是一道高阶推理题：每一行的最后一列由该行前三项通过线性规则计算，即 a1*第1项 + a2*第2项 + a3*第3项 + b。未知格子用X标记；最后一行给出每列的普通和，总计为前三行最后一列之和。题面同时提供若干附加约束以保证唯一解。三行显示为：行1: {row1_display}；行2: {row2_display}；行3: {row3_display}；最后一行(各列普通和与总计): {last_row_display}。本题规则说明: {rules_text}。附加约束: {extra_text}。可用数字(每个仅使用一次): {available_nums}。答案格式提示: 请按未知位置列表顺序以====连接四个值。问题: {q_fill}'

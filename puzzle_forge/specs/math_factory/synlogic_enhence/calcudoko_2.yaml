@@ -1,0 +1,236 @@
+# 参数化 Calcudoku 造题框架（逆向生成：先解后约束；唯一性由求解器验证）
+# - 自定义函数生成随机拉丁方解与连通笼 + 运算/目标 + 随机全局规则（对角线、固定格、Thermo、Anti-knight、外环和、2×2区块和、Sandwich）
+# - 文本明确：列出实际生效的全局规则；说明 1-based 坐标；笼为正交连通；答案格式示例与严格要求
+# - 唯一解由 ans_assertion 与 max_solution 联合保障
+# - 控制单格笼与固定格的比例，提升逻辑深度，减少显见线索
+
+custom_operator:
+  # 基础约束算子（YAML 中直接使用）
+  prod: calcudoko_2.py
+  sub2: calcudoko_2.py
+  div2: calcudoko_2.py
+  all_diff: calcudoko_2.py
+  # Sandwich 专用子句（避免在 YAML 中使用 min/max）
+  sandwich_row_clause: calcudoko_2.py
+  sandwich_col_clause: calcudoko_2.py
+  # 实例生成器与规则/笼文本渲染器（变量公式中使用）
+  gen_calcudoku_instance: calcudoko_2.py
+  format_rules: calcudoko_2.py
+  format_cages: calcudoko_2.py
+
+# 限制枚举解数量以加速唯一性检测（超过 2 个解直接中止并丢弃）
+max_solution: 2
+
+variables:
+  # 网格大小（随机 4~6）
+  N:
+    type: int
+    domain: '[4, 6]'
+
+  # 行、列索引（字符串化，作为符号字典键，1-based）
+  rows:
+    formula: '[str(i) for i in range(1, N + 1)]'
+  cols:
+    formula: '[str(i) for i in range(1, N + 1)]'
+
+  # 生成实例（包含笼 cells/ops/targets 与候选解 + 随机全局规则）
+  instance:
+    formula: 'gen_calcudoku_instance(N)'
+
+  # 笼的细项
+  cage_cells:
+    formula: 'instance["cells"]'
+  cage_ops:
+    formula: 'instance["ops"]'
+  cage_targets:
+    formula: 'instance["targets"]'
+  # 候选解网格（不在题面展示）
+  solution_grid:
+    formula: 'instance["solution"]'
+
+  # 全局规则包（extras）
+  extras:
+    formula: 'instance["extras"]'
+
+  # 对角线和目标（可能为 None）
+  main_diag_target:
+    formula: 'extras["main_diag_sum"]'
+  anti_diag_target:
+    formula: 'extras["anti_diag_sum"]'
+  has_main_diag:
+    formula: 'extras["main_diag_sum"] is not None'
+  has_anti_diag:
+    formula: 'extras["anti_diag_sum"] is not None'
+
+  # 固定格 [(('r','c'), val), ...]
+  fixed_cells:
+    formula: 'extras["fixed_cells"]'
+  fixed_rows:
+    formula: '[fc[0][0] for fc in fixed_cells]'
+  fixed_cols:
+    formula: '[fc[0][1] for fc in fixed_cells]'
+  fixed_vals:
+    formula: '[int(fc[1]) for fc in fixed_cells]'
+
+  # Thermometer 路径（列表的列表，每条路径为 [(r,c), ...]）
+  thermo_paths:
+    formula: 'extras["thermos"]'
+
+  # Anti-knight 开关与马步对列表（全局）
+  anti_knight_on:
+    formula: 'extras["anti_knight"]'
+  knight_pairs:
+    formula: 'extras["knight_pairs"]'
+
+  # 外环和与边框格列表（条件中会用到）
+  border_sum_target:
+    formula: 'extras["border_sum"]'
+  has_border:
+    formula: 'extras["border_sum"] is not None'
+  # 外环格（1-based 字符串坐标）
+  border_cells:
+    formula: '[(rows[0], c) for c in cols] + [(rows[N-1], c) for c in cols] + [(rows[i], cols[0]) for i in range(1, N-1)] + [(rows[i], cols[N-1]) for i in range(1, N-1)]'
+
+  # 2×2 区块和
+  block_cells:
+    formula: 'extras["block_cells"]'
+  block_targets:
+    formula: 'extras["block_targets"]'
+
+  # Sandwich 和（行/列）
+  sandwich_row_pairs:
+    formula: 'extras["sandwich_rows"]'
+  sandwich_row_rows:
+    formula: '[p[0] for p in sandwich_row_pairs]'
+  sandwich_row_tgts:
+    formula: '[int(p[1]) for p in sandwich_row_pairs]'
+
+  sandwich_col_pairs:
+    formula: 'extras["sandwich_cols"]'
+  sandwich_col_cols:
+    formula: '[p[0] for p in sandwich_col_pairs]'
+  sandwich_col_tgts:
+    formula: '[int(p[1]) for p in sandwich_col_pairs]'
+
+  # 笼清单渲染字符串（题面使用，单行）
+  cages_str:
+    formula: 'format_cages(cage_cells, cage_ops, cage_targets)'
+
+  # 规则文本渲染（单行，直接为清单或 none.）
+  rules_str:
+    formula: 'instance["rules_text"]'
+
+  # 答案格式示例（与 N 一致）
+  format_example:
+    formula: 'str([[j + 1 for j in range(N)] for i in range(N)])'
+
+symbols:
+  # 每个格子的整数符号（键为 (row, col) 的字符串对）
+  grid_s:
+    source:
+    - rows
+    - cols
+    type: int
+    desc: 'Cell ({_rows}, {_cols})'
+
+conditions:
+  # 取值域：每个格子在 [1..N]
+  val_domain:
+    formula: 'And([And(grid_s[(r, c)] >= 1, grid_s[(r, c)] <= N) for r in rows for c in cols])'
+    desc: 'All cells take values from 1 to N'
+
+  # 行唯一性：每行数字互不相同
+  row_unique:
+    formula: 'And([all_diff([grid_s[(r, c)] for c in cols]) for r in rows])'
+    desc: 'Each row has distinct numbers'
+
+  # 列唯一性：每列数字互不相同
+  col_unique:
+    formula: 'And([all_diff([grid_s[(r, c)] for r in rows]) for c in cols])'
+    desc: 'Each column has distinct numbers'
+
+  # 笼唯一性：每个笼内数字互不相同
+  cage_unique:
+    formula: 'And([all_diff([grid_s[(rc[0], rc[1])] for rc in cells]) for cells in cage_cells])'
+    desc: 'Each cage has distinct numbers'
+
+  # 加法笼约束
+  sum_cages_ok:
+    formula: 'And([Sum([grid_s[(rc[0], rc[1])] for rc in cage_cells[i]]) == cage_targets[i] for i in range(len(cage_targets)) if cage_ops[i] == "sum"])'
+    desc: 'Sum cages satisfy their targets'
+
+  # 乘法笼约束
+  prod_cages_ok:
+    formula: 'And([prod([grid_s[(rc[0], rc[1])] for rc in cage_cells[i]]) == cage_targets[i] for i in range(len(cage_targets)) if cage_ops[i] == "prod"])'
+    desc: 'Product cages satisfy their targets'
+
+  # 两格减法笼约束（绝对差）
+  diff_cages_ok:
+    formula: 'And([sub2(grid_s[(cage_cells[i][0][0], cage_cells[i][0][1])], grid_s[(cage_cells[i][1][0], cage_cells[i][1][1])], cage_targets[i]) for i in range(len(cage_targets)) if cage_ops[i] == "diff"])'
+    desc: 'Difference cages satisfy their targets (absolute difference on 2 cells)'
+
+  # 两格整除商笼约束（乘法等价）
+  div_cages_ok:
+    formula: 'And([div2(grid_s[(cage_cells[i][0][0], cage_cells[i][0][1])], grid_s[(cage_cells[i][1][0], cage_cells[i][1][1])], cage_targets[i]) for i in range(len(cage_targets)) if cage_ops[i] == "div"])'
+    desc: 'Division cages satisfy their targets (integer quotient on 2 cells via multiplication equivalence)'
+
+  # 单格等值笼约束
+  eq_cages_ok:
+    formula: 'And([grid_s[(cage_cells[i][0][0], cage_cells[i][0][1])] == cage_targets[i] for i in range(len(cage_targets)) if cage_ops[i] == "eq"])'
+    desc: 'Single-cell cages match their targets exactly'
+
+  # 额外全局规则：主对角线和（有则启用）
+  main_diag_ok:
+    formula: 'If(has_main_diag, Sum([grid_s[(rows[i], cols[i])] for i in range(N)]) == main_diag_target, True)'
+    desc: 'If present, the main diagonal sum equals its target'
+
+  # 额外全局规则：副对角线和（有则启用）
+  anti_diag_ok:
+    formula: 'If(has_anti_diag, Sum([grid_s[(rows[i], cols[N - 1 - i])] for i in range(N)]) == anti_diag_target, True)'
+    desc: 'If present, the anti-diagonal sum equals its target'
+
+  # 额外全局规则：固定格（给定数）
+  fixed_cells_ok:
+    formula: 'And([grid_s[(fixed_rows[i], fixed_cols[i])] == fixed_vals[i] for i in range(len(fixed_vals))])'
+    desc: 'Fixed cells must equal their given values'
+
+  # Thermometer 路径严格递增（若存在）
+  thermo_ok:
+    formula: 'If(len(thermo_paths) > 0, And([And([grid_s[(thermo_paths[i][j][0], thermo_paths[i][j][1])] < grid_s[(thermo_paths[i][j+1][0], thermo_paths[i][j+1][1])] for j in range(len(thermo_paths[i]) - 1)]) for i in range(len(thermo_paths))]), True)'
+    desc: 'On each thermometer path, values must strictly increase from bulb to tip'
+
+  # Anti-knight（若启用）
+  anti_knight_ok:
+    formula: 'If(anti_knight_on, And([grid_s[(p[0][0], p[0][1])] != grid_s[(p[1][0], p[1][1])] for p in knight_pairs]), True)'
+    desc: 'Anti-knight: cells at a knight-move must be different'
+
+  # 外环和（若启用）
+  border_sum_ok:
+    formula: 'If(has_border, Sum([grid_s[(rc[0], rc[1])] for rc in border_cells]) == border_sum_target, True)'
+    desc: 'If present, the sum of border ring equals its target'
+
+  # 2×2 区块和（若存在）
+  block_sums_ok:
+    formula: 'And([Sum([grid_s[(rc[0], rc[1])] for rc in block_cells[i]]) == block_targets[i] for i in range(len(block_targets))])'
+    desc: 'Each specified 2x2 block sum equals its target'
+
+  # Sandwich 和（行）：行内 1 与 N 之间（不含端点）的和
+  sandwich_rows_ok:
+    formula: 'And([sandwich_row_clause(grid_s, row, cols, tgt, N) for (row, tgt) in sandwich_row_pairs])'
+    desc: 'For each specified row, the sum between 1 and N equals its target'
+
+  # Sandwich 和（列）：列内 1 与 N 之间（不含端点）的和
+  sandwich_cols_ok:
+    formula: 'And([sandwich_col_clause(grid_s, col, rows, tgt, N) for (col, tgt) in sandwich_col_pairs])'
+    desc: 'For each specified column, the sum between 1 and N equals its target'
+
+# 返回唯一解的矩阵；格式严格为嵌套列表字符串
+queries:
+  q1:
+    desc: 'Answer format (must match exactly): return the solved grid as a Python-style nested list [[r1],[r2],...,[rN]] with integers 1..{N}; strictly follow the example when N={N}: {format_example}'
+    ans_formula: '[[get_value(_solutions[0], grid_s[(r, c)]) for c in cols] for r in rows]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# 单行题面描述（仅单引号；花括号仅用于变量替换）
+desc: 'Solve a {N}×{N} Calcudoku: fill each row and column with numbers 1..{N} without repetition; within each cage all numbers are distinct; cages are orthogonally contiguous; cage operations must reach their targets (two-cell difference is absolute; two-cell division is integer quotient). Cells are indexed as (rX,cY) with 1-based row/column. Cages are listed as [(cells) -> op target]: {cages_str}. Global rules in effect: {rules_str} Submit your answer as a nested list [[row1],...,[row{N}]] with integers 1..{N}; example format: {format_example}. {q1}'

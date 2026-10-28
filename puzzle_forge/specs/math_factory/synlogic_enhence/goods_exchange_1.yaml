@@ -1,0 +1,74 @@
+# 自定义操作符：均来自 goods_exchange_1.py，函数名需一致且文件真实存在
+custom_operator:
+  exchange_build_scenario: goods_exchange_1.py
+  scenario_final_tuple: goods_exchange_1.py
+  scenario_final_str: goods_exchange_1.py
+  scenario_owner_of_item: goods_exchange_1.py
+  scenario_item_of_player: goods_exchange_1.py
+  scenario_step_players_str: goods_exchange_1.py
+  scenario_uniqueness_ok: goods_exchange_1.py
+
+# 变量定义：规模与噪声参数（适度收敛提升可玩性）
+variables:
+  # 玩家数量（10~20，仍具多样性且便于手动推演）
+  player_num:
+    type: int
+    domain: '[10, 20]'
+    diff_factor: 1
+
+  # 步骤数量（6~12）
+  step_num:
+    type: int
+    domain: '[6, 12]'
+    diff_factor: 1
+
+  # 噪声（无操作）步骤的最小/最大值（适度收敛）
+  noise_min:
+    type: int
+    domain: '[1, 2]'
+    diff_factor: 0
+
+  noise_max:
+    type: int
+    domain: '[2, 4]'
+    diff_factor: 0
+
+  # 构建场景（文本、最终映射、查询所需参数等）
+  scenario:
+    formula: 'exchange_build_scenario(player_num, step_num, noise_min, noise_max)'
+
+# 使用纯计算模式，不构造Z3符号/约束
+calc_solution: false
+
+# 问题集：逐问输出、格式严格、唯一性断言
+queries:
+  # Q1：输出最终映射（固定格式字符串，按玩家列表顺序）
+  q1:
+    desc: '问题1：请计算游戏结束时各玩家拥有的物品，并以固定格式字符串按玩家列表顺序输出：玩家1,物品1;玩家2,物品2;...（不含空格）；示例：张三,橙色地图;李四,银色钱包'
+    ans_formula: 'scenario_final_str(scenario)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'scenario_uniqueness_ok(scenario)'
+
+  # Q2：谁拥有指定物品
+  q2:
+    desc: '问题2：在游戏结束时，谁拥有目标物品：{scenario[''target_item'']}？请仅输出姓名；示例：张三'
+    ans_formula: 'scenario_owner_of_item(scenario)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'scenario_uniqueness_ok(scenario)'
+
+  # Q3：指定玩家最终拥有什么
+  q3:
+    desc: '问题3：在游戏结束时，玩家{scenario[''target_player'']}拥有的物品是什么？请仅输出物品名；示例：橙色地图'
+    ans_formula: 'scenario_item_of_player(scenario)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'scenario_uniqueness_ok(scenario)'
+
+  # Q4：给出某一步参与交换的两位玩家（必须是交换步，非无操作），按玩家列表顺序输出“姓名A,姓名B”
+  q4:
+    desc: '问题4：在第{scenario[''q_step_index''] + 1}步中，参与交换的两位玩家是谁？请按玩家列表顺序输出“姓名A,姓名B”；示例：何方,钱明'
+    ans_formula: 'scenario_step_players_str(scenario)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'scenario_uniqueness_ok(scenario)'
+
+# 题面描述：单行、单引号、显式换行；明确给出玩家列表顺序与总步数
+desc: '有{len(scenario[''players''])}名玩家与{len(scenario[''items''])}件物品，一一对应。\n玩家列表顺序：{scenario[''players_str'']}\n初始配对如下（按玩家列表顺序）：{scenario[''initial_pairs_str'']}\n总步数：{scenario[''total_steps'']}步（从第1步开始连续编号）\n{scenario[''rules_guide'']}\n规则（顺序执行）：\n{scenario[''steps_text'']}\n请依次回答以下问题，严格遵循答案格式：\n1) 问题1：输出最终固定格式字符串：玩家1,物品1;玩家2,物品2;...（按玩家列表顺序，不含空格）；示例：张三,橙色地图;李四,银色钱包\n2) 问题2：输出拥有{scenario[''target_item'']}的玩家姓名，示例：张三\n3) 问题3：输出玩家{scenario[''target_player'']}最终拥有的物品名称，示例：橙色地图\n4) 问题4：输出第{scenario[''q_step_index''] + 1}步参与交换的两位玩家（按玩家列表顺序）为“姓名A,姓名B”，示例：何方,钱明\n'

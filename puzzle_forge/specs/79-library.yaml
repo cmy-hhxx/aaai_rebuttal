@@ -1,0 +1,93 @@
+variables:
+  p_num:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+  
+  book_num:
+    formula: p_num
+    diff_factor: 1
+    
+  names:
+    formula: "get_faker(p_num, 'name')"
+    diff_factor: 0
+    
+  exchange_num:
+    type: int
+    domain: "[p_num-1, p_num-1]"
+    diff_factor: 1
+    
+  book_indices:
+    formula: "[str(i) for i in range(book_num)]"
+    diff_factor: 0
+    
+  query_person:
+    type: int
+    domain: "[0, p_num-1]"
+    diff_factor: 0
+    
+  query_stage:
+    type: int
+    domain: "[1, book_num-2]"
+    diff_factor: 0
+
+symbols:
+  # 阅读顺序矩阵：read_order[(p, i)] 表示第p个人读的第i本书的拥有者索引
+  read_order:
+    source:
+      - names
+      - book_indices
+    type: int
+    desc: "{_names}读的第{_book_indices}本书"
+
+conditions:
+  # 约束1：阅读顺序的值域在0到p_num-1之间
+  read_order_domain:
+    formula: And([And(read_order[(p, i)] >= 0, read_order[(p, i)] < p_num) for p in names for i in book_indices])
+  
+  # 约束2：每个人的阅读顺序是完整的排列（0到4各出现一次）
+  read_order_permutation:
+    formula: And([And([read_order[(p, i)] != read_order[(p, j)] for i in book_indices for j in book_indices if i != j]) for p in names])
+  
+  # 约束3：每个阅读阶段，书的所有权形成完整的排列
+  exchange_consistency:
+    formula: And([And([read_order[(p, i)] != read_order[(q, i)] for p in names for q in names if p != q]) for i in book_indices])
+  
+  # 约束4：初始状态 - 每个人读自己带来的书
+  initial_condition:
+    formula: And([read_order[(p, '0')] == names.index(p) for p in names])
+  
+  # 动态条件：生成多个阅读顺序约束关系
+  reading_constraints:
+    source:
+      - names
+      - book_indices
+      - book_indices
+      - "['eq', 'neq']"
+    domain: "[p_num, p_num*p_num]"
+    amount:
+      - '2'
+      - '1'
+      - '1'
+      - '1'
+    formula: make_expr(_sym[3][0], read_order[(_sym[0][0], _sym[1][0])], read_order[(_sym[0][1], _sym[2][0])])
+    desc: "{_sym[0][0]}读的第{int(_sym[1][0])+int(1)}本书{'' if _sym[3][0] == 'eq' else '不'}是{_sym[0][1]}读的第{int(_sym[2][0])+int(1)}本书；"
+    custom_cond:
+      - scope: domain
+        fields: [0]
+        constraint: "lambda l: len(set([item[0][0][0] for item in l])) >= p_num//2"
+      - scope: domain
+        fields: [1, 2]
+        constraint: "lambda l: all([item[0][0][0] != item[0][1][0] for item in l])"
+
+max_solution: 10
+
+queries:
+  # 问题1：特定人的特定阅读阶段对应的最初读者
+  q1:
+    desc: "问{names[query_person]}读的第{query_stage+1}本书是谁最先读的？"
+    ans_formula: "list(to_unique([names[get_value(_model, read_order[(names[query_person], str(query_stage))])] for _model in _solutions]))"
+    ans_text: "_ans[0]"
+    ans_assertion: "len(_ans) == 1"
+
+desc: "{'、'.join(names)} {p_num}人各从图书馆借来一本小说，约定读完后互相交换。{p_num}本书的厚度与{p_num}个人的阅读速度都差不多，因此{p_num}个人总是同时交换书。经{exchange_num}次交换后，每个人都读完了这{p_num}本书。已知：{reading_constraints}{q1}"

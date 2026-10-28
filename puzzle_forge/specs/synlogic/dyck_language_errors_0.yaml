@@ -1,0 +1,45 @@
+custom_operator:
+  # function_1和function_2是dyck_language_errors_0.py中的函数
+  function_1: dyck_language_errors_0.py
+  function_2: dyck_language_errors_0.py
+  # 生成随机括号序列（正向随机产生输入）
+  gen_seq: dyck_language_errors_0.py
+
+variables:
+  # 随机生成题面声明的总长度（24到40之间的整数）
+  seq_len_expected:
+    formula: randint(24, 40)
+    diff_factor: 1
+  # 四种括号的配对集合
+  bracket_pairs:
+    formula: "[('(', ')'), ('[', ']'), ('{', '}'), ('<', '>')]"
+  # 随机决定序列是否合法（True 合法返回-1；False 不合法返回错误位置）
+  is_valid:
+    formula: random.choice([True, False])
+  # 随机生成括号序列与其唯一答案（正向：先随机产生输入，再计算答案）
+  seq_and_ans:
+    formula: gen_seq(seq_len_expected, bracket_pairs, is_valid)
+  # 具体序列
+  seq:
+    formula: seq_and_ans[0]
+  # 该序列的答案（-1 或 第一个错误位置）
+  ans_expected:
+    formula: seq_and_ans[1]
+
+symbols: {}
+conditions: {}
+# 纯算法验证，无需SMT求解
+calc_solution: false
+
+queries:
+  q1:
+    # 问题：输出第一个错误位置（1起始）；合法输出-1；末尾未闭合视为错误位置在末尾下一位
+    desc: "请找出第一个出现错误的位置（以1为起始索引）。错误定义为第一个破坏预期模式的字符，例如未匹配的括号或顺序错误的括号。如果序列中间没有错误，但末尾存在未闭合的括号，则错误位置被认为是在序列末尾的下一个位置。如果序列合法，请直接输出-1；如果不合法，请直接输出第一个错误的位置编号。"
+    # 使用解析函数计算答案
+    ans_formula: function_1(seq, bracket_pairs)
+    ans_text: str(_ans)
+    # 验证唯一性与正确性：与生成时的期望答案一致
+    ans_assertion: function_2(seq, bracket_pairs, ans_expected)
+
+# 题目完整描述（自动化生成更丰富的题面）
+desc: "你是一个括号语言专家，需要分析括号的闭合情况。这是一个包含4种括号的序列，总长度为{seq_len_expected}。请找出第一个出现错误的位置（以1为起始索引）。错误定义为第一个破坏预期模式的字符，例如未匹配的括号或顺序错误的括号。如果序列中间没有错误，但末尾存在未闭合的括号，则错误位置被认为是在序列末尾的下一个位置。如果序列合法，请直接输出-1；如果不合法，请直接输出第一个错误的位置编号。括号序列：{seq}\n{q1}"

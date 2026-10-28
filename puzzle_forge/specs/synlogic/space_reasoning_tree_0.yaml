@@ -1,0 +1,80 @@
+custom_operator:
+  # 统一在 space_reasoning_tree_0.py 中实现
+  build_core_tree: space_reasoning_tree_0.py
+  pick_target: space_reasoning_tree_0.py
+  get_cousins: space_reasoning_tree_0.py
+  gen_noise: space_reasoning_tree_0.py
+  sort_unicode: space_reasoning_tree_0.py
+  format_facts: space_reasoning_tree_0.py
+  validate_cousins: space_reasoning_tree_0.py
+
+variables:
+  # ---- 难度与多样性控制参数 ----
+  parents_count:
+    type: int
+    domain: "[3, 5]"
+    diff_factor: 1
+  child_min:
+    type: int
+    domain: "[2, 3]"
+  child_max:
+    type: int
+    domain: "[3, 6]"
+  noise_count:
+    type: int
+    domain: "[0, 6]"
+  # 名称池规模（使用generate_letters生成稳定唯一的标识，避免Faker唯一性不足导致报错）
+  name_pool_size:
+    type: int
+    domain: "[40, 80]"
+
+  # ---- 名称池（使用generate_letters保证充足且唯一） ----
+  names_pool:
+    formula: generate_letters(name_pool_size)
+
+  # ---- 核心树构建（确保一致性与可解性）----
+  core_tree:
+    formula: build_core_tree(names_pool, parents_count, child_min, child_max)
+  gp_name:
+    formula: core_tree['gp']
+  parent_children_map:
+    formula: core_tree['parent_children']
+  nodes_count:
+    formula: core_tree['nodes_count']
+  facts_core:
+    formula: core_tree['facts_core']
+
+  # ---- 目标与答案计算 ----
+  target_node:
+    formula: pick_target(parent_children_map)
+  cousins_raw:
+    formula: get_cousins(parent_children_map, target_node)
+  cousins_sorted:
+    formula: sort_unicode(cousins_raw)
+
+  # ---- 噪声事实（真实且与解无关） ----
+  facts_noise:
+    formula: gen_noise(parent_children_map, noise_count)
+
+  # ---- 结构化题面事实文本 ----
+  facts_text:
+    formula: format_facts(facts_core, facts_noise)
+
+symbols: {}
+
+conditions: {}
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: "根据给定的树结构，{target_node}的堂兄弟节点是什么？你的最终答案必须只包含物品名称；若有多个物品，请按Unicode代码点顺序排序并用逗号分隔；若无法确定答案，请输出unknown。"
+    ans_formula: cousins_sorted
+    ans_text: "'unknown' if len(_ans) == 0 else ','.join(_ans)"
+    ans_assertion: "validate_cousins(parent_children_map, target_node, _ans)"
+
+desc: >
+  这是一个树结构空间推理题目。我们采用如下定义：两个节点是“堂兄弟”，当且仅当它们拥有相同的祖父母，但是父母不同（等价地，某节点的堂兄弟即“该节点父母的兄弟节点的所有孩子”）。
+  已知这棵树共有 {nodes_count} 个不同的节点。下面给出与本题相关的结构化事实（均为真）：
+  {facts_text}
+  注意：请将答案按Unicode代码点顺序进行排序（例如按Python内置sorted的中文排序方式）。{q1}

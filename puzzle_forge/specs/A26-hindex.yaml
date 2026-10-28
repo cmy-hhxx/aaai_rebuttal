@@ -1,0 +1,27 @@
+custom_operator: 
+    cal_h_index: customs/hindex.py
+variables:
+  num_pub:
+    type: int
+    domain: "[2, 100]"
+    diff_factor: 1
+  upper_bound_citations:
+    type: int
+    domain: "[500, 500]"
+    diff_factor: 1
+  lower_bound_citations:
+    type: int
+    domain: "[0, 0]"
+    diff_factor: 0
+  citations:
+    formula: "[random.randint(lower_bound_citations, 10) for _ in range(num_pub//2)]+[random.randint(lower_bound_citations, 50) for _ in range(num_pub//3)]+[random.randint(lower_bound_citations, upper_bound_citations) for _ in range(num_pub-num_pub//3-num_pub//2)]"
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 某科研人员共发表了{num_pub}篇论文，被引用次数分别为{'、'.join(str(items) for items in citations)}。请问该科研人员的h指数为？
+    ans_formula: cal_h_index(citations)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 已知h指数定义为“高引用次数”，一名科研人员的h指数是指所有已发表文章中至少有h篇论文被引用了h次。{q1}

@@ -1,0 +1,66 @@
+# 高阶泛化与唯一解验证版：逆向生成多模板复合约束，确保唯一解，题面规模与复杂度可达 200+ 不同实例。
+custom_operator:
+  gen_deep_instance: math_path_0.py
+  format_assign: math_path_0.py
+
+variables:
+  inst:
+    formula: gen_deep_instance()
+
+  d_order:
+    formula: inst['order']
+  sol_digits:
+    formula: inst['digits']
+
+  m:
+    formula: sol_digits[0]
+  n:
+    formula: sol_digits[1]
+  o:
+    formula: sol_digits[2]
+  p:
+    formula: sol_digits[3]
+  q:
+    formula: sol_digits[4]
+  r:
+    formula: sol_digits[5]
+  s:
+    formula: sol_digits[6]
+  t:
+    formula: sol_digits[7]
+  u:
+    formula: sol_digits[8]
+  v:
+    formula: sol_digits[9]
+
+  rules_texts:
+    formula: inst['rules_texts']
+  rules_numbered:
+    formula: inst['rules_numbered']
+  cond_num:
+    formula: len(rules_texts)
+  rules_joined:
+    formula: "'; '.join(rules_numbered)"
+  nonzero_desc:
+    formula: inst['nonzero_desc']
+  explain_text:
+    formula: inst['explain_text']
+  notes_text:
+    formula: inst['notes_text']
+
+  max_sum:
+    formula: sum(sol_digits)
+
+  assign_str:
+    formula: format_assign(d_order, sol_digits)
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请计算最大可能的和值以及在该和值下的一组 [m,n,o,p,q,r,s,t,u,v] 的赋值，并按题末给定的答题格式输出。'
+    ans_formula: max_sum
+    ans_text: "str(max_sum) + '====' + assign_str"
+    ans_assertion: "True"
+
+desc: '网络分包校验码复合约束（高阶泛化版）。共有 {cond_num} 条规则同时成立：{rules_joined}。说明: {explain_text}；非零约束: {nonzero_desc}；附注: {notes_text}。所有变量取 0 到 9 且两两不同。答题格式: 最大和值====m=..., n=..., o=..., p=..., q=..., r=..., s=..., t=..., u=..., v=...。问题: {q1}'

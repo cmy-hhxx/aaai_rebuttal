@@ -1,0 +1,119 @@
+custom_operator:
+  function_1: knights_knaves_puzzle_1.py
+  function_2: knights_knaves_puzzle_1.py
+  build_rule_cfg: knights_knaves_puzzle_1.py
+  build_rulebook_text: knights_knaves_puzzle_1.py
+  generate_roles: knights_knaves_puzzle_1.py
+  build_speeches: knights_knaves_puzzle_1.py
+  same_class_z3: knights_knaves_puzzle_1.py
+  compound_relation_z3: knights_knaves_puzzle_1.py
+
+variables:
+  p_num:
+    type: int
+    domain: "[6, 12]"
+  names:
+    formula: "to_unique(get_faker(p_num, 'foreign_name_cn', 'zh_CN'))"
+  s_count:
+    type: int
+    domain: "[2, 3]"
+  alt_true_num:
+    formula: "randint(1, s_count - 1)"
+  rule_cfg:
+    formula: "build_rule_cfg(names, s_count, alt_true_num)"
+  rulebook_text:
+    formula: "build_rulebook_text(rule_cfg)"
+  roles_pack:
+    formula: "generate_roles(names, s_count, alt_true_num)"
+  Kval:
+    formula: "roles_pack['Kval']"
+  Aval:
+    formula: "roles_pack['Aval']"
+  speeches_text:
+    formula: "build_speeches(names, Kval, Aval, s_count, alt_true_num, rule_cfg)"
+  sc_num:
+    formula: "rule_cfg['sc_num']"
+  comp_rel_num:
+    formula: "rule_cfg['comp_rel_num']"
+  knight_count_target:
+    formula: "sum([1 for i in range(len(names)) if Kval[i]])"
+
+symbols:
+  K:
+    source:
+    - names
+    type: Bool
+    desc: "{_names} 是骑士"
+  A:
+    source:
+    - names
+    type: Bool
+    desc: "{_names} 是交替者"
+
+conditions:
+  fix_K:
+    formula: "And([K[n] == Kval[i] for i, n in enumerate(names)])"
+    desc: '固定骑士身份为逆向随机生成的取值'
+  fix_A:
+    formula: "And([A[n] == Aval[i] for i, n in enumerate(names)])"
+    desc: '固定交替者身份为逆向随机生成的取值'
+
+  alternator_unique:
+    formula: "Sum([If(A[n], 1, 0) for n in names]) == 1"
+    desc: '恰有一人是交替者'
+  knight_not_alternator:
+    formula: "And([Implies(K[n], Not(A[n])) for n in names])"
+    desc: '骑士不可能是交替者'
+  alternator_not_knight:
+    formula: "And([Implies(A[n], Not(K[n])) for n in names])"
+    desc: '交替者不可能是骑士'
+  type_cover:
+    formula: "And([Or(K[n], A[n], And(Not(K[n]), Not(A[n]))) for n in names])"
+    desc: '每人必须在骑士/骗子/交替者三类之一'
+
+  knight_count_eq:
+    formula: "Sum([If(K[n], 1, 0) for n in names]) == knight_count_target"
+    desc: '骑士人数等于随机生成的目标人数'
+
+  same_class_dynamic:
+    source:
+    - "range(p_num)"
+    - "range(p_num)"
+    amount:
+    - '1'
+    - '1'
+    domain: "[sc_num, sc_num]"
+    dim_cond:
+    - - 0
+      - 1
+    formula: "same_class_z3(K[names[_sym[0][0]]], A[names[_sym[0][0]]], K[names[_sym[1][0]]], A[names[_sym[1][0]]], rule_cfg['same_class_mode'])"
+    desc: '同类动态约束: 随机选取若干对人, 根据同类模式进行约束'
+
+  complex_relation_constraints:
+    source:
+    - "range(p_num)"
+    - "range(p_num)"
+    - "range(p_num)"
+    amount:
+    - '1'
+    - '1'
+    - '1'
+    domain: "[comp_rel_num, comp_rel_num]"
+    dim_cond:
+    - - 0
+      - 1
+    - - 0
+      - 2
+    - - 1
+      - 2
+    formula: "compound_relation_z3(K[names[_sym[0][0]]], A[names[_sym[0][0]]], K[names[_sym[1][0]]], A[names[_sym[1][0]]], K[names[_sym[2][0]]], A[names[_sym[2][0]]], rule_cfg)"
+    desc: '复合三元关系约束: 若骑士则异或/至少一骗子/交替者在三人中之一等, 具体类型见规则说明'
+
+queries:
+  q1:
+    desc: '请根据上面的陈述与规则, 推断每个人的身份, 并指出谁是交替者。答案格式(放在一行当中): 姓名: 身份; ...; 交替者: 姓名。'
+    ans_formula: " '; '.join([names[i] + ': ' + ('交替者' if get_value(_solutions[0], A[names[i]]) else ('骑士' if get_value(_solutions[0], K[names[i]]) else '骗子')) for i in range(p_num)]) + '; 交替者: ' + [n for n in names if get_value(_solutions[0], A[n])][0] "
+    ans_text: "_ans"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: '场景: 深空殖民船; 本题中每位船员说 {s_count} 句话。角色规则: 骑士的所有话都为真, 骗子的所有话都为假, 交替者的 {s_count} 句话中恰有 {alt_true_num} 句为真且其余为假。为避免歧义, 同类的定义与某些逻辑运算的用法将在规则说明中明确给出。\n规则说明: {rulebook_text}\n以下是每位船员的陈述:\n{speeches_text}\n{q1}'

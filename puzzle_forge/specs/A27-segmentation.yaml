@@ -1,0 +1,23 @@
+custom_operator: 
+    splitArray: customs/segmentation.py
+variables:
+  n: 
+    type: int
+    domain: "[1, 100]"
+    diff_factor: 1
+  k: 
+    type: int
+    domain: "[1, 50 if n > 50 else n]"
+    diff_factor: 1
+  nums:
+    formula: "[random.randint(0, 1000) for _ in range(n)]"
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请问分割后 最小的 和的最大值为？子数组是数组中连续的部分。
+    ans_formula: splitArray(nums,k)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 给定一个非负整数数组nums={str(nums)}和一个整数{k}，你需要将这个数组分成{k}个非空的连续子数组，使得这{k}个子数组各自和的最大值 最小。{q1}

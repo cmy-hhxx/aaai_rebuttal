@@ -1,0 +1,58 @@
+custom_operator: 
+    prod_list: customs/fitnessball.py
+    cal_eff: customs/fitnessball.py
+    cal_gcd: customs/fitnessball.py
+    # generate_diverse_array: customs/fitnessball.py
+variables:
+  num_colors:
+    type: int
+    domain: "[2, 4]"
+    diff_factor: 1
+  num_workshops:
+    type: int
+    domain: "[2, 4]"
+    diff_factor: 1
+  colors:
+    formula: random.sample(['红','橙','黄','蓝','绿','紫','黑','白'],num_colors)
+  workshops:
+    formula: generate_letters(num_workshops,lang='cn')
+  denom_list:
+    # formula: "[random.choice([3,5,6,10,15]) for _ in range(num_colors)]"  # do not recommend
+    formula: random.sample([3,5,6,10,15], num_workshops)
+  molecula_list:
+    formula: "[generate_random_list_with_total(num_colors, [1,denom_list[i]-1], denom_list[i]) for i in range(num_workshops)]"
+    # formula: "[generate_diverse_array(denom_list[i],num_workshops) for i in range(num_colors)]"
+  production_each_workshop:
+    formula: random.sample(list(range(250,360,10)), num_workshops)
+  efficiency:
+    formula: "cal_eff(denom_list,molecula_list,production_each_workshop,colors,workshops)"
+symbols:
+  workdays:
+    source:
+    - workshops
+    - colors
+    type: int
+  vars:
+    source:
+    - "['total']"
+    type: int
+conditions:
+  total_non_negative:
+    formula: vars['total'] >= sum(production_each_workshop)
+  cond_divide:
+    formula: And(And(Sum([workdays[(x,y)] for y in colors]) == 30) for x in workshops)
+  cond_non_negative:
+    formula: And(And(workdays[(x,y)] >= 0 for y in colors) for x in workshops)
+  total_up_bound:
+    formula: And(And(Sum([workdays[(x,y)]*efficiency[i][j] for i,x in enumerate(workshops)]) >= vars['total']) for j,y in enumerate(colors))
+max_solution: 1
+optimize:
+  type: maximize
+  formula: vars['total']
+queries:
+  q1:
+    desc: 如果所有车间一起合作生产，请问每月最多能生产多少套可供出售的健身球？
+    ans_formula: get_value(_solutions, vars['total'])
+    ans_text: str(int(_ans//1))
+    ans_assertion: 'True'
+desc: 某种健身球由{'、'.join('一个'+color+'球' for color in colors)}组成一套。已知{num_workshops}个车间都生产这种健身球，但生产不同颜色球的速度会存在差异：{'；'.join(workshop+'车间每月用'+'，用'.join(str(int(m/cal_gcd(m,d)))+'/'+str(int(d/cal_gcd(m,d)))+'的时间生产'+color+'球' for m,color in zip(molecula_list[i],colors)) + '，每月正好生产'+str(prod)+'套' for i, (workshop, d, prod) in enumerate(zip(workshops, denom_list,production_each_workshop)))}。注意：(1) 车间一天只能生产一种颜色的球; (2) 假设每月固定为30天; (3) 一个车间生产的半成品可以交由另一个车间继续生产。基于以上条件，{q1}

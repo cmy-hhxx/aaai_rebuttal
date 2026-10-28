@@ -1,0 +1,111 @@
+# 生成式 Futoshiki（不等式数独）高阶变体规范化配置（增强版，统一随机源与上限控制）
+# -----------------------------------------------------------------------------
+# 改进要点：
+# - 明确坐标与 R/C 均以 1 开始计数，文本清晰无歧义，并补充 X 表示未给定。
+# - 术语说明基于实际启用的额外线索类型（hints），避免误导。
+# - 降低显见线索风险：预填采用非显见选择器（每行列最多 n-2），总量收紧。
+# - 至少包含 1 条高价值线索；value_position 仅兜底增量使用，至多 1 条。
+# - 统一随机源在 Python 端，通过 seed 控制 sample_sublist 与 sample_choice。
+# - desc 使用单引号包裹、单行、内部不使用双引号；花括号仅用于变量占位。
+# - 严格统一答案字符串风格与示例一致（保留逗号后的空格与行间空格）。
+# -----------------------------------------------------------------------------
+
+# 自定义算子：主生成与格式化、取样与规则文本合成（均在 futoshiki_3.py 中实现）
+custom_operator:
+  gen_futoshiki_instance: futoshiki_3.py  # 主生成：造解→派生线索→唯一化（失败自动重试）
+  format_grid: futoshiki_3.py             # 展示矩阵格式化（X 表示未给定）
+  format_ineqs: futoshiki_3.py            # 不等式列表格式化（稳定排序）
+  format_hints: futoshiki_3.py            # 线索列表格式化（稳定排序，集合有序）
+  sample_sublist: futoshiki_3.py          # 从候选集合中随机取子集（受 seed 控制）
+  sample_choice: futoshiki_3.py           # 从选项中随机取一个（受 seed 控制）
+  compose_rule_text: futoshiki_3.py       # 拼接规则说明文本（基于实际 hints 类型）
+
+# -------------------------------
+# 变量区：随机化参数与派生结果
+# -------------------------------
+variables:
+  # 网格维度 n（4..6）
+  n:
+    type: int
+    domain: "[4, 6]"
+    diff_factor: 0
+  # 随机种子，便于批量生成多样化实例
+  seed:
+    type: int
+    domain: "[1, 1000000000]"
+    diff_factor: 0
+  # 相邻边总数上界：2 * n * (n - 1)
+  adj_count:
+    formula: "2 * n * (n - 1)"
+  # 不等式密度百分比，控制题目强度（建议 35%~65%）
+  ineq_ratio_pct:
+    type: int
+    domain: "[35, 65]"
+    diff_factor: 1
+  # 不等式数量由密度计算，避免过多或过少（至少 n 条）
+  ineq_num:
+    formula: "max(n, int(adj_count * ineq_ratio_pct / 100))"
+  # 预填数量（越少越难）：范围 [n + 1, n*n // 2]，生成器会进一步限制不超过 ceil(0.35*n*n)
+  given_cells_num:
+    type: int
+    domain: "[n + 1, n * n // 2]"
+    diff_factor: -1
+  # 额外线索预算（至少 1，确保出现线索；value_position 作为兜底）
+  hint_budget:
+    type: int
+    domain: "[1, n]"
+    diff_factor: 1
+  # 允许的线索类型（从候选集中随机子集；受 seed 控制；生成器内部会保底引入高价值类型）
+  hint_types:
+    formula: "sample_sublist(['pair_sum','pair_diff_abs','cell_parity','cell_in_set','value_position','thermo_chain','cage_sum','region_all_diff','line_segment_sum','anti_knight','anti_king'], seed)"
+  # 生成实例（包含题面、线索与唯一解）
+  instance:
+    formula: "gen_futoshiki_instance(n, given_cells_num, ineq_num, seed, hint_budget, hint_types)"
+  # 题面网格（含 X）
+  given_grid:
+    formula: "instance['given_grid']"
+  # 不等式列表：[( (i,j), (x,y), 'gt'/'lt' ), ...]
+  ineqs:
+    formula: "instance['ineqs']"
+  # 额外线索列表（保证无重复、与解一致）
+  hints:
+    formula: "instance['hints']"
+  # 最终唯一解网格
+  final_grid:
+    formula: "instance['final_grid']"
+  # 展示字符串：题面、约束与线索的可读形式（稳定排序）
+  given_str:
+    formula: "format_grid(given_grid)"
+  ineqs_str:
+    formula: "format_ineqs(ineqs)"
+  hints_str:
+    formula: "format_hints(hints)"
+  # 规则文本（含坐标基准、X 的含义与线索术语简释，基于实际 hints 类型）
+  rule_text:
+    formula: "compose_rule_text(n, hints)"
+
+# -------------------------------
+# 符号与条件：禁用（使用 Python 内部唯一性校验与重试）
+# -------------------------------
+symbols: {}
+
+conditions: {}
+
+# 关闭 SMT 求解（已在 Python 中校验唯一性且设置了求解超时与重试）
+calc_solution: false
+
+# -------------------------------
+# 问答区：直接输出最终唯一解网格
+# -------------------------------
+queries:
+  q1:
+    # 统一使用数值二维数组字符串，注意严格保留逗号与空格；示例与标准答案风格一致
+    desc: '请将最终网格以二维数组形式输出，示例格式为 [[1, 2, 3], [3, 1, 2], [2, 3, 1]]（必须使用半角逗号与方括号，并严格保留逗号后的空格与行间空格，确保与标准答案字符串完全一致）。'
+    ans_formula: final_grid
+    ans_text: "str(_ans)"
+    ans_assertion: "True"
+
+# -------------------------------
+# 单行题面描述（含规则解释与答案格式说明）
+# -------------------------------
+desc: '这是一个 {n}x{n} 的不等式数独高阶变体；{rule_text}；题面矩阵为 {given_str}；相邻不等式为 {ineqs_str}；额外线索为 {hints_str}；请在遵循以上规则下求解并输出最终解的二维数组，示例格式为 [[1, 2, 3], [3, 1, 2], [2, 3, 1]]（必须严格保留逗号后的空格与行间空格）；{q1}'

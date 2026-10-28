@@ -1,0 +1,174 @@
+custom_operator:
+  # 所有函数均在 math_path_2.py 中定义
+  calc_rhs: math_path_2.py
+  calc_checksum: math_path_2.py
+  calc_tau: math_path_2.py
+  build_desc: math_path_2.py
+  parity_word: math_path_2.py
+  compare_word: math_path_2.py
+  list_len: math_path_2.py
+  gen_hints_all: math_path_2.py
+  hints_text: math_path_2.py
+
+# ==============================
+# 变量定义
+# ==============================
+variables:
+  # 槽位名称，用于符号字典键
+  slots:
+    formula: '["a","b","c","d","e","f","g"]'
+  # 常数项 base_const，题面展示
+  base_const:
+    type: int
+    domain: '[5, 45]'
+  # 符号控制：第一模项的加/减（±1）
+  sign1:
+    type: int
+    domain: '[-1, 1]'
+  # 符号控制：第二模项的加/减（±1）
+  sign2:
+    type: int
+    domain: '[-1, 1]'
+  # 是否启用第二模项：0=不启用，1=启用
+  coeff2:
+    type: int
+    domain: '[0, 1]'
+  # 题面风格
+  style_id:
+    type: int
+    domain: '[0, 2]'
+  # 辅助键（仅保留两组商/余键，用于定义 r_cd 与 r_fg 的取模语义）
+  aux_keys:
+    formula: '["q_cd","r_cd","q_fg","r_fg"]'
+  # 校验1的模基数（题面可见）
+  chk_base:
+    type: int
+    domain: '[3, 9]'
+  # 余数加权校验参数 α、β（题面可见）
+  alpha:
+    type: int
+    domain: '[1, 3]'
+  beta:
+    type: int
+    domain: '[1, 3]'
+
+# ==============================
+# 符号定义
+# ==============================
+symbols:
+  # 每个占位符对应一个整数符号（0..9）
+  val:
+    source:
+    - slots
+    type: int
+    desc: '占位符 {_slots} 的取值'
+  # 辅助商/余符号（用于定义 r_cd 与 r_fg 的取模语义）
+  aux:
+    source:
+    - aux_keys
+    type: int
+    desc: '辅助符号 {_aux_keys} 的取值'
+
+# ==============================
+# 基础约束（第一阶段）
+# ==============================
+conditions:
+  # sign1、sign2 必须为 ±1
+  sign_domain:
+    formula: 'And([Or(sign1 == -1, sign1 == 1), Or(sign2 == -1, sign2 == 1)])'
+    desc: '符号控制：第一、第二模项的符号分别为“加”或“减”'
+  # 每个占位符均在 0..9
+  range_0_9:
+    formula: 'And([And(val[slots[i]] >= 0, val[slots[i]] <= 9) for i in range(7)])'
+    desc: '所有占位符 a,b,c,d,e,f,g 均为 0-9 的数字'
+  # 互异性（便于形成多步推理且唯一解）
+  all_distinct:
+    formula: 'And([val[slots[i]] != val[slots[j]] for i in range(7) for j in range(i + 1, 7)])'
+    desc: '所有占位符互不相同'
+  # 模运算合法：d ≠ 0；若第二模项启用则 g ≠ 0
+  nonzero_mod_divisors:
+    formula: 'And([val["d"] != 0, Or(coeff2 == 0, val["g"] != 0)])'
+    desc: '模号后的除数不为0（若出现第二个模运算亦需满足）'
+  # 商-余约束：定义 r_cd 与 r_fg 为对应取模的余数；第二模项按需启用
+  quotient_remainder:
+    formula: 'And([aux["r_cd"] >= 0, aux["q_cd"] >= 0, aux["r_cd"] < val["d"], val["c"] == aux["q_cd"] * val["d"] + aux["r_cd"], If(coeff2 == 1, And(aux["r_fg"] >= 0, aux["q_fg"] >= 0, aux["r_fg"] < val["g"], val["f"] == aux["q_fg"] * val["g"] + aux["r_fg"]), And(aux["r_fg"] == 0, aux["q_fg"] == 0))])'
+    desc: '等价约束：按通常意义定义余数（余数非负且小于除数）；若未启用第二模项，则按约定 (f % g)=0'
+
+# ==============================
+# 二次生成：由解派生新变量与新约束（第二阶段）
+# ==============================
+post_generation:
+  post_gen_vars:
+    # 从第一步解中取出各位数值
+    a_v: 'get_value(_sol, val["a"])'
+    b_v: 'get_value(_sol, val["b"])'
+    c_v: 'get_value(_sol, val["c"])'
+    d_v: 'get_value(_sol, val["d"])'
+    e_v: 'get_value(_sol, val["e"])'
+    f_v: 'get_value(_sol, val["f"])'
+    g_v: 'get_value(_sol, val["g"])'
+    # 由第一步的解计算题面展示的右端常数与两条校验结果
+    rhs: 'calc_rhs(a_v, b_v, c_v, d_v, e_v, f_v, g_v, base_const, sign1, sign2, coeff2)'
+    chk_rem: 'calc_checksum(a_v, b_v, c_v, d_v, e_v, f_v, g_v, chk_base)'
+    tau: 'calc_tau(a_v, b_v, c_v, d_v, e_v, f_v, g_v, alpha, beta, coeff2)'
+    # 新增：数位总和与余数之和（用于锁定并在题面公布）
+    sum_all: 'a_v + b_v + c_v + d_v + e_v + f_v + g_v'
+    r_cd_v: 'c_v % d_v'
+    r_fg_v: '0 if coeff2 == 0 else (f_v % g_v)'
+    r_sum_v: 'r_cd_v + (0 if coeff2 == 0 else r_fg_v)'
+    # 基于解生成三类提示（确定性、去显见线索）
+    hints_pack: 'gen_hints_all(slots, [a_v, b_v, c_v, d_v, e_v, f_v, g_v])'
+    parity_hints: 'hints_pack[0]'
+    ordering_hints: 'hints_pack[1]'
+    difference_hints: 'hints_pack[2]'
+    parity_n: 'list_len(parity_hints)'
+    ordering_n: 'list_len(ordering_hints)'
+    difference_n: 'list_len(difference_hints)'
+  post_gen_conditions:
+    # 主等式锁定（与rhs一致）
+    main_equation:
+      formula: 'val["a"] * val["b"] + sign1 * aux["r_cd"] * val["e"] + coeff2 * sign2 * aux["r_fg"] + base_const == rhs'
+      desc: '主等式成立：按题面表达式计算结果等于右端常数'
+    # 校验1锁定（直接取模约束）
+    checksum_equation:
+      formula: '(val["a"] + 2 * val["b"] + 3 * val["c"] + 4 * val["d"] + 5 * val["e"] + 6 * val["f"] + 7 * val["g"]) % chk_base == chk_rem'
+      desc: '校验1成立：加权和对基数取模后的余数等于给定值'
+    # 校验2锁定（余数加权，直接取模约束）
+    weighted_remainder_equation:
+      formula: '((alpha * aux["r_cd"]) + (coeff2 * beta * aux["r_fg"])) % (5 + alpha) == tau'
+      desc: '校验2成立：余数加权和对(5+α)取模后的余数等于给定值'
+    # 数位总和锁定
+    sum_constraint:
+      formula: 'val["a"] + val["b"] + val["c"] + val["d"] + val["e"] + val["f"] + val["g"] == sum_all'
+      desc: '数位总和约束：a+b+c+d+e+f+g 等于给定常数'
+    # 余数之和锁定（与题面公布一致）
+    remainder_sum_lock:
+      formula: 'aux["r_cd"] + coeff2 * aux["r_fg"] == r_sum_v'
+      desc: '余数之和提示成立： (c % d) 与 (f % g) 之和（若有）等于给定常数'
+    # 提示-奇偶（由解派生）
+    hints_parity:
+      formula: 'And([If(parity_hints[i][1], Or(val[parity_hints[i][0]] == 0, val[parity_hints[i][0]] == 2, val[parity_hints[i][0]] == 4, val[parity_hints[i][0]] == 6, val[parity_hints[i][0]] == 8), Or(val[parity_hints[i][0]] == 1, val[parity_hints[i][0]] == 3, val[parity_hints[i][0]] == 5, val[parity_hints[i][0]] == 7, val[parity_hints[i][0]] == 9)) for i in range(parity_n)])'
+      desc: '提示线索（奇偶）'
+    # 提示-大小（由解派生）
+    hints_ordering:
+      formula: 'And([If(ordering_hints[i][2], val[ordering_hints[i][0]] > val[ordering_hints[i][1]], val[ordering_hints[i][0]] < val[ordering_hints[i][1]]) for i in range(ordering_n)])'
+      desc: '提示线索（大小比较）'
+    # 提示-差值（由解派生）
+    hints_difference:
+      formula: 'And([Or(val[difference_hints[i][0]] - val[difference_hints[i][1]] == difference_hints[i][2], val[difference_hints[i][1]] - val[difference_hints[i][0]] == difference_hints[i][2]) for i in range(difference_n)])'
+      desc: '提示线索（数值差）'
+
+# ==============================
+# 问题与答案
+# ==============================
+queries:
+  q1:
+    desc: '请按(a,b,c,d,e,f,g)的顺序给出一组满足条件的取值；答案必须是一个7元组，示例：(1,2,3,4,5,6,7)'
+    ans_formula: '(get_value(_solutions[0], val[slots[0]]), get_value(_solutions[0], val[slots[1]]), get_value(_solutions[0], val[slots[2]]), get_value(_solutions[0], val[slots[3]]), get_value(_solutions[0], val[slots[4]]), get_value(_solutions[0], val[slots[5]]), get_value(_solutions[0], val[slots[6]]))'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# ==============================
+# 题干描述（单行，使用\\n换行）
+# ==============================
+desc: '{build_desc(style_id, base_const, rhs, sign1, sign2, coeff2, chk_base, chk_rem, alpha, beta, tau, sum_all, r_sum_v)}\n{hints_text(slots, parity_hints, ordering_hints, difference_hints)}\n{range_0_9}\n{all_distinct}\n{nonzero_mod_divisors}\n{q1}'

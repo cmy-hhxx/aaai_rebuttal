@@ -1,0 +1,325 @@
+# -----------------------------
+# 自定义操作符：外部Python函数
+# -----------------------------
+custom_operator:
+  pick_k: einsteins_riddle_3.py
+  pick_one_exclude: einsteins_riddle_3.py
+  get_position_of_surname: einsteins_riddle_3.py
+  unique_answer_for_surname: einsteins_riddle_3.py
+  get_unique_position_of_surname: einsteins_riddle_3.py
+
+# -----------------------------
+# 变量设置：参数与随机集合
+# -----------------------------
+variables:
+  # 位置数量（固定为5）
+  pos_num:
+    type: int
+    domain: "[5, 5]"
+    diff_factor: 1
+
+  # 位置编号（数值与字符串）
+  positions:
+    formula: "list(range(1, pos_num + 1))"
+  positions_str:
+    formula: "[str(p) for p in positions]"
+
+  # 邻接、有序、三元组与距离映射
+  neighbor_pairs:
+    formula: "[(positions_str[i], positions_str[i + 1]) for i in range(pos_num - 1)]"
+  left_right_pairs:
+    formula: "[(positions_str[i], positions_str[j]) for i in range(pos_num) for j in range(pos_num) if i < j]"
+  order_triples:
+    formula: "[(positions_str[i], positions_str[j], positions_str[k]) for i in range(pos_num) for j in range(pos_num) for k in range(pos_num) if i < j < k]"
+  between_triples:
+    formula: "[(positions_str[i], positions_str[k], positions_str[j]) for i in range(pos_num) for k in range(pos_num) for j in range(pos_num) if i < k < j]"
+  distance_pairs_map:
+    formula: "{d: [(positions_str[i], positions_str[j]) for i in range(pos_num) for j in range(pos_num) if (i - j == d or j - i == d)] for d in [1, 2, 3]}"
+
+  # 值域池：颜色、品类、姓氏、音乐（中文集合）
+  color_pool:
+    formula: "['红','蓝','绿','黄','紫','青','橙','棕','灰','白']"
+  category_pool:
+    formula: "['书店','茶馆','花店','玩具店','烘焙店','咖啡馆','服饰店','文具店','果蔬店']"
+  surname_pool:
+    formula: "['赵','钱','孙','李','周','吴','郑','王','冯','陈','褚','卫']"
+  music_pool:
+    formula: "['爵士','古典','摇滚','民谣','电子','流行','嘻哈','乡村','轻音乐']"
+
+  # 每次随机抽取的5项集合
+  colors:
+    formula: "pick_k(color_pool, pos_num)"
+  categories:
+    formula: "pick_k(category_pool, pos_num)"
+  surnames:
+    formula: "pick_k(surname_pool, pos_num)"
+  musics:
+    formula: "pick_k(music_pool, pos_num)"
+
+  # 便于描述的字符串拼接（使用中文顿号避免英文引号）
+  colors_join:
+    formula: "'、'.join(colors)"
+  categories_join:
+    formula: "'、'.join(categories)"
+  surnames_join:
+    formula: "'、'.join(surnames)"
+  musics_join:
+    formula: "'、'.join(musics)"
+
+  # 辅助位置变量
+  first_pos:
+    formula: "positions_str[0]"
+  last_pos:
+    formula: "positions_str[-1]"
+  middle_pos:
+    formula: "positions_str[(pos_num - 1) // 2]"
+
+  # 奇偶位集合与奇偶取值
+  odd_positions:
+    formula: "[positions_str[i] for i in range(pos_num) if (i + 1) % 2 == 1]"
+  even_positions:
+    formula: "[positions_str[i] for i in range(pos_num) if (i + 1) % 2 == 0]"
+  parity_pool:
+    formula: "['奇','偶']"
+
+  # 难度控制变量（保留以评估题目难度）
+  left_right_clues:
+    type: int
+    domain: "[0, 0]"
+    diff_factor: -1
+
+  # 距离候选
+  distance_options:
+    formula: "[1, 2, 3]"
+
+  # 目标查询与公开事实选择
+  target_surname:
+    formula: "pick_k(surnames, 1)[0]"
+  reveal_surname:
+    formula: "pick_one_exclude(surnames, target_surname)"
+  reveal_color:
+    formula: "pick_k(colors, 1)[0]"
+  reveal_category:
+    formula: "pick_k(categories, 1)[0]"
+  reveal_music:
+    formula: "pick_k(musics, 1)[0]"
+
+# -----------------------------
+# 符号：布尔映射（位置 × 取值）
+# -----------------------------
+symbols:
+  color_s:
+    source:
+    - positions_str
+    - colors
+    type: bool
+  category_s:
+    source:
+    - positions_str
+    - categories
+    type: bool
+  surname_s:
+    source:
+    - positions_str
+    - surnames
+    type: bool
+  music_s:
+    source:
+    - positions_str
+    - musics
+    type: bool
+
+# -----------------------------
+# 约束：基本双射
+# -----------------------------
+conditions:
+  one_color_per_position:
+    formula: "And([Sum([If(color_s[(p, c)], 1, 0) for c in colors]) == 1 for p in positions_str])"
+    desc: '每个位置恰有一种门面颜色'
+  one_category_per_position:
+    formula: "And([Sum([If(category_s[(p, g)], 1, 0) for g in categories]) == 1 for p in positions_str])"
+    desc: '每个位置恰有一个主营品类'
+  one_surname_per_position:
+    formula: "And([Sum([If(surname_s[(p, s)], 1, 0) for s in surnames]) == 1 for p in positions_str])"
+    desc: '每个位置恰有一个老板姓氏'
+  one_music_per_position:
+    formula: "And([Sum([If(music_s[(p, m)], 1, 0) for m in musics]) == 1 for p in positions_str])"
+    desc: '每个位置恰有一种店内音乐'
+
+  color_appears_once:
+    formula: "And([Sum([If(color_s[(p, c)], 1, 0) for p in positions_str]) == 1 for c in colors])"
+    desc: '每种颜色恰好出现一次'
+  category_appears_once:
+    formula: "And([Sum([If(category_s[(p, g)], 1, 0) for p in positions_str]) == 1 for g in categories])"
+    desc: '每个品类恰好出现一次'
+  surname_appears_once:
+    formula: "And([Sum([If(surname_s[(p, s)], 1, 0) for p in positions_str]) == 1 for s in surnames])"
+    desc: '每个姓氏恰好出现一次'
+  music_appears_once:
+    formula: "And([Sum([If(music_s[(p, m)], 1, 0) for p in positions_str]) == 1 for m in musics])"
+    desc: '每种音乐恰好出现一次'
+
+# -----------------------------
+# 后置生成：从初始解抽取关系型线索，减少显见位置线索，增强逻辑深度
+# -----------------------------
+post_generation:
+  post_gen_vars:
+    # 基本位置及索引映射
+    pos_index_map: "{positions_str[i]: i for i in range(pos_num)}"
+    color_pos_map: "{c: [p for p in positions_str if get_value(_sol, color_s[(p, c)])][0] for c in colors}"
+    category_pos_map: "{g: [p for p in positions_str if get_value(_sol, category_s[(p, g)])][0] for g in categories}"
+    surname_pos_map: "{s: [p for p in positions_str if get_value(_sol, surname_s[(p, s)])][0] for s in surnames}"
+    music_pos_map: "{m: [p for p in positions_str if get_value(_sol, music_s[(p, m)])][0] for m in musics}"
+
+    # 仅保留一条锚点型位置线索：一个颜色的具体位置
+    reveal_color_pos: "[p for p in positions_str if get_value(_sol, color_s[(p, reveal_color)])][0]"
+
+    # 目标姓氏位置与邻接信息（用于生成关系线索）
+    target_pos_int: "get_position_of_surname(_sol, positions_str, surname_s, target_surname)"
+    target_idx: "target_pos_int - 1"
+    target_right_pos: "positions_str[target_idx + 1] if (target_idx + 1) < pos_num else None"
+    target_left_pos: "positions_str[target_idx - 1] if (target_idx - 1) >= 0 else None"
+    right_music: "None if target_right_pos is None else [m for m in musics if get_value(_sol, music_s[(target_right_pos, m)])][0]"
+    left_color: "None if target_left_pos is None else [c for c in colors if get_value(_sol, color_s[(target_left_pos, c)])][0]"
+    adj_type: "'music_right' if right_music is not None else 'color_left'"
+    adj_value: "right_music if right_music is not None else left_color"
+    target_parity: "'奇' if (target_pos_int % 2 == 1) else '偶'"
+    adj_sentence: "adj_value + '在' + target_surname + ('老板的店右边紧邻处' if adj_type == 'music_right' else '老板的店左边紧邻处')"
+
+    # 左侧关系线索：统一抽取一个真实成立的 颜色 在 品类 左侧 的配对
+    left_of_candidates: "[(c, g) for c in colors for g in categories if pos_index_map[color_pos_map[c]] < pos_index_map[category_pos_map[g]]]"
+    left_of_pair: "pick_k(left_of_candidates, 1)[0]"
+    left_color_for_clue: "left_of_pair[0]"
+    left_category_for_clue: "left_of_pair[1]"
+
+    # 距离线索：统一抽取一个颜色与品类相隔 k 家的配对
+    distance_candidates: "[(c, g, pos_index_map[color_pos_map[c]] - pos_index_map[category_pos_map[g]]) for c in colors for g in categories if (pos_index_map[color_pos_map[c]] - pos_index_map[category_pos_map[g]]) in [1, 2, 3, -1, -2, -3]]"
+    distance_pair: "pick_k(distance_candidates, 1)[0]"
+    distance_color: "distance_pair[0]"
+    distance_category: "distance_pair[1]"
+    distance_diff: "distance_pair[2]"
+    distance_k: "distance_diff if distance_diff >= 0 else -distance_diff"
+
+    # 替换中间位置线索：选择一个非中间颜色，构造非锚点线索
+    non_middle_color: "pick_k([c for c in colors if color_pos_map[c] != middle_pos], 1)[0]"
+
+    # 两种颜色相隔2家：统一抽取一个配对
+    two_apart_pairs: "[(a, b) for a in colors for b in colors if a != b and (pos_index_map[color_pos_map[a]] - pos_index_map[color_pos_map[b]]) in [2, -2]]"
+    two_apart_pair: "pick_k(two_apart_pairs, 1)[0]"
+    two_apart_color_a: "two_apart_pair[0]"
+    two_apart_color_b: "two_apart_pair[1]"
+
+    # 姓氏与颜色不相邻：统一抽取一个配对
+    not_adj_pairs: "[(s, c) for s in surnames for c in colors if (pos_index_map[surname_pos_map[s]] - pos_index_map[color_pos_map[c]]) not in [1, -1]]"
+    not_adj_pair: "pick_k(not_adj_pairs, 1)[0]"
+    not_adj_surname: "not_adj_pair[0]"
+    not_adj_color: "not_adj_pair[1]"
+
+    # 音乐不在两端：从真实成立的候选中抽取一个
+    non_end_music: "pick_k([m for m in musics if (music_pos_map[m] != first_pos and music_pos_map[m] != last_pos)], 1)[0]"
+
+    # 三元有序链：统一抽取满足 姓氏 左于 颜色 左于 音乐 的三元组
+    triple_order_candidates: "[(s, c, m) for s in surnames for c in colors for m in musics if pos_index_map[surname_pos_map[s]] < pos_index_map[color_pos_map[c]] and pos_index_map[color_pos_map[c]] < pos_index_map[music_pos_map[m]]]"
+    triple_order_trip: "pick_k(triple_order_candidates, 1)[0]"
+    triple_s: "triple_order_trip[0]"
+    triple_c: "triple_order_trip[1]"
+    triple_m: "triple_order_trip[2]"
+
+    # 两种颜色左边紧邻关系：统一抽取一个配对
+    imm_left_color_pairs: "[(a, b) for a in colors for b in colors if pos_index_map[color_pos_map[b]] - pos_index_map[color_pos_map[a]] == 1]"
+    imm_left_color_pair: "pick_k(imm_left_color_pairs, 1)[0]"
+    imm_left_color_a: "imm_left_color_pair[0]"
+    imm_left_color_b: "imm_left_color_pair[1]"
+
+    # 某姓氏与某品类相邻：统一抽取一个配对
+    adj_pairs: "[(s, g) for s in surnames for g in categories if (pos_index_map[surname_pos_map[s]] - pos_index_map[category_pos_map[g]]) in [1, -1]]"
+    adj_pair: "pick_k(adj_pairs, 1)[0]"
+    adj_surname: "adj_pair[0]"
+    adj_category: "adj_pair[1]"
+
+    # 选取一个真实同店的 品类-音乐 配对：统一抽取一个配对
+    eq_category_music_pairs: "[(g, m) for g in categories for m in musics if category_pos_map[g] == music_pos_map[m]]"
+    eq_cm_pair: "pick_k(eq_category_music_pairs, 1)[0]"
+    eq_category_for_pair: "eq_cm_pair[0]"
+    eq_music_for_pair: "eq_cm_pair[1]"
+
+  post_gen_conditions:
+    # 保留一条锚点：一个颜色的具体位置
+    fixed_reveal_color_pos:
+      formula: "color_s[(reveal_color_pos, reveal_color)]"
+      desc: '{reveal_color}门面在第{reveal_color_pos}家'
+
+    # 目标姓氏的奇偶位约束
+    fixed_target_parity:
+      formula: "Or([surname_s[(p, target_surname)] for p in (odd_positions if target_parity == '奇' else even_positions)])"
+      desc: '{target_surname}老板的店在{target_parity}数位置'
+
+    # 目标姓氏邻接事实（音乐右或颜色左）
+    fixed_target_adjacent_fact:
+      formula: "(Or([And(surname_s[(a, target_surname)], music_s[(b, adj_value)]) for (a, b) in neighbor_pairs]) if adj_type == 'music_right' else Or([And(color_s[(a, adj_value)], surname_s[(b, target_surname)]) for (a, b) in neighbor_pairs]))"
+      desc: '{adj_sentence}'
+
+    # 真实成立的左侧关系
+    fixed_color_left_of_category:
+      formula: "Or([And(color_s[(i, left_color_for_clue)], category_s[(j, left_category_for_clue)]) for (i, j) in left_right_pairs])"
+      desc: '{left_color_for_clue}门面的店在{left_category_for_clue}左边某处'
+
+    # 真实成立的相隔 k 家
+    fixed_distance_between_color_and_category:
+      formula: "Or([And(color_s[(i, distance_color)], category_s[(j, distance_category)]) for (i, j) in distance_pairs_map[distance_k]])"
+      desc: '{distance_color}门面的店与{distance_category}相隔{distance_k}家'
+
+    # 替换中间位置线索为非锚点线索
+    fixed_middle_not_color:
+      formula: "Not(color_s[(middle_pos, non_middle_color)])"
+      desc: '中间的店不是{non_middle_color}门面'
+
+    # 两种颜色相隔2家
+    fixed_two_apart_colors:
+      formula: "Or([And(color_s[(i, two_apart_color_a)], color_s[(j, two_apart_color_b)]) for (i, j) in distance_pairs_map[2]])"
+      desc: '{two_apart_color_a}与{two_apart_color_b}相隔2家'
+
+    # 姓氏与颜色不相邻
+    fixed_surname_not_adjacent_to_color:
+      formula: "And([Or(Not(surname_s[(a, not_adj_surname)]), Not(color_s[(b, not_adj_color)])) for (a, b) in neighbor_pairs] + [Or(Not(surname_s[(b, not_adj_surname)]), Not(color_s[(a, not_adj_color)])) for (a, b) in neighbor_pairs])"
+      desc: '{not_adj_surname}老板的店不与{not_adj_color}门面相邻'
+
+    # 音乐不在两端
+    fixed_music_not_ends:
+      formula: "And(Not(music_s[(first_pos, non_end_music)]), Not(music_s[(last_pos, non_end_music)]))"
+      desc: '{non_end_music}不在最左也不在最右'
+
+    # 三元有序链
+    fixed_triple_chain_order:
+      formula: "Or([And(surname_s[(i, triple_s)], color_s[(j, triple_c)], music_s[(k, triple_m)]) for (i, j, k) in order_triples])"
+      desc: '{triple_s}老板的店在{triple_c}门面的左边且{triple_c}门面在播放{triple_m}的店左边'
+
+    # 某品类与某音乐必同一家（存在式）
+    fixed_category_equals_music:
+      formula: "Or([And(category_s[(p, eq_category_for_pair)], music_s[(p, eq_music_for_pair)]) for p in positions_str])"
+      desc: '{eq_category_for_pair}播放{eq_music_for_pair}'
+
+    # 两种颜色左边紧邻关系
+    fixed_color_immediate_left_of_color_strict:
+      formula: "Or([And(color_s[(a, imm_left_color_a)], color_s[(b, imm_left_color_b)]) for (a, b) in neighbor_pairs])"
+      desc: '{imm_left_color_a}在{imm_left_color_b}左边紧邻处'
+
+    # 某姓氏与某品类相邻
+    fixed_surname_adjacent_to_category:
+      formula: "Or([And(surname_s[(a, adj_surname)], category_s[(b, adj_category)]) for (a, b) in neighbor_pairs] + [And(surname_s[(b, adj_surname)], category_s[(a, adj_category)]) for (a, b) in neighbor_pairs])"
+      desc: '{adj_surname}老板的店在{adj_category}旁边'
+
+# -----------------------------
+# 问题设置
+# -----------------------------
+queries:
+  q1:
+    desc: '问题 请给出{target_surname}老板的店的编号 答案格式为单个整数 示例 3'
+    ans_formula: 'get_unique_position_of_surname(_solutions, positions_str, surname_s, target_surname)'
+    ans_text: 'str(_ans)'
+    ans_assertion: '(_ans > 0) and unique_answer_for_surname(_solutions, positions_str, surname_s, target_surname)'
+
+# -----------------------------
+# 题面文本（解释相隔含义并展示全部线索）
+# -----------------------------
+desc: '有{pos_num}家店从左到右编号为1到{pos_num} 每家有门面颜色 主营品类 老板姓氏 与店内音乐 四类在各店中不重复 恰好各出现一次 颜色来自集合 {colors_join} 品类来自集合 {categories_join} 姓氏来自集合 {surnames_join} 音乐来自集合 {musics_join} 线索中的相隔k家表示两家店之间相距k个位置 例如相隔1家表示两店之间有且仅有1家 左边紧邻指两家店相邻且左者在右者左侧 现给出如下线索\n{one_color_per_position}\n{one_category_per_position}\n{one_surname_per_position}\n{one_music_per_position}\n{color_appears_once}\n{category_appears_once}\n{surname_appears_once}\n{music_appears_once}\n并且还有如下事实\n{fixed_reveal_color_pos}\n{fixed_target_parity}\n{fixed_target_adjacent_fact}\n{fixed_color_left_of_category}\n{fixed_distance_between_color_and_category}\n{fixed_middle_not_color}\n{fixed_two_apart_colors}\n{fixed_surname_not_adjacent_to_color}\n{fixed_music_not_ends}\n{fixed_triple_chain_order}\n{fixed_category_equals_music}\n{fixed_color_immediate_left_of_color_strict}\n{fixed_surname_adjacent_to_category}\n请回答以下问题\n{q1}'

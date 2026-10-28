@@ -1,0 +1,116 @@
+# =================================================================
+# 使用自定义Python函数进行直接计算（无需Z3求解）
+# =================================================================
+custom_operator:
+  gen_statements: boolean_expressions_1.py
+  is_valid_instance_v3: boolean_expressions_1.py
+  randbool: boolean_expressions_1.py
+  randint: boolean_expressions_1.py
+  list_len: boolean_expressions_1.py
+  make_universe: boolean_expressions_1.py
+  random_prime_between: boolean_expressions_1.py
+  random_composite_between: boolean_expressions_1.py
+  random_y_given_z: boolean_expressions_1.py
+  choose_subset: boolean_expressions_1.py
+  choose_superset_or_random: boolean_expressions_1.py
+
+# =================================================================
+# 变量：高参数化随机生成输入，控制范围与结构（包含难度因子）
+# =================================================================
+variables:
+  # 数值范围控制（x）
+  x_low:
+    type: int
+    domain: "[2, 30]"
+    diff_factor: 1
+  x_high:
+    type: int
+    domain: "[x_low + 10, x_low + 40]"
+  want_prime:
+    formula: 'randbool()'
+  x:
+    formula: 'random_prime_between(x_low, x_high) if want_prime else random_composite_between(x_low, x_high)'
+
+  # 数值范围控制（z与y）
+  z_low:
+    type: int
+    domain: "[1, 6]"
+  z_high:
+    type: int
+    domain: "[z_low + 3, z_low + 8]"
+  z:
+    formula: 'randint(z_low, z_high)'
+    diff_factor: 1
+  want_y_small:
+    formula: 'randbool()'
+  y:
+    formula: 'random_y_given_z(z, want_y_small)'
+
+  # 集合与宇宙
+  element_universe_size:
+    type: int
+    domain: "[6, 12]"
+    diff_factor: 1
+  size_A:
+    formula: 'randint(2, element_universe_size - 2)'
+  size_B:
+    formula: 'randint(size_A + 1, element_universe_size)'
+  universe:
+    formula: 'make_universe(element_universe_size)'
+  subset_flag:
+    formula: 'randbool()'
+  A:
+    formula: 'choose_subset(universe, size_A)'
+  B:
+    formula: 'choose_superset_or_random(A, universe, size_B, subset_flag)'
+  B_len:
+    formula: 'list_len(B)'
+    diff_factor: 1
+
+  # -------------------------------
+  # 动态规则控制与随机种子
+  # -------------------------------
+  stmt_min:
+    type: int
+    domain: "[6, 8]"
+    diff_factor: 1
+  stmt_max:
+    type: int
+    domain: "[stmt_min + 1, stmt_min + 3]"
+  allow_set_templates:
+    formula: 'randbool()'
+  # 模板池：扩展到 1..12；若不允许集合类模板则去掉 1,4,7（集合相关），保留元模板
+  templates_pool:
+    formula: '[1,2,3,4,5,6,7,8,9,10,11,12] if allow_set_templates else [2,3,5,6,8,9,10,11,12]'
+  seed:
+    formula: 'randint(1, 10**9)'
+
+  # -------------------------------
+  # 生成陈述文本块与真值列表
+  # -------------------------------
+  stmt_result:
+    formula: 'gen_statements(x, y, z, A, B, seed, stmt_min, stmt_max, templates_pool)'
+  stmt_block:
+    formula: 'stmt_result["block"]'
+  truths:
+    formula: 'stmt_result["truths"]'
+  stmt_count:
+    formula: 'list_len(truths)'
+
+# 直接计算模式：不生成_solver相关内置变量
+calc_solution: false
+
+# =================================================================
+# 问题（开放式）：按顺序给出全部陈述的真假结果
+# =================================================================
+queries:
+  q1:
+    desc: '请按顺序给出所有陈述的真假结果，以布尔列表形式输出；示例：[True, False, True]'
+    ans_formula: truths
+    ans_text: str(_ans)
+    ans_assertion: 'is_valid_instance_v3(x, y, z, A, B, seed, stmt_min, stmt_max, templates_pool, truths)'
+
+# =================================================================
+# 描述：题面文本（避免非变量的花括号，集合以列表形式呈现；包含答案格式说明与示例）
+# =================================================================
+desc: '设有整数x、y、z以及两个自然数集合A与B。已知如下数据：x等于 {x}，y等于 {y}，z等于 {z}；集合A为 {A}，集合B为 {B}。术语说明：子集表示包含关系允许相等，真子集表示严格包含且不相等，交集非空表示存在至少一个公共元素，偶数表示能被2整除，x模z表示x除以z的余数。陈述按顺序以字母编号标记（A为第一条，B为第二条，以此类推），部分陈述可能引用前面某几条陈述的编号、数量或奇偶性。以下给出共 {stmt_count} 条陈述：\n{stmt_block}\n请判定每条陈述的真假，并按顺序输出布尔列表。答案必须严格为长度为 {stmt_count} 的Python风格布尔列表，元素只能是True或False，顺序与A、B、C等编号一致；例如 [True, False, True]。\n{q1}'

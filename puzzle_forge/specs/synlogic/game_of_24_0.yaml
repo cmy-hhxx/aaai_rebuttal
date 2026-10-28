@@ -1,0 +1,64 @@
+custom_operator:
+  function_1: customs/game_of_24_0.py
+  function_2: customs/game_of_24_0.py
+
+variables:
+  list_len:
+    type: int
+    domain: "[4, 4]"
+    diff_factor: 1
+  min_num:
+    type: int
+    domain: "[1, 6]"
+  max_num:
+    type: int
+    domain: "[min_num + 4, min_num + 18]"
+  target_min:
+    type: int
+    domain: "[10, 40]"
+  target_max:
+    type: int
+    domain: "[target_min + 5, target_min + 25]"
+  ops_pool_candidates:
+    formula: "['+', '-', '*', '/']"
+  op_repeat_allowed:
+    type: bool
+    domain: "[False, False]"
+  require_plus_or_div:
+    type: bool
+    domain: "[True, True]"
+  plus_implies_div:
+    type: bool
+    domain: "[True, True]"
+  max_tries:
+    type: int
+    domain: "[200, 600]"
+  scenario:
+    formula: function_1(list_len, min_num, max_num, ops_pool_candidates, target_min, target_max, max_tries, op_repeat_allowed, require_plus_or_div, plus_implies_div)
+  nums:
+    formula: scenario['nums']
+  ops:
+    formula: scenario['ops']
+  target:
+    formula: scenario['target']
+  ans_map:
+    formula: scenario['answer']
+  eval_mode:
+    formula: scenario['eval_mode']
+  q1_desc_str:
+    # 这里修改了题目描述，明确了返回格式为列表嵌套元组
+    formula: "('表达式固定为右结合：nums[0] ops[0] (nums[1] ops[1] (nums[2] ops[2] nums[3]))；ops顺序依次对应op1、op2、op3；四个数字各使用一次；运算符从集合' + str(scenario['ops']) + '中选取且不允许重复；除法采用有理数运算（允许非整数中间结果），禁止除以零；必须至少使用“+”或“/”，且若使用“+”则必须同时使用“/”。该实例仅有唯一解。用数字' + str(scenario['nums']) + '，通过合适的算术运算' + str(scenario['ops']) + '，使其计算结果为' + str(scenario['target']) + '，请返回格式 [(nums[0], nums[1], nums[2], nums[3]), (\"op1\", \"op2\", \"op3\")]，例如 [(6, 1, 5, 3), (\"*\", \"+\", \"/\")]。')"
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "{q1_desc_str}"
+    ans_formula: ans_map
+    # 输出时处理成字符串显示
+    ans_text: "str(_ans)"
+    ans_assertion: "function_2(nums, ops, target, _ans, eval_mode, op_repeat_allowed, require_plus_or_div, plus_implies_div)"
+
+desc: "{q1}"

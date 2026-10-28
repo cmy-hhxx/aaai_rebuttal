@@ -1,0 +1,41 @@
+custom_operator:
+  generate_arrow_maze: arrow_maze_0.py
+  function_1: arrow_maze_0.py
+  function_2: arrow_maze_0.py
+
+variables:
+  grid_size:
+    type: int
+    domain: "[4, 5]"
+  arrow_density:
+    type: float
+    domain: "[0.65, 0.85]"
+  rule_mode:
+    type: enum
+    domain: "['all','orth','diag']"
+  target_blank:
+    type: int
+    domain: "[3, 6]"
+
+  maze_pair:
+    formula: generate_arrow_maze(grid_size, arrow_density, rule_mode, target_blank)
+  initial_grid:
+    formula: maze_pair[0]
+  solution_grid:
+    formula: maze_pair[1]
+
+  rule_desc:
+    formula: "'所有 8 个方向' if rule_mode=='all' else ('上下左右 4 个方向' if rule_mode=='orth' else '4 条对角线方向')"
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: '请提交完整迷宫的二维数组（合法 Python 列表），元素必须为 [↑ ↓ ← → ↖ ↗ ↘ ↙] 或数字；示例：[[''↑'',''X''],[''↓'',''→'']].'
+    ans_formula: solution_grid
+    ans_text: str(solution_grid)
+    ans_assertion: 'True'
+
+desc: '填箭头迷宫挑战！这里有一个 {grid_size}×{grid_size} 的网格，X 为待填箭头。数字 n 表示：从该格出发沿 {rule_desc} 的连续箭头格数量之和为 n。可用箭头符号：[↑ ↓ ← → ↖ ↗ ↘ ↙]。题面：{initial_grid}\\n请按示例 [[''↑'',''X''],[''↓'',''→'']] 的格式提交完整网格（合法 Python 列表），系统将自动判分。'

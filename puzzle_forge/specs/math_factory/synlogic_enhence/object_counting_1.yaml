@@ -1,0 +1,135 @@
+# ===============================
+# 自定义操作符：引用外部Python函数
+# ===============================
+custom_operator:
+  generate_weekly_events: object_counting_1.py
+  generate_rule_order: object_counting_1.py
+  generate_cap_policy: object_counting_1.py
+  compute_final_inventory: object_counting_1.py
+  compute_inventory_diff: object_counting_1.py
+  format_rule_order_text: object_counting_1.py
+  render_category_events_text: object_counting_1.py
+  pick_category_names: object_counting_1.py
+  compare_final: object_counting_1.py
+  pack_finals: object_counting_1.py
+  compute_dual_final: object_counting_1.py
+  generate_coupling_policy: object_counting_1.py
+  generate_maintenance_plan: object_counting_1.py
+  format_coupling_text: object_counting_1.py
+  validate_scenario_extended: object_counting_1.py
+  unique_solution_guard: object_counting_1.py
+
+# ===============================
+# 变量定义：周数、期初库存、类别名、逐周事件、顺序、维护与耦合规则
+# ===============================
+variables:
+  # 周数与期初库存
+  weeks:
+    type: int
+    domain: "[5, 8]"
+    diff_factor: 1
+  initial_suits:
+    type: int
+    domain: "[90, 220]"
+    diff_factor: 1
+  initial_rovers:
+    type: int
+    domain: "[25, 90]"
+    diff_factor: 1
+
+  # 类别名称
+  names_pair:
+    formula: 'pick_category_names()'
+  suits_label:
+    formula: 'names_pair[0]'
+  rovers_label:
+    formula: 'names_pair[1]'
+
+  # 每周执行顺序与扣减封顶策略
+  rule_order:
+    formula: 'generate_rule_order()'
+  cap_policy:
+    formula: 'generate_cap_policy()'
+
+  # 逐周事件：两类物资
+  suits_events:
+    formula: 'generate_weekly_events(weeks, "suits")'
+  rovers_events:
+    formula: 'generate_weekly_events(weeks, "rovers")'
+
+  # 维护计划与文本
+  maintenance_info:
+    formula: 'generate_maintenance_plan(weeks, suits_label, rovers_label)'
+  maintenance_plan:
+    formula: 'maintenance_info["plan"]'
+  maintenance_text:
+    formula: 'maintenance_info["text"]'
+
+  # 耦合策略：基于真实维护计划抽样，确保至少一次调剂触发
+  coupling_policy:
+    formula: 'generate_coupling_policy(weeks, initial_suits, initial_rovers, suits_events, rovers_events, rule_order, cap_policy, maintenance_plan)'
+  coupling_text:
+    formula: 'format_coupling_text(suits_label, rovers_label, coupling_policy)'
+
+  # 展示用文本
+  order_text:
+    formula: 'format_rule_order_text(rule_order)'
+  suits_events_text:
+    formula: 'render_category_events_text(suits_events, rule_order)'
+  rovers_events_text:
+    formula: 'render_category_events_text(rovers_events, rule_order)'
+
+  # 双类联动仿真结果
+  dual_results:
+    formula: 'compute_dual_final(initial_suits, initial_rovers, suits_events, rovers_events, rule_order, cap_policy, coupling_policy, maintenance_plan)'
+  suits_final:
+    formula: 'dual_results["suits_final"]'
+  rovers_final:
+    formula: 'dual_results["rovers_final"]'
+  transfer_weeks:
+    formula: 'dual_results["transfer_weeks"]'
+  weekly_total:
+    formula: 'dual_results["weekly_total"]'
+    diff_factor: 1
+
+# ===============================
+# 计算模式：直接计算（不使用Z3）
+# ===============================
+calc_solution: false
+
+# ===============================
+# 问题与答案
+# ===============================
+queries:
+  # 问题1：两类物资最终在库数量之差的绝对值（整数）
+  q1:
+    desc: '请计算两类物资最终在库数量之差的绝对值并按整数输出例如17'
+    ans_formula: 'compute_inventory_diff(suits_final, rovers_final)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_scenario_extended(weeks, suits_events, rovers_events, initial_suits, initial_rovers, rule_order, cap_policy, coupling_policy, maintenance_plan) and unique_solution_guard(weeks, initial_suits, initial_rovers, suits_events, rovers_events, rule_order, cap_policy, coupling_policy, maintenance_plan)'
+
+  # 问题2：判断最终哪一类更多，若相同输出equal
+  q2:
+    desc: '请判断最终哪一类数量更多若相同输出equal例如{suits_label}或equal'
+    ans_formula: 'compare_final(suits_final, rovers_final, suits_label, rovers_label)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_scenario_extended(weeks, suits_events, rovers_events, initial_suits, initial_rovers, rule_order, cap_policy, coupling_policy, maintenance_plan) and unique_solution_guard(weeks, initial_suits, initial_rovers, suits_events, rovers_events, rule_order, cap_policy, coupling_policy, maintenance_plan)'
+
+  # 问题3：输出两个最终数量的列表按题面出现的两类顺序
+  q3:
+    desc: '请按列表形式输出两个最终在库数量顺序为题面两类例如[120, 45]'
+    ans_formula: 'pack_finals(suits_final, rovers_final)'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_scenario_extended(weeks, suits_events, rovers_events, initial_suits, initial_rovers, rule_order, cap_policy, coupling_policy, maintenance_plan) and unique_solution_guard(weeks, initial_suits, initial_rovers, suits_events, rovers_events, rule_order, cap_policy, coupling_policy, maintenance_plan)'
+
+  # 问题4：输出发生紧急调剂的周序号列表
+  q4:
+    desc: '请输出发生紧急调剂的周序号列表按从小到大例如[2, 5]'
+    ans_formula: 'transfer_weeks'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'validate_scenario_extended(weeks, suits_events, rovers_events, initial_suits, initial_rovers, rule_order, cap_policy, coupling_policy, maintenance_plan) and unique_solution_guard(weeks, initial_suits, initial_rovers, suits_events, rovers_events, rule_order, cap_policy, coupling_policy, maintenance_plan)'
+
+# ===============================
+# 故事描述：完整题目环境、规则与步骤顺序
+# ===============================
+desc: '星际殖民地双类物资调剂试题：你在火星基地管理{suits_label}与{rovers_label}。共有{weeks}周的物资流转周序号从1开始计数期初库存为{suits_label}{initial_suits}件、{rovers_label}{initial_rovers}辆。{order_text}。步骤含义说明：到货与退回为加项，报废与调拨为减项；若本期顺序未包含某一步骤则该步在该周忽略。每周先分别按上述顺序独立结算两类库存后再按下述规则执行一次跨类紧急调剂。维护机制如下：{maintenance_text}。跨类紧急调剂机制如下：{coupling_text}。所有减项在执行时不得超过当时库存若超过则以当时库存为上限。{suits_label}各周按采用的步骤列出如下{suits_events_text}；{rovers_label}各周按采用的步骤列出如下{rovers_events_text}。答案格式要求：q1为整数例如17；q2为类别名称或equal例如{suits_label}或equal；q3为形如[整数, 整数]的列表例如[120, 45]；q4为发生紧急调剂的周序号列表例如[2, 5]。\n{q1}\n{q2}\n{q3}\n{q4}'

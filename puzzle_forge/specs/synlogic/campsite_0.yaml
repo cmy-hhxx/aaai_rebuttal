@@ -1,0 +1,90 @@
+variables:
+  # 网格行数
+  row_num:
+    type: int
+    domain: "[4, 8]"
+    diff_factor: 1
+  # 网格列数
+  col_num:
+    type: int
+    domain: "[3, 8]"
+    diff_factor: 1
+  # 随机树木数量（为提升可解率，限制在1~3）
+  tree_num:
+    type: int
+    domain: "[4, 12]"
+  # 在row_num*col_num个格子中随机选择tree_num个唯一索引作为树的位置
+  tree_indices:
+    formula: "generate_random_list(tree_num, 'int', [0, row_num * col_num - 1], [\"lambda l: len(l) == len(to_unique(l))\"])"
+  # 由tree_indices生成初始网格：'T'为树木，'X'为空地（可放帐篷）
+  grid:
+    formula: "[['T' if (r*col_num + c) in tree_indices else 'X' for c in range(col_num)] for r in range(row_num)]"
+  # 为每个格子生成字符串ID，避免多维元组键导致的符号命名问题
+  cell_id_grid:
+    formula: "[['R' + str(r) + 'C' + str(c) for c in range(col_num)] for r in range(row_num)]"
+  # 扁平化后的格子ID列表
+  cell_ids:
+    formula: "[cid for row in cell_id_grid for cid in row]"
+  # 将网格转为可展示的多行字符串，避免在desc表达式中使用反斜杠
+  grid_str:
+    formula: "chr(10).join(['  '.join(row) for row in grid])"
+
+symbols:
+  # 帐篷布尔变量：tent[cell_id]为True表示在该格子放置帐篷'C'
+  tent:
+    source:
+    - cell_ids
+    type: Bool
+    desc: "在{_cell_ids}处放置帐篷"
+
+conditions:
+  # 1) 帐篷不能放在树木格子上
+  no_tent_on_tree:
+    formula: "And([Implies(grid[r][c] == 'T', Not(tent[cell_id_grid[r][c]])) for r in range(row_num) for c in range(col_num)])"
+    desc: 帐篷不能放在树木格子上
+  # 2) 每个帐篷必须正交邻接至少一棵树
+  tent_adjacent_to_tree:
+    formula: "And([Implies(tent[cell_id_grid[r][c]], Or((r > 0 and grid[r - 1][c] == 'T'), (r < row_num - 1 and grid[r + 1][c] == 'T'), (c > 0 and grid[r][c - 1] == 'T'), (c < col_num - 1 and grid[r][c + 1] == 'T'))) for r in range(row_num) for c in range(col_num)])"
+    desc: 每个帐篷必须正交邻接至少一棵树
+  # 2') 每个帐篷必须且仅能邻接一棵树（确保一一对应的一侧）
+  tent_adjacent_to_exactly_one_tree:
+    formula: "And([Implies(tent[cell_id_grid[r][c]], ((1 if (r > 0 and grid[r - 1][c] == 'T') else 0) + (1 if (r < row_num - 1 and grid[r + 1][c] == 'T') else 0) + (1 if (c > 0 and grid[r][c - 1] == 'T') else 0) + (1 if (c < col_num - 1 and grid[r][c + 1] == 'T') else 0)) == 1) for r in range(row_num) for c in range(col_num)])"
+    desc: 每个帐篷恰好邻接一棵树
+  # 3) 帐篷之间互不接触（包含对角线方向）
+  tents_do_not_touch:
+    formula: "And([Implies(tent[cell_id_grid[r][c]], And([Not(tent[cell_id_grid[rr][cc]]) for rr in range(max(0, r - 1), min(row_num, r + 2)) for cc in range(max(0, c - 1), min(col_num, c + 2)) if not (rr == r and cc == c)])) for r in range(row_num) for c in range(col_num)])"
+    desc: 任何两个帐篷不能在8邻域内接触（包括对角线）
+  # 4) 每棵树至多相邻一顶帐篷（确保一一对应的另一侧）
+  tree_at_most_one_tent:
+    formula: "And([Implies(grid[r][c] == 'T', Sum([If(tent[cell_id_grid[rr][cc]], 1, 0) for (rr,cc) in ([(r-1,c)] if r>0 else []) + ([(r+1,c)] if r<row_num-1 else []) + ([(r,c-1)] if c>0 else []) + ([(r,c+1)] if c<col_num-1 else [])]) <= 1) for r in range(row_num) for c in range(col_num)])"
+    desc: 每棵树至多相邻一顶帐篷
+  # 5) 帐篷总数等于树木总数
+  total_tents_equals_trees:
+    formula: "Sum([If(tent[cid], 1, 0) for cid in cell_ids]) == tree_num"
+    desc: 帐篷总数等于树木总数
+
+# 先求一次解，基于该解生成行列约束，然后加入这些约束并再次求解，确保唯一性
+post_generation:
+  post_gen_vars:
+    # 由第一次求解得到的解（_sol）提取每行帐篷个数，作为行约束
+    row_constraints: "[sum([1 if get_value(_sol, tent[cell_id_grid[r][c]]) else 0 for c in range(col_num)]) for r in range(row_num)]"
+    # 提取每列帐篷个数，作为列约束
+    col_constraints: "[sum([1 if get_value(_sol, tent[cell_id_grid[r][c]]) else 0 for r in range(row_num)]) for c in range(col_num)]"
+  post_gen_conditions:
+    row_counts:
+      formula: "And([Sum([If(tent[cell_id_grid[r][c]], 1, 0) for c in range(col_num)]) == row_constraints[r] for r in range(row_num)])"
+      desc: 每行帐篷数量满足行约束
+    col_counts:
+      formula: "And([Sum([If(tent[cell_id_grid[r][c]], 1, 0) for r in range(row_num)]) == col_constraints[c] for c in range(col_num)])"
+      desc: 每列帐篷数量满足列约束
+
+queries:
+  q1:
+    desc: "请以Python格式的二维列表(列表的列表)输出完成的网格。"
+    # 生成答案二维网格：树位置'T'保持，帐篷位置'C'，其余为'X'
+    ans_formula: "[[ 'T' if grid[r][c] == 'T' else ('C' if get_value(_solutions[0], tent[cell_id_grid[r][c]]) else 'X') for c in range(col_num)] for r in range(row_num)]"
+    ans_text: "str(_ans)"
+    # 断言唯一解
+    ans_assertion: "len(_solutions) == 1"
+
+desc: "我给你一个 {row_num} x {col_num} 的营地谜题，其中：\n- 树木用'T'表示。\n- 可以放置帐篷的空地用'X'表示。\n- 每行和每列都有一个约束，表示必须放置的帐篷数量。\n1. 规则：\n  1. 每个帐篷(C)必须放在一棵树(T)的正交相邻位置。\n  2. 帐篷之间不能相互接触，即使是对角线方向也不行。\n  3. 每行必须包含其约束所指定的帐篷数量。\n  4. 每列必须包含其约束所指定的帐篷数量。\n  5. 帐篷与树一一对应，且帐篷的数量等于树木的数量。\n2. 输入（随机生成的网格）：\n{grid_str}\nrow_constraints = {row_constraints}\ncol_constraints = {col_constraints}\n3. 任务\n  - 在网格中按照所有规则放置帐篷('C')。\n  - 以Python格式的二维列表(列表的列表)输出完成的网格。\n{q1}"

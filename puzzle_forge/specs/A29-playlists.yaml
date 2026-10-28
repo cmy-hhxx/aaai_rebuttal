@@ -1,0 +1,25 @@
+custom_operator: 
+    numMusicPlaylists: customs/playlists.py
+variables:
+  k: 
+    type: int
+    domain: "[0, 98]"
+    diff_factor: 1
+  n: 
+    type: int
+    domain: "[k+1, 99]"
+    diff_factor: 0
+  goal: 
+    type: int
+    domain: "[n, 100]"
+    diff_factor: 0
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 请问可以满足要求的播放列表的数量？若答案非常大，请输出对10^9+7取余的结果。
+    ans_formula: numMusicPlaylists(n,goal,k)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+desc: 你的音乐播放器里有 {n} 首不同的歌，在旅途中，你计划听 {goal} 首歌（不一定不同，即，允许歌曲重复）。你将会按如下规则创建播放列表：1、每首歌 至少播放一次。2、一首歌只有在其他 {k} 首歌播放完之后才能再次播放。{q1}

@@ -1,0 +1,93 @@
+# ================================================================
+# PuzzleClone Spec — 计息周期差异 + 阶梯利息税 复利推算
+# ================================================================
+calc_solution: false
+
+# ----------------------- 随机变量 -------------------------------
+variables:
+  principal:
+    type: int
+    domain: "[2000, 5000]"                # 初始本金
+
+  # -------- 阶段一参数 --------
+  rate1_pct:
+    type: int
+    domain: "[3, 6]"                      # 年利率 %
+  years1:
+    type: int
+    domain: "[2, 4]"                      # 年数
+  periods1:                               # 计息周期：1=年，4=季度，12=月
+    type: enum
+    domain: "[1, 4, 12]"
+
+  # -------- 阶段二参数 --------
+  extra_deposit:
+    type: int
+    domain: "[1000, 4000]"
+  rate2_pct:
+    type: int
+    domain: "[3, 7]"
+  years2:
+    type: int
+    domain: "[2, 4]"
+  periods2:
+    type: enum
+    domain: "[1, 4, 12]"
+
+  # -------- 税制参数 ----------
+  tax_threshold:                           # 阶梯税临界点（元）
+    type: int
+    domain: "[800, 1500]"
+  tax_low_pct:                             # 低档税率
+    type: int
+    domain: "[3, 6]"
+  tax_high_pct:                            # 高档税率
+    type: int
+    domain: "[8, 12]"
+
+  # ------------------ 计算辅助 ----------------------------------
+  r1:
+    formula: rate1_pct / 100
+  r2:
+    formula: rate2_pct / 100
+
+  # 计息周期文字
+  period_desc1:
+    formula: "'年' if periods1==1 else ('季度' if periods1==4 else '月')"
+  period_desc2:
+    formula: "'年' if periods2==1 else ('季度' if periods2==4 else '月')"
+
+  # 阶段一复利系数
+  factor1:
+    formula: (1 + r1 / periods1) ** (periods1 * years1)
+  balance1:
+    formula: round(principal * factor1, 2)
+
+  # 阶段二复利系数
+  factor2:
+    formula: (1 + r2 / periods2) ** (periods2 * years2)
+  gross2:
+    formula: round((balance1 + extra_deposit) * factor2, 2)
+
+  interest2:
+    formula: round(gross2 - (balance1 + extra_deposit), 2)
+
+  # 适用税率（阶梯）
+  tax_rate:
+    formula: tax_high_pct if interest2 > tax_threshold else tax_low_pct
+  tax_pay:
+    formula: round(interest2 * tax_rate / 100, 2)
+
+  final_balance:
+    formula: round(gross2 - tax_pay, 2)
+
+# ----------------------- 问答 -----------------------------------
+queries:
+  q1:
+    desc: ''
+    ans_formula: final_balance
+    ans_text: str(final_balance)
+    ans_assertion: 'True'
+
+# ----------------------- 题干描述 -------------------------------
+desc: '理财终极版：某人将 {principal} 元存入银行，按复利计息。\n阶段一：以年利率 {rate1_pct}%、每{period_desc1}计息一次，存 {years1} 年。\n阶段二：阶段一结束时，他追加 {extra_deposit} 元；之后年利率变为 {rate2_pct}% ，并改为每{period_desc2}计息一次，再存 {years2} 年。\n税制：如果第二阶段产生的利息不超过 {tax_threshold} 元，需缴纳 {tax_low_pct}% 的利息税；若超过该阈值，则全部按照 {tax_high_pct}% 的税率征税（税在第二阶段结束时一次性扣除）。\n问：到期时账户的本息合计是多少元？（保留两位小数）\n答案格式：写金额数字，例如 7280.45'

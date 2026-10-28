@@ -1,0 +1,142 @@
+# 可参数化的 Knights & Knaves 造题框架（高级泛化 + 隐式阵营，稳健版，唯一解增强）
+# - 显式呈现每位说话者的陈述文本，确保可解性
+# - 文本精简与一致化，严格遵守 desc 约束：单行、无双引号、花括号仅占位
+# - 强化唯一性：精确计数 + 阵营锚定与非空 + 分阵营骑士分布约束 + 覆盖度保障（至少一条身份类与至少一条阵营类陈述）
+# - 修复不可满足根因：knight_count 至少为 3，避免与“两阵营均有骑士且人数不等”矛盾
+
+# 自定义操作符定义（全部在 knights_knaves_puzzle_3.py 中）
+custom_operator:
+  pick_names: knights_knaves_puzzle_3.py
+  format_names: knights_knaves_puzzle_3.py
+  to_2d_sorted: knights_knaves_puzzle_3.py
+  render_answer: knights_knaves_puzzle_3.py
+  choose_template_pool: knights_knaves_puzzle_3.py
+  choose_extra_rule_pool: knights_knaves_puzzle_3.py
+  pick_from: knights_knaves_puzzle_3.py
+  render_saying: knights_knaves_puzzle_3.py
+  render_extra_rule: knights_knaves_puzzle_3.py
+  gen_sayings_triplets: knights_knaves_puzzle_3.py
+  build_sayings_text: knights_knaves_puzzle_3.py
+  choose_count_type: knights_knaves_puzzle_3.py
+  choose_knight_count: knights_knaves_puzzle_3.py
+
+# 变量区：人数、姓名、模板池、额外规则池、人数约束模式与阈值、阵营、陈述三元组与文本、额外规则条数
+variables:
+  p_num:
+    type: int
+    domain: "[6, 10]" # 人数范围，支持多样性
+  names:
+    formula: "pick_names(p_num)" # 姓名列表（无放回抽样）
+  templates_pool:
+    formula: "choose_template_pool(3, 6, 12)" # 发言模板池子集（覆盖身份与阵营类）
+  extra_rule_pool:
+    formula: "choose_extra_rule_pool(1, 3, 7, templates_pool)" # 全局规则池子集（若模板池缺阵营线索则强制加入阵营规则）
+  count_type:
+    formula: "choose_count_type(templates_pool, extra_rule_pool)" # 人数约束模式（精确计数）
+  count_type_text:
+    formula: "'exactly ' if count_type == 'exactly' else ('at least ' if count_type == 'atleast' else 'at most ')" # 文本映射
+  knight_count:
+    formula: "choose_knight_count(p_num, templates_pool, extra_rule_pool)" # 骑士人数阈值（至少 3）
+  group_num:
+    type: int
+    domain: "[2, 2]" # 隐式阵营数量固定为 2
+  sayings_triplets:
+    formula: "gen_sayings_triplets(names, templates_pool)" # 为每位说话者生成 (x,y,t)
+  say_x_list:
+    formula: "[tpl[0] for tpl in sayings_triplets]" # 语句目标 x
+  say_y_list:
+    formula: "[tpl[1] for tpl in sayings_triplets]" # 语句目标 y
+  say_t_list:
+    formula: "[tpl[2] for tpl in sayings_triplets]" # 模板编号 t
+  sayings_text:
+    formula: "build_sayings_text(names, sayings_triplets)" # 渲染语句文本
+  extra_rule_num:
+    type: int
+    domain: "[1, 3]" # 全局额外规则条数
+
+# 符号区：角色与阵营
+symbols:
+  role:
+    source:
+    - names
+    type: bool
+    desc: '{_names} is a knight' # True=骑士，False=骗子
+  group_s:
+    source:
+    - names
+    attr:
+    - g
+    type:
+    - int
+    desc:
+    - '{_names} belongs to faction {_g}' # 阵营标签（0 或 1）
+
+# 约束区：人数约束 + 阵营取值 + 阵营锚定与非空 + 分阵营骑士分布约束 + 非平凡身份 + 每人一句话（按模板）+ 全局额外规则
+conditions:
+  knight_count_rule:
+    formula: "(Sum([If(role[n], 1, 0) for n in names]) == knight_count) if count_type == 'exactly' else ((Sum([If(role[n], 1, 0) for n in names]) >= knight_count) if count_type == 'atleast' else (Sum([If(role[n], 1, 0) for n in names]) <= knight_count))"
+    desc: 'There are {count_type_text}{knight_count} knights' # 在题面中呈现
+  faction_value_domain:
+    formula: And([And(group_s[n].get('g') >= 0, group_s[n].get('g') < group_num) for n in names])
+    desc: 'Each person belongs to one of two hidden factions' # 环境设定
+  faction_anchor:
+    formula: "group_s[names[0]].get('g') == 0"
+    desc: 'We name the factions Alpha and Beta; the first listed person belongs to Alpha' # 对称性破除（环境设定）
+  faction_both_nonempty:
+    formula: And(Sum([If(group_s[n].get('g') == 0, 1, 0) for n in names]) >= 1, Sum([If(group_s[n].get('g') == 1, 1, 0) for n in names]) >= 1)
+    desc: 'Both factions are non-empty'
+  faction_each_has_knight:
+    formula: And(Sum([If(And(group_s[n].get('g') == 0, role[n]), 1, 0) for n in names]) >= 1, Sum([If(And(group_s[n].get('g') == 1, role[n]), 1, 0) for n in names]) >= 1)
+    desc: 'Each faction contains at least one knight'
+  faction_knight_counts_different:
+    formula: Not(Sum([If(And(group_s[n].get('g') == 0, role[n]), 1, 0) for n in names]) == Sum([If(And(group_s[n].get('g') == 1, role[n]), 1, 0) for n in names]))
+    desc: 'The two factions do not have the same number of knights'
+  nontrivial_roles:
+    formula: And(Sum([If(role[n], 1, 0) for n in names]) >= 1, Sum([If(role[n], 1, 0) for n in names]) <= p_num - 1)
+    desc: 'There is at least one knight and at least one knave'
+  sayings_truth:
+    formula: "And([And([Implies(say_t_list[i] == 0, role[names[i]] == role[say_x_list[i]]), Implies(say_t_list[i] == 1, role[names[i]] == Not(role[say_x_list[i]])), Implies(say_t_list[i] == 2, role[names[i]] == Xor(role[say_x_list[i]], role[say_y_list[i]])), Implies(say_t_list[i] == 3, role[names[i]] == (role[say_x_list[i]] == role[say_y_list[i]])), Implies(say_t_list[i] == 4, role[names[i]] == Implies(Not(role[say_x_list[i]]), role[say_y_list[i]])), Implies(say_t_list[i] == 5, role[names[i]] == Not(And(role[say_x_list[i]], role[say_y_list[i]]))), Implies(say_t_list[i] == 6, role[names[i]] == Or(role[say_x_list[i]], role[say_y_list[i]])), Implies(say_t_list[i] == 7, role[names[i]] == And([Implies(group_s[z].get('g') == group_s[say_x_list[i]].get('g'), role[z]) for z in names])), Implies(say_t_list[i] == 8, role[names[i]] == (group_s[say_x_list[i]].get('g') == group_s[say_y_list[i]].get('g'))), Implies(say_t_list[i] == 9, role[names[i]] == And([Implies(role[z], group_s[z].get('g') == group_s[say_x_list[i]].get('g')) for z in names])), Implies(say_t_list[i] == 10, role[names[i]] == Implies(role[say_y_list[i]], And([Implies(group_s[z].get('g') == group_s[say_y_list[i]].get('g'), role[z]) for z in names]))), Implies(say_t_list[i] == 11, role[names[i]] == (Sum([If(And(group_s[z].get('g') == group_s[say_x_list[i]].get('g'), role[z]), 1, 0) for z in names]) >= 1))]) for i in range(p_num)])"
+    desc: 'Each person makes exactly one statement; knights tell the truth while knaves lie'
+  extras:
+    source:
+    - names
+    - names
+    - names
+    - extra_rule_pool
+    amount:
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    order:
+    - false
+    - false
+    - false
+    - false
+    duplicate:
+    - false
+    - false
+    - false
+    - false
+    domain: "[extra_rule_num, extra_rule_num]"
+    domain_cond: true
+    custom_cond:
+    - scope: domain
+      fields: [0, 1, 2, 3]
+      constraint: 'lambda l: all(((dl[0][0][0] != dl[0][1][0]) if dl[0][3][0] in [0,1,2,5] else ((dl[0][0][0] != dl[0][1][0]) and (dl[0][0][0] != dl[0][2][0]) and (dl[0][1][0] != dl[0][2][0]))) for dl in l)'
+    formula: "Or(And(_sym[3][0] == 0, Xor(role[_sym[0][0]], role[_sym[1][0]])), And(_sym[3][0] == 1, role[_sym[0][0]] == role[_sym[1][0]]), And(_sym[3][0] == 2, Implies(Not(role[_sym[0][0]]), role[_sym[1][0]])), And(_sym[3][0] == 3, Or(role[_sym[0][0]], role[_sym[1][0]], role[_sym[2][0]])), And(_sym[3][0] == 4, Sum([If(role[_sym[0][0]], 1, 0), If(role[_sym[1][0]], 1, 0), If(role[_sym[2][0]], 1, 0)]) <= 1), And(_sym[3][0] == 5, group_s[_sym[0][0]].get('g') == group_s[_sym[1][0]].get('g')), And(_sym[3][0] == 6, Implies(role[_sym[0][0]], group_s[_sym[1][0]].get('g') == group_s[_sym[2][0]].get('g'))))"
+    desc: '({_index + 1}) {render_extra_rule(_sym[0][0], _sym[1][0], _sym[2][0], _sym[3][0])}\\n'
+
+# 结果唯一性控制（全模型唯一）
+max_solution: 1
+
+# 查询区：输出 [[Knaves],[Knights]]，按字母序，渲染为单引号无空格字符串
+queries:
+  q1:
+    desc: 'Your answer:' # 精简问题描述，避免重复提示
+    ans_formula: "to_2d_sorted([n for n in names if not get_value(_solutions[0], role[n])], [n for n in names if get_value(_solutions[0], role[n])])"
+    ans_text: "render_answer(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+# 描述文本（单行、无双引号、用 \\n 控制换行；花括号仅作占位）
+desc: 'On an island of knights and knaves, you meet {p_num} inhabitants [ {format_names(names)} ]. Each person belongs to one of two hidden factions named Alpha and Beta, and the first listed person belongs to Alpha. Both factions are non-empty. Each faction contains at least one knight, and the two factions do not have the same number of knights. Knights always tell the truth, and knaves always lie. There is at least one knight and at least one knave. There are {count_type_text}{knight_count} knights. Each person makes exactly one statement; knights tell the truth while knaves lie. Statements:\\n{sayings_text}\\nAdditional global rules:\\n{extras}\\nReturn exactly [[Knaves],[Knights]] with both sublists sorted alphabetically, names in single quotes and no spaces; for example [[''A'',''B''],[''C'',''D'']]. {q1}'

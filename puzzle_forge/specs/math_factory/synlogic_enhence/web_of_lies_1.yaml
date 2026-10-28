@@ -1,0 +1,287 @@
+# 逻辑真话/假话谜题：去冗余改进版（保留唯一解验证与高变体能力，避免显见线索）
+# 1. 自定义操作符
+custom_operator:
+  to_yn_list: web_of_lies_1.py
+  gen_chinese_names: web_of_lies_1.py
+  gen_places: web_of_lies_1.py
+  gen_perm_mapping: web_of_lies_1.py
+  build_mapping_desc: web_of_lies_1.py
+  gen_prop_keys: web_of_lies_1.py
+  gen_target_types: web_of_lies_1.py
+  pick_targets: web_of_lies_1.py
+  render_targets_desc: web_of_lies_1.py
+  to_codes: web_of_lies_1.py
+  pick_global_rule_type: web_of_lies_1.py
+  render_global_rules_desc: web_of_lies_1.py
+  prop_key_owner: web_of_lies_1.py
+  render_owner_link_desc: web_of_lies_1.py
+  gen_zone_assign: web_of_lies_1.py
+  get_zones: web_of_lies_1.py
+  build_zone_desc: web_of_lies_1.py
+  get_places_in_zone: web_of_lies_1.py
+  pick_focus_zone: web_of_lies_1.py
+  pick_zone_truth_target: web_of_lies_1.py
+  render_zone_count_desc: web_of_lies_1.py
+  pick_anchor_p1: web_of_lies_1.py
+  pick_anchor_p2: web_of_lies_1.py
+  pick_anchor_place: web_of_lies_1.py
+  render_anchor_rules_desc: web_of_lies_1.py
+  pick_triplet: web_of_lies_1.py
+  render_triplet_desc: web_of_lies_1.py
+  render_counts_equal_desc: web_of_lies_1.py
+  say_person_on_place: web_of_lies_1.py
+  say_place_on_place: web_of_lies_1.py
+  say_person_on_person: web_of_lies_1.py
+  say_on_prop: web_of_lies_1.py
+  pick_truth_k: web_of_lies_1.py
+  build_person_place_pairs: web_of_lies_1.py
+  build_safe_person_pairs: web_of_lies_1.py
+  build_safe_place_pairs: web_of_lies_1.py
+  pick_chain_type: web_of_lies_1.py
+  pick_one_pair: web_of_lies_1.py
+  render_chain_desc_person: web_of_lies_1.py
+  render_chain_desc_place: web_of_lies_1.py
+  build_safe_person_prop_pairs: web_of_lies_1.py
+  build_safe_place_prop_pairs: web_of_lies_1.py
+
+# 2. 变量（顺序严格，避免前向引用）
+variables:
+  # 基本规模
+  name_num:
+    type: int
+    domain: '[7, 10]'
+    diff_factor: 1
+  place_num:
+    formula: 'name_num'
+    diff_factor: 1
+
+  # 名称与地点
+  names:
+    formula: 'gen_chinese_names(name_num)'
+  places:
+    formula: 'gen_places(place_num)'
+  place_occupant:
+    formula: 'gen_perm_mapping(places, names)'
+  mapping_desc:
+    formula: 'build_mapping_desc(places, place_occupant)'
+
+  # 为避免显见线索：预构合法“人-地点”配对（人不为该地点的占据者）
+  person_place_pairs:
+    formula: 'build_person_place_pairs(names, places, place_occupant)'
+
+  # 命题键
+  prop_num:
+    type: int
+    domain: '[2, 4]'
+    diff_factor: 1
+  prop_keys:
+    formula: 'gen_prop_keys(names, prop_num)'
+  prop_keys_desc:
+    formula: '", ".join(prop_keys)'
+
+  # 问题对象（答案格式提示用）
+  q_item_num:
+    type: int
+    domain: '[4, 6]'
+    diff_factor: 1
+  q_types:
+    formula: 'gen_target_types(q_item_num)'
+  q_targets:
+    formula: 'pick_targets(names, places, q_types)'
+  q_targets_desc:
+    formula: 'render_targets_desc(q_types, q_targets)'
+  q_codes:
+    formula: 'to_codes(q_types)'
+
+  # 分区与区域目标（先确定区域与区域目标，再确定 truth_k）
+  zones_num:
+    type: int
+    domain: '[2, 3]'
+    diff_factor: 1
+  zone_assign:
+    formula: 'gen_zone_assign(places, zones_num)'
+  zones:
+    formula: 'get_zones(zone_assign)'
+  zone_desc:
+    formula: 'build_zone_desc(places, zone_assign, zones)'
+  focus_zone:
+    formula: 'pick_focus_zone(zones)'
+  focus_zone_places:
+    formula: 'get_places_in_zone(places, zone_assign, focus_zone)'
+  focus_zone_truth_target:
+    formula: 'pick_zone_truth_target(focus_zone_places, prop_num)'
+  focus_zone_rule_desc:
+    formula: 'render_zone_count_desc(focus_zone, focus_zone_truth_target)'
+
+  # 锚点与三人组规则文本
+  anchor_p1:
+    formula: 'pick_anchor_p1(names)'
+  anchor_p2:
+    formula: 'pick_anchor_p2(names, anchor_p1)'
+  anchor_pl1:
+    formula: 'pick_anchor_place(places)'
+  anchor_rule_desc:
+    formula: 'render_anchor_rules_desc(anchor_p1, anchor_p2, anchor_pl1)'
+  triplet_names:
+    formula: 'pick_triplet(names)'
+  triplet_truth_target:
+    type: int
+    domain: '[1, 1]'
+  triplet_rule_desc:
+    formula: 'render_triplet_desc(triplet_names, triplet_truth_target)'
+  equal_counts_desc:
+    formula: 'render_counts_equal_desc()'
+
+  # 全局规则类型与可行 truth_k，再生成文本
+  global_rule_type:
+    formula: 'pick_global_rule_type(name_num, prop_num)'
+  truth_k:
+    formula: 'pick_truth_k(name_num, prop_num, len(focus_zone_places), focus_zone_truth_target)'
+  global_rules_desc:
+    formula: 'render_global_rules_desc(global_rule_type, truth_k)'
+
+  # 安全配对与链式类型/实例与文案
+  person_pairs:
+    formula: 'build_safe_person_pairs(names, anchor_p1, anchor_p2, triplet_names)'
+  place_pairs:
+    formula: 'build_safe_place_pairs(places, focus_zone_places, anchor_pl1)'
+  person_chain_type:
+    formula: 'pick_chain_type()'
+  place_chain_type:
+    formula: 'pick_chain_type()'
+  person_chain_pair:
+    formula: 'pick_one_pair(person_pairs)'
+  place_chain_pair:
+    formula: 'pick_one_pair(place_pairs)'
+  person_chain_desc:
+    formula: 'render_chain_desc_person(person_chain_pair[0], person_chain_pair[1], person_chain_type)'
+  place_chain_desc:
+    formula: 'render_chain_desc_place(place_chain_pair[0], place_chain_pair[1], place_chain_type)'
+
+  # NEW: 安全的人-命题 与 地点-命题 配对集合，避免冗余与显见线索
+  person_prop_pairs:
+    formula: 'build_safe_person_prop_pairs(names, prop_keys)'
+  place_prop_pairs:
+    formula: 'build_safe_place_prop_pairs(places, prop_keys, place_occupant)'
+
+# 3. 符号
+symbols:
+  tperson:
+    source:
+    - names
+    type: bool
+    desc: '{_names}是说真话者'
+  tplace:
+    source:
+    - places
+    type: bool
+    desc: '在{_places}的人是说真话者'
+  prop_s:
+    source:
+    - prop_keys
+    type: bool
+    desc: '{_prop_keys}命题为真'
+
+# 4. 约束（加强去冗余与分布控制）
+conditions:
+  # 环境映射
+  map_place_truth:
+    formula: 'And([tplace[places[i]] == tperson[place_occupant[i]] for i in range(place_num)])'
+    desc: '每个地点的真话状态等价于该地点对应人物的真话状态'
+
+  # 全局规则（按类型选择）
+  truth_exact_k:
+    formula: 'True if global_rule_type != ''exact_k'' else Sum([If(tperson[n], 1, 0) for n in names]) == truth_k'
+    desc: ''
+  truth_balanced_half:
+    formula: 'True if global_rule_type != ''balanced_half'' else Sum([If(tperson[n], 1, 0) for n in names]) == name_num // 2'
+    desc: ''
+
+  # 结构性约束
+  zone_truth_count:
+    formula: 'Sum([If(tplace[p], 1, 0) for p in focus_zone_places]) == focus_zone_truth_target'
+    desc: '{focus_zone_rule_desc}'
+  anchor_equiv:
+    formula: 'tperson[anchor_p1] == Xor(tperson[anchor_p2], tplace[anchor_pl1])'
+    desc: '{anchor_rule_desc}'
+  triplet_exact_one:
+    formula: 'Sum([If(tperson[x], 1, 0) for x in triplet_names]) == triplet_truth_target'
+    desc: '{triplet_rule_desc}'
+  persons_props_equal:
+    formula: 'Sum([If(tperson[n], 1, 0) for n in names]) == Sum([If(prop_s[k], 1, 0) for k in prop_keys])'
+    desc: '{equal_counts_desc}'
+
+  # 基本线索（避免显见线索，加入否定型）
+  person_on_place_true:
+    source:
+    - person_place_pairs
+    domain: '[1, 1]'
+    formula: 'tperson[_sym[0][0]] == tplace[_sym[0][1]]'
+    desc: '{say_person_on_place(_sym[0][0], _sym[0][1], True)}'
+
+  place_on_place_true:
+    source:
+    - place_pairs
+    domain: '[1, 1]'
+    formula: 'tplace[_sym[0][0]] == tplace[_sym[0][1]]'
+    desc: '{say_place_on_place(_sym[0][0], _sym[0][1], True)}'
+
+  person_on_person_true:
+    source:
+    - person_pairs
+    domain: '[1, 1]'
+    formula: 'tperson[_sym[0][0]] == tperson[_sym[0][1]]'
+    desc: '{say_person_on_person(_sym[0][0], _sym[0][1], True)}'
+
+  # NEW: 使用安全的人-命题与地点-命题配对，避免冗余与显见线索
+  person_on_prop_true:
+    source:
+    - person_prop_pairs
+    domain: '[1, 1]'
+    formula: 'tperson[_sym[0][0]] == prop_s[_sym[0][1]]'
+    desc: '{say_on_prop(''person'', _sym[0][0], _sym[0][1], True)}'
+
+  place_on_prop_false:
+    source:
+    - place_prop_pairs
+    domain: '[1, 1]'
+    formula: 'tplace[_sym[0][0]] == Not(prop_s[_sym[0][1]])'
+    desc: '{say_on_prop(''place'', _sym[0][0], _sym[0][1], False)}'
+
+  # 链式线索（正/负模式）
+  person_chain:
+    formula: 'Implies(tperson[person_chain_pair[0]], tperson[person_chain_pair[1]]) if person_chain_type == ''pos'' else Implies(tperson[person_chain_pair[0]], Not(tperson[person_chain_pair[1]]))'
+    desc: '{person_chain_desc}'
+
+  place_chain:
+    formula: 'Implies(tplace[place_chain_pair[0]], tplace[place_chain_pair[1]]) if place_chain_type == ''pos'' else Implies(tplace[place_chain_pair[0]], Not(tplace[place_chain_pair[1]]))'
+    desc: '{place_chain_desc}'
+
+  person_mutex:
+    source:
+    - person_pairs
+    domain: '[1, 1]'
+    formula: 'Or(Xor(tperson[_sym[0][0]], tperson[_sym[0][1]]), And(Not(tperson[_sym[0][0]]), Not(tperson[_sym[0][1]])))'
+    desc: '{_sym[0][0]}与{_sym[0][1]}不可同时说真话。'
+
+  prop_owner_equiv:
+    source:
+    - prop_keys
+    domain: '[1, 1]'
+    formula: 'prop_s[_sym[0]] == tperson[prop_key_owner(_sym[0])]'
+    desc: '{render_owner_link_desc(_sym[0], ''equiv'')}'
+
+# 5. 求解与唯一解限制
+calc_solution: true
+max_solution: 1200
+
+# 6. 查询（严格答案格式）
+queries:
+  q1:
+    desc: '请依次回答以下{q_item_num}项是否为“真”（是/否），并按 Python 列表格式输出（示例：[''是'',''否'',''是'',''否'']）：\n{q_targets_desc}'
+    ans_formula: 'to_yn_list([get_value(_solutions[0], (tplace if q_codes[i] == 0 else tperson)[q_targets[i]]) for i in range(q_item_num)])'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# 7. 描述（单行+显式换行）
+desc: '题目环境：共有{place_num}个地点与{name_num}名人物，一一对应，地点-人物对应如下：{mapping_desc}。每个人要么总是说真话，要么总是说谎；在某地点的人说真话/假话即表示该地点的陈述为真/假（{map_place_truth}）。此外，存在若干关于人物属性的命题，其真假未知：{prop_keys_desc}。全局规则：{global_rules_desc}进一步结构：各地点被划分为{zones_num}个区域（{zone_desc}），并满足“{focus_zone_rule_desc}”；同时满足“{anchor_rule_desc}”、“{triplet_rule_desc}”与“{equal_counts_desc}”。线索如下：\n{person_on_place_true}\n{place_on_place_true}\n{person_on_person_true}\n{person_on_prop_true}\n{place_on_prop_false}\n{person_chain}\n{place_chain}\n{person_mutex}\n{prop_owner_equiv}\n请按“问题区”给定的对象序列分条判断真假，并以严格的 Python 列表格式提交你的答案（示例：[''是'',''否'',''是'',''否'']）。\n{q1}'

@@ -1,0 +1,38 @@
+custom_operator:
+  gen_word_data: word_sorting_mistake_2.py
+  gen_complex_steps: word_sorting_mistake_2.py
+
+variables:
+  word_num:
+    type: int
+    domain: "[7, 10]"
+
+  word_data:
+    formula: gen_word_data(word_num)
+
+  step_num:
+    type: int
+    domain: "[4, 6]"          # 提升最小步骤数
+
+  step_pack:
+    formula: gen_complex_steps(word_data, step_num)
+
+  steps_desc:
+    formula: "'\\n'.join(step_pack['steps'])"
+
+  correct_total:
+    formula: "step_pack['correct_total']"
+
+  answer:
+    formula: "str(step_pack['answer'])"
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: "请输入首个错误步骤的编号；若全部正确请输入 No（注意大小写）。示例：若首个错误为步骤2，则答案写 2；若无错误写 No:"
+    ans_formula: answer
+    ans_text: answer
+    ans_assertion: "True"
+
+desc: "情境：词典需按 Unicode(NFC) 排序，并且不做大小写折叠；若两个单词拼写完全一致，则按词频高者在前。\\n以下给出 {word_num} 个单词及其词频：\\n{', '.join([f'{w} ({f})' for w, f in word_data])}\\n\\n下面列出关于排序过程的 {step_num} 条说明：\\n{steps_desc}\\n\\n已知以上说明中恰有 {correct_total} 条是正确的。\\n任务：写出首个错误步骤的编号（1,2,…）；若所有步骤均正确则写 No。示例：若首个错误为步骤2，则答案写 2；若无错误写 No。\\n{q1}"

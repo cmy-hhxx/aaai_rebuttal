@@ -1,0 +1,214 @@
+# Mars Base Dual-Layer KenKen: 扩展版（多模板跨层约束、双层给定格、唯一解验证）
+# =============== 自定义算子：在 calcudoko_3.py 中定义并引入 ===============
+custom_operator:
+  # 基础判定与工具
+  all_distinct: calcudoko_3.py
+  is_even: calcudoko_3.py
+  is_odd: calcudoko_3.py
+  odd_sum_condition: calcudoko_3.py
+  even_sum_condition: calcudoko_3.py
+  parity_condition: calcudoko_3.py
+  gen_perm: calcudoko_3.py
+  diag_mode_to_flags: calcudoko_3.py
+  make_example_answer_text: calcudoko_3.py
+  # 笼子构造与锁定
+  make_row_pairs: calcudoko_3.py
+  make_col_pairs: calcudoko_3.py
+  make_cages: calcudoko_3.py
+  choose_ops_and_targets: calcudoko_3.py
+  apply_cage_constraints: calcudoko_3.py
+  # 跨层模板与约束锁定（与首轮解一致或降级到和值组）
+  make_checker_cells: calcudoko_3.py
+  choose_cross_rule_pack: calcudoko_3.py
+  apply_cross_constraints: calcudoko_3.py
+  # 给定格相关
+  choose_givens: calcudoko_3.py
+  apply_given_cells: calcudoko_3.py
+  format_givens_as_text: calcudoko_3.py
+
+# =========================
+# 变量定义（参数化与多样化）
+# =========================
+variables:
+  # 网格大小 n（4..7），数值越大难度越高
+  grid_size:
+    type: int
+    domain: "[4, 7]"
+    diff_factor: 1
+
+  # 行列整数索引与字符串键（作为符号字典键）
+  rows:
+    formula: "list(range(grid_size))"
+  cols:
+    formula: "list(range(grid_size))"
+  row_keys:
+    formula: "[f'r{i}' for i in range(grid_size)]"
+  col_keys:
+    formula: "[f'c{i}' for i in range(grid_size)]"
+
+  # 对角线模式（每层独立）
+  diag_mode_l1:
+    formula: "['none','main','anti','both'][randint(0,3)]"
+  diag_mode_l2:
+    formula: "['none','main','anti','both'][randint(0,3)]"
+  diag_flags_l1:
+    formula: "diag_mode_to_flags(diag_mode_l1)"
+  diag_flags_l2:
+    formula: "diag_mode_to_flags(diag_mode_l2)"
+  diag_main_l1_on:
+    formula: "diag_flags_l1['main']"
+  diag_anti_l1_on:
+    formula: "diag_flags_l1['anti']"
+  diag_main_l2_on:
+    formula: "diag_flags_l2['main']"
+  diag_anti_l2_on:
+    formula: "diag_flags_l2['anti']"
+  diag_desc_l1:
+    formula: "('无需对角线约束' if diag_mode_l1 == 'none' else ('主对角线不重复' if diag_mode_l1 == 'main' else ('副对角线不重复' if diag_mode_l1 == 'anti' else '主与副对角线均不重复')))"
+  diag_desc_l2:
+    formula: "('无需对角线约束' if diag_mode_l2 == 'none' else ('主对角线不重复' if diag_mode_l2 == 'main' else ('副对角线不重复' if diag_mode_l2 == 'anti' else '主与副对角线均不重复')))"
+
+  # 笼子偏好与模式（每层独立）
+  prefer_div:
+    type: bool
+    domain: "[True, False]"
+  cage_pattern_l1:
+    formula: "['row_pairs','col_pairs'][randint(0,1)]"
+  cage_pattern_l2:
+    formula: "['row_pairs','col_pairs'][randint(0,1)]"
+  cages_l1:
+    formula: "make_cages(grid_size, cage_pattern_l1)"
+  cages_l2:
+    formula: "make_cages(grid_size, cage_pattern_l2)"
+
+  # 跨层约束模式与参数（高级模板）
+  cross_mode:
+    formula: "['parity_global','checkerboard','sum_groups','equal_pairs','anti_match_cells','row_shift','value_map'][randint(0,6)]"
+  parity_type:
+    formula: "['odd','even'][randint(0,1)]"
+  checker_origin:
+    formula: "['black_odd','white_odd'][randint(0,1)]"
+
+  # 动态生成与规模一致的答案格式示例
+  ans_example_text:
+    formula: "make_example_answer_text(grid_size)"
+
+# =========================
+# 符号定义：两层 n×n 整型格子
+# =========================
+symbols:
+  # 层1：整型格子符号，键为(row_key, col_key)
+  L1:
+    source:
+    - row_keys
+    - col_keys
+    type: int
+    desc: "Layer-1 cell at ({_row_keys},{_col_keys})"
+  # 层2：整型格子符号，键为(row_key, col_key)
+  L2:
+    source:
+    - row_keys
+    - col_keys
+    type: int
+    desc: "Layer-2 cell at ({_row_keys},{_col_keys})"
+
+# =========================
+# 约束：值域、Latin、对角线
+# =========================
+conditions:
+  # 值域约束（1..n）
+  domain_l1:
+    formula: And([And(L1[(row_keys[i], col_keys[j])] >= 1, L1[(row_keys[i], col_keys[j])] <= grid_size) for i in range(grid_size) for j in range(grid_size)])
+    desc: "Layer-1 cell values are within 1..{grid_size}"
+  domain_l2:
+    formula: And([And(L2[(row_keys[i], col_keys[j])] >= 1, L2[(row_keys[i], col_keys[j])] <= grid_size) for i in range(grid_size) for j in range(grid_size)])
+    desc: "Layer-2 cell values are within 1..{grid_size}"
+
+  # 行不重复
+  row_distinct_l1:
+    formula: And([all_distinct([L1[(row_keys[i], col_keys[j])] for j in range(grid_size)]) for i in range(grid_size)])
+    desc: "Layer-1 rows contain 1..{grid_size} without repetition"
+  row_distinct_l2:
+    formula: And([all_distinct([L2[(row_keys[i], col_keys[j])] for j in range(grid_size)]) for i in range(grid_size)])
+    desc: "Layer-2 rows contain 1..{grid_size} without repetition"
+
+  # 列不重复
+  col_distinct_l1:
+    formula: And([all_distinct([L1[(row_keys[i], col_keys[j])] for i in range(grid_size)]) for j in range(grid_size)])
+    desc: "Layer-1 columns contain 1..{grid_size} without repetition"
+  col_distinct_l2:
+    formula: And([all_distinct([L2[(row_keys[i], col_keys[j])] for i in range(grid_size)]) for j in range(grid_size)])
+    desc: "Layer-2 columns contain 1..{grid_size} without repetition"
+
+  # 可选对角线唯一性（按标志启用）
+  diag_main_l1:
+    formula: Or(Not(diag_main_l1_on), all_distinct([L1[(row_keys[i], col_keys[i])] for i in range(grid_size)]))
+    desc: "Layer-1 main diagonal uniqueness enabled conditionally"
+  diag_anti_l1:
+    formula: Or(Not(diag_anti_l1_on), all_distinct([L1[(row_keys[i], col_keys[grid_size - 1 - i])] for i in range(grid_size)]))
+    desc: "Layer-1 anti diagonal uniqueness enabled conditionally"
+  diag_main_l2:
+    formula: Or(Not(diag_main_l2_on), all_distinct([L2[(row_keys[i], col_keys[i])] for i in range(grid_size)]))
+    desc: "Layer-2 main diagonal uniqueness enabled conditionally"
+  diag_anti_l2:
+    formula: Or(Not(diag_anti_l2_on), all_distinct([L2[(row_keys[i], col_keys[grid_size - 1 - i])] for i in range(grid_size)]))
+    desc: "Layer-2 anti diagonal uniqueness enabled conditionally"
+
+# =========================
+# 先解后约束：提取解并锁定笼子、跨层模板与给定格
+# =========================
+post_generation:
+  post_gen_vars:
+    # 提取两层网格数值（按整数 i,j 组织）
+    grid_l1: "[[get_value(_sol, L1[(row_keys[i], col_keys[j])]) for j in range(grid_size)] for i in range(grid_size)]"
+    grid_l2: "[[get_value(_sol, L2[(row_keys[i], col_keys[j])]) for j in range(grid_size)] for i in range(grid_size)]"
+    # 为两层笼子选择运算与目标（基于已解值，确保可满足）
+    cage_meta_l1: "choose_ops_and_targets(cages_l1, grid_l1, prefer_div)"
+    cage_meta_l2: "choose_ops_and_targets(cages_l2, grid_l2, prefer_div)"
+    # 选择并描述跨层约束模板（含坐标、目标或映射表），内部保证与首轮解一致或降级到和值组
+    cross_meta: "choose_cross_rule_pack(cross_mode, parity_type, grid_l1, grid_l2, checker_origin)"
+    cross_desc: "cross_meta['desc_text']"
+    # 选取每层若干给定格（先缓存一次，避免二次随机调用导致坐标与值错配）
+    givens_pack_l1: "choose_givens(grid_l1)"
+    givens_l1_cells: "givens_pack_l1[0]"
+    givens_l1_vals: "givens_pack_l1[1]"
+    givens_pack_l2: "choose_givens(grid_l2)"
+    givens_l2_cells: "givens_pack_l2[0]"
+    givens_l2_vals: "givens_pack_l2[1]"
+    givens_l1_desc: "format_givens_as_text(givens_l1_cells, givens_l1_vals)"
+    givens_l2_desc: "format_givens_as_text(givens_l2_cells, givens_l2_vals)"
+  post_gen_conditions:
+    # 将笼子运算目标锁定为硬约束
+    cages_lock_l1:
+      formula: apply_cage_constraints(L1, cages_l1, cage_meta_l1[0], cage_meta_l1[1], row_keys, col_keys)
+      desc: "Layer-1 cages are fixed with chosen operations and targets"
+    cages_lock_l2:
+      formula: apply_cage_constraints(L2, cages_l2, cage_meta_l2[0], cage_meta_l2[1], row_keys, col_keys)
+      desc: "Layer-2 cages are fixed with chosen operations and targets"
+    # 锁定跨层约束模板
+    cross_lock:
+      formula: apply_cross_constraints(L1, L2, cross_meta, row_keys, col_keys)
+      desc: "Cross-layer constraints are fixed according to the chosen template"
+    # 锁定给定格
+    givens_lock_l1:
+      formula: apply_given_cells(L1, givens_l1_cells, givens_l1_vals, row_keys, col_keys)
+      desc: "Layer-1 givens are fixed"
+    givens_lock_l2:
+      formula: apply_given_cells(L2, givens_l2_cells, givens_l2_vals, row_keys, col_keys)
+      desc: "Layer-2 givens are fixed"
+
+# =========================
+# 问答：严格答案格式与唯一解断言
+# =========================
+queries:
+  q1:
+    # 答案格式说明：一个 Python 元组(G1, G2)，G1 与 G2 分别是 {grid_size}×{grid_size} 的整数矩阵
+    desc: '请给出两层网格的解答，并说明你所用的求解策略。答案格式：一个Python元组(G1, G2)，其中G1与G2均为{grid_size}行列表、每行{grid_size}个整数；示例：{ans_example_text}。行列索引在题面笼子分组中以(r,c)表示，r与c皆为0到{grid_size - 1}的整数。请严格按该格式返回。'
+    ans_formula: "([[get_value(_solutions[0], L1[(row_keys[i], col_keys[j])]) for j in range(grid_size)] for i in range(grid_size)], [[get_value(_solutions[0], L2[(row_keys[i], col_keys[j])]) for j in range(grid_size)] for i in range(grid_size)])"
+    ans_text: "_ans"
+    ans_assertion: "len(_solutions) == 1"
+
+# =========================
+# 总描述（单行、单引号；明确给出运算定义、笼子、跨层模板与给定格）
+# =========================
+desc: '在火星基地的双层KenKen调度棋盘中进行推演：两层各为{grid_size}×{grid_size}的拉丁方，每层行列数字为1到{grid_size}且不重复；对角线约束：层1为{diag_desc_l1}，层2为{diag_desc_l2}；笼子约束定义：add表示笼内格子数之和等于目标，sub表示两格数之差的绝对值等于目标，div表示两格数的商等于目标（整除）；本题笼子分组与目标如下：层1分组{cages_l1}、运算{cage_meta_l1[0]}、目标{cage_meta_l1[1]}；层2分组{cages_l2}、运算{cage_meta_l2[0]}、目标{cage_meta_l2[1]}；跨层约束：{cross_desc}；给定格：层1{givens_l1_desc}，层2{givens_l2_desc}。{q1}'

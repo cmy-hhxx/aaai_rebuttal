@@ -1,0 +1,147 @@
+# ============================
+# Custom operators (Python ops)
+# ============================
+# 注意：所有函数必须在 numbrix_3.py 中定义后通过此处引入方可在 YAML 使用
+custom_operator:
+  gen_torus_clues_unique: numbrix_3.py
+  build_rule_pack: numbrix_3.py
+  render_rules_text: numbrix_3.py
+  pick_difficulty: numbrix_3.py
+
+# =========================
+# Variables: core parameters
+# =========================
+variables:
+  # 网格大小 n（随机 5..8，保证生成数量丰富）
+  n:
+    type: int
+    domain: "[5, 8]"
+    diff_factor: 1
+  # 难度等级：通过自定义函数生成（字符串由函数返回）
+  difficulty:
+    formula: "pick_difficulty()"
+  # 数字集合 1..n^2
+  numbers:
+    formula: "list(range(1, n * n + 1))"
+  # 线索：(row, col, value)，索引均为 1-based；严格唯一解（Python 侧严格验证 unknown≠unique）
+  clues:
+    formula: "gen_torus_clues_unique(n, difficulty)"
+  # 线索的便捷描述
+  clue_desc:
+    formula: "', '.join(['(' + str(r) + ',' + str(c) + ')=' + str(v) for (r, c, v) in clues])"
+
+# =======================================
+# Symbols: 位置符号 pos_s(v) = (row, col)
+# 每个数字 v 的行、列作为待求符号
+# =======================================
+symbols:
+  pos_s:
+    source:
+    - numbers
+    attr:
+    - row
+    - col
+    type:
+    - int
+    - int
+    desc:
+    - "{get_p(_sym[0], 'numbers')} is at row {_row}"
+    - "{get_p(_sym[0], 'numbers')} is at col {_col}"
+
+# ================================
+# Conditions: 基本规则（求解环境）
+# ================================
+conditions:
+  # 边界约束：位置在 1..n
+  bounds:
+    formula: "And([And(pos_s[v].get('row') >= 1, pos_s[v].get('row') <= n, pos_s[v].get('col') >= 1, pos_s[v].get('col') <= n) for v in numbers])"
+    desc: "All numbers are placed within the n x n grid"
+  # 单元唯一：任意两个数字不共享同一单元
+  injective_positions:
+    formula: "And([Or(pos_s[numbers[i]].get('row') != pos_s[numbers[j]].get('row'), pos_s[numbers[i]].get('col') != pos_s[numbers[j]].get('col')) for i in range(len(numbers)) for j in range(i + 1, len(numbers))])"
+    desc: "Each cell contains at most one number"
+  # 连续数相邻（环面包裹）：横或竖相邻，行/列边界相连
+  consecutive_adjacency:
+    formula: "And([Or(And(pos_s[k].get('row') == pos_s[k + 1].get('row'), Or(pos_s[k + 1].get('col') == pos_s[k].get('col') + 1, And(pos_s[k].get('col') == n, pos_s[k + 1].get('col') == 1), pos_s[k + 1].get('col') == pos_s[k].get('col') - 1, And(pos_s[k].get('col') == 1, pos_s[k + 1].get('col') == n))), And(pos_s[k].get('col') == pos_s[k + 1].get('col'), Or(pos_s[k + 1].get('row') == pos_s[k].get('row') + 1, And(pos_s[k].get('row') == n, pos_s[k + 1].get('row') == 1), pos_s[k + 1].get('row') == pos_s[k].get('row') - 1, And(pos_s[k].get('row') == 1, pos_s[k + 1].get('row') == n)))) for k in range(1, n * n)])"
+    desc: "Consecutive numbers are orthogonally adjacent with wrap-around"
+  # 固定线索
+  fixed_clues:
+    formula: "And([And(pos_s[v].get('row') == r, pos_s[v].get('col') == c) for (r, c, v) in clues])"
+    desc: "All given clues must be satisfied"
+
+# ============================================
+# Solve-then-constrain: 二次求解前的后处理
+# 从首解中抽取实际布局并生成随机内部规则
+# ============================================
+post_generation:
+  # 从 _sol 中抽取每个数字的行列；构造随机规则包并渲染文本
+  post_gen_vars:
+    row_of: "[get_value(_sol, pos_s[v].get('row')) for v in numbers]"
+    col_of: "[get_value(_sol, pos_s[v].get('col')) for v in numbers]"
+    rules: "build_rule_pack(n, row_of, col_of, difficulty, clues)"
+    rules_text: "render_rules_text(rules)"
+  # 将内部规则以约束形式加入，保证与题面文本一致
+  post_gen_conditions:
+    rule_same_row:
+      formula: "And([pos_s[a].get('row') == pos_s[b].get('row') for (a, b) in rules['same_row_pairs']])"
+      desc: "Injected rule: listed number pairs share the same row."
+    rule_same_col:
+      formula: "And([pos_s[a].get('col') == pos_s[b].get('col') for (a, b) in rules['same_col_pairs']])"
+      desc: "Injected rule: listed number pairs share the same column."
+    rule_adjacent:
+      formula: "And([Or(And(pos_s[a].get('row') == pos_s[b].get('row'), Or(pos_s[b].get('col') == pos_s[a].get('col') + 1, And(pos_s[a].get('col') == n, pos_s[b].get('col') == 1), pos_s[b].get('col') == pos_s[a].get('col') - 1, And(pos_s[a].get('col') == 1, pos_s[b].get('col') == n))), And(pos_s[a].get('col') == pos_s[b].get('col'), Or(pos_s[b].get('row') == pos_s[a].get('row') + 1, And(pos_s[a].get('row') == n, pos_s[b].get('row') == 1), pos_s[b].get('row') == pos_s[a].get('row') - 1, And(pos_s[a].get('row') == 1, pos_s[b].get('row') == n)))) for (a, b) in rules['adj_pairs']])"
+      desc: "Injected rule: listed number pairs are torus-adjacent."
+    rule_right_offset:
+      formula: "And([And(pos_s[x].get('row') == pos_s[y].get('row'), Or(pos_s[x].get('col') == pos_s[y].get('col') + k, And(pos_s[y].get('col') + k > n, pos_s[x].get('col') == pos_s[y].get('col') + k - n))) for (x, y, k) in rules['left_k_rel']])"
+      desc: "Injected rule: on same row, x is k steps to the right of y (wrapping)."
+    rule_border:
+      formula: "And([Or(pos_s[v].get('row') == 1, pos_s[v].get('row') == n, pos_s[v].get('col') == 1, pos_s[v].get('col') == n) for v in rules['border_values']])"
+      desc: "Injected rule: listed numbers are on the outer border."
+    rule_corner:
+      formula: "And([Or(And(pos_s[v].get('row') == 1, pos_s[v].get('col') == 1), And(pos_s[v].get('row') == 1, pos_s[v].get('col') == n), And(pos_s[v].get('row') == n, pos_s[v].get('col') == 1), And(pos_s[v].get('row') == n, pos_s[v].get('col') == n)) for v in rules['corner_values']])"
+      desc: "Injected rule: listed numbers are in corner cells."
+    rule_mirror_h:
+      formula: "And([And(pos_s[a].get('row') == pos_s[b].get('row'), pos_s[a].get('col') + pos_s[b].get('col') == n + 1) for (a, b) in rules['mirror_h_pairs']])"
+      desc: "Injected rule: horizontal mirror symmetry in row (columns sum to n+1)."
+    rule_mirror_v:
+      formula: "And([And(pos_s[a].get('col') == pos_s[b].get('col'), pos_s[a].get('row') + pos_s[b].get('row') == n + 1) for (a, b) in rules['mirror_v_pairs']])"
+      desc: "Injected rule: vertical mirror symmetry in column (rows sum to n+1)."
+    rule_diag_eq:
+      formula: "And([pos_s[a].get('row') - pos_s[a].get('col') == pos_s[b].get('row') - pos_s[b].get('col') for (a, b) in rules['diag_eq_pairs']])"
+      desc: "Injected rule: same NW-SE diagonal (row minus column equal)."
+    rule_antidiag_eq:
+      formula: "And([pos_s[a].get('row') + pos_s[a].get('col') == pos_s[b].get('row') + pos_s[b].get('col') for (a, b) in rules['antidiag_eq_pairs']])"
+      desc: "Injected rule: same NE-SW diagonal (row plus column equal)."
+    rule_rectangle:
+      formula: "And([And(pos_s[p].get('row') == pos_s[q].get('row'), pos_s[r].get('row') == pos_s[s].get('row'), pos_s[p].get('col') == pos_s[r].get('col'), pos_s[q].get('col') == pos_s[s].get('col')) for (p, q, r, s) in rules['rectangle_quads']])"
+      desc: "Injected rule: listed quadruples form rectangle corners."
+    rule_row_band:
+      formula: "And([Or(pos_s[v].get('row') == rules['band_rows'][0], pos_s[v].get('row') == rules['band_rows'][1]) for v in rules['band_values']])"
+      desc: "Injected rule: listed numbers are limited to two specific rows."
+    rule_col_band:
+      formula: "And([Or(pos_s[v].get('col') == rules['band_cols'][0], pos_s[v].get('col') == rules['band_cols'][1]) for v in rules['bandc_values']])"
+      desc: "Injected rule: listed numbers are limited to two specific columns."
+
+# =================
+# Queries: 最终输出
+# =================
+queries:
+  grid_output:
+    desc: 'Return the completed grid as a Python 2D list in row-major order. Answer format: a list of n rows, each a list of n integers. Example (for 3x3): [[1,2,3],[4,5,6],[7,8,9]]'
+    ans_formula: "[[sum([v if (get_value(_solutions[0], pos_s[v].get('row')) == r and get_value(_solutions[0], pos_s[v].get('col')) == c) else 0 for v in numbers]) for c in range(1, n + 1)] for r in range(1, n + 1)]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+# ============
+# Global limits
+# ============
+# 保留默认 max_solution 上限，严格唯一由 ans_assertion 与 Python 严格验证保证
+
+# =================
+# Description text
+# 注意：
+# 1. 使用单引号且单行；
+# 2. 不包含双引号；
+# 3. 花括号只用于变量替换；
+# =================
+desc: 'Torus Numbrix on a {n} x {n} grid: fill numbers 1..{n*n} so that each pair of consecutive numbers is orthogonally adjacent; edges wrap around (row 1 is adjacent to row {n}; column 1 is adjacent to column {n}). All indices are 1-based. Clues are given as (row,col)=value: {clue_desc}. Additional rules: {rules_text}. Answer format: a Python 2D list in row-major order; example (for 3x3) is [[1,2,3],[4,5,6],[7,8,9]].'

@@ -1,0 +1,114 @@
+custom_operator:
+  # 随机生成完整解（可复现）
+  function_1: customs/sudoku_0.py
+  # 基于完整解、对称/线索/块与难度约束挖洞，确保唯一解和目标难度
+  function_2: customs/sudoku_0.py
+
+variables:
+  # 数独维度（固定9）
+  dim:
+    type: int
+    domain: "[9, 9]"
+
+  # 随机种子（便于复现）
+  seed:
+    type: int
+    domain: "[0, 1000000]"
+
+  # 目标难度：近似区间控制（回溯节点数）
+  difficulty:
+    type: enum
+    domain: "['easy', 'medium', 'hard', 'expert']"
+
+  # 对称模式（提升美观）
+  symmetry:
+    type: enum
+    domain: "['none', 'central', 'horizontal', 'vertical', 'diagonal']"
+
+  # 是否尽量构造“最小题面”（移除任一给定都会导致非唯一）
+  minimal_clue:
+    type: bool
+    domain: "[False, True]"
+
+  # 线索数范围
+  min_clues:
+    type: int
+    domain: "[24, 36]"
+  max_clues:
+    type: int
+    domain: "[min_clues, 45]"
+
+  # 每个3x3子块至少一个给定
+  block_min_per_box:
+    type: bool
+    domain: "[True, True]"
+
+  # 行列索引
+  rows:
+    formula: list(range(dim))
+  cols:
+    formula: list(range(dim))
+
+  # 符号键使用字符串，避免字典键为整数导致的变量名拼接错误
+  row_keys:
+    formula: "[f'r{i}' for i in range(dim)]"
+  col_keys:
+    formula: "[f'c{i}' for i in range(dim)]"
+
+  # 生成一个完整可复现的解
+  sol_grid:
+    formula: function_1(seed)
+
+  # 由完整解挖洞生成高质量题面（唯一解、对称、线索范围、块保障、难度筛选、可选最小题面）
+  puzzle_obj:
+    formula: function_2(sol_grid, difficulty, symmetry, minimal_clue, min_clues, max_clues, block_min_per_box, seed)
+
+  # 题面矩阵与字符串（0表示空格、显示为'X'）
+  puzzle_matrix:
+    formula: puzzle_obj['matrix']
+  puzzle_rows:
+    formula: puzzle_obj['rows']
+
+symbols:
+  # cell[(row_key, col_key)]：每个格的整数变量
+  cell:
+    source:
+    - row_keys
+    - col_keys
+    type: int
+    desc: "单元格的数字"
+
+conditions:
+  # 数值范围：1..9
+  value_range:
+    formula: And(*[And(cell[(row_keys[i], col_keys[j])] >= 1, cell[(row_keys[i], col_keys[j])] <= 9) for i in rows for j in cols])
+
+  # 行唯一性
+  row_distinct:
+    formula: And(*[Distinct(*[cell[(row_keys[i], col_keys[j])] for j in cols]) for i in rows])
+
+  # 列唯一性
+  col_distinct:
+    formula: And(*[Distinct(*[cell[(row_keys[i], col_keys[j])] for i in rows]) for j in cols])
+
+  # 3x3 子网格唯一性
+  block_distinct:
+    formula: And(*[Distinct(*[cell[(row_keys[i], col_keys[j])] for i in range(br, br + 3) for j in range(bc, bc + 3)]) for br in range(0, dim, 3) for bc in range(0, dim, 3)])
+
+  # 题面给定数字约束：题面非0则固定
+  givens:
+    formula: And(*[cell[(row_keys[i], col_keys[j])] == puzzle_matrix[i][j] for i in rows for j in cols if puzzle_matrix[i][j] != 0])
+
+# 生成后的最终求解必须唯一；否则此实例被自动丢弃
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请解开这个数独谜题。数独规则：填入数字1-9，使得每行、每列和每个3x3子网格中的数字都不重复。请在最后给出答案，以元组形式表示，例如：((1,2,3,4,5,6,7,8,9),(4,5,6,7,8,9,1,2,3),...)"
+    # 显式绑定 _model，确保环境变量存在
+    ans_formula: "to_unique([tuple(tuple(get_value(_model, cell[(row_keys[i], col_keys[j])]) for j in cols) for i in rows) for _model in _solutions])[0]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+# 题面展示：附带对称性、线索数与预估难度，便于审查题目质量
+desc: "下面是一个 9x9 的数独谜题，X 代表需要填入的数字：\\n{puzzle_rows[0]}\\n{puzzle_rows[1]}\\n{puzzle_rows[2]}\\n{puzzle_rows[3]}\\n{puzzle_rows[4]}\\n{puzzle_rows[5]}\\n{puzzle_rows[6]}\\n{puzzle_rows[7]}\\n{puzzle_rows[8]}\\n。\\n\\n{q1}"

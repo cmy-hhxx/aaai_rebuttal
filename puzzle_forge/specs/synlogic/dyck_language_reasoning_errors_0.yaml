@@ -1,0 +1,48 @@
+custom_operator:
+  # function_1与function_2均在dyck_language_reasoning_errors_0.py中实现，用于生成随机实例与计算答案
+  function_1: dyck_language_reasoning_errors_0.py
+  function_2: dyck_language_reasoning_errors_0.py
+
+variables:
+  # 随机生成一组Dyck序列与思考过程（包含可能的错误），以提升题目的多样性
+  pack:
+    formula: function_2()
+  # 原始Dyck语言输入序列（随机生成的平衡括号序列）
+  seq:
+    formula: pack['seq']
+  # 思考过程的完整文本行（用于在题面中呈现，每行含“Thought i: ...”）
+  thought_lines:
+    formula: pack['thought_lines']
+  # 将思考过程拼接为多行文本，避免在desc表达式中出现反斜杠
+  thought_text:
+    formula: "'\\n'.join(thought_lines)"
+  # 与括号读入相关的步骤编号（对应“思考过程N”）
+  step_indices:
+    formula: pack['step_indices']
+  # 每步读入的字符（与seq一致）
+  step_chars:
+    formula: pack['step_chars']
+  # 题面记录的“栈”文本（用于比对是否推理错误，可能包含随机注入的错误）
+  step_stacks:
+    formula: pack['step_stacks']
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "问题：这个序列中有推理错误吗？如果没有错误请直接输出空字符串；如果有错误请直接输出错误步骤的编号，错误出现在思考过程N中。附加条件：如果有多个错误请按格式输出：1,3,9"
+    ans_formula: function_1(seq, step_indices, step_chars, step_stacks)
+    ans_text: _ans
+    ans_assertion: 'True'
+
+desc: >
+  你是一位精通dyck语言的专家，其中你必须完成所有类型的未闭合括号（例如[]，{{}}，<>）的语言序列。你需要根据dyck语言规则，分析括号配对的步骤是否正确。
+  
+  为提升题目的多样性，系统已随机生成一个初始dyck语言序列以及用于推导闭合括号序列的“思考过程”。你的任务是确定dyck语言中存在错误推理的位置，可能存在多个错误。这可能是忘记闭合某个括号、使用错误的闭合括号或者在下一步中不正确地复制闭合括号的子序列。
+  
+  任务：检查序列，确保括号正确闭合。
+  输入：{seq}
+  {thought_text}
+  {q1}

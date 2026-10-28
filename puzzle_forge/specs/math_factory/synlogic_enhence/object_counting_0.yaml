@@ -1,0 +1,213 @@
+# -----------------------------
+# 自定义操作符：引入外部Python函数（文件名与函数已在object_counting_0.py中定义）
+# -----------------------------
+custom_operator:
+  abs_diff: object_counting_0.py
+  rand_list: object_counting_0.py
+  gen_invertible_matrix: object_counting_0.py
+  gen_random_matrix: object_counting_0.py
+  matmul: object_counting_0.py
+  sum_int_list: object_counting_0.py
+  rand_int: object_counting_0.py
+  concat_two_lists: object_counting_0.py
+  argmax_index: object_counting_0.py
+  select_random_indices: object_counting_0.py
+  format_equations: object_counting_0.py
+  format_mixed_equations: object_counting_0.py
+
+# -----------------------------
+# 变量：随机环境与参数（泛化与文本渲染）
+# -----------------------------
+variables:
+  # 两个域的类别数量
+  clothes_num:
+    type: int
+    domain: '[3, 6]'
+    diff_factor: 1
+  cars_num:
+    type: int
+    domain: '[4, 6]'
+    diff_factor: 1
+
+  # 每个域的上界（影响计数范围与难度）
+  bound_max_A:
+    type: int
+    domain: '[15, 45]'
+    diff_factor: 1
+  bound_max_B:
+    type: int
+    domain: '[15, 45]'
+    diff_factor: 1
+
+  # 名称列表（自动生成）
+  clothes:
+    formula: "[f'衣物{i + 1}' for i in range(clothes_num)]"
+  cars:
+    formula: "[f'汽车{i + 1}' for i in range(cars_num)]"
+
+  # 唯一解的目标计数（逆向生成的真实解）
+  clothes_counts_sol:
+    formula: 'rand_list(clothes_num, 0, bound_max_A)'
+  cars_counts_sol:
+    formula: 'rand_list(cars_num, 0, bound_max_B)'
+
+  # 随机生成可逆整数矩阵（保证唯一解）
+  A_clothes:
+    formula: 'gen_invertible_matrix(clothes_num, -3, 3)'
+  A_cars:
+    formula: 'gen_invertible_matrix(cars_num, -3, 3)'
+
+  # 右端常数项，来自解与矩阵的乘积
+  b_clothes:
+    formula: 'matmul(A_clothes, clothes_counts_sol)'
+  b_cars:
+    formula: 'matmul(A_cars, cars_counts_sol)'
+
+  # 跨域混合约束行数与矩阵
+  min_nc:
+    formula: 'clothes_num if clothes_num < cars_num else cars_num'
+  mix_rows:
+    formula: 'rand_int(1, min_nc)'
+  M_mix:
+    formula: 'gen_random_matrix(mix_rows, clothes_num + cars_num, -2, 2)'
+  x_solution_concat:
+    formula: 'concat_two_lists(clothes_counts_sol, cars_counts_sol)'
+  b_mix:
+    formula: 'matmul(M_mix, x_solution_concat)'
+
+  # 模二子集选择与目标值（基于真实解）
+  cl_sel_k:
+    formula: 'rand_int(1, clothes_num)'
+  cl_sel_indices:
+    formula: 'select_random_indices(clothes_num, cl_sel_k)'
+  cl_parity_val:
+    formula: 'sum([clothes_counts_sol[i] for i in cl_sel_indices]) % 2'
+
+  car_sel_k:
+    formula: 'rand_int(1, cars_num)'
+  car_sel_indices:
+    formula: 'select_random_indices(cars_num, car_sel_k)'
+  car_parity_val:
+    formula: 'sum([cars_counts_sol[i] for i in car_sel_indices]) % 2'
+
+  # 文本渲染准备：列表与等式文本（优化显示，跳过0系数，规范正负号）
+  clothes_list_text:
+    formula: "'、'.join(clothes)"
+  cars_list_text:
+    formula: "'、'.join(cars)"
+  clothes_eq_text:
+    formula: 'format_equations(A_clothes, clothes, b_clothes)'
+  cars_eq_text:
+    formula: 'format_equations(A_cars, cars, b_cars)'
+  mix_eq_text:
+    formula: 'format_mixed_equations(M_mix, clothes, cars, b_mix)'
+  parity_text:
+    formula: "'衣物模二子集编号从1开始为[' + ', '.join([str(i + 1) for i in cl_sel_indices]) + '] 其数量之和对2取模等于' + str(cl_parity_val) + '\\n' + '汽车模二子集编号从1开始为[' + ', '.join([str(i + 1) for i in car_sel_indices]) + '] 其数量之和对2取模等于' + str(car_parity_val)"
+
+  # 难度因子示例
+  total_upper_bound_scale:
+    type: int
+    domain: '[2, 6]'
+    diff_factor: 1
+
+# -----------------------------
+# 符号：每类对象对应未知整数数量与奇偶辅助变量
+# -----------------------------
+symbols:
+  clothes_s:
+    source:
+    - clothes
+    attr:
+    - count
+    type:
+    - int
+    desc:
+    - '{_clothes}的数量是一个未知的非负整数'
+  cars_s:
+    source:
+    - cars
+    attr:
+    - count
+    type:
+    - int
+    desc:
+    - '{_cars}的数量是一个未知的非负整数'
+  # 奇偶辅助变量（各自只有一个键），用于将模二等式改写为线性等式
+  t_clothes_s:
+    source:
+    - "['k']"
+    type: int
+    desc: '衣物奇偶约束的内部辅助整数变量'
+  t_cars_s:
+    source:
+    - "['k']"
+    type: int
+    desc: '汽车奇偶约束的内部辅助整数变量'
+
+# -----------------------------
+# 条件：边界与线性等式线索 加上跨域与奇偶线索（线性化表达）
+# -----------------------------
+conditions:
+  # 非负与上界约束
+  clothes_bounds:
+    formula: And([And(x >= 0, x <= bound_max_A) for x in clothes_s.get('count')])
+    desc: '每种衣物的数量均为不小于0且不超过{bound_max_A}的整数'
+  cars_bounds:
+    formula: And([And(x >= 0, x <= bound_max_B) for x in cars_s.get('count')])
+    desc: '每款汽车的数量均为不小于0且不超过{bound_max_B}的整数'
+
+  # 衣物线索：clothes_num条（声明为动态条件以启用_index）
+  clothes_eqs:
+    source:
+    - 'range(clothes_num)'
+    domain: '[clothes_num, clothes_num]'
+    formula: Sum([A_clothes[_index][i] * clothes_s[clothes[i]].get('count') for i in range(clothes_num)]) == b_clothes[_index]
+    desc: '衣物等式约束之一'
+  # 汽车线索：cars_num条（声明为动态条件以启用_index）
+  cars_eqs:
+    source:
+    - 'range(cars_num)'
+    domain: '[cars_num, cars_num]'
+    formula: Sum([A_cars[_index][i] * cars_s[cars[i]].get('count') for i in range(cars_num)]) == b_cars[_index]
+    desc: '汽车等式约束之一'
+
+  # 跨域混合线索：mix_rows条（声明为动态条件以启用_index）
+  mix_eqs:
+    source:
+    - 'range(mix_rows)'
+    domain: '[mix_rows, mix_rows]'
+    formula: Sum([M_mix[_index][i] * clothes_s[clothes[i]].get('count') for i in range(clothes_num)]) + Sum([M_mix[_index][clothes_num + j] * cars_s[cars[j]].get('count') for j in range(cars_num)]) == b_mix[_index]
+    desc: '跨类混合等式约束之一'
+
+  # 奇偶线索（线性化表达：Sum = 2 * t + parity_val）
+  clothes_parity:
+    formula: Sum([clothes_s[clothes[i]].get('count') for i in cl_sel_indices]) == 2 * t_clothes_s['k'] + cl_parity_val
+    desc: '衣物模二子集的数量和与给定值同余'
+  cars_parity:
+    formula: Sum([cars_s[cars[i]].get('count') for i in car_sel_indices]) == 2 * t_cars_s['k'] + car_parity_val
+    desc: '汽车模二子集的数量和与给定值同余'
+
+# -----------------------------
+# 求解设置：计算解（通过ans_assertion验证唯一性）
+# -----------------------------
+calc_solution: true
+
+# -----------------------------
+# 问题与答案：两个小问，严格的数值与列表答案格式
+# -----------------------------
+queries:
+  q1:
+    desc: '问题一 计算所有衣物数量之和与所有汽车数量之和的差的绝对值答案格式为一个整数例如42'
+    ans_formula: 'abs_diff(sum_int_list([get_value(_solutions[0], clothes_s[c].get(''count'')) for c in clothes]), sum_int_list([get_value(_solutions[0], cars_s[c].get(''count'')) for c in cars]))'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1 and isinstance(_ans, int) and _ans >= 0'
+  q2:
+    desc: '问题二 给出一个列表用于表示两个域中最大数量类别的编号采用从1开始的编号并列时取编号较小者列表的第一个元素是衣物中最大数量类别的编号第二个元素是汽车中最大数量类别的编号答案格式为形如[2, 4]的列表'
+    ans_formula: '[argmax_index([get_value(_solutions[0], clothes_s[c].get(''count'')) for c in clothes]) + 1, argmax_index([get_value(_solutions[0], cars_s[c].get(''count'')) for c in cars]) + 1]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1 and isinstance(_ans, list) and len(_ans) == 2 and all(isinstance(x, int) for x in _ans) and _ans[0] >= 1 and _ans[0] <= clothes_num and _ans[1] >= 1 and _ans[1] <= cars_num'
+
+# -----------------------------
+# 描述：题面文本（不暴露生成逻辑，叙述清晰）
+# -----------------------------
+desc: '在一个混合计数任务中共有{clothes_num}种衣物其名称为{clothes_list_text}以及{cars_num}款汽车其名称为{cars_list_text}每种对象的数量都是未知的非负整数并受到上界限制衣物不超过{bound_max_A}汽车不超过{bound_max_B}\n你掌握的线索分为三类\n一 衣物专属加权等式共{clothes_num}条如下\n{clothes_eq_text}\n二 汽车专属加权等式共{cars_num}条如下\n{cars_eq_text}\n三 跨类混合加权等式共{mix_rows}条如下\n{mix_eq_text}\n此外还给出以下模二线索用于进一步锁定某些组合的奇偶性\n{parity_text}\n请在充分利用以上线索的基础上通过多步推理作答\n{q1}\n{q2}'

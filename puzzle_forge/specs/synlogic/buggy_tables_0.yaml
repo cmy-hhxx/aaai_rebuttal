@@ -1,0 +1,121 @@
+custom_operator:
+  gen_headers: buggy_tables_0.py
+  gen_constraints: buggy_tables_0.py
+  gen_flattened_data: buggy_tables_0.py
+  compute_variance_diff: buggy_tables_0.py
+  to_fixed_2: buggy_tables_0.py
+  render_desc: buggy_tables_0.py
+  render_query_desc: buggy_tables_0.py
+  headers_mapping: buggy_tables_0.py
+  noise_rule_text: buggy_tables_0.py
+  filter_rule_text: buggy_tables_0.py
+  parse_rule_text: buggy_tables_0.py
+  gen_toy_demo: buggy_tables_0.py
+  display_flattened: buggy_tables_0.py
+
+variables:
+  # 容器规模
+  col_num:
+    type: int
+    domain: "[14, 32]"
+    diff_factor: 1
+  row_num:
+    type: int
+    domain: "[6, 24]"
+    diff_factor: 1
+  # 缺陷规模
+  tail_scale:
+    type: int
+    domain: "[1, 3]"
+  # 筛选集合至少容量（保证方差可计算）
+  min_filter_count:
+    type: int
+    domain: "[2, 6]"
+  # 数值范围
+  num_low:
+    type: int
+    domain: "[10, 200]"
+  num_high:
+    type: int
+    domain: "[500, 6000]"
+  # 操作符池
+  operator_pool:
+    formula: "['gt', 'ge', 'lt', 'le', 'eq', 'neq']"
+  # 动态约束数量上界（避免表达式在 domain 中使用 max(...) 导致解析问题）
+  n_constraints_upper:
+    formula: "max(2, col_num // 4)"
+  n_constraints:
+    type: int
+    domain: "[2, n_constraints_upper]"
+  # 生成列名、约束与数据
+  headers:
+    formula: gen_headers(col_num)
+  constraints_pack:
+    formula: gen_constraints(n_constraints, operator_pool, headers, num_low, num_high)
+  constraints_config:
+    formula: constraints_pack['configs']
+  constraints_desc:
+    formula: "'; '.join(constraints_pack['texts'])"
+  flattened_data:
+    formula: gen_flattened_data(row_num, col_num, headers, tail_scale, min_filter_count, num_low, num_high, constraints_config)
+
+  # 规则说明与映射
+  headers_index_desc:
+    formula: headers_mapping(headers)
+  noise_rule_desc:
+    formula: noise_rule_text(tail_scale, headers)
+  parse_rule_desc:
+    formula: parse_rule_text()
+  filter_rule_desc:
+    formula: filter_rule_text()
+  null_tokens_desc:
+    formula: "'空值标记：' + ', '.join(['', 'NA', 'NaN', 'None', 'null', 'NULL', 'tbd', 'x'])"
+  variance_type_desc:
+    formula: "'方差口径：总体方差 Var(X)=E[(X-μ)^2]（非样本方差）'"
+
+  # 小型示例（演示缺陷注入与重建）
+  toy_pack:
+    formula: gen_toy_demo(tail_scale)
+  toy_demo_text:
+    formula: toy_pack['text']
+  toy_flat_text:
+    formula: display_flattened(toy_pack['flat'])
+
+  # 完整扁平列表文本（提供核验数据，不仅长度）
+  flat_text:
+    formula: display_flattened(flattened_data)
+
+  # 多模板题面与查询
+  problem_desc:
+    formula: render_desc(headers, constraints_desc, tail_scale)
+  q1_text:
+    formula: render_query_desc()
+
+symbols: {}
+
+conditions: {}
+
+calc_solution: false
+
+queries:
+  q1:
+    desc: "{q1_text}"
+    ans_formula: to_fixed_2(compute_variance_diff(flattened_data, headers, constraints_config, tail_scale))
+    ans_text: _ans
+    ans_assertion: "len(_ans) > 0"
+
+desc: |
+  {problem_desc}
+  ——— 数据与规则完整说明（用于核验与复现） ———
+  1) 列名与索引映射（0 基）：{headers_index_desc}
+  2) 缺陷注入与重建规则：{noise_rule_desc}
+  3) 空值与数值解析：{parse_rule_desc}；{null_tokens_desc}
+  4) 筛选流程：{filter_rule_desc}
+  5) 约束集合（动态生成，操作符池化）：{constraints_desc}
+  6) {variance_type_desc}
+  7) 小型示例（演示 base_rows 推导与对齐重建）：
+     {toy_demo_text}
+     示例扁平列表：{toy_flat_text}
+  8) 本实例完整扁平列表（含表头与尾部噪声）：{flat_text}
+  9) 目标：仅在满足约束的记录上，忽略空值，计算 sleep_minutes 与 num_calls 两列总体方差的差的绝对值；若任一不可计算，答案为 0.00。
+  答案：{q1}

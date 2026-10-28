@@ -1,0 +1,117 @@
+# Knights and Knaves puzzle (advanced generalized with layered composite reasoning)
+# Generation mode: Inverse. Randomize ground truth assignment, generate complex statements and meta rules
+# consistent with that truth, and lock the unique solution.
+
+calc_solution: true
+max_solution: 20
+
+# =================================================================
+# Variables: fully parameterized and randomized
+# =================================================================
+variables:
+  # Random number of inhabitants for diversity
+  p_num:
+    type: int
+    domain: "[6, 10]"
+  # Random unique names using Faker; English locale for diversity and readability
+  inhabitants:
+    formula: "get_faker(p_num, 'name', 'en_US')"
+  # Global ground truth assignment: True = Knight, False = Knave
+  assignment:
+    formula: "generate_random_list(p_num, 'bool', [False, True])"
+  # Random number of groups (2 or 3)
+  group_num:
+    type: int
+    domain: "[2, 3]"
+  # Group display names
+  group_names:
+    formula: "['Group ' + chr(65 + i) for i in range(group_num)]"
+  # Group assignment for each person (ensure each group is non-empty)
+  group_assignment:
+    formula: "generate_random_list(p_num, 'int', [0, group_num - 1], ['lambda l: all(g in l for g in range(group_num))'])"
+  # Randomized per-speaker statements consistent with assignment and groups
+  statement_configs:
+    formula: "build_statements(inhabitants, assignment, group_assignment, group_num, group_names)"
+  # Randomized meta rules consistent with assignment and groups
+  meta_rule_configs:
+    formula: "build_meta_rules(inhabitants, assignment, group_assignment, group_num, group_names)"
+  # Derived text lines for statements and meta rules (safe single-quoted strings)
+  statements_text:
+    formula: "[cfg['speaker'] + ': ' + cfg['text'] for cfg in statement_configs]"
+  meta_rules_text:
+    formula: "[mr['text'] for mr in meta_rule_configs]"
+  # Helper rendering strings
+  names_str:
+    formula: "', '.join(inhabitants)"
+  # Groups rendered as lines: Group X: name1, name2, ...
+  group_members_text:
+    formula: "['%s: ' % group_names[g] + ', '.join([inhabitants[i] for i in range(p_num) if group_assignment[i] == g]) for g in range(group_num)]"
+  groups_str:
+    formula: "'\\n'.join(group_members_text)"
+  statements_str:
+    formula: "'\\n'.join([statements_text[i] for i in range(p_num)])"
+  meta_rules_str:
+    formula: "'\\n'.join(meta_rules_text)"
+
+# =================================================================
+# Custom operators: Python helpers for statement and meta rule generation and expression building
+# =================================================================
+custom_operator:
+  function_1: knights_knaves_puzzle_0.py
+  function_2: knights_knaves_puzzle_0.py
+  build_knights_instance: knights_knaves_puzzle_0.py
+  build_statements: knights_knaves_puzzle_0.py
+  truth_expr: knights_knaves_puzzle_0.py
+  build_meta_rules: knights_knaves_puzzle_0.py
+  meta_rule_expr: knights_knaves_puzzle_0.py
+
+# =================================================================
+# Symbols: One Bool per inhabitant indicating whether they are a knight
+# =================================================================
+symbols:
+  knights:
+    source:
+    - inhabitants
+    type: Bool
+    desc: '{_inhabitants} is a knight'
+
+# =================================================================
+# Conditions: Bind Knight(speaker) to the truth of generated statement; enforce meta rules
+# =================================================================
+conditions:
+  statements_truth_consistency:
+    # For each i, knights[inhabitants[i]] equals the (possibly negated) truth value of the statement (built via operator).
+    formula: "And([knights[inhabitants[i]] == truth_expr(knights, inhabitants, statement_configs[i], group_assignment, group_num) for i in range(p_num)])"
+    desc: 'Each speaker is a knight exactly when their generated statement (with possible overall negation) is true.'
+  meta_rules_consistency:
+    # Enforce each randomized meta rule consistent with the assignment via operator.
+    formula: "And([meta_rule_expr(knights, inhabitants, statement_configs, meta_rule_configs[j], group_assignment, group_num) for j in range(len(meta_rule_configs))])"
+    desc: 'All randomized global facts hold: counts, parity, cross-group relations, consistent with the ground truth.'
+
+# =================================================================
+# Post-generation: lock the unique solution and build final answers
+# =================================================================
+post_generation:
+  post_gen_vars:
+    chosen_knight: assignment
+    knaves_answer: "sorted([inhabitants[i] for i in range(p_num) if not chosen_knight[i]])"
+    knights_answer: "sorted([inhabitants[i] for i in range(p_num) if chosen_knight[i]])"
+  post_gen_conditions:
+    lock_truth:
+      formula: "And([knights[inhabitants[i]] == chosen_knight[i] for i in range(p_num)])"
+      desc: 'The unique solution matches the sampled ground truth assignment.'
+
+# =================================================================
+# Query: Return the final 2D list as requested (sorted alphabetically)
+# =================================================================
+queries:
+  q1:
+    desc: 'Provide your answer as a 2D list [[list of Knaves], [list of Knights]].'
+    ans_formula: "[knaves_answer, knights_answer]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+# =================================================================
+# Description: Single-line, single-quoted; explicit \n; no double quotes inside.
+# =================================================================
+desc: 'On this island, a knight always tells the truth and a knave always lies. You meet {p_num} inhabitants: [{names_str}]. They are divided into groups as follows:\n{groups_str}\nEach person makes one statement. Some global facts are also provided. Less common terms: parity means even or odd; subset refers to a listed set of people; majority means strictly more knights than knaves within that group or set.\nStatements:\n{statements_str}\nGlobal facts:\n{meta_rules_str}\nTask:\nDetermine who is a knight and who is a knave. Return your answer as [[list of Knaves], [list of Knights]] with both lists sorted alphabetically. {q1}'

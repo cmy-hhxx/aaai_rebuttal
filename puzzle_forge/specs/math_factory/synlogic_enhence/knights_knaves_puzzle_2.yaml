@@ -1,0 +1,160 @@
+# Knights and Knaves（昼骑士夜骗子 / 昼骗子夜骑士）— 高复杂度泛化生成（逆向两阶段锁定，唯一解内部保证）
+# 语义：
+# - True  -> 昼骑士夜骗子（白天说真话，夜晚说假话）
+# - False -> 昼骗子夜骑士（白天说假话，夜晚说真话）
+# 随机与两阶段：
+# - 僧侣人数、姓名、是否为白天、模板子集、混合模式、分组数、链式强度均随机。
+# - 首次求解后，内部锁定首个解（角色/誓约/分组编码），保证最终唯一解（不在题面暴露）。
+
+custom_operator:
+  function_1: knights_knaves_puzzle_2.py
+  function_2: knights_knaves_puzzle_2.py
+  function_3: knights_knaves_puzzle_2.py
+  function_4: knights_knaves_puzzle_2.py
+
+variables:
+  monk_num:
+    type: int
+    domain: "[5, 10]"
+  names:
+    formula: "get_faker(monk_num, 'name', 'zh_CN')"
+  is_day:
+    formula: "random.choice([True, False])"
+  day_text:
+    formula: "'白天' if is_day else '夜晚'"
+  ops_full:
+    formula: "['eq','neq','impl_ab','impl_ba','iff_same','iff_neg','or_knave','and_knight','speaker_eq_a','speaker_neq_a','speaker_impl_b','b_impl_speaker','speaker_iff_neg_a']"
+  ops_k_count:
+    formula: "random.choice(list(range(6, 11)))"
+  ops_active:
+    formula: "random.sample(ops_full, k=ops_k_count)"
+  mix_modes:
+    formula: "['direct','xor_vow','flip_group']"
+  mix_mode:
+    formula: "random.choice(mix_modes)"
+  # 外显规则文本（陈述解释模式）
+  mode_desc:
+    formula: "('陈述解释模式: 常规解释。' if mix_mode == 'direct' else ('陈述解释模式: 受誓约者的陈述在当前时段按反向解释。' if mix_mode == 'xor_vow' else '陈述解释模式: 分组0的成员的陈述在当前时段按反向解释。'))"
+  group_num:
+    type: int
+    domain: "[2, 3]"
+  group_relation:
+    formula: "random.choice(['dominant','balanced','none'])"
+  group_relation_desc:
+    formula: "('分组角色关系: 分组0的骑士数不少于其他分组。' if group_relation == 'dominant' else ('分组角色关系: 分组0与分组1的骑士数相等。' if group_relation == 'balanced' else '分组角色关系: 无额外分组角色关系约束。'))"
+  chain_strength:
+    formula: "random.choice(list(range(max(1, monk_num // 3), max(2, monk_num // 2) + 1)))"
+  chain_desc:
+    formula: "'链式约束: 对每位受誓约者X, 名单中下一位Y与再下一位Z需满足[Y为骑士 或 Z为骗子] (按名单顺序环形计算)。'"
+  rule_desc:
+    formula: "'基本规则: 昼骑士夜骗子在白天说真话、夜晚说假话; 昼骗子夜骑士在白天说假话、夜晚说真话。'"
+  name_desc:
+    formula: "', '.join(names)"
+
+symbols:
+  role_s:
+    source:
+    - names
+    type: Bool
+    desc: "{_names}的昼夜类型（True为昼骑士夜骗子, False为昼骗子夜骑士）"
+  vow_s:
+    source:
+    - names
+    type: Bool
+    desc: "{_names}是否受誓约约束（True表示受誓约）"
+  group_s:
+    source:
+    - names
+    attr:
+    - gid
+    type:
+    - int
+    desc:
+    - "{_names}所属分组编号（整数）"
+
+conditions:
+  # 随机生成陈述：说话者、对象A、对象B、模板标签（每条陈述一个说话者）
+  speeches:
+    source:
+    - names
+    - names
+    - names
+    - ops_active
+    amount:
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    order:
+    - false
+    - false
+    - false
+    - true
+    duplicate:
+    - false
+    - false
+    - false
+    - true
+    domain: "[5, 5]"
+    domain_cond: true
+    custom_cond:
+    # 维度约束（dim=1 -> 索引为0）：说话者≠A, 说话者≠B, A≠B
+    - scope: dim
+      fields: [0, 1, 2]
+      constraint: "lambda l: (l[0][1][0] != l[0][2][0]) and (l[0][0][0] != l[0][1][0]) and (l[0][0][0] != l[0][2][0])"
+    # 域约束：所有说话者唯一
+    - scope: domain
+      fields: [0]
+      constraint: "lambda l: all([l[i][0][0][0] != l[j][0][0][0] for i in range(len(l)) for j in range(i+1, len(l))])"
+    formula: function_1(_sym, role_s, vow_s, group_s, names, is_day, mix_mode)
+    desc: "{function_2(_sym, names)}"
+
+  # 分组域与非空约束
+  group_domain:
+    formula: And([And(group_s[names[i]].get('gid') >= 0, group_s[names[i]].get('gid') < group_num) for i in range(monk_num)])
+    desc: '分组编号范围: [0, group_num-1]'
+  group_nonempty:
+    formula: And([Sum([If(group_s[names[i]].get('gid') == g, 1, 0) for i in range(monk_num)]) >= 1 for g in range(group_num)])
+    desc: '每个分组至少一人'
+
+  # 分组角色关系约束（题面会解释其含义）
+  group_role_relation:
+    formula: function_3(group_relation, group_num, names, role_s, group_s)
+    desc: '分组角色关系约束'
+
+  # 链式隐式约束（按题面说明：对受誓约者施加邻接约束）
+  chain_constraints:
+    formula: function_4(names, role_s, vow_s, monk_num, chain_strength)
+    desc: '链式约束'
+
+post_generation:
+  # 锁定首个解（内部唯一解保证）并提取显示用目标值
+  post_gen_vars:
+    role_code: "sum([(1 << i) * (1 if get_value(_sol, role_s[names[i]]) else 0) for i in range(monk_num)])"
+    vow_code: "sum([(1 << i) * (1 if get_value(_sol, vow_s[names[i]]) else 0) for i in range(monk_num)])"
+    group_base: "group_num"
+    group_code: "sum([get_value(_sol, group_s[names[i]].get('gid')) * (group_base ** i) for i in range(monk_num)])"
+    role_target_show: "sum([1 if get_value(_sol, role_s[names[i]]) else 0 for i in range(monk_num)])"
+    vow_target_show: "sum([1 if get_value(_sol, vow_s[names[i]]) else 0 for i in range(monk_num)])"
+  post_gen_conditions:
+    lock_roles:
+      formula: Sum([If(role_s[names[i]], 1 << i, 0) for i in range(monk_num)]) == role_code
+      desc: '内部唯一解锁定（不展示）'
+    lock_vows:
+      formula: Sum([If(vow_s[names[i]], 1 << i, 0) for i in range(monk_num)]) == vow_code
+      desc: '内部唯一解锁定（不展示）'
+    lock_groups:
+      formula: Sum([group_s[names[i]].get('gid') * (group_base ** i) for i in range(monk_num)]) == group_code
+      desc: '内部唯一解锁定（不展示）'
+
+max_solution: 3000
+
+queries:
+  q1:
+    desc: '问题：根据规则与陈述，判断每位僧侣的昼夜类型。请按格式输出：姓名1: 类型, 姓名2: 类型, ... 类型为[昼骑士夜骗子]或[昼骗子夜骑士]。'
+    ans_formula: "', '.join([names[i] + ': ' + ('昼骑士夜骗子' if get_value(_solutions[0], role_s[names[i]]) else '昼骗子夜骑士') for i in range(monk_num)])"
+    ans_text: "_ans"
+    ans_assertion: "len(_solutions) == 1"
+
+# 题面描述（单行、无双引号、以 \n 分隔段落；仅呈现玩家需要的信息）
+desc: '场景 [山寺晨钟暮鼓]；规则 [{rule_desc}]；陈述解释 [{mode_desc}]；分组说明 [共有{group_num}个分组，编号0到{group_num - 1}]；{group_relation_desc}；{chain_desc}；僧侣名单 [{name_desc}]；当前时段 [{day_text}]。以下是陈述：{speeches}\n已知本题满足以下总体信息：骑士总数为[{role_target_show}]；受誓约人数为[{vow_target_show}]；每个分组至少一人。请按格式输出答案：姓名1: 类型, 姓名2: 类型, ... 类型用昼骑士夜骗子或昼骗子夜骑士。{q1}'

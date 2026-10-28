@@ -1,0 +1,157 @@
+custom_operator:
+  init_futoshiki_ultimate: futoshiki_0.py
+  get_solution_grid: futoshiki_0.py
+  get_given_grid: futoshiki_0.py
+  get_con_left: futoshiki_0.py
+  get_con_right: futoshiki_0.py
+  get_con_op: futoshiki_0.py
+  get_con_k: futoshiki_0.py
+  get_con_layer: futoshiki_0.py
+  get_affine_params: futoshiki_0.py
+  get_diag_type: futoshiki_0.py
+  get_diag_sum: futoshiki_0.py
+  get_clue_pos: futoshiki_0.py
+  get_clue_val: futoshiki_0.py
+  format_constraints_text_templates: futoshiki_0.py
+  compose_rel: futoshiki_0.py
+
+variables:
+  # 结构动态化：n阶，取值3~6。题面明确使用数字1~n且不重复。
+  n:
+    type: int
+    domain: "[3, 6]"
+    diff_factor: 1
+
+  # 坐标采用1基索引，(r,c)表示第r行第c列；行从上到下、列从左到右
+  rows:
+    formula: "[str(x) for x in range(1, n + 1)]"
+  cols:
+    formula: "[str(x) for x in range(1, n + 1)]"
+
+  # 关系约束数量（与规模挂钩）
+  con_min:
+    type: int
+    domain: "[n, n * 2]"
+  con_max:
+    type: int
+    domain: "[con_min + 1, n * 3]"
+
+  # 预填提示数量（与规模挂钩）
+  clue_min:
+    type: int
+    domain: "[1, n]"
+  clue_max:
+    type: int
+    domain: "[clue_min + 1, n * 2]"
+
+  # 算子池（严格/非严格比较 + 差值关系；差值常量K始终为正整数）
+  op_pool:
+    formula: "['gt','lt','ge','le','add','sub']"
+
+  # 逆向生成并缓存：唯一解场景（提示、关系、仿射参数、主/副对角线和）
+  init_ok:
+    formula: init_futoshiki_ultimate(n, con_min, con_max, clue_min, clue_max, op_pool)
+
+  # 读取缓存的场景数据
+  solution_grid:
+    formula: get_solution_grid()
+  given_grid:
+    formula: get_given_grid()
+
+  # 关系约束（绑定具体坐标与操作）
+  con_left:
+    formula: get_con_left()
+  con_right:
+    formula: get_con_right()
+  con_op:
+    formula: get_con_op()
+  con_k:
+    formula: get_con_k()
+  con_layer:
+    formula: get_con_layer()
+  con_num:
+    formula: len(con_op)
+
+  # 仿射层参数：仿射(x) = a*x + b；在题面明确显示
+  affine_params:
+    formula: get_affine_params()
+  aff_a:
+    formula: affine_params[0]
+  aff_b:
+    formula: affine_params[1]
+
+  # 对角线约束（仅保留主/副对角线和，避免冗余行/列和）
+  diag_type:
+    formula: get_diag_type()
+  diag_sum:
+    formula: get_diag_sum()
+
+  # 预填提示（显式坐标与值，避免与'X'比较）
+  clue_pos:
+    formula: get_clue_pos()
+  clue_val:
+    formula: get_clue_val()
+  clue_num:
+    formula: len(clue_val)
+
+  # 题面矩阵文本（X表示空格）
+  given_grid_text:
+    formula: "'\\n'.join([' '.join(str(v) for v in row) for row in given_grid])"
+
+  # 关系约束句式模板池（规范表述，避免“+ -K”）
+  ineq_templates:
+    formula: "['{L} > {R}','{L} < {R}','{L} ≥ {R}','{L} ≤ {R}','{R} = {L} + {K}','{R} = {L} - {K}','平方({L}) > 平方({R})','平方({L}) ≥ 平方({R})','平方({L}) ≤ 平方({R})','平方({L}) < 平方({R})','三角数({L}) > 三角数({R})','三角数({L}) ≥ 三角数({R})','三角数({L}) ≤ 三角数({R})','三角数({L}) < 三角数({R})','三角数({R}) = 三角数({L}) + {K}','三角数({R}) = 三角数({L}) - {K}','仿射({L}) > 仿射({R})','仿射({L}) ≥ 仿射({R})','仿射({L}) ≤ 仿射({R})','仿射({L}) < 仿射({R})','仿射({R}) = 仿射({L}) + {K}','仿射({R}) = 仿射({L}) - {K}']"
+  con_text:
+    formula: format_constraints_text_templates(con_left, con_right, con_op, con_k, con_layer, ineq_templates)
+
+symbols:
+  # 单元格整数符号 cell[(行,列)]
+  cell:
+    source:
+    - rows
+    - cols
+    type: int
+    desc: "v({{_rows}},{{_cols}})"
+
+conditions:
+  # 值域约束：每格在1..n内（显式给出取值范围）
+  value_domain:
+    formula: And([And(cell[(i, j)] >= 1, cell[(i, j)] <= n) for i in rows for j in cols])
+    desc: "每个格子的数字在1到{n}之间"
+
+  # 行全异（每行1..n恰好出现一次）
+  row_distinct:
+    formula: And([Distinct([cell[(i, j)] for j in cols]) for i in rows])
+    desc: "每一行数字不重复（1~{n}各出现一次）"
+
+  # 列全异（每列1..n恰好出现一次）
+  col_distinct:
+    formula: And([Distinct([cell[(i, j)] for i in rows]) for j in cols])
+    desc: "每一列数字不重复（1~{n}各出现一次）"
+
+  # 预填提示约束：将提示施加到对应坐标
+  clue_constraints:
+    formula: And([cell[(clue_pos[k][0], clue_pos[k][1])] == clue_val[k] for k in range(clue_num)])
+    desc: "根据生成的提示固定部分格子的数值"
+
+  # 复合关系约束（原值/平方/三角数/仿射；比较/加减；K为正整数）
+  constraints_mixed_comp:
+    formula: And([compose_rel(cell[(con_left[k][0], con_left[k][1])], cell[(con_right[k][0], con_right[k][1])], con_op[k], con_k[k], con_layer[k], affine_params) for k in range(con_num)])
+    desc: "约束混合（复合层：原值/平方/三角数/仿射；K为正整数）"
+
+  # 对角线求和约束（条件分支；仅保留主/副对角线）
+  diag_sum_constraint:
+    formula: (Sum([cell[(rows[i-1], cols[i-1])] for i in range(1, n+1)]) == diag_sum) if diag_type == 'main' else (Sum([cell[(rows[i-1], cols[n-i])] for i in range(1, n+1)]) == diag_sum)
+    desc: "对角线（{('主' if diag_type == 'main' else '副')}）的数字之和为{diag_sum}"
+
+# 唯一解限制：若出现多解则自动丢弃该题
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请按照以下格式输出答案。例如，如果答案是：\\nA B C\\nD E F\\nG H I\\n\\n请输出 [[A,B,C],[D,E,F],[G,H,I]]。"
+    ans_formula: "[[get_value(_solutions[0], cell[(rows[i - 1], cols[j - 1])]) for j in range(1, n + 1)] for i in range(1, n + 1)]"
+    ans_text: str(_ans)
+    ans_assertion: "len(_solutions) == 1"
+
+desc: "这是一个{n}x{n}的不等式数独。规则与取值域：使用数字1~{n}填入网格，且每一行、每一列都恰好包含1~{n}各一次（不重复）。坐标与方向：采用1基索引，(r,c)表示第r行第c列，行从上到下、列从左到右；主对角线指(1,1)到({n},{n})，副对角线指(1,{n})到({n},1)。函数定义：平方(x)=x^2；三角数T(x)=x(x+1)/2；仿射(x)=a·x+b，其中a={aff_a}、b={aff_b}。\\n\\n当前题目矩阵（X为未填）：\\n{given_grid_text}\\n\\n关系约束（均与已给提示相容）：\\n{con_text}\\n\\n{('主对角线' if diag_type == 'main' else '副对角线')}的数字之和为{diag_sum}。本题经程序验证唯一解。\\n\\n{q1}"

@@ -1,0 +1,26 @@
+custom_operator: 
+    simulate_engineer_teams: customs/worktogether.py
+variables:
+    num_teams: 
+        type: int
+        domain: "[2, 5]"
+        diff_factor: 1
+    team_names:
+        formula: generate_letters(num_teams, 'cn')
+    days_alone:
+        formula: '[randint(45,75) for _ in range(num_teams)]'
+    work_days:
+        formula: '[randint(4,7) for _ in range(num_teams)]'
+    off_days: 
+        formula: '[randint(1,2) for _ in range(num_teams)]'
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+    q1:
+        desc: 请问，如果全部队伍合作，至少需多少天完成该工程？请以整数回答。
+        ans_formula: simulate_engineer_teams(days_alone,work_days,off_days)
+        ans_text: str(_ans)
+        ans_assertion: 'True'
+
+desc: 已知{'，'.join(name+'工程队每工作'+str(work)+'天必须休息'+str(rest)+'天' for name, work, rest in zip(team_names, work_days, off_days))}。一项工程，{'，'.join(name+'工程队单独做需'+str(day_alone//(work+rest)*work+(day_alone//(work+rest)-1)*rest if day_alone%(work+rest) > work or day_alone%(work+rest)==0 else day_alone)+'天' for name, day_alone, work, rest in zip(team_names, days_alone, work_days, off_days))}。{q1}

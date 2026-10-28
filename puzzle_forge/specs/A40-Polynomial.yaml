@@ -1,0 +1,51 @@
+custom_operator:
+  #combinations_with_replacement_and_sum: customs/Polynomial.py
+  multinomial: customs/Polynomial.py
+  product: customs/Polynomial.py
+  find_max_coeff_exponent_tuple: customs/Polynomial.py  # 关键函数：返回精确最优指数元组
+  format_polynomial: customs/Polynomial.py
+  no_zero: customs/Polynomial.py
+variables:
+  # 变量个数：2~6
+  vars_num:
+    type: int
+    domain: "[2, 6]"
+    diff_factor: 1
+
+  # 幂次：支持大 n（如 100）
+  power_n:
+    type: int
+    domain: "[3, 20]"
+    diff_factor: 1
+
+  # 变量名
+  var_names:
+    formula: generate_var_names(vars_num)
+
+  # 各变量前的系数（非零）
+  coeff_values:
+    formula: generate_random_list(vars_num, 'int', [-5, 5],cond=["no_zero"] )
+
+  # 构造多项式字符串
+  poly_str:
+    formula: format_polynomial(coeff_values, var_names)
+
+  # 使用 Python 辅助函数直接计算使系数最大的指数元组（精确解）
+  optimal_exponents:
+    formula: find_max_coeff_exponent_tuple(power_n, coeff_values)
+
+  # 计算该点处的精确最大系数绝对值
+  max_coeff_abs:
+    formula: multinomial(power_n, *optimal_exponents) * product(abs(coeff_values[i])**optimal_exponents[i] for i in range(vars_num))
+
+symbols: {}
+conditions: {}
+calc_solution: false
+queries:
+  q1:
+    desc: 系数的绝对值最大是多少？（用数字作答）
+    ans_formula: max_coeff_abs
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+
+desc: 在多项式 ({poly_str})^{power_n} 的展开式中，各项{q1}

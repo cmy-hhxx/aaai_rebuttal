@@ -1,0 +1,91 @@
+custom_operator:
+#yaml custom_operator:
+  build_unique_instance: customs/web_of_lies_0.py
+
+variables:
+  seed:
+    type: int
+    domain: "[0, 1000000000]"
+  n_persons:
+    type: int
+    domain: "[8, 12]"  # 缩小范围加快生成
+    diff_factor: 1
+  min_clues:
+    type: int
+    domain: "[n_persons, n_persons + 4]"  # 更紧的范围
+  max_clues:
+    type: int
+    domain: "[min_clues + 2, n_persons + 8]"
+  pos_ratio:
+    type: float
+    domain: "[0.4, 0.6]"  # 更平衡的范围
+  minimal_unique:
+    type: bool
+    domain: "[False, False]"  # 默认关闭最小化，大幅提速
+  allow_place_speakers:
+    type: bool
+    domain: "[True, False]"
+  allow_person_speakers:
+    type: bool
+    domain: "[True, True]"  # 默认开启人物说话者
+  always_true_places_num:
+    type: int
+    domain: "[0, 1]"  # 减少恒真角色
+  always_false_places_num:
+    type: int
+    domain: "[0, 1]"
+
+  instance:
+    formula: "build_unique_instance(seed=seed, n_persons=n_persons, min_clues=min_clues, max_clues=max_clues, ensure_unique=True, minimal_unique=minimal_unique, pos_ratio=pos_ratio, allow_place_speakers=allow_place_speakers, allow_person_speakers=allow_person_speakers, always_true_places_num=always_true_places_num, always_false_places_num=always_false_places_num)"
+
+  persons:
+    formula: "instance['persons']"
+  places:
+    formula: "instance['places']"
+  place_to_person:
+    formula: "instance['place_to_person']"
+  clue_speakers:
+    formula: "instance['speakers']"
+  clue_targets:
+    formula: "instance['targets']"
+  clue_pols:
+    formula: "instance['pols']"
+  clue_num:
+    formula: "len(clue_pols)"
+  always_true_speakers:
+    formula: "instance['always_true']"
+  always_false_speakers:
+    formula: "instance['always_false']"
+  desc_text:
+    formula: "instance['desc']"
+  query_targets:
+    formula: "instance['query_targets']"
+
+symbols:
+  truth_s:
+    source:
+    - persons
+    type: Bool
+    desc: "{_names}说的是真话"
+
+conditions:
+  clues_all:
+    formula: And([truth_s[clue_speakers[i]] == (truth_s[clue_targets[i]] if clue_pols[i] else Not(truth_s[clue_targets[i]])) for i in range(clue_num)])
+    desc: 线索一致性
+  always_true_cond:
+    formula: "(True if len(always_true_speakers) == 0 else And([truth_s[n] == True for n in always_true_speakers]))"
+    desc: 恒真角色约束
+  always_false_cond:
+    formula: "(True if len(always_false_speakers) == 0 else And([truth_s[n] == False for n in always_false_speakers]))"
+    desc: 恒假角色约束
+
+max_solution: 1
+
+queries:
+  q1:
+    desc: "请判断下列对象是否说真话（按顺序输出，使用是或否）：{'、'.join(query_targets)}。示例：是,否,是"
+    ans_formula: "[('是' if get_value(_solutions[0], truth_s[q]) else '否') for q in query_targets]"
+    ans_text: "', '.join(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: "{desc_text}\n{q1}"

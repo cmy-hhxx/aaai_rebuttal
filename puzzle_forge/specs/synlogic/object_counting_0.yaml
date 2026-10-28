@@ -1,0 +1,70 @@
+variables:
+  # 明确分类池：衣物与汽车的名称集合（仅统计这些名称，且仅统计“我拥有”的数量）
+  clothing_pool:
+    formula: "['睡衣','牛仔裤','夹克','毛衣','领带','T恤','大衣','围巾','手套','运动鞋','袜子','帽子']"
+  car_pool:
+    formula: "['日产劲客','日产Armada','现代伊兰特','丰田卡罗拉','奥迪A4','沃尔沃XC90','宝马X5','马自达CX-90','斯巴鲁傲虎','本田雅阁','福特福克斯','特斯拉Model 3']"
+
+  # 随机抽取将被“我拥有”的衣物和汽车品类（保证不重复）
+  clothing_k:
+    type: int
+    domain: "[3, 6]"
+    diff_factor: 1
+  car_k:
+    type: int
+    domain: "[3, 6]"
+    diff_factor: 1
+  clothing_items:
+    formula: "generate_random_list(clothing_k, 'enum', clothing_pool, [\"lambda l: len(l)==len(set(l))\"])"
+  car_items:
+    formula: "generate_random_list(car_k, 'enum', car_pool, [\"lambda l: len(l)==len(set(l))\"])"
+
+  # 为“我拥有”的衣物和汽车品类生成对应的数量
+  clothing_counts:
+    formula: "generate_random_list(clothing_k, 'int', [5, 120])"
+  car_counts:
+    formula: "generate_random_list(car_k, 'int', [5, 150])"
+
+  # 其他与题面无关的他人/其它物品句子（仅用于扩充题面，不参与计算）
+  others_n:
+    type: int
+    domain: "[3, 6]"
+  other_people:
+    formula: get_faker(others_n, 'foreign_name_cn')
+  other_products:
+    formula: get_faker(others_n, 'product_cn')
+  other_counts:
+    formula: "generate_random_list(others_n, 'int', [5, 120])"
+
+  # 汇总与答案相关的总量
+  clothing_total:
+    formula: sum(clothing_counts)
+  car_total:
+    formula: sum(car_counts)
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "具体要求：在仅统计“我拥有”的物品中，并且仅将下述列明的衣物品类与汽车品类计入，总计“衣物与汽车数量差的绝对值”是多少？请进行细致分析，确保计算准确无误。"
+    ans_formula: abs(car_total - clothing_total)
+    ans_text: str(_ans)
+    ans_assertion: 'True'
+
+desc: >
+  请对以下物品计数问题进行严谨分析和解答（为避免歧义，现作如下明确约定）：
+  计数规则：仅统计“我拥有”的物品；“衣物”仅指以下列出的衣物品类；“汽车”仅指以下列出的汽车品类。
+  具体品类如下：
+  - 衣物（我拥有且计数）：{', '.join(clothing_items)}
+  - 汽车（我拥有且计数）：{', '.join(car_items)}
+
+  我拥有的清单（仅以下两类会被计数）：
+  - 我的衣物清单：{'、'.join([str(clothing_counts[i]) + '个' + clothing_items[i] for i in range(clothing_k)])}
+  - 我的汽车清单：{'、'.join([str(car_counts[i]) + '个' + car_items[i] for i in range(car_k)])}
+
+  其它与计算无关的信息（不计入统计，仅用于丰富题面）：
+  {'；'.join([other_people[i] + '有' + str(other_counts[i]) + '个' + other_products[i] for i in range(others_n)])}。
+
+  {q1}

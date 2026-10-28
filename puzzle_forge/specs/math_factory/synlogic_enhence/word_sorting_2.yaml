@@ -1,0 +1,142 @@
+custom_operator:
+  function_1: word_sorting_2.py
+  function_2: word_sorting_2.py
+  function_3: word_sorting_2.py
+  function_4: word_sorting_2.py
+
+# 本题为确定性排序任务，无需Z3
+calc_solution: false
+
+# 随机参数与数据生成（正向生成：先生成输入items与规则，再调用排序得到答案）
+variables:
+  # 随机生成的待排序项数量
+  item_num:
+    type: int
+    domain: "[10, 20]"
+
+  # token长度区间（token指特殊复合字母或单字母）
+  token_len_min:
+    type: int
+    domain: "[2, 3]"
+  token_len_max:
+    type: int
+    domain: "[token_len_min + 1, token_len_min + 4]"
+
+  # 特殊token出现权重（相对于普通单字母，越大越容易出现特殊复合字母）
+  weight_special:
+    type: int
+    domain: "[1, 6]"
+
+  # 大小写风格：0 全小写；1 首字符概率大写；2 随机大小写
+  upper_mode:
+    type: int
+    domain: "[0, 2]"
+
+  # 旋转字母表起点：从a到z的偏移量（0表示从a开始）
+  rotated_start_offset:
+    type: int
+    domain: "[0, 25]"
+
+  # 分词模式：0 任意位置匹配特殊复合字母；1 仅在词首匹配特殊复合字母
+  segmentation_mode:
+    type: int
+    domain: "[0, 1]"
+
+  # 声调排序模式：0 升序；1 降序
+  tone_order_mode:
+    type: int
+    domain: "[0, 1]"
+
+  # 长度排序模式：0 升序；1 降序
+  length_order_mode:
+    type: int
+    domain: "[0, 1]"
+
+  # 特殊复合字母候选池（可扩展）
+  special_candidate_pool:
+    formula: "['zh', 'ch', 'sh', 'ng']"
+
+  # 从候选池中实际选用的特殊复合字母数量
+  special_pick_num:
+    type: int
+    domain: "[1, 3]"
+
+  # 特殊复合字母顺序模式：0 按字典序升序；1 按字典序降序；2 随机顺序
+  special_order_mode:
+    type: int
+    domain: "[0, 2]"
+
+  # 特殊与单字母的优先级：0 特殊在前；1 单字母在前
+  special_priority_mode:
+    type: int
+    domain: "[0, 1]"
+
+  # 附加决胜键排序模式：特殊数量/旋转值总和/元音数量（0 升序；1 降序）
+  special_count_order_mode:
+    type: int
+    domain: "[0, 1]"
+  sum_rank_order_mode:
+    type: int
+    domain: "[0, 1]"
+  vowel_count_order_mode:
+    type: int
+    domain: "[0, 1]"
+
+  # 触发器模式：0 不启用；1 启用声调翻转；2 启用后段排名反转
+  trigger_mode:
+    type: int
+    domain: "[0, 2]"
+
+  # 触发器候选池：特殊集合 + 单字母集合
+  trigger_pool:
+    formula: "['zh', 'ch', 'sh', 'ng'] + [chr(i) for i in range(97, 123)]"
+
+  # 同时生成输入与规则及其描述的打包对象（含唯一性保障）
+  pack:
+    formula: function_2(item_num, token_len_min, token_len_max, weight_special, upper_mode, rotated_start_offset, segmentation_mode, tone_order_mode, length_order_mode, special_candidate_pool, special_pick_num, special_order_mode, special_priority_mode, special_count_order_mode, sum_rank_order_mode, vowel_count_order_mode, trigger_mode, trigger_pool)
+
+  # 取出输入列表
+  items:
+    formula: "pack['items']"
+
+  # 取出规则配置
+  rules:
+    formula: "pack['rules']"
+
+  # 使用自定义排序规则得到的结果列表
+  sorted_items:
+    formula: function_1(items, rules)
+
+  # 展示用拼接
+  items_desc:
+    formula: "','.join(items)"
+
+  # 规则描述文本（用于题面）
+  rule_desc:
+    formula: "pack['desc']"
+
+  # 唯一性校验（必须为真）
+  unique_ok:
+    formula: function_3(items, rules)
+
+  # 前三项统计串（第二段答案）
+  top3_stats:
+    formula: function_4(sorted_items, rules)
+
+queries:
+  # 第一段答案：完整排序结果
+  q1:
+    desc: '请给出按规则排序后的完整结果，使用半角逗号分隔且不带空格。'
+    ans_formula: "','.join(sorted_items)"
+    ans_text: "_ans"
+    ans_assertion: "unique_ok"
+
+  # 第二段答案：前三项统计串
+  q2:
+    desc: '请给出按最终排序的前三项统计，格式为 item:SC/SR/VC|item:SC/SR/VC|item:SC/SR/VC。(特殊数量 (SC),旋转值总和 (SR),元音数量 (VC))'
+    ans_formula: "top3_stats"
+    ans_text: "_ans"
+    ans_assertion: "unique_ok"
+
+# 题面描述：规则、随机数据与问题（单行，无双引号）
+desc: '场景: 高阶拼音排序规则生成。规则说明: {rule_desc} 比较以主键为先并逐层决胜；主键相同则按声调与长度以及附加隐式统计进行决胜。共有 {item_num} 个待排序项: [{items_desc}]。答案格式说明: 第一段为完整排序结果 item1,item2,...; 第二段为前三项统计串 item:SC/SR/VC|item:SC/SR/VC|item:SC/SR/VC; 最终答案用====连接两段。{q1}{q2}'

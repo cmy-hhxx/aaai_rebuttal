@@ -1,0 +1,276 @@
+# =================================================================
+# High-Complexity Generalized Skyscraper Puzzle (n x n) — Reverse Generation with Composite Rules
+# - Randomized: board size, rule sets, counts, and targets derived from a random Latin solution.
+# - Composite constraints: partial visibility, row/col sums, weighted sums, reveals, row/col <, rank hints,
+#   regions with sum and region-max hints, adjacency absolute differences.
+# - Z3 re-solves with randomized rules and ensures uniqueness; query outputs the solved grid.
+# =================================================================
+custom_operator:
+  function_1: skyscraper_puzzle_0.py
+  function_2: skyscraper_puzzle_0.py
+  make_index_labels: skyscraper_puzzle_0.py
+  random_latin_grid: skyscraper_puzzle_0.py
+  compute_clues: skyscraper_puzzle_0.py
+  generate_rule_spec: skyscraper_puzzle_0.py
+  render_rule_text: skyscraper_puzzle_0.py
+
+variables:
+  # Board size (generalized)
+  n:
+    type: int
+    domain: "[4, 6]"
+    diff_factor: 1
+
+  # Difficulty level controlling rule intensity and concealment (1=易, 2=中, 3=难)
+  difficulty_level:
+    type: int
+    domain: "[1, 3]"
+
+  # Rows and columns as STRING keys (prevent symbol key join errors)
+  rows:
+    formula: "make_index_labels(n, 'r')"
+  cols:
+    formula: "make_index_labels(n, 'c')"
+
+  # Reverse-generation seed: random Latin grid
+  sol_grid:
+    formula: "random_latin_grid(n)"
+
+  # Compute full clues from the solution grid
+  clues:
+    formula: "compute_clues(sol_grid)"
+  top_full:
+    formula: "clues['top']"
+  bottom_full:
+    formula: "clues['bottom']"
+  left_full:
+    formula: "clues['left']"
+  right_full:
+    formula: "clues['right']"
+
+  # Randomized rule counts (upper bounds), fully variable-driven
+  max_top_num:
+    type: int
+    domain: "[1, n]"
+  max_bottom_num:
+    type: int
+    domain: "[1, n]"
+  max_left_num:
+    type: int
+    domain: "[1, n]"
+  max_right_num:
+    type: int
+    domain: "[1, n]"
+  row_sum_num:
+    type: int
+    domain: "[0, n]"
+  col_sum_num:
+    type: int
+    domain: "[0, n]"
+  reveal_num:
+    type: int
+    domain: "[0, n]"
+  row_rel_num:
+    type: int
+    domain: "[0, n]"
+  col_rel_num:
+    type: int
+    domain: "[0, n]"
+
+  # Generate randomized composite rule specification
+  rule_spec:
+    formula: "generate_rule_spec(n, sol_grid, top_full, bottom_full, left_full, right_full, max_top_num, max_bottom_num, max_left_num, max_right_num, row_sum_num, col_sum_num, reveal_num, row_rel_num, col_rel_num, difficulty_level)"
+
+  # Extract specific rule lists from rule_spec for constraints
+  top_idx:
+    formula: "rule_spec['top_idx']"
+  bottom_idx:
+    formula: "rule_spec['bottom_idx']"
+  left_idx:
+    formula: "rule_spec['left_idx']"
+  right_idx:
+    formula: "rule_spec['right_idx']"
+
+  row_sum_rows:
+    formula: "rule_spec['row_sum_rows']"
+  row_sum_targets:
+    formula: "rule_spec['row_sum_targets']"
+
+  col_sum_cols:
+    formula: "rule_spec['col_sum_cols']"
+  col_sum_targets:
+    formula: "rule_spec['col_sum_targets']"
+
+  reveals:
+    formula: "rule_spec['reveals']"
+
+  row_rel_lt:
+    formula: "rule_spec['row_rel_lt']"
+  col_rel_lt:
+    formula: "rule_spec['col_rel_lt']"
+
+  # Rank hints: (row i, col j, rank r)
+  rank_row_hints:
+    formula: "rule_spec['rank_row_hints']"
+  # Rank hints in columns
+  rank_col_hints:
+    formula: "rule_spec['rank_col_hints']"
+
+  # Regions
+  region_cells_list:
+    formula: "rule_spec['region_cells_list']"
+  region_sum_targets:
+    formula: "rule_spec['region_sum_targets']"
+  region_max_pairs:
+    formula: "rule_spec['region_max_pairs']"
+
+  # Adjacency absolute differences
+  adj_row_diffs:
+    formula: "rule_spec['adj_row_diffs']"
+  adj_col_diffs:
+    formula: "rule_spec['adj_col_diffs']"
+
+  # Weighted row sums
+  row_weight_rows:
+    formula: "rule_spec['row_weight_rows']"
+  row_weight_weights:
+    formula: "rule_spec['row_weight_weights']"
+  row_weight_targets:
+    formula: "rule_spec['row_weight_targets']"
+
+  # Human-readable rules text for the final problem statement
+  rules_text:
+    formula: "render_rule_text(n, rule_spec, top_full, bottom_full, left_full, right_full)"
+
+# =================================================================
+# Symbols: cells[(row, col)] represents the height (int in [1..n])
+# =================================================================
+symbols:
+  cells:
+    source:
+    - rows
+    - cols
+    type: int
+    desc: "Height at row {_rows}, column {_cols}"
+
+# =================================================================
+# Conditions
+# - Core domain and Latin constraints always enforced.
+# - Visibility constraints applied only to randomized index subsets for each side.
+# - Additional randomized constraints: row/col sums, weighted sums, reveals, row/col pairwise < relations,
+#   row/col rank hints, region sums with optional region-max hints, adjacency absolute differences.
+# =================================================================
+conditions:
+  # Domain: 1..n
+  domain_of_cells:
+    formula: "And([And(cells[(rows[i], cols[j])] >= 1, cells[(rows[i], cols[j])] <= n) for i in range(n) for j in range(n)])"
+    desc: '每个格子的高度为 1 到 {n} 之间的整数'
+
+  # Row Distinct
+  row_distinct:
+    formula: "And([Distinct([cells[(rows[i], cols[j])] for j in range(n)]) for i in range(n)])"
+    desc: '每一行的高度互不重复'
+
+  # Column Distinct
+  col_distinct:
+    formula: "And([Distinct([cells[(rows[i], cols[j])] for i in range(n)]) for j in range(n)])"
+    desc: '每一列的高度互不重复'
+
+  # Visibility — Top (partial indices in top_idx)
+  views_cols_top_partial:
+    formula: "And([Sum([1] + [If(And([cells[(rows[r], cols[c])] > cells[(rows[k], cols[c])] for k in range(r)]), 1, 0) for r in range(1, n)]) == top_full[c] for c in top_idx])"
+    desc: '顶部视角给出部分线索，索引列表为 [top_idx]'
+
+  # Visibility — Bottom
+  views_cols_bottom_partial:
+    formula: "And([Sum([1] + [If(And([cells[(rows[n - 1 - r], cols[c])] > cells[(rows[n - 1 - k], cols[c])] for k in range(r)]), 1, 0) for r in range(1, n)]) == bottom_full[c] for c in bottom_idx])"
+    desc: '底部视角给出部分线索，索引列表为 [bottom_idx]'
+
+  # Visibility — Left
+  views_rows_left_partial:
+    formula: "And([Sum([1] + [If(And([cells[(rows[i], cols[j])] > cells[(rows[i], cols[k])] for k in range(j)]), 1, 0) for j in range(1, n)]) == left_full[i] for i in left_idx])"
+    desc: '行左侧视角给出部分线索，索引列表为 [left_idx]'
+
+  # Visibility — Right
+  views_rows_right_partial:
+    formula: "And([Sum([1] + [If(And([cells[(rows[i], cols[n - 1 - j])] > cells[(rows[i], cols[n - 1 - k])] for k in range(j)]), 1, 0) for j in range(1, n)]) == right_full[i] for i in right_idx])"
+    desc: '行右侧视角给出部分线索，索引列表为 [right_idx]'
+
+  # Row sum constraints
+  row_sum_constraints:
+    formula: "And([Sum([cells[(rows[i], cols[j])] for j in range(n)]) == row_sum_targets[ri] for ri, i in enumerate(row_sum_rows)])"
+    desc: '若干行给出总和约束，行索引与目标和由题目给定'
+
+  # Column sum constraints
+  col_sum_constraints:
+    formula: "And([Sum([cells[(rows[i], cols[j])] for i in range(n)]) == col_sum_targets[ci] for ci, j in enumerate(col_sum_cols)])"
+    desc: '若干列给出总和约束，列索引与目标和由题目给定'
+
+  # Revealed cells (fixed values)
+  reveals_constraints:
+    formula: "And([cells[(rows[i], cols[j])] == v for (i, j, v) in reveals])"
+    desc: '部分格子已揭示其具体高度'
+
+  # Row pairwise < relations
+  row_rel_lt_constraints:
+    formula: "And([cells[(rows[i], cols[j1])] < cells[(rows[i], cols[j2])] for (i, j1, j2) in row_rel_lt])"
+    desc: '在某些行中给出两列之间的相对大小约束'
+
+  # Column pairwise < relations
+  col_rel_lt_constraints:
+    formula: "And([cells[(rows[i1], cols[j])] < cells[(rows[i2], cols[j])] for (i1, i2, j) in col_rel_lt])"
+    desc: '在某些列中给出两行之间的相对大小约束'
+
+  # Rank hints — rows (r-th smallest)
+  rank_rows_constraints:
+    formula: "And([Sum([If(cells[(rows[i], cols[t])] < cells[(rows[i], cols[j])], 1, 0) for t in range(n)]) == (r - 1) for (i, j, r) in rank_row_hints])"
+    desc: '在若干行中给出某格子的排名提示（第 r 小）'
+
+  # Rank hints — cols (r-th smallest across rows at fixed column)
+  rank_cols_constraints:
+    formula: "And([Sum([If(cells[(rows[t], cols[j])] < cells[(rows[i], cols[j])], 1, 0) for t in range(n)]) == (r - 1) for (i, j, r) in rank_col_hints])"
+    desc: '在若干列中给出某格子的排名提示（第 r 小）'
+
+  # Regions: sum targets
+  region_sum_constraints:
+    formula: "And([Sum([cells[(rows[i], cols[j])] for (i, j) in region_cells_list[ri]]) == region_sum_targets[ri] for ri in range(len(region_cells_list))])"
+    desc: '若干区域的总和约束，区域由若干格子组成'
+
+  # Region max hints: designated cell is the maximum within its region
+  region_max_constraints:
+    formula: "And([And([cells[(rows[i_max], cols[j_max])] >= cells[(rows[i], cols[j])] for (i, j) in region_cells_list[ri]]) for (ri, (i_max, j_max)) in region_max_pairs])"
+    desc: '部分区域给出最大值所在格子的提示'
+
+  # Adjacency absolute differences — rows
+  adj_row_diff_constraints:
+    formula: "And([If(cells[(rows[i], cols[j1])] >= cells[(rows[i], cols[j2])], cells[(rows[i], cols[j1])] - cells[(rows[i], cols[j2])], cells[(rows[i], cols[j2])] - cells[(rows[i], cols[j1])]) == d for (i, j1, j2, d) in adj_row_diffs])"
+    desc: '若干行中给出两格高度差的绝对值约束'
+
+  # Adjacency absolute differences — cols
+  adj_col_diff_constraints:
+    formula: "And([If(cells[(rows[i1], cols[j])] >= cells[(rows[i2], cols[j])], cells[(rows[i1], cols[j])] - cells[(rows[i2], cols[j])], cells[(rows[i2], cols[j])] - cells[(rows[i1], cols[j])]) == d for (i1, i2, j, d) in adj_col_diffs])"
+    desc: '若干列中给出两格高度差的绝对值约束'
+
+  # Weighted row sums
+  row_weight_constraints:
+    formula: "And([Sum([row_weight_weights[ri][j] * cells[(rows[i], cols[j])] for j in range(n)]) == row_weight_targets[ri] for ri, i in enumerate(row_weight_rows)])"
+    desc: '部分行给出加权总和约束'
+
+calc_solution: true
+# Limit solutions to quickly reject non-unique cases within a short time budget (<< 3 minutes).
+max_solution: 2
+
+# =================================================================
+# Query: Return the solved grid as Python list of lists (row-major)
+# =================================================================
+queries:
+  q1:
+    desc: '请以 Python 的二维列表格式输出答案，例如 [[1,2,...],[...],...]。所有索引均从 0 开始。'
+    ans_formula: "[[get_value(_solutions[0], cells[(rows[i], cols[j])]) for j in range(n)] for i in range(n)]"
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+# =================================================================
+# Single-line problem description (compose readable rule list into the statement; safe quoting)
+# =================================================================
+desc: '这是一个 n×n 的摩天楼谜题。每行每列填入 1..n 且互不重复。视角的可见数定义为从某一侧看时能看到的楼数：从前到后，每当出现更高的楼就能多看到一座。索引均从 0 开始。下面给出本题的具体规则清单，请据此推理唯一解；答案请以 Python 二维列表格式输出，例如 [[1,2,...],[...],...]。\\n{rules_text}\\n{q1}'

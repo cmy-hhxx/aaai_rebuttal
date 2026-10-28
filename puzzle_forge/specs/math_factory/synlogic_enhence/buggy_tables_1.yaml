@@ -1,0 +1,75 @@
+custom_operator:
+  # Instance generation and helpers
+  mk_instance: buggy_tables_1.py
+  getk: buggy_tables_1.py
+  to_string: buggy_tables_1.py
+  build_filter_text: buggy_tables_1.py
+  build_metric_text: buggy_tables_1.py
+  build_control_metric_text: buggy_tables_1.py
+  build_group_rule_text: buggy_tables_1.py
+  validate_instance: buggy_tables_1.py
+  # Solver
+  compute_metric: buggy_tables_1.py
+  unique_answer_ok: buggy_tables_1.py
+  # Answer format check
+  answer_format_ok: buggy_tables_1.py
+
+# 参数化随机实例生成（正向生成：先产生输入，再计算输出答案）
+variables:
+  # 生成一个完整实例（包含维度、列名、扁平数据、过滤条件、聚合逻辑、度量类型、分组列、控制列、控制度量、夜间门等）
+  inst:
+    formula: mk_instance()
+
+  # 维度
+  n_rows:
+    formula: getk(inst, 'n_rows')
+  n_cols:
+    formula: getk(inst, 'n_cols')
+
+  # 表头与扁平化数据（包含表头 + 数据行，且可能附加列底垃圾）
+  header:
+    formula: getk(inst, 'header')
+  header_str:
+    formula: to_string(header)
+  flat_data:
+    formula: getk(inst, 'flat_data')
+  flat_data_str:
+    formula: to_string(flat_data)
+
+  # 目标列名称
+  targets:
+    formula: getk(inst, 'targets')
+  target1:
+    formula: getk(inst, 'targets')[0]
+  target2:
+    formula: getk(inst, 'targets')[1]
+
+  # 分组与控制列
+  group_col:
+    formula: getk(inst, 'group_col')
+  control_col:
+    formula: getk(inst, 'control_col')
+
+  # 文案：过滤条件 + 目标度量名称 + 控制度量名称 + 分组选择规则
+  filter_text:
+    formula: build_filter_text(inst)
+  metric_text:
+    formula: build_metric_text(inst)
+  control_metric_text:
+    formula: build_control_metric_text(inst)
+  group_rule_text:
+    formula: build_group_rule_text(inst)
+
+# 直接计算模式，无需Z3
+calc_solution: false
+
+# 单题（开放式答案）
+queries:
+  q1:
+    desc: '给定一个包含表头的 {n_rows}×{n_cols} 行主序扁平数组 flat_data（如下），仅使用前 {n_rows}×{n_cols} 个元素按行主序还原表格；第一行为表头。过滤与度量计算的清洗策略如下：忽略空值与非数值；无法验证过滤条件的记录视为不满足；分组列为空字符串或空值的记录不参与分组；如题面包含“额外限制：仅在 22:00–23:59 的记录视为有效”，则在筛选后仅保留床时间可解析为“HH:MM”且位于 22:00–23:59 的记录。筛选规则如下（{filter_text}）；随后仅对满足筛选（以及可能的时间保留）的记录，{group_rule_text}。若无任何分组达到上述控制度量样本门槛，则答案为 0.00。本题分组列为 {group_col}，控制列为 {control_col}，目标列为 {target1} 与 {target2}，统计量类型为 {metric_text}。在该目标分组内分别计算两列的{metric_text}，并返回二者差值的绝对值；若任一侧样本数不足（对方差/标准差至少 2 个，对均值至少 1 个）则输出 0.00；结果四舍五入保留两位小数。答案格式：保留两位小数的字符串，例如 0.00。\\nheader = {header_str}\\nflat_data = {flat_data_str}\\n'
+    ans_formula: compute_metric(inst)
+    ans_text: _ans
+    ans_assertion: validate_instance(inst) and unique_answer_ok(inst) and answer_format_ok(compute_metric(inst))
+
+# 整体题干描述
+desc: '表格以行主序保存，第一行为表头，共 {n_rows} 行（含表头）× {n_cols} 列。每列 j（0 起）在列底部可能附加 j 个随机值，但解题时仅使用前 {n_rows}×{n_cols} 个元素。过滤与度量计算规则：忽略空值与非数值；无法验证过滤条件的记录视为不满足；分组列为空字符串或为空值的记录不参与分组；若启用夜间限制，仅保留床时间可解析为“HH:MM”且位于 22:00–23:59 的记录。筛选规则如下（{filter_text}）；如包含夜间限制，则在筛选后再按该时间范围保留记录。仅对满足给定筛选（以及可能的时间保留）的记录，按指定分组列分组，基于控制列的{control_metric_text}选择控制度量最大的分组（并列时选字典序最小分组）作为目标分组；仅在分组的控制列样本数达到相应门槛（方差/标准差为 2，均值为 1）时参与比较；若无任何分组达到控制度量样本数门槛，则答案为 0.00。随后在该分组内分别计算两列的指定统计量（{metric_text}）并返回二者差值的绝对值；若任一侧样本数不足（方差/标准差至少 2 个，均值至少 1 个）则输出 0.00；最终四舍五入保留两位小数。答案格式：保留两位小数的字符串，例如 0.00。\\n{queries}'

@@ -1,0 +1,115 @@
+# 直接计算模式：参数化生成空间路径推理题（强制约束类型覆盖与唯一性验证）
+custom_operator:
+  # 生成完整故事数据（随机化参数 -> 随机规则 -> 显式/补充约束 -> 防直达泄露 -> 一致性与唯一性校验 -> 返回结构体）
+  gen_story: space_reasoning_2.py
+  # 格式化路径片段为可读字符串，如 'RD1, LD2, RU3'
+  pretty_steps: space_reasoning_2.py
+  # 求解器：依据故事数据计算查询终点对应物品或 unknown
+  diamond_item_solver: space_reasoning_2.py
+
+# 参数区：完全随机化的原子参数，驱动大规模题面变体
+variables:
+  # 菱形网络层数（参与多样性/难度微调）
+  layer_n:
+    type: int
+    domain: '[10, 20]'
+    diff_factor: 1
+
+  # 物品池规模（实际使用的独立物品数量下限为9）
+  item_pool_size:
+    type: int
+    domain: '[9, 16]'
+    diff_factor: 1
+
+  # 单段路径长度下界
+  len_min:
+    type: int
+    domain: '[1, 2]'
+    diff_factor: 1
+
+  # 单段路径长度上界
+  len_max:
+    type: int
+    domain: '[3, 5]'
+    diff_factor: 1
+
+  # 单步最大步长
+  step_max:
+    type: int
+    domain: '[2, 6]'
+    diff_factor: 1
+
+  # 坐标边界（绝对值不超过该值）
+  coord_bound:
+    type: int
+    domain: '[12, 24]'
+    diff_factor: 1
+
+  # 是否倾向将查询终点设置为已知坐标（从而答案更可能为某已知物品）
+  want_known_answer:
+    type: bool
+    domain: '[True, False]'
+
+  # 额外规则的数量下界（至少1，代码层保证最终不少于2条）
+  extras_min:
+    type: int
+    domain: '[1, 3]'
+    diff_factor: 1
+
+  # 额外规则的数量上界（需保证 >= extras_min；代码层会进行规范化与类型覆盖）
+  extras_max:
+    type: int
+    domain: '[2, 5]'
+    diff_factor: 1
+
+  # 故事数据：一次性生成并校验的题面结构体（含随机规则、显式/补充约束文本、以及“防直达泄露”处理）
+  story_data:
+    formula: gen_story(layer_n, item_pool_size, len_min, len_max, step_max, coord_bound, want_known_answer, extras_min, extras_max)
+
+  # -------- 为避免 desc 中引号嵌套风险，以下变量提前抽取并格式化 --------
+  start_item_t:
+    formula: story_data['start_item']
+  item_at_proj_t:
+    formula: story_data['item_at_proj']
+  item_next1_t:
+    formula: story_data['item_next1']
+  jump_item_t:
+    formula: story_data['jump_item']
+  item_printer_t:
+    formula: story_data['item_printer']
+  item_speaker_t:
+    formula: story_data['item_speaker']
+  current_item_t:
+    formula: story_data['current_item']
+  extra_text_t:
+    formula: story_data['extra_text']
+
+  seq_until_proj_txt:
+    formula: pretty_steps(story_data['seq_until_proj'])
+  seq_to_next1_txt:
+    formula: pretty_steps(story_data['seq_to_next1'])
+  seq_to_printer_txt:
+    formula: pretty_steps(story_data['seq_to_printer'])
+  seq_back_to_start_txt:
+    formula: pretty_steps(story_data['seq_back_to_start'])
+  seq_to_speaker_txt:
+    formula: pretty_steps(story_data['seq_to_speaker'])
+  seq_to_current_txt:
+    formula: pretty_steps(story_data['seq_to_current'])
+  query_path_txt:
+    formula: pretty_steps(story_data['query_path'])
+
+# 本题为直接计算类，不使用 Z3 求解（注意：_model/_solutions/_value 不会生成）
+calc_solution: false
+
+# 单题问答（答案为单个字符串，生成器已避免“额外规则从CUR直达查询终点”的显见线索）
+queries:
+  q1:
+    # 严格的答案格式说明与示例（示例同时覆盖 unknown 与已知物品名）
+    desc: '请输出最终所看到的物品名称；若该位置无已知物品则输出 unknown。仅输出单个字符串，不要包含多余字符。示例: unknown 或 打印机'
+    ans_formula: diamond_item_solver(story_data)
+    ans_text: str(_ans)
+    ans_assertion: "isinstance(_ans, str) and (_ans == 'unknown' or _ans in story_data['used_items']) and story_data['ok'] == True and story_data.get('unique_ok', False) == True and len(story_data.get('extras', [])) >= 2 and story_data.get('extra_types_ok', False) == True"
+
+# 题面文本（单行、仅使用单引号；花括号仅用于变量插值）
+desc: '在一张菱形格点网络上, 你从某顶点看到 {start_item_t}。随后沿 {seq_until_proj_txt} 来到并看到 {item_at_proj_t}；再沿 {seq_to_next1_txt} 来到并看到 {item_next1_t}。接着你瞬移到未知位置, 看到 {jump_item_t}, 再沿 {seq_to_printer_txt} 来到并看到 {item_printer_t}, 随后沿 {seq_back_to_start_txt} 回到起点并确认仍是 {start_item_t}。之后从起点沿 {seq_to_speaker_txt} 来到并看到 {item_speaker_t}, 再沿 {seq_to_current_txt} 来到当前位置并看到 {current_item_t}。{extra_text_t} 现在从当前位置依次按路径 {query_path_txt} 移动, 问最终所看到的物品是什么?\n{q1}'

@@ -1,0 +1,163 @@
+custom_operator:
+  build_norinori_instance: norinori_0.py
+  format_rules: norinori_0.py
+  function_1: norinori_0.py
+  function_2: norinori_0.py
+
+variables:
+  n_rows:
+    type: int
+    domain: "[4, 7]"
+  n_cols:
+    type: int
+    domain: "[4, 7]"
+
+  cells:
+    formula: "[(r, c) for r in range(1, n_rows + 1) for c in range(1, n_cols + 1)]"
+
+  edges:
+    formula: "[( (r, c), (r, c + 1) ) for r in range(1, n_rows + 1) for c in range(1, n_cols)] + [ ( (r, c), (r + 1, c) ) for r in range(1, n_rows) for c in range(1, n_cols + 1)]"
+
+  edge_keys:
+    formula: "['r{}c{}__r{}c{}'.format(e[0][0], e[0][1], e[1][0], e[1][1]) for e in edges]"
+
+  edge_cells1:
+    formula: "[e[0] for e in edges]"
+  edge_cells2:
+    formula: "[e[1] for e in edges]"
+  edge_indices:
+    formula: "list(range(len(edge_keys)))"
+
+  cell_to_edgekeys:
+    formula: "{cell: [edge_keys[i] for i, e in enumerate(edges) if e[0] == cell or e[1] == cell] for cell in cells}"
+
+  edge_key_to_pair:
+    formula: "{edge_keys[i]: edges[i] for i in range(len(edge_keys))}"
+
+  instance:
+    formula: "build_norinori_instance(n_rows, n_cols)"
+
+  grid_labels:
+    formula: "instance['grid_labels']"
+  answer_edges:
+    formula: "instance['answer_edges']"
+  answer_edge_keys:
+    formula: "['r{}c{}__r{}c{}'.format(e[0][0], e[0][1], e[1][0], e[1][1]) for e in answer_edges]"
+  cover_per_region:
+    formula: "instance['cover_per_region']"
+  adjacency_mode:
+    formula: "instance['adjacency_mode']"
+  x_policy:
+    formula: "instance['x_policy']"
+  row_targets:
+    formula: "instance['row_targets']"
+  col_targets:
+    formula: "instance['col_targets']"
+  h_target:
+    formula: "instance['h_target']"
+  v_target:
+    formula: "instance['v_target']"
+  cross_target:
+    formula: "instance['cross_target']"
+  black_target:
+    formula: "instance['black_target']"
+  use_orientation:
+    formula: "instance['use_orientation']"
+  use_cross:
+    formula: "instance['use_cross']"
+  use_black:
+    formula: "instance['use_black']"
+
+  grid_text:
+    formula: "'\\n'.join([' '.join(row) for row in grid_labels])"
+  policy_text:
+    formula: "format_rules(adjacency_mode, x_policy, cover_per_region, row_targets, col_targets, h_target, v_target, cross_target, black_target, use_orientation, use_cross, use_black)"
+
+  regions:
+    formula: "to_unique([ch for row in grid_labels for ch in row if ch != 'X'])"
+
+  diag_pairs:
+    formula: "[((r, c), (r + 1, c + 1)) for r in range(1, n_rows) for c in range(1, n_cols)] + [((r + 1, c), (r, c + 1)) for r in range(1, n_rows) for c in range(1, n_cols)]"
+
+  h_keys:
+    formula: "[edge_keys[i] for i, e in enumerate(edges) if e[0][0] == e[1][0]]"
+  v_keys:
+    formula: "[edge_keys[i] for i, e in enumerate(edges) if e[0][1] == e[1][1]]"
+
+  cross_keys:
+    formula: "[k for k in edge_keys if function_1(grid_labels, edge_key_to_pair[k][0]) != function_1(grid_labels, edge_key_to_pair[k][1])]"
+
+  checker_black:
+    formula: "[(r, c) for r in range(1, n_rows + 1) for c in range(1, n_cols + 1) if (r + c) % 2 == 0]"
+
+  full_desc:
+    formula: "'这是一个高级的区域多米诺覆盖谜题。' + policy_text + '\\n当前网格(行以空格分隔)：\\n' + grid_text + '\\n请输出所有多米诺的坐标列表，格式为[[(r1,c1),(r1,c2)],[(r2,c1),(r2,c2)],...]，坐标从1开始。'"
+
+symbols:
+  domino:
+    source:
+    - edge_keys
+    type: bool
+    desc: "domino covering edge key {_edge_keys}"
+
+conditions:
+  unique_cover_per_cell:
+    formula: "And([Sum([domino[k] for k in cell_to_edgekeys[cell]]) <= 1 for cell in cells])"
+    desc: '每个格子至多被一个多米诺覆盖'
+
+  x_policy_must:
+    formula: "And([Sum([domino[k] for k in cell_to_edgekeys[(r+1, c+1)]]) == 1 for r in range(n_rows) for c in range(n_cols) if grid_labels[r][c] == 'X']) if x_policy == 'must_use' else True"
+    desc: '若策略为must_use，则所有X格子恰好被一个多米诺覆盖'
+  x_policy_forbid:
+    formula: "And([Sum([domino[k] for k in cell_to_edgekeys[(r+1, c+1)]]) == 0 for r in range(n_rows) for c in range(n_cols) if grid_labels[r][c] == 'X']) if x_policy == 'forbid' else True"
+    desc: '若策略为forbid，则所有X格子不得被多米诺覆盖'
+
+  each_region_exact_k:
+    formula: "And([Sum([Sum([domino[k] for k in cell_to_edgekeys[cell]]) for cell in cells if function_1(grid_labels, cell) == reg]) == cover_per_region for reg in regions])"
+    desc: '每个区域恰有K个格子被多米诺覆盖（K为cover_per_region）'
+
+  no_orth_adj:
+    formula: "And([ (Sum([domino[k] for k in cell_to_edgekeys[edge_cells1[i]]]) + Sum([domino[k] for k in cell_to_edgekeys[edge_cells2[i]]]) - If(domino[edge_keys[i]], 1, 0)) <= 1 for i in edge_indices ]) if adjacency_mode in ['no_orth','no_orth_and_diag'] else True"
+    desc: '若模式禁止正交相邻，则不同多米诺不得沿边相邻'
+  no_diag_adj:
+    formula: "And([ (Sum([domino[k] for k in cell_to_edgekeys[p]]) + Sum([domino[k] for k in cell_to_edgekeys[q]]) ) <= 1 for (p,q) in diag_pairs ]) if adjacency_mode in ['no_diag','no_orth_and_diag'] else True"
+    desc: '若模式禁止对角相邻，则不同多米诺不得在对角方向同时覆盖格子'
+
+  rows_sum_constraints:
+    formula: "And([ Sum([Sum([domino[k] for k in cell_to_edgekeys[(r, c)]]) for c in range(1, n_cols + 1)]) == t for (r, t) in row_targets ])"
+    desc: '部分行的覆盖总数约束'
+  cols_sum_constraints:
+    formula: "And([ Sum([Sum([domino[k] for k in cell_to_edgekeys[(r, c)]]) for r in range(1, n_rows + 1)]) == t for (c, t) in col_targets ])"
+    desc: '部分列的覆盖总数约束'
+  orientation_constraints:
+    formula: "And(Sum([domino[k] for k in h_keys]) == h_target, Sum([domino[k] for k in v_keys]) == v_target) if use_orientation else True"
+    desc: '若启用，则限定水平与垂直多米诺数量'
+  cross_region_constraints:
+    formula: "Sum([domino[k] for k in cross_keys]) == cross_target if use_cross else True"
+    desc: '若启用，则限定跨区域多米诺数量'
+  checker_black_constraints:
+    formula: "Sum([Sum([domino[k] for k in cell_to_edgekeys[cell]]) for cell in checker_black]) == black_target if use_black else True"
+    desc: '若启用，则限定棋盘黑格被覆盖数'
+
+  fix_solution_true:
+    formula: "And([domino[k] for k in answer_edge_keys])"
+    desc: '答案集合中的边必须被选择'
+  fix_solution_false:
+    formula: "And([Not(domino[k]) for k in edge_keys if k not in answer_edge_keys])"
+    desc: '非答案集合中的边必须不被选择'
+
+max_solution: 1
+
+post_generation:
+  post_gen_vars:
+    selected_dominoes_raw: "[edge_key_to_pair[k] for k in edge_keys if get_value(_sol, domino[k])]"
+    selected_dominoes: "function_2(selected_dominoes_raw, grid_labels)"
+
+queries:
+  q1:
+    desc: '{full_desc}'
+    ans_formula: selected_dominoes
+    ans_text: "str(_ans)"
+    ans_assertion: "len(_solutions) == 1"
+
+desc: '这是一个高级的区域多米诺覆盖谜题。{policy_text}\n当前网格(行以空格分隔)：\n{grid_text}\n请输出所有多米诺的坐标列表，格式为[[(r1,c1),(r1,c2)],[(r2,c1),(r2,c2)],...]，坐标从1开始。'

@@ -1,0 +1,82 @@
+custom_operator:
+  # 生成正交连通的标准 Norinori 实例，并枚举所有可行解以获得“总解数”和“字典序最小方案”
+  function_1: customs/norinori_0.py
+  # 将多米诺坐标列表格式化为括号坐标字符串
+  function_2: customs/norinori_0.py
+
+variables:
+  # 网格尺寸（容器参数化，控制规模以避免超时）
+  R:
+    type: int
+    domain: "[4, 6]"
+    diff_factor: 1
+  C:
+    type: int
+    domain: "[4, 6]"
+    diff_factor: 1
+
+  # 区域数量（与网格规模挂钩，并限制上限以保证快速枚举）
+  region_count:
+    formula: "random.randint(2, min(6, (R * C) // 3))"
+
+  # Solve-then-Constrain：Python 生成正交连通的区域划分，并枚举所有可行解以得到计数与唯一编码下的最小方案
+  instance:
+    formula: function_1(R, C, region_count)
+
+  # 结构化数据（全部为 JSON 安全类型）
+  grid_matrix:
+    formula: instance['grid']                    # [[label,...], ...]（同一字母表示一个正交连通区域）
+  coords:
+    formula: instance['coords']                  # [[r,c], ...]，1-based 坐标
+  region_labels:
+    formula: instance['labels']                  # ['A','B','C', ...]
+  cells_by_label:
+    formula: instance['cells_by_label']          # {'A': [[r,c],...], ...}
+  domino_keys:
+    formula: instance['domino_keys']             # ["(r,c)-(r,c+1)", ...]
+  domino_cells_items:
+    formula: instance['domino_cells_items']      # [(key, [[r,c],[r2,c2]]), ...]
+  domino_cells_map:
+    formula: "dict(domino_cells_items)"          # 字典：key -> [[r,c],[r2,c2]]
+
+  # 由 Python 枚举得到的总解数与字典序最小方案（唯一编码）
+  solution_count:
+    formula: instance['sol_count']               # int，总解数
+  ans_min_dominoes:
+    formula: instance['ans_min_dominoes']        # [[[r,c],[r2,c2]], ...]，字典序最小方案（唯一编码规则）
+
+  # 题面展示用：网格行文本与拼接字符串（避免在 desc 中使用反斜杠表达式）
+  grid_rows_text:
+    formula: "['  '.join(row) for row in grid_matrix]"
+  grid_text:
+    formula: "'\\n'.join(grid_rows_text)"
+
+# 本题采用“约束校验而非比对单一答案”的评测策略；为避免重复求解，关闭SMT在YAML阶段的计算
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+
+  # 问题2：输出“字典序最小”的唯一编码方案（由 Python 预先依据规则计算）
+  q1:
+    desc: "请给出按唯一编码规则的字典序最小方案（坐标从1开始计数），格式为：[[(r1,c1), (r1,c2)], ...]。唯一编码规则：每个多米诺内部按坐标升序排列（先行、后列），方案中的多米诺按其第一坐标（再第二坐标）升序排列为列表。"
+    ans_formula: ans_min_dominoes
+    ans_text: function_2(ans_min_dominoes)
+    ans_assertion: "len(ans_min_dominoes) >= 1"
+
+desc: >
+  标准 Norinori 谜题（区域为正交连通块）：
+  - 在 {R}×{C} 的网格中放置多米诺（1×2 或 2×1 的矩形块）。
+  - 多米诺不能重叠（同一格最多被一个多米诺覆盖）。
+  - 每个“区域”（下表中的同一字母表示的正交连通块）必须恰好有两个格子被多米诺覆盖。
+  - 若两个正交相邻的格子都被覆盖，则它们必须属于同一个多米诺（多米诺之间不可正交相邻）。
+  - 多米诺可以跨越区域边界。
+  - 坐标从1开始计数（左上角为 (1,1)）。
+
+  网格（按行显示，字母表示正交连通区域标签）：
+  {grid_text}
+
+  注：本题不要求“唯一解”。我们采用“约束校验”的评测策略：请输出在唯一编码规则下的字典序最小方案（列表顺序以唯一编码规则确定，内部坐标升序，外部列表按第一坐标再第二坐标升序）。
+  {q1}
+  最终的回答格式形如："[[(1, 1), (1, 2)], [(2, 3), (3, 3)], [(4, 1), (4, 2)]]"。

@@ -1,0 +1,243 @@
+# =================================================================
+# Custom operators: utility helpers for randomized selections
+# =================================================================
+custom_operator:
+  choose_item: einsteins_riddle_0.py
+  choose_pair_distinct: einsteins_riddle_0.py
+  choose_sample_distinct: einsteins_riddle_0.py
+  shuffle_list: einsteins_riddle_0.py
+
+# =================================================================
+# Variables: base sets, randomized labels, helpers
+# =================================================================
+variables:
+  # House count (classic Einstein puzzle)
+  house_num:
+    type: int
+    domain: "[5, 5]"
+    diff_factor: 1
+
+  positions:
+    formula: "list(range(house_num))"
+
+  # Randomize label orders to increase variety while keeping index logic intact
+  nationalities:
+    formula: "shuffle_list(['Norwegian', 'Dane', 'Englishman', 'German', 'Swede'])"
+  colors:
+    formula: "shuffle_list(['Red', 'Green', 'White', 'Yellow', 'Blue'])"
+  drinks:
+    formula: "shuffle_list(['Tea', 'Coffee', 'Milk', 'Beer', 'Water'])"
+  cigars:
+    formula: "shuffle_list(['Pall Mall', 'Dunhill', 'Blend', 'BlueMaster', 'Prince'])"
+  pets:
+    formula: "shuffle_list(['Dogs', 'Birds', 'Cats', 'Horses', 'Fish'])"
+
+  # Indices for classic clues to avoid built-in functions inside conditions
+  idx_Englishman:
+    formula: "nationalities.index('Englishman')"
+  idx_Swede:
+    formula: "nationalities.index('Swede')"
+  idx_Dane:
+    formula: "nationalities.index('Dane')"
+  idx_German:
+    formula: "nationalities.index('German')"
+  idx_Norwegian:
+    formula: "nationalities.index('Norwegian')"
+
+  idx_Red:
+    formula: "colors.index('Red')"
+  idx_Green:
+    formula: "colors.index('Green')"
+  idx_White:
+    formula: "colors.index('White')"
+  idx_Yellow:
+    formula: "colors.index('Yellow')"
+  idx_Blue:
+    formula: "colors.index('Blue')"
+
+  idx_Tea:
+    formula: "drinks.index('Tea')"
+  idx_Coffee:
+    formula: "drinks.index('Coffee')"
+  idx_Milk:
+    formula: "drinks.index('Milk')"
+  idx_Beer:
+    formula: "drinks.index('Beer')"
+  idx_Water:
+    formula: "drinks.index('Water')"
+
+  idx_PallMall:
+    formula: "cigars.index('Pall Mall')"
+  idx_Dunhill:
+    formula: "cigars.index('Dunhill')"
+  idx_Blend:
+    formula: "cigars.index('Blend')"
+  idx_BlueMaster:
+    formula: "cigars.index('BlueMaster')"
+  idx_Prince:
+    formula: "cigars.index('Prince')"
+
+  idx_Dogs:
+    formula: "pets.index('Dogs')"
+  idx_Birds:
+    formula: "pets.index('Birds')"
+  idx_Cats:
+    formula: "pets.index('Cats')"
+  idx_Horses:
+    formula: "pets.index('Horses')"
+  idx_Fish:
+    formula: "pets.index('Fish')"
+
+  nat_list_text:
+    formula: "', '.join(nationalities)"
+  example_nationality:
+    formula: "nationalities[0]"
+
+  # =======================
+  # Randomized query target
+  # =======================
+  target_attr_pool:
+    formula: "['pet', 'drink', 'cigar', 'color']"
+  target_attr:
+    formula: "choose_item(target_attr_pool)"
+  target_value_pool:
+    formula: "(pets if target_attr == 'pet' else drinks if target_attr == 'drink' else cigars if target_attr == 'cigar' else colors)"
+  target_value:
+    formula: "choose_item(target_value_pool)"
+  target_index:
+    formula: "(pets.index(target_value) if target_attr == 'pet' else drinks.index(target_value) if target_attr == 'drink' else cigars.index(target_value) if target_attr == 'cigar' else colors.index(target_value))"
+
+# =================================================================
+# Symbols: each house has five integer attributes (indices)
+# =================================================================
+symbols:
+  house_s:
+    source:
+    - positions
+    attr:
+    - nationality
+    - color
+    - drink
+    - cigar
+    - pet
+    type:
+    - int
+    - int
+    - int
+    - int
+    - int
+    desc:
+    - '{_positions}th house nationality index'
+    - '{_positions}th house color index'
+    - '{_positions}th house drink index'
+    - '{_positions}th house cigar index'
+    - '{_positions}th house pet index'
+
+# =================================================================
+# Conditions: domains, distinctness and classic Einstein clues
+# =================================================================
+conditions:
+  # Ranges
+  range_nationality:
+    formula: 'And([And(x >= 0, x < house_num) for x in house_s.get("nationality")])'
+  range_color:
+    formula: 'And([And(x >= 0, x < house_num) for x in house_s.get("color")])'
+  range_drink:
+    formula: 'And([And(x >= 0, x < house_num) for x in house_s.get("drink")])'
+  range_cigar:
+    formula: 'And([And(x >= 0, x < house_num) for x in house_s.get("cigar")])'
+  range_pet:
+    formula: 'And([And(x >= 0, x < house_num) for x in house_s.get("pet")])'
+
+  # Pairwise distinctness per category
+  distinct_nationality:
+    formula: 'And([And([house_s[positions[i]].get("nationality") != house_s[positions[j]].get("nationality") for j in range(i + 1, house_num)]) for i in range(house_num)])'
+  distinct_color:
+    formula: 'And([And([house_s[positions[i]].get("color") != house_s[positions[j]].get("color") for j in range(i + 1, house_num)]) for i in range(house_num)])'
+  distinct_drink:
+    formula: 'And([And([house_s[positions[i]].get("drink") != house_s[positions[j]].get("drink") for j in range(i + 1, house_num)]) for i in range(house_num)])'
+  distinct_cigar:
+    formula: 'And([And([house_s[positions[i]].get("cigar") != house_s[positions[j]].get("cigar") for j in range(i + 1, house_num)]) for i in range(house_num)])'
+  distinct_pet:
+    formula: 'And([And([house_s[positions[i]].get("pet") != house_s[positions[j]].get("pet") for j in range(i + 1, house_num)]) for i in range(house_num)])'
+
+  # --- Classic Einstein clues (static and consistent) ---
+  english_red:
+    formula: 'And([Implies(house_s[positions[i]].get("nationality") == idx_Englishman, house_s[positions[i]].get("color") == idx_Red) for i in range(house_num)])'
+    desc: 'the Englishman lives in the Red house'
+
+  swede_dogs:
+    formula: 'And([Implies(house_s[positions[i]].get("nationality") == idx_Swede, house_s[positions[i]].get("pet") == idx_Dogs) for i in range(house_num)])'
+    desc: 'the Swede keeps Dogs'
+
+  dane_tea:
+    formula: 'And([Implies(house_s[positions[i]].get("nationality") == idx_Dane, house_s[positions[i]].get("drink") == idx_Tea) for i in range(house_num)])'
+    desc: 'the Dane drinks Tea'
+
+  green_left_white:
+    formula: 'And([Implies(house_s[positions[i]].get("color") == idx_Green, house_s[positions[i + 1]].get("color") == idx_White) for i in range(house_num - 1)] + [house_s[positions[house_num - 1]].get("color") != idx_Green])'
+    desc: 'the Green house is immediately to the left of the White house'
+
+  green_coffee:
+    formula: 'And([Implies(house_s[positions[i]].get("color") == idx_Green, house_s[positions[i]].get("drink") == idx_Coffee) for i in range(house_num)])'
+    desc: 'the owner of the Green house drinks Coffee'
+
+  pall_birds:
+    formula: 'And([Implies(house_s[positions[i]].get("cigar") == idx_PallMall, house_s[positions[i]].get("pet") == idx_Birds) for i in range(house_num)])'
+    desc: 'the Pall Mall smoker keeps Birds'
+
+  yellow_dunhill:
+    formula: 'And([Implies(house_s[positions[i]].get("color") == idx_Yellow, house_s[positions[i]].get("cigar") == idx_Dunhill) for i in range(house_num)])'
+    desc: 'the owner of the Yellow house smokes Dunhill'
+
+  center_milk:
+    formula: 'house_s[positions[2]].get("drink") == idx_Milk'
+    desc: 'the man in the center house drinks Milk'
+
+  norwegian_first:
+    formula: 'house_s[positions[0]].get("nationality") == idx_Norwegian'
+    desc: 'the Norwegian lives in the first house'
+
+  blend_cats_neighbor:
+    formula: 'And([Implies(house_s[positions[0]].get("cigar") == idx_Blend, house_s[positions[1]].get("pet") == idx_Cats)] + [Implies(house_s[positions[i]].get("cigar") == idx_Blend, Or(house_s[positions[i - 1]].get("pet") == idx_Cats, house_s[positions[i + 1]].get("pet") == idx_Cats)) for i in range(1, house_num - 1)] + [Implies(house_s[positions[house_num - 1]].get("cigar") == idx_Blend, house_s[positions[house_num - 2]].get("pet") == idx_Cats)])'
+    desc: 'the man who smokes Blend lives next to the person who keeps Cats'
+
+  horses_dunhill_neighbor:
+    formula: 'And([Implies(house_s[positions[0]].get("pet") == idx_Horses, house_s[positions[1]].get("cigar") == idx_Dunhill)] + [Implies(house_s[positions[i]].get("pet") == idx_Horses, Or(house_s[positions[i - 1]].get("cigar") == idx_Dunhill, house_s[positions[i + 1]].get("cigar") == idx_Dunhill)) for i in range(1, house_num - 1)] + [Implies(house_s[positions[house_num - 1]].get("pet") == idx_Horses, house_s[positions[house_num - 2]].get("cigar") == idx_Dunhill)])'
+    desc: 'the man who keeps Horses lives next to the man who smokes Dunhill'
+
+  bluemaster_beer:
+    formula: 'And([Implies(house_s[positions[i]].get("cigar") == idx_BlueMaster, house_s[positions[i]].get("drink") == idx_Beer) for i in range(house_num)])'
+    desc: 'the BlueMaster smoker drinks Beer'
+
+  german_prince:
+    formula: 'And([Implies(house_s[positions[i]].get("nationality") == idx_German, house_s[positions[i]].get("cigar") == idx_Prince) for i in range(house_num)])'
+    desc: 'the German smokes Prince'
+
+  norwegian_blue_neighbor:
+    formula: 'And([Implies(house_s[positions[0]].get("nationality") == idx_Norwegian, house_s[positions[1]].get("color") == idx_Blue)] + [Implies(house_s[positions[i]].get("nationality") == idx_Norwegian, Or(house_s[positions[i - 1]].get("color") == idx_Blue, house_s[positions[i + 1]].get("color") == idx_Blue)) for i in range(1, house_num - 1)] + [Implies(house_s[positions[house_num - 1]].get("nationality") == idx_Norwegian, house_s[positions[house_num - 2]].get("color") == idx_Blue)])'
+    desc: 'the Norwegian lives next to the Blue house'
+
+  blend_water_neighbor:
+    formula: 'And([Implies(house_s[positions[0]].get("cigar") == idx_Blend, house_s[positions[1]].get("drink") == idx_Water)] + [Implies(house_s[positions[i]].get("cigar") == idx_Blend, Or(house_s[positions[i - 1]].get("drink") == idx_Water, house_s[positions[i + 1]].get("drink") == idx_Water)) for i in range(1, house_num - 1)] + [Implies(house_s[positions[house_num - 1]].get("cigar") == idx_Blend, house_s[positions[house_num - 2]].get("drink") == idx_Water)])'
+    desc: 'the man who smokes Blend has a neighbor who drinks Water'
+
+# =================================================================
+# Solver controls
+# =================================================================
+max_solution: 2000
+
+# =================================================================
+# Query: ask for nationality given randomized attribute and value
+# =================================================================
+queries:
+  q1:
+    desc: 'Which nationality matches the {target_attr} {target_value} write exactly one nationality name equal to one of the following {nat_list_text} for example {example_nationality}'
+    ans_formula: '[nationalities[get_value(m, house_s[positions[i]].get(''nationality''))] for m in _solutions for i in range(house_num) if get_value(m, house_s[positions[i]].get(target_attr)) == target_index][0]'
+    ans_text: 'str(_ans)'
+    ans_assertion: 'len(_solutions) == 1'
+
+# =================================================================
+# Description: puzzle statement and clues list
+# =================================================================
+desc: 'There are five houses in a row numbered from 1 to 5 each house has a unique color nationality drink cigar and pet the following clues are provided and all of them are true use them to deduce the nationality of the person who matches the {target_attr} {target_value}\n{english_red}\n{swede_dogs}\n{dane_tea}\n{green_left_white}\n{green_coffee}\n{pall_birds}\n{yellow_dunhill}\n{center_milk}\n{norwegian_first}\n{blend_cats_neighbor}\n{horses_dunhill_neighbor}\n{bluemaster_beer}\n{german_prince}\n{norwegian_blue_neighbor}\n{blend_water_neighbor}\nanswer format write a single nationality name exactly equal to one of the following {nat_list_text} for example {example_nationality}\n{q1}'

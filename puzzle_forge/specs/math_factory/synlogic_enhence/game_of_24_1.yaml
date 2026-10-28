@@ -1,0 +1,56 @@
+custom_operator:
+  function_1: game_of_24_1.py
+  function_2: game_of_24_1.py
+  gen_instance: game_of_24_1.py
+  gen_rule_config: game_of_24_1.py
+  rule_desc: game_of_24_1.py
+  verify_unique: game_of_24_1.py
+variables:
+  # ---- Meta-parameters for generalized instance and rules ----
+  num_min:
+    type: int
+    domain: "[1, 6]"
+  num_max:
+    type: int
+    domain: "[num_min + 16, num_min + 40]"
+  ops_allow:
+    formula: "['+', '-', '*', '/']"
+  funcs_allow:
+    formula: "['sqrt', 'log2', 'abs']"
+  max_funcs_upper_seed:
+    type: int
+    domain: "[0, 2]"
+  # ---- Randomize internal rules (scope, integrality, pools, pipelines, parity/relations, style) ----
+  rule_config:
+    formula: "gen_rule_config(ops_allow, funcs_allow, max_funcs_upper_seed)"
+  # ---- Generate a solvable and uniquely-solvable instance consistent with the rules ----
+  instance:
+    formula: "gen_instance(num_min, num_max, rule_config)"
+  nums:
+    formula: "instance['nums']"
+  ops_set:
+    formula: "instance['ops_set']"
+  funcs_set:
+    formula: "instance['funcs_set']"
+  target:
+    formula: "instance['target']"
+  max_funcs:
+    formula: "instance['max_funcs']"
+  nums_str:
+    formula: "'[' + ', '.join(map(str, nums)) + ']'"
+  ops_str:
+    formula: "'[' + ', '.join(ops_set) + ']'"
+  funcs_str:
+    formula: "'[' + ', '.join(funcs_set) + ']'"
+  rule_text:
+    formula: "rule_desc(rule_config)"
+  example:
+    formula: "{'nums':[22,20,32,13],'ops':['-','*','+'],'parens':'(((22 - 20) * 32) + 13)','funcs_sequence':[]}"
+queries:
+  q1:
+    desc: '请输出满足规则的最优表达式配置字典, 键与顺序固定为 [nums, ops, parens, funcs_sequence]。答案需为 JSON 字符串; 其中 nums 为从左到右的数字序列; ops 为三次二元运算的实际求值顺序; parens 为完整括号表达式且包含一元函数; funcs_sequence 为按首次出现顺序记录的函数应用序列, 每项含 func 与 at_step(叶子为 0..3, 三次运算为 4..6)。'
+    ans_formula: "function_1(nums, ops_set, funcs_set, target, max_funcs, rule_config)"
+    ans_text: "function_2(_ans)"
+    ans_assertion: "verify_unique(nums, ops_set, funcs_set, target, max_funcs, rule_config)"
+calc_solution: false
+desc: '高阶导航合成任务: 给定四个数 nums {nums_str}, 二元运算可选集合 ops_set {ops_str}, 一元函数可选集合 funcs_set {funcs_str}, 目标值为 {target}。规则摘要: {rule_text}。规范化: 先最少函数次数, 再按 nums 的字典序最小, 再按 ops 的字典序最小; funcs_sequence 按首次出现顺序记录。索引说明: 叶子从左到右为 0..3, 三次二元运算的求值顺序为 4..6。答案格式: 输出 JSON 字符串, 键顺序固定为 [nums, ops, parens, funcs_sequence], 不要更改键名或顺序。{q1}输出样例 {example}。'

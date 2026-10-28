@@ -1,0 +1,144 @@
+# Crossword-style fill puzzle with unordered word sets and full-rule uniqueness verification
+# -----------------------------------------------------------------------------
+# Custom operators: all referenced functions must exist in wordscapes_1.py
+# -----------------------------------------------------------------------------
+custom_operator:
+  generate_puzzle: wordscapes_1.py
+  dict_get: wordscapes_1.py
+  gen_alphabet: wordscapes_1.py
+  count_X: wordscapes_1.py
+  to_json: wordscapes_1.py
+  verify_unique_fill_sets: wordscapes_1.py
+  format_grid_plain: wordscapes_1.py
+
+# -----------------------------------------------------------------------------
+# Variables: grid size, run constraints, rules, alphabet, generated instance
+# -----------------------------------------------------------------------------
+variables:
+  # Grid dimensions
+  rows:
+    type: int
+    domain: "[4, 6]"
+    diff_factor: 1
+  cols:
+    type: int
+    domain: "[4, 6]"
+    diff_factor: 1
+
+  # Asymmetric run ranges for across and down
+  across_min_run:
+    type: int
+    domain: "[2, 3]"
+  across_max_run:
+    type: int
+    domain: "[across_min_run + 1, across_min_run + 3]"
+  down_min_run:
+    type: int
+    domain: "[2, 3]"
+  down_max_run:
+    type: int
+    domain: "[down_min_run + 1, down_min_run + 3]"
+
+  # Additional base rules
+  # 0: none, 1: intersections must be vowels, 2: intersections must be consonants
+  intersection_rule_code:
+    type: int
+    domain: "[0, 2]"
+  forbid_adjacent:
+    type: bool
+    domain: "[True, False]"
+    diff_factor: 1
+  include_quota:
+    type: bool
+    domain: "[True, False]"
+
+  # Advanced rule switches
+  row_vowel_even:
+    type: bool
+    domain: "[True, False]"
+    diff_factor: 1
+  col_cons_odd:
+    type: bool
+    domain: "[True, False]"
+  diag_distinct:
+    type: bool
+    domain: "[True, False]"
+  no_pal_across:
+    type: bool
+    domain: "[True, False]"
+  prefix_rule_on:
+    type: bool
+    domain: "[True, False]"
+  suffix_rule_on:
+    type: bool
+    domain: "[True, False]"
+
+  # Alphabet
+  alph_size:
+    type: int
+    domain: "[4, 6]"
+  alphabet:
+    formula: gen_alphabet(alph_size)
+
+  # Generate one full puzzle instance under the selected rules
+  puzzle_data:
+    formula: generate_puzzle(rows, cols, across_min_run, across_max_run, down_min_run, down_max_run, alphabet, intersection_rule_code, forbid_adjacent, include_quota, row_vowel_even, col_cons_odd, diag_distinct, no_pal_across, prefix_rule_on, suffix_rule_on)
+
+  # Extract fields from generated instance
+  grid:
+    formula: dict_get(puzzle_data, 'grid')
+  across_words:
+    formula: dict_get(puzzle_data, 'across')
+  down_words:
+    formula: dict_get(puzzle_data, 'down')
+  filled_grid:
+    formula: dict_get(puzzle_data, 'filled')
+  filled_json:
+    formula: dict_get(puzzle_data, 'json')
+  rules_text:
+    formula: dict_get(puzzle_data, 'rules_text')
+  quota_letter:
+    formula: dict_get(puzzle_data, 'quota_letter')
+  quota_count:
+    formula: dict_get(puzzle_data, 'quota_count')
+  across_prefix_set:
+    formula: dict_get(puzzle_data, 'prefix_set')
+  down_suffix_set:
+    formula: dict_get(puzzle_data, 'suffix_set')
+
+  # Displays
+  across_desc:
+    formula: "', '.join(across_words)"
+  down_desc:
+    formula: "', '.join(down_words)"
+  grid_desc:
+    formula: "'\\n'.join([' '.join(row) for row in grid])"
+
+  # Difficulty heuristic
+  x_count:
+    formula: count_X(grid)
+    diff_factor: 1
+
+  # Plain (quote-free) formatted answer string for evaluation and example consistency
+  filled_plain:
+    formula: format_grid_plain(filled_grid)
+
+# -----------------------------------------------------------------------------
+# Direct computation mode
+# -----------------------------------------------------------------------------
+calc_solution: false
+
+# -----------------------------------------------------------------------------
+# Queries: open-ended single answer equals the plain string of the filled grid
+# -----------------------------------------------------------------------------
+queries:
+  q1:
+    desc: '提供按行书写的最终填字网格，使用嵌套列表的无引号字符格式；每一行是长度为{cols}的列表，总共{rows}行；X格填字母，0格填单个空格；例如示例格式为[[a, b, c], [ , d, e]]，其中空白格用单个空格表示'
+    ans_formula: filled_plain
+    ans_text: _ans
+    ans_assertion: 'verify_unique_fill_sets(grid, across_words, down_words, filled_grid, intersection_rule_code, forbid_adjacent, quota_letter, quota_count, row_vowel_even, col_cons_odd, across_prefix_set, down_suffix_set, diag_distinct, no_pal_across, across_min_run, across_max_run, down_min_run, down_max_run)'
+
+# -----------------------------------------------------------------------------
+# Problem description: single line, explicit rules and example, no internal quotes
+# -----------------------------------------------------------------------------
+desc: '将字母填入网格中以满足所有规则；横向单词集合为（无序、每个恰好使用一次）{across_desc}，纵向单词集合为（无序、每个恰好使用一次）{down_desc}；X表示可填格，0表示空格；允许的段长范围：横向X连续段长度在{across_min_run}到{across_max_run}之间，纵向X连续段长度在{down_min_run}到{down_max_run}之间；其他规则：{rules_text}；元音为a e i o u，辅音为其他小写字母；下方给出网格布局（X与0以空格分隔）：\n{grid_desc}\n规则补充：每个横向X连续段必须恰好对应集合中的一个横向单词；最终网格中每个纵向X连续段必须恰好形成集合中的一个纵向单词；交叉处字母必须一致；每个集合内的单词各用一次；答案格式：返回最终网格对应的嵌套列表（行长度为{cols}且共有{rows}行），X格填字母，0格填单个空格；示例[[a, b, c], [ , d, e]]\n{q1}'

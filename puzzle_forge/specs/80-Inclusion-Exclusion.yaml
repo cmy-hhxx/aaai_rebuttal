@@ -1,0 +1,121 @@
+variables:
+  # 定义班级（科目）数量，范围在3-6之间
+  num_classes:
+    type: int
+    domain: "[3, 3]"
+    diff_factor: 1
+
+  # 定义班级名称列表
+  class_names:
+    formula: "get_faker(num_classes, 'major')"
+
+  class_sizes:
+    formula: "generate_random_list(3, 'int', [20, 40], ['lambda l: len(to_unique(l)) == 3'])"
+  
+  # 定义两两交集的人数，确保不超过对应班级的最小人数且至少为5
+  pairwise_intersects:
+    formula: |
+      [
+        randint(5, min(class_sizes[0], class_sizes[1]) - 1),
+        randint(5, min(class_sizes[0], class_sizes[2]) - 1),
+        randint(5, min(class_sizes[1], class_sizes[2]) - 1)
+      ]
+  
+  # 三科交集人数，确保不超过任意两两交集的最小值且至少为2
+  triple_intersect:
+    type: int
+    domain: "[2, min(pairwise_intersects) - 1]"
+
+symbols:
+  # 定义符号变量 - 使用单个源来创建符号
+  single_subject_only:
+    source: ["['single']"]
+    type: int
+  
+  total_students:
+    source: ["['total']"]
+    type: int
+  
+  multi_subject_students:
+    source: ["['multi']"]
+    type: int
+
+conditions:
+  # 使用容斥原理计算总人数
+  total_calculation:
+    formula: "total_students['total'] == sum(class_sizes) - sum(pairwise_intersects) + triple_intersect"
+  
+  # 计算至少参加两个科目的学员人数
+  multi_subject_calculation:
+    formula: "multi_subject_students['multi'] == sum(pairwise_intersects) - 2 * triple_intersect"
+  
+  # 计算只参加一个科目的学员人数
+  single_subject_calculation:
+    formula: "single_subject_only['single'] == total_students['total'] - multi_subject_students['multi']"
+  
+  # 验证数据合理性：所有人数必须为正数
+  data_validation:
+    formula: "And(total_students['total'] > 0, single_subject_only['single'] > 0, multi_subject_students['multi'] >= 0)"
+  
+  # 验证交集关系的合理性
+  intersection_validation:
+    formula: "And(pairwise_intersects[0] >= triple_intersect, pairwise_intersects[1] >= triple_intersect, pairwise_intersects[2] >= triple_intersect)"
+  
+  # 补充的潜在条件：
+  
+  # 1. 每个交集人数不能超过对应班级的最小人数
+  intersection_size_limits:
+    formula: "And(pairwise_intersects[0] <= min(class_sizes[0], class_sizes[1]), pairwise_intersects[1] <= min(class_sizes[0], class_sizes[2]), pairwise_intersects[2] <= min(class_sizes[1], class_sizes[2]))"
+  
+  # 2. 总人数不能小于任何单个班级的人数（因为可能有只报一个班的人）
+  total_size_consistency:
+    formula: "total_students['total'] >= max(class_sizes)"
+  
+  # 3. 只参加一个科目的人数不能超过三个班级人数的总和
+  single_subject_upper_bound:
+    formula: "single_subject_only['single'] <= sum(class_sizes)"
+  
+  # 4. 至少参加两个科目的人数不能超过所有可能的交集组合
+  multi_subject_upper_bound:
+    formula: "multi_subject_students['multi'] <= sum(pairwise_intersects)"
+  
+  # 5. 验证容斥原理的合理性：总人数不能小于0
+  inclusion_exclusion_validity:
+    formula: "sum(class_sizes) - sum(pairwise_intersects) + triple_intersect >= 0"
+  
+  # 6. 验证三交集不能导致负数的两两交集纯部分
+  pure_pairwise_validation:
+    formula: "And(pairwise_intersects[0] - triple_intersect >= 0, pairwise_intersects[1] - triple_intersect >= 0, pairwise_intersects[2] - triple_intersect >= 0)"
+  
+  # 7. 验证每个班级的纯单科人数非负
+  pure_single_class_validation:
+    formula: "And(class_sizes[0] - (pairwise_intersects[0] + pairwise_intersects[1] - triple_intersect) >= 0, class_sizes[1] - (pairwise_intersects[0] + pairwise_intersects[2] - triple_intersect) >= 0, class_sizes[2] - (pairwise_intersects[1] + pairwise_intersects[2] - triple_intersect) >= 0)"
+calc_solution: true
+max_solution: 1
+
+queries:
+  q1:
+    desc: "那么, 只参加一个科目学习的学员有多少名？"
+    ans_formula: "get_value(_solutions[0], single_subject_only['single'])"
+    ans_text: "str(_ans)"
+  
+  q2:
+    desc: "参加培训的总学员人数是多少？"
+    ans_formula: "get_value(_solutions[0], total_students['total'])"
+    ans_text: "str(_ans)"
+  
+  q3:
+    desc: "至少参加两个科目的学员有多少名？"
+    ans_formula: "get_value(_solutions[0], multi_subject_students['multi'])"
+    ans_text: "str(_ans)"
+
+desc: |
+  某学校春季{class_names[0]}、{class_names[1]}、{class_names[2]}招生。
+  {class_names[0]}招收了{class_sizes[0]}名学员, {class_names[1]}招收了{class_sizes[1]}名学员, {class_names[2]}招收了{class_sizes[2]}名学员。
+  在这些学员中既报{class_names[0]}又报{class_names[1]}的有{pairwise_intersects[0]}名, 
+  既报{class_names[0]}又报{class_names[2]}的有{pairwise_intersects[1]}名, 
+  既报{class_names[1]}又报{class_names[2]}的有{pairwise_intersects[2]}名, 
+  三个科目都报的有{triple_intersect}名。
+  {q1}
+  {q2}
+  {q3}

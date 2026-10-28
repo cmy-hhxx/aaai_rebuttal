@@ -1,0 +1,30 @@
+custom_operator:
+  # 高质量空间推理造题：逆向生成一个可解且信息完备的场景（含层数、坐标、路径与规则说明）
+  generate_scenario: customs/space_reasoning_0.py
+  # 基于场景与全局规则，计算查询路径终点的物品名称（并用于答案校验）
+  compute_final_item: customs/space_reasoning_0.py
+
+variables:
+  # 随机生成完整场景（包含：层数N、难度、起点坐标、路径分段、映射规则与题面叙述等）
+  scenario:
+    formula: generate_scenario()
+  N:
+    formula: scenario['N']
+    diff_factor: 1
+  story:
+    formula: scenario['story']
+  ans_expected:
+    formula: scenario['ans']
+
+symbols: {}
+conditions: {}
+calc_solution: false
+
+queries:
+  q1:
+    desc: "请问从“当前位置”开始，依次{scenario['query_text']}，最终看到的物品是什么？"
+    ans_formula: compute_final_item(scenario)
+    ans_text: _ans
+    ans_assertion: "_ans == ans_expected"
+
+desc: "在一个{N}层的菱形网络上，坐标系定义为整数点(x,y)，每一步沿瓷砖的一条边移动到相邻顶点，方向包括右上(RU)、右下(RD)、左下(LD)、左上(LU)，其中 RU:(+1,+1), RD:(+1,-1), LD:(-1,-1), LU:(-1,+1)。所有移动均保证不越界(max(|x|,|y|) ≤ {N})。全局物品分布规则：每个顶点(x,y)摆放唯一物品“物品#I”，其中 I = (x + {N}) * (2*{N} + 1) + (y + {N}) + 1，因此任何顶点的物品都可按坐标直接计算。步长范围已在叙述中说明。\n{story}\n{q1}"
