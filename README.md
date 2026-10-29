@@ -1,188 +1,47 @@
-# PuzzleForge rebuttal：GPT-5.2 数据质量对比
+# PuzzleForge rebuttal
 
-在**同一批种子题**上，让 GPT-5.2 用两种方式造题，再与现有 PuzzleForge（PF）参考题做盲评，检验 PF 的题目质量是否更好：
+最终交付：
 
-- A：PF 已有测试题，历史数据，作为参考组。
-- B：API 直接造题（direct）。
-- C：GPT-5.2 现场编写可复用 Python 生成器，再由本地执行器运行造题（framework）。
+- [rebuttal_response.md](rebuttal_response.md) — 英文 Rebuttal
+- [rebuttal_response_zh.md](rebuttal_response_zh.md) — 中文翻译
+- [rebuttal_illustrated.docx](rebuttal_illustrated.docx) — 带图的双语版（4 张图，Word）
+- [rebuttal_illustrated.pdf](rebuttal_illustrated.pdf) — 同上的 PDF
 
-结论见下方"2026-10-29 更新"与 [REPORT_1000.md](final_experiment/run/REPORT_1000.md)。仓库只提交代码、提示词和非敏感配置；`sources/`、`runs/` 中的数据与报告留在本地。
+## 这次补的实验
 
-> **2026-10-29 更新：实验已跑完并冻结**（97 seeds / 每组 1,284 matched / 1,440 道盲评）。结果见 [final_experiment/run/REPORT_1000.md](final_experiment/run/REPORT_1000.md)；针对审稿意见 4 的回复与材料见 [rebuttal_response_zh.md](rebuttal_response_zh.md)、[rebuttal_tables.md](rebuttal_tables.md)、[rebuttal_figures.md](rebuttal_figures.md)、[rebuttal_reproducibility.md](rebuttal_reproducibility.md)。各环节状态见下表。
+在 97 个共享 seed 上，用同一 GPT-5.2 跑三条流水线并做盲评（每组 480 题，共 1,440 题）：
 
-> C 组没有预写的 per-seed 生成器。我们只预写 system prompt 和本地执行/校验器；每个 seed 的 Python 程序由 GPT-5.2 在 `generate` 时现场返回，原样保存到 `programs/<seed>/attempt-*.py` 后再执行。
+- **PF**：论文发布的 test split（每生成器 2% 随机 holdout，经过流水线自己的去重与生成器过滤）。
+- **B1**：直接生成题目实例（direct）。
+- **B2**：直接生成一个可复用 Python 生成器，沙箱执行；三次带真实报错的调试，无 expansion / DSL / 语义验证。
 
-规模：97 个语言控制 seed，每个 baseline 20 槽/seed，共 **1940** 个原始槽位；三组 matched 各 1,284 题（见 `run/manifest.json` 的 `matched_slots`）。盲评每 seed 每组最多 5 题，**目标 ≥1000 题**。
+## 核心结果
 
-## 指导思想
+- 对 **B1**：PF 显著更好（有效率 +0.484；深度 +0.844）；B1 71.7% 无效，且多数是静默的答案错误。
+- 对 **B2**：有效率持平（生成器级 0.775 vs 0.774）；PF 的 **>=3 步产出率**是 62.7% vs 33.8%（1.86×），按长度分布标准化后 +24.6 pp [+11.6, +35.9]。
+- 深度：原始 +0.602，OLS +0.418，但严格长度匹配（CEM）+0.207 [-0.020, +0.443]；因此 depth 作为支持性证据，主主张是 >=3 步产出率。
+- 成本：同一摊销尺度下 PF/B2 约 **23-25×**（200 实例/单位：1,227 vs 50；20 实例/单位：12,267 vs 527）。
+- 跨家族评审（560 题交叉子样本）：exact agreement 83.4%，kappa 0.67；PF−B2 有效率差随 judge 翻符号，B1 在两个家族下都是 72-74% invalid。
+- PF 的 23.1% invalid 是 judge-specific 的偏高代理；两个真实例子（积分符号错误、0.01 舍入差）说明它混合了实质错误与瑕疵。
 
-1. **目标是可核查的比较，不是预设 PF 胜出。** 允许结论为支持、部分支持、无差异、baseline 更好或证据不足。
-2. **只差一个变量。** 三组同种子、同语言、同答题格式；B 与 C 只差“直接出题”还是“写生成器”。
-3. **不把历史数据当因果实验。** A 已经过论文的生成器验证、过滤和测试集选择；结论只描述“固定种子与设置下的测试集比较”，不写成框架的普遍因果优势。
-4. **生成与评价分离。** 生成提示词不看评测反馈；盲评去掉方法、seed 和原生解释；自动初评只是代理，人工双审才是主终点。
-5. **失败保留，抽样固定。** 不删失败槽位、不按质量补选；报告分母、覆盖和区间，不合成一个总分。
-6. **baseline 不能故意弱化。** B/C 用同一 GPT-5.2、同一预算和同等提示词投入；不靠弱 baseline 或窄提示词制造优势。
-7. **一切冻结。** config、prompt、代码、输入都有 hash；改动就新建 run，不覆盖旧结果。
+## 数据与复现
 
-## 当前状态
+- 生成、盲评、token 账本：`final_experiment/run/`
+- 分析脚本：`final_experiment/analysis/`
+- 第二批评审（560 题交叉子样本）：`runs/judge_k3/agreement.md`
+- 表格中间量：`final_experiment/run/analysis/`
 
-| 环节 | 状态 | 位置 |
-|---|---|---|
-| 中英文提示词 | 已就绪 | `experiment/prompts/paper_v2/`，四份完整 system prompt，已冻结 hash |
-| direct 调用 / framework 执行链 | 已就绪 | `experiment/run.py`、`experiment/executor.py` |
-| GPT-5.2 配置 | 已填 | `configs/gpt52_paper_v2_20261028.json` |
-| 子集导出、1000+ 题盲评、自动初评 | 已就绪 | `experiment/run.py`、`evaluation.py`、`autojudge.py` |
-| GPT-5.2 实际生成 | **已完成（2026-10-28）** | `runs/gpt52_final_20261028/`，冻结副本见 `final_experiment/` |
-| 对比报告 | **已完成** | [final_experiment/run/REPORT_1000.md](final_experiment/run/REPORT_1000.md) |
+## 归档
 
-## 最小流程
+旧的表格、可复现说明、2,500 字符短版与 4,000 字符版都在 `tmp/archive_rebuttal/`，需要时再取。
 
-```text
-prepare → generate（97 seeds，direct + framework）→ export 子集
-        → evaluation（1000+ 题盲评）→ autojudge → auto_report.md
-```
+## 带图版本
 
-### 1. 环境与数据
+`rebuttal_illustrated.docx / .pdf` 是英文 Rebuttal + 中文翻译的排版版，内嵌 4 张图：
 
-```bash
-uv venv --python 3.12 .venv
-uv pip install --python .venv/bin/python -r runtime-requirements.lock
-```
+1. 盲评有效率（PF / B2 / B1）。
+2. 按题面长度五分位的 depth 与 >=3 步产出率。
+3. 两个摊销尺度下的每有效题 token。
+4. 两个评审家族在 560 题重叠样本上的有效率区间。
 
-`sources/puzzleforge_supplement/data/` 需要：
-
-```text
-seed_puzzles.jsonl      129 个种子
-test_normal.jsonl       862 道 PF 参考题
-test_hard.jsonl         858 道 PF 参考题
-```
-
-这些数据不随仓库分发；生成器执行还需要 macOS `sandbox-exec`。
-
-### 2. 配置 endpoint 与 key
-
-编辑 `configs/gpt52_paper_v2_20261028.json`：
-
-```json
-"endpoint": "https://YOUR_ENDPOINT/v1"
-```
-
-- 兼容 OpenAI Chat Completions，可填 base URL 或完整 `/chat/completions` URL。
-- 默认模型 `gpt-5.2-2025-12-11`；端点只支持别名时改成实际 id，并记录差异。
-- key 只放环境变量或根目录 `.env`，不要写进 JSON。
-- **先填 endpoint，再 `prepare`。** 之后改 endpoint 会被冻结检查拒绝。
-
-```bash
-read -rs "OPENAI_API_KEY?请输入 API key: "
-export OPENAI_API_KEY
-```
-
-### 3. 预检（不调用 API）
-
-```bash
-.venv/bin/python -m experiment.run prepare \
-  --config configs/gpt52_paper_v2_20261028.json \
-  --out runs/gpt52_paper_v2_20261028
-```
-
-检查：
-
-```bash
-jq '{model: .config.model, prompt: .config.prompt_variant,
-     language: .config.output_language,
-     matched_total: ([.matched_slots[] | length] | add)}' \
-  runs/gpt52_paper_v2_20261028/manifest.json
-```
-
-预期 `model=gpt-5.2-2025-12-11`、`matched_total=1720`（全 129 seed 的配额；本轮 97 seed 的实际 matched 从导出结果统计）。
-
-### 4. 造题
-
-```bash
-.venv/bin/python -m experiment.run generate \
-  --config configs/gpt52_paper_v2_20261028.json \
-  --out runs/gpt52_paper_v2_20261028 \
-  --method both \
-  --seed-file configs/gpt52_seed_ids.txt
-```
-
-同一条命令可续跑；已完成的批次和缓存会跳过。不要为了重跑换新目录。97 个 seed 的完整清单在 `configs/gpt52_seed_ids.txt`。
-
-### 5. 导出子集并准备 1000+ 题盲评
-
-```bash
-.venv/bin/python -m experiment.run export \
-  --out runs/gpt52_paper_v2_20261028 \
-  --seed-file configs/gpt52_seed_ids.txt \
-  --filename records_selected.jsonl
-
-.venv/bin/python -m experiment.evaluation \
-  --data runs/gpt52_paper_v2_20261028/records_selected.jsonl \
-  --out runs/gpt52_paper_v2_20261028/audit \
-  --per-seed 5 --min-audit 1000
-```
-
-`records_selected.jsonl` 含 97 个 seed 的 PF matched（约 1300 行）加两个 baseline 各 1940 行；主比较只用 matched。盲评按每 seed 每组最多 5 题抽样，**低于 1000 会直接报错**；若实际不足，把 `--per-seed` 提到 6 重跑，不能按质量补选。
-
-### 6. 自动初评
-
-```bash
-export JUDGE_API_KEY=...
-.venv/bin/python -m experiment.autojudge \
-  --audit runs/gpt52_paper_v2_20261028/audit/audit_blind.jsonl \
-  --key runs/gpt52_paper_v2_20261028/audit/audit_key.jsonl \
-  --out runs/gpt52_paper_v2_20261028/auto \
-  --endpoint 'https://YOUR_JUDGE_ENDPOINT/v1' \
-  --api-key-env JUDGE_API_KEY \
-  --models JUDGE_MODEL \
-  --k 1 --workers 8 --timeout 300 --max-calls 4000
-```
-
-评审模型应与生成模型不同；只有 GPT-5.2 时只能标“自评/单模型初评”。`k=1` 约 2800 次请求，`k=4` 约 7000 次请求。
-
-### 7. 结果
-
-| 内容 | 文件 |
-|---|---|
-| 子集记录/失败/产量 | `runs/gpt52_paper_v2_20261028/records_selected.jsonl` |
-| 自动初评主表 | `runs/gpt52_paper_v2_20261028/auto/auto_report.md` |
-| 逐题标签 | `runs/gpt52_paper_v2_20261028/auto/model_labels.jsonl` |
-| 案例候选 | `runs/gpt52_paper_v2_20261028/auto/examples.jsonl` |
-| 人工盲审 | `runs/gpt52_paper_v2_20261028/audit/audit_labels.csv` |
-
-## 提示词与题目位置
-
-| 文件 | 用途 |
-|---|---|
-| `experiment/prompts/paper_v2/zh/direct.txt` | 中文直接造题 system prompt |
-| `experiment/prompts/paper_v2/zh/framework.txt` | 中文 system prompt，要求模型现场写生成器（不是生成器本身） |
-| `experiment/prompts/paper_v2/en/direct.txt` | 英文直接造题 |
-| `experiment/prompts/paper_v2/en/framework.txt` | 英文 system prompt，要求模型现场写生成器 |
-| `experiment/prompts/paper_v2/README.md` | 提示词说明与论文映射（内部，不发送） |
-
-实际发送的完整 messages 在 `runs/gpt52_paper_v2_20261028/traces/`；题目在 `results/`；C 的模型生成代码在 `programs/<seed>/attempt-*.py`，`accepted.json` 记录被采用的版本和 hash；统一记录在 `records.jsonl` / `records_selected.jsonl`。
-
-## 对比口径
-
-- 分别报告 PF−direct、PF−framework；不合成总分。
-- 正确性/有效性是主终点；自动 `valid/invalid/uncertain` 只是代理，人工双审才作准。
-- 主统计按 97 个 seed 配对 bootstrap；不能把 1000+ 题当独立样本。
-- 深度、难度、证书评分只在有效且可评估子集报告，并给出覆盖。
-- 当前脚本的配对区间是 PF−baseline；direct 与 framework 的差异先看分组表，B−C 区间需另加比较。
-
-必须写明：PF 是历史筛选数据；语言要控制；单次生成不是稳定性实验；自动初评不是人工审核。
-
-## 文档
-
-- [实验协议](docs/experiment_protocol.md)：组别、种子、盲评、指标、统计边界。
-- [运行手册](docs/gpt52_runbook.md)：预检、续跑、故障排查、成本、完成清单。
-- [提示词说明](experiment/prompts/paper_v2/README.md)：中英对照、动态输入、论文映射。
-
-## 验证
-
-```bash
-.venv/bin/python -m unittest discover -s tests -v
-pyright
-```
-
-测试使用本地 HTTP mock、模拟响应和自写程序，不调用付费 API。
+图源在 `tmp/doc_figures/`，生成脚本是 `tools/make_doc_figures.py`；文档脚本是 `tools/build_rebuttal_docx.py`。

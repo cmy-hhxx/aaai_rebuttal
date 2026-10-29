@@ -70,7 +70,7 @@ T1 = table(
         ["reasoning depth, mean (0-4)", "2.94", "2.34", "1.93"],
         ["median problem length (chars)", "692", "321", "297"],
         ["near-duplicate pairs @0.8", "3.0%", "24.9%", "6.2%"],
-        ["seeds with zero valid items", "1/97", "13/97", "53/97"],
+        ["generators represented", "284", "97", "97"],
         ["tokens per valid item", "1,227", "527", "4,571"],
     ],
     "lccc",
@@ -87,7 +87,7 @@ T1_FULL = table(
         ["median problem length (chars)", "692", "321", "297"],
         ["near-duplicate pairs @0.8", "3.0%", "24.9%", "6.2%"],
         ["identical constraint-tag sets", "15.2%", "50.4%", "42.6%"],
-        ["seeds with zero valid items", "1/97", "13/97", "53/97"],
+        ["generators represented", "284", "97", "97"],
         ["seeds that produced no item", "0/97", "5/97", "0/97"],
         ["tokens per valid item", "1,227", "527", "4,571"],
     ],
@@ -118,7 +118,7 @@ T2 = table(
 T3 = table(
     ["", "PF", "B2", "B1"],
     [
-        ["seeds with zero valid items", "1", "13", "53"],
+        ["seeds with zero valid items (see T8)", "1", "13", "53"],
         ["seeds with >=3 of 5 valid", "80", "77", "25"],
         ["median valid items per seed (of 5)", "4", "4", "0"],
         ["items with no output at all", "0/480", "25/480", "1/480"],
@@ -162,14 +162,15 @@ T5 = table(
 )
 
 T6 = table(
-    ["", "PF", "B2", "B1"],
+    ["scale", "PF (mean spec)", "PF (median spec)", "B2", "B1"],
     [
-        ["tokens per generated item", "935 @200 / 9,353 @20", "407", "1,279"],
-        ["tokens per valid item", "1,227 @200 / 12,267 @20", "527", "4,571"],
-        ["marginal API cost per extra instance", "0", "0", "linear"],
-        ["projected tokens for 86K valid items", "105 M", "45 M", "393 M"],
+        ["200 instances / unit", "1,227", "761", "49.9", "4,571"],
+        ["20 instances / unit", "12,267", "7,611", "526.6", "4,571"],
+        ["-", "", "", "", ""],
+        ["spec tokens / seed", "~0.55M", "~0.34M", "7.7k", "25.5k"],
+        ["spec tokens / generator", "187k", "116k", "-", "-"],
     ],
-    "lccc",
+    "lrrrr",
 )
 
 T7 = table(
@@ -205,6 +206,7 @@ T0 = table(
         ["matched slots per seed", "4/6/8/12/14/16 (median 16); 1,284 per condition"],
         ["items blind-judged", "480 per condition; 5 per seed (4 for 5 seeds)"],
         ["generator", "gpt-5.2, max_completion_tokens=32768"],
+        ["generators per seed", "PF 3-4 (129 x 4 = 516; 432 verified); B2/B1 1"],
         ["judge", "gpt-5.6-luna, k=1, max_completion_tokens=16384"],
         ["prompts", "paper_v2 / zh; one prompt per condition"],
         ["repair budget", "B1 3 repairs/batch; B2 3 attempts/seed"],
@@ -264,6 +266,64 @@ T11 = table(
     "lrr",
 )
 
+
+T8_GL = table(
+    ["unit", "PF", "B2", "B1"],
+    [
+        ["judged units (generators)", "284", "97", "97"],
+        ["unit-level validity, mean", "0.775", "0.774", "0.278"],
+        ["units with zero valid items", "46/284 (16.2%)", "13/97 (13.4%)", "53/97 (54.6%)"],
+        ["units with zero valid, >=2 judged", "17/141 (12.1%)", "-", "-"],
+        ["-", "", "", ""],
+        ["PF matched to one generator per seed", "", "", ""],
+        ["  zero-valid seeds, mean [95% CI]", "14.0 [9, 19]", "13", "-"],
+        ["  unit-level validity, mean", "0.773", "0.774", "-"],
+        ["  valid, >=3 dependent steps", "63.8% [56.6, 70.5]", "33.8%", "-"],
+    ],
+    "lccc",
+)
+
+T9_VAR = table(
+    ["PF generator variant", "judged", "valid", "validity", "depth mean", "valid >=3 steps", "median length"],
+    [
+        ["_0 (no expansion)", "113", "79", "0.699", "2.91", "63 (55.8%)", "711"],
+        ["_1", "132", "99", "0.750", "2.96", "84 (63.6%)", "729"],
+        ["_2", "131", "104", "0.794", "2.95", "84 (64.1%)", "590"],
+        ["_3", "104", "84", "0.808", "2.94", "70 (67.3%)", "739"],
+        ["-", "", "", "", "", "", ""],
+        ["_1.._3 pooled", "367", "287", "0.782", "2.95", "238 (64.9%)", "687"],
+    ],
+    "lrrrrrr",
+)
+
+T10_LEN = table(
+    ["comparison", "raw gap", "controlled gap [95% CI]", "n (PF / B2)"],
+    [
+        ["PF - B2: + log(length)", "+0.602", "+0.418 [+0.150, +0.702]", "366 / 352"],
+        ["PF - B2: + log(length) + seed FE", "", "+0.382 [+0.149, +0.645]", "366 / 352"],
+        ["B2 - B1: + log(length)", "+0.416", "+0.380 [+0.126, +0.634]", "352 / 134"],
+        ["B2 - B1: + log(length) + seed FE", "", "+0.148 [+0.023, +0.267]", "352 / 134"],
+        ["-", "", "", ""],
+        ["strata [53, 303]", "+0.49", "", "21 / 159"],
+        ["strata [303, 493]", "+0.18", "", "64 / 115"],
+        ["strata [493, 759]", "+0.89", "", "129 / 50"],
+        ["strata [759, 6085]", "+0.30", "", "152 / 28"],
+    ],
+    "lrrr",
+)
+
+
+T11_DIV = table(
+    ["unit", "PF", "B2", "B1"],
+    [
+        ["near-dup @0.8, within unit", "13.2%", "24.9%", "6.2%"],
+        ["  pairs", "1,918", "8,091", "8,413"],
+        ["identical reasoning-tag sets", "46.1%", "56.8%", "53.7%"],
+        ["identical constraint-tag sets", "30.2%", "53.1%", "42.4%"],
+    ],
+    "lccc",
+)
+
 TABLES = {
     "T1": T1,
     "T1_FULL": T1_FULL,
@@ -278,6 +338,10 @@ TABLES = {
     "T0": T0,
     "T11": T11,
     "T9": T9,
+    "T8_GL": T8_GL,
+    "T9_VAR": T9_VAR,
+    "T10_LEN": T10_LEN,
+    "T11_DIV": T11_DIV,
 }
 
 TARGETS = [
