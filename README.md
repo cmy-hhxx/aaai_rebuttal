@@ -6,11 +6,13 @@
 - B：API 直接造题（direct）。
 - C：GPT-5.2 现场编写可复用 Python 生成器，再由本地执行器运行造题（framework）。
 
-结论尚未产生。仓库只提交代码、提示词和非敏感配置；`sources/`、`output/`、`runs/` 中的数据与报告留在本地。
+结论见下方"2026-10-29 更新"与 [REPORT_1000.md](final_experiment/run/REPORT_1000.md)。仓库只提交代码、提示词和非敏感配置；`sources/`、`runs/` 中的数据与报告留在本地。
+
+> **2026-10-29 更新：实验已跑完并冻结**（97 seeds / 每组 1,284 matched / 1,440 道盲评）。结果见 [final_experiment/run/REPORT_1000.md](final_experiment/run/REPORT_1000.md)；针对审稿意见 4 的回复与材料见 [rebuttal_response_zh.md](rebuttal_response_zh.md)、[rebuttal_tables.md](rebuttal_tables.md)、[rebuttal_figures.md](rebuttal_figures.md)、[rebuttal_reproducibility.md](rebuttal_reproducibility.md)。各环节状态见下表。
 
 > C 组没有预写的 per-seed 生成器。我们只预写 system prompt 和本地执行/校验器；每个 seed 的 Python 程序由 GPT-5.2 在 `generate` 时现场返回，原样保存到 `programs/<seed>/attempt-*.py` 后再执行。
 
-规模：97 个语言控制 seed，每个 baseline 20 槽/seed，共 **1940** 个原始槽位；三组 matched 总量从 `records_selected.jsonl` 统计（约 1300/组）。盲评每 seed 每组最多 5 题，**目标 ≥1000 题**。
+规模：97 个语言控制 seed，每个 baseline 20 槽/seed，共 **1940** 个原始槽位；三组 matched 各 1,284 题（见 `run/manifest.json` 的 `matched_slots`）。盲评每 seed 每组最多 5 题，**目标 ≥1000 题**。
 
 ## 指导思想
 
@@ -28,10 +30,10 @@
 |---|---|---|
 | 中英文提示词 | 已就绪 | `experiment/prompts/paper_v2/`，四份完整 system prompt，已冻结 hash |
 | direct 调用 / framework 执行链 | 已就绪 | `experiment/run.py`、`experiment/executor.py` |
-| GPT-5.2 配置 | 已就绪，endpoint 待填 | `configs/gpt52_paper_v2_20261028.json` |
+| GPT-5.2 配置 | 已填 | `configs/gpt52_paper_v2_20261028.json` |
 | 子集导出、1000+ 题盲评、自动初评 | 已就绪 | `experiment/run.py`、`evaluation.py`、`autojudge.py` |
-| GPT-5.2 实际生成 | **尚未运行** | 本检出没有 endpoint、API key、`sources/` 数据 |
-| 对比报告 | **尚未产生** | 不能填预设结论 |
+| GPT-5.2 实际生成 | **已完成（2026-10-28）** | `runs/gpt52_final_20261028/`，冻结副本见 `final_experiment/` |
+| 对比报告 | **已完成** | [final_experiment/run/REPORT_1000.md](final_experiment/run/REPORT_1000.md) |
 
 ## 最小流程
 

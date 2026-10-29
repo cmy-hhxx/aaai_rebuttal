@@ -20,7 +20,7 @@
 | B：direct | GPT-5.2 直接输出题目 JSON | 1940 | Σ n_s |
 | C：framework | GPT-5.2 现场写 Python 生成器，本地执行 | 1940 | Σ n_s |
 
-- `n_s` 是该 seed 在 PF 参考集中的题数；97 个 seed 合计约 1300。精确值从 `records_selected.jsonl` 的 matched 统计；`manifest.json` 保留全 129 seed 的配额。
+- `n_s` 是该 seed 在 PF 参考集中的题数；97 个 seed 合计 1,284。该值由 `manifest.json` 的 `matched_slots` 固定，可用 `records_selected.jsonl` 的 matched 统计复核。
 - 两个 baseline 各 97 × 20 = 1940 个原始槽位；matched 之外的槽位为 extra，只做产量、重复率和稳定性补充分析。
 - 每个 baseline 每个 seed 生成 20 槽；matched 槽位在生成前按固定 RNG 选定，不按题目质量挑选。
 
@@ -82,7 +82,7 @@
 ## 5. 盲评协议
 
 - 每 seed 每方法固定抽 5 题；97 × 3 × 5 的上限是 1455，实际数量由各 seed 的 matched 配额决定。
-- 不全部盲评的原因：三组 matched 约 3900 题，全部评审即使 k=1 也需约 7800 次请求；5/seed/组 在 97 个 seed 上约 1400 题，既超过 1000，又保留 seed 配对和覆盖。
+- 不全部盲评的原因：三组 matched 共 3,852 题，全部评审即使 k=1 也需约 7800 次请求；5/seed/组 在 97 个 seed 上约 1400 题，既超过 1000，又保留 seed 配对和覆盖。
 - 抽样用固定 RNG，包含生成失败槽位，不按质量挑选；`--min-audit 1000` 会在低于 1000 时直接失败。
 - 不允许为了凑 1000 按质量补题；若配额不足，只能提高 `--per-seed`。
 - `audit_blind.jsonl` 只含 `anon_id`、`problem`、`answer`；方法、seed、原始 id、原生解释全部移除。私有映射留在 `audit_key.jsonl`。

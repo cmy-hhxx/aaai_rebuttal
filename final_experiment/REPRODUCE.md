@@ -97,10 +97,10 @@ MPLCONFIGDIR=tmp/mplconfig tmp/figvenv/bin/python \
 | 原始槽位 / 组 | 1940 |
 | `records_selected.jsonl` 行数 | 5164 |
 | 盲评 | 1440（480/组） |
-| 生成请求 | 约 485 + 修复 |
-| 评审请求 | 约 2880 + 格式修复 |
+| 生成请求 | 507（direct 391 + framework 116，含修复） |
+| 评审请求 | 2,895（解题 1,421 + 判定 1,474，含格式修复） |
 
-每 seed 的 `matched_slots` 由 `manifest.json` 固定；`cipher_18`、`cipher_25`、`logic_2`、`logic_3`、`operation_21` 的配额为 4，其余为 5–16。
+每 seed 的 `matched_slots` 由 `manifest.json` 固定；`cipher_18`、`cipher_25`、`logic_2`、`logic_3`、`operation_21` 的配额为 4，其余为 6/8/12/14/16（中位 16，合计 1,284）。
 
 ## 5. 校验
 

@@ -197,8 +197,8 @@ def main() -> None:
     tokens = {"components": dict(comp), "generation": gen_tokens,
               "raw_produced": raw_produced, "matched_produced": matched_produced,
               "per_item": {m: gen_tokens[m] / raw_produced[m] if raw_produced[m] else None for m in gen_tokens},
-              "per_valid": {m: gen_tokens[m] / (matched_produced[m] * valid_rate[m]["mean"])
-                            if matched_produced[m] and valid_rate[m]["mean"] else None for m in gen_tokens},
+              "per_valid": {m: gen_tokens[m] / (raw_produced[m] * conditional[m]["rate"])
+                            if raw_produced[m] and conditional[m]["rate"] else None for m in gen_tokens},
               "judge_total": comp["judge_solve"] + comp["judge_verdict"],
               "judge_items": len(labels)}
 
@@ -312,7 +312,7 @@ def main() -> None:
         ax.bar(i - width / 2, tokens["per_item"][method], width, color=COLORS[method],
                label="per generated" if i == 0 else None)
         ax.bar(i + width / 2, tokens["per_valid"][method], width, color=COLORS[method], alpha=0.45,
-               hatch="//", label="per valid (matched, est.)" if i == 0 else None)
+               hatch="//", label="per valid (est.)" if i == 0 else None)
         ax.text(i - width / 2, tokens["per_item"][method] * 1.02, f"{tokens['per_item'][method]:,.0f}",
                 ha="center", fontsize=12)
         ax.text(i + width / 2, tokens["per_valid"][method] * 1.02, f"{tokens['per_valid'][method]:,.0f}",
